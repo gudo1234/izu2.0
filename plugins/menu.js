@@ -1,5 +1,5 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-let txt = `Hola ${m.pushName} mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar y buscar datos e información a través de \`WhatsApp\` y mucho más.
+let txt = `Hola ${m.pushName} mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar, buscar datos e información a través de \`WhatsApp\` y mucho más.
 
 > ⁉ ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️
 ${e}${s}kick *‹@υsєя›*
