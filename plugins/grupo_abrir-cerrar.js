@@ -10,8 +10,8 @@ let isClose = { // Switch Case Like :v
 }[(args[0] || '')]
 if (isClose === undefined)
 throw `${e} *Ejemplo:*
-${usedPrefix + command} abrir
-${usedPrefix + command} cerrar
+.grupo abrir
+.grupo cerrar
 `.trim()
 await conn.groupSettingUpdate(m.chat, isClose)
   
