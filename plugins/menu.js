@@ -12,8 +12,8 @@ ${e}${s}tag *‹rєρℓy›*
 ${e}${s}icongc *‹rєρℓy›*
 ${e}${s}grupo *‹αвrir/cєrrαr›*
 ${e}${s}on/off
-${e}promote *‹@υsєя›*
-${e}demote *‹@υsєя›*
+${e}${s}promote *‹@υsєя›*
+${e}${s}demote *‹@υsєя›*
 
 > ⁉ ᴅᴇsᴄᴀʀɢᴀs ᴍᴜʟᴛɪᴍᴇᴅɪᴀ📂
 ${e}${s}play *‹τ×τ›*
