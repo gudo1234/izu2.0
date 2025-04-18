@@ -15,7 +15,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     isEnable = false
 } else {
     const estado = isEnable ? '✓ Activado' : '✗ Desactivado'
-    return conn.reply(m.chat, `${e} Un administrador puede activar o desactivar el *${command}* utilizando:\n\n> *${usedPrefix}${command} on* para activar.\n> *${usedPrefix}${command} off* para desactivar.\n\nEstado actual *${estado}*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇ\nwelcome
+    return conn.reply(m.chat, `${e}Ejemplo de uso:\n.antilink on *para activar*\n.antilink off *para desactivar*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇ\nwelcome
 bienvenida
 antiprivado
 antiprivate
