@@ -30,15 +30,15 @@ console.log(`Error : ${e}`)
 global.creador = 'Wa.me/528211111111'
 global.ofcbot = `${conn.user.jid.split('@')[0]}`
 global.asistencia = 'Wa.me/528211111111'
-global.namechannel = '🍁⃧►iʑυвöτ◃2.0▹'
+global.namechannel = '🤖⃧►iʑυвöτ◃2.0▹'
 global.namechannel2 = 'Zeus Bot🔆Channel-OFC'
-global.namegrupo = '🍁⃧►iʑυвöτ◃2.0▹'
+global.namegrupo = '🤖⃧►iʑυвöτ◃2.0▹'
 global.namecomu = '𓆩ίʑ᭘ɱί-ⲃⲟτ𓆪 & ➲౽໋ⲉⷡυⷪ᥉ࣰ֧ⷮ✰᮫݄݃🪴'
 global.listo = '❀ *Aquí tienes ฅ^•ﻌ•^ฅ*'
 global.fotoperfil = await conn.profilePictureUrl(m.sender, 'image').catch(_ => 'https://files.catbox.moe/ojqdd0.jpg')
 
 global.canalIdM = ["120363285614743024@newsletter", "120363395205399025@newsletter"]
-global.canalNombreM = ["🍁⃧►iʑυвöτ◃2.0▹", "Zeus Bot🔆Channel-OFC"]
+global.canalNombreM = ["🤖⃧►iʑυвöτ◃2.0▹", "Zeus Bot🔆Channel-OFC"]
 global.channelRD = await getRandomChannel()
 
 global.d = new Date(new Date + 3600000)
