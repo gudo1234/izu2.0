@@ -15,7 +15,38 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     isEnable = false
 } else {
     const estado = isEnable ? '✓ Activado' : '✗ Desactivado'
-    return conn.reply(m.chat, `「✦」Un administrador puede activar o desactivar el *${command}* utilizando:\n\n> ✐ *${usedPrefix}${command} on* para activar.\n> ✐ *${usedPrefix}${command} off* para desactivar.\n\n✧ Estado actual » *${estado}*`, m)
+    return conn.reply(m.chat, `${e} Un administrador puede activar o desactivar el *${command}* utilizando:\n\n> *${usedPrefix}${command} on* para activar.\n> *${usedPrefix}${command} off* para desactivar.\n\nEstado actual *${estado}*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇs\nwelcome
+bienvenida
+antiprivado
+antiprivate
+restrict
+restringir
+autolevelup
+autonivel
+antibot
+antibots
+autoaceptar
+aceptarauto
+autorechazar
+rechazarauto
+autoresponder
+autorespond
+antisubbots
+antibot2
+modoadmin
+soloadmin
+reaction
+reaccion
+nsfw
+modohorny
+antispam
+jadibotmd
+modejadibot
+subbots
+detect
+avisos
+antilink
+antifake`, m)
   }
 
   switch (type) {
