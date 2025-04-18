@@ -21,7 +21,7 @@ const fetchWithRetries = async (url, maxRetries = 2) => {
 let handler = async (m, { conn, text }) => {
   if (!text || !text.trim()) {
     return conn.sendMessage(m.chat, {
-      text: `${e} Ingresa el nombre de la música a descargar.*\n\n*Ejemplo:* .play diles`,
+      text: "*✎ Ingresa el nombre de la música a descargar.*\n\n*Ejemplo:* `.play No llores más`",
     });
   }
 
@@ -37,12 +37,12 @@ let handler = async (m, { conn, text }) => {
 
     await conn.sendMessage(m.chat, {
       image: { url: video.thumbnail },
-      caption: `${e} *Descargando ${video.title}*
+      caption: `*「✦」Descargando ${video.title}*
 
-Canal *${video.author.name}*
-*Vistas:* ${video.views}
-*Duración:*  ${video.timestamp}
-*Autor:* ${video.author.name}`,
+> ✦ Canal » *${video.author.name}*
+> ✰ *Vistas:* » ${video.views}
+> ⴵ *Duración:* » ${video.timestamp}
+> ✐ *Autor:* » ${video.author.name}`,
     });
 
     // Convertir duración a minutos
@@ -56,35 +56,9 @@ Canal *${video.author.name}*
       mimetype: "audio/mpeg",
       fileName: `${video.title}.mp3`,
     };
-// para audio🗿
-    if (command === 'play' || command === 'yta' || command === 'mp3') {
-    await conn.sendMessage(m.chat, audioMessage, { quoted: m });
-    await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
- 
-// para docAudio📃
-} else if (command === 'play3' || command === 'ytadoc' || command === 'playdoc' || command === 'ytmp3doc') {
-await conn.sendMessage(m.chat, { document: { url: null }, mimetype: "audio/mpeg", fileName: `${video.title}`, caption: `${e} Aqui tienes tu audio` }, { quoted: m });
 
-// Para video🗿
-    } else if (command === 'play2' || command === 'ytv' || command === 'mp4') {
-  await conn.sendMessage(m.chat, {
-              video: { url: null },
-              fileName: `${video.title}`,
-              mimetype: 'video/mp4',
-              caption: `${e} Aqui tienes tu video`,
-              thumbnail: null
-            }, { quoted: m });
-  
-  // Para docVideo🗿
-    } else if (command === 'play4' || command === 'ytvdoc' || command === 'play2doc' || command === 'ytmp4doc') {
-await conn.sendMessage(m.chat, {
-              document: { url: null },
-              fileName: `${video.title}`,
-              mimetype: 'video/mp4',
-              caption: `${e} Aqui tienes tu docVideo`,
-              thumbnail: null
-            }, { quoted: m });
-   }
+    await conn.sendMessage(m.chat, documentMessage, { quoted: m });
+    await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
   } catch (error) {
     console.error("Error:", error);
     await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } });
@@ -94,6 +68,8 @@ await conn.sendMessage(m.chat, {
   }
 };
 
-handler.command = handler.help = ['play', 'play2', 'mp3', 'yta', 'mp4', 'ytv', 'play3', 'ytadoc', 'playdoc', 'ytmp3doc', 'play4', 'ytvdoc', 'play2doc', 'ytmp4doc'];
+handler.command = ['play','mp3'];
+handler.help = ['playaudio <texto>', 'mp3'];
+handler.tags = ['downloader'];
 
 export default handler;
