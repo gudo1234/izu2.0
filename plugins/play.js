@@ -57,7 +57,7 @@ let handler = async (m, { conn, text }) => {
       fileName: `${video.title}.mp3`,
     };
 
-    await conn.sendMessage(m.chat, documentMessage, { quoted: m });
+    await conn.sendMessage(m.chat, audioMessage, { quoted: m });
     await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } });
   } catch (error) {
     console.error("Error:", error);
