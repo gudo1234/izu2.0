@@ -98,9 +98,13 @@ global.fkontak = { key: {participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJ
 global.fake = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, newsletterName: channelRD.name, serverMessageId: -1 }
 }}, { quoted: m }
 
-global.icono = [
+global.icono = [ 
+'https://files.catbox.moe/ztexr8.jpg',
+'https://files.catbox.moe/fd7x3t.jpg',
+'https://files.catbox.moe/nsfx7f.jpg',
+'https://files.catbox.moe/p3wdxz.jpg',
 'https://files.catbox.moe/cbagtg.jpg',
-].getRandom()
+'https://files.catbox.moe/ojqdd0.jpg'].getRandom()
 
 global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: packname, body: dev, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: icono, sourceUrl: redes, mediaType: 1, renderLargerThumbnail: false }, }, }}
 
