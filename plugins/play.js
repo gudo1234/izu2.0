@@ -21,7 +21,7 @@ const fetchWithRetries = async (url, maxRetries = 2) => {
 let handler = async (m, { conn, text }) => {
   if (!text || !text.trim()) {
     return conn.sendMessage(m.chat, {
-      text: `${e} Ingresa el nombre de la música a descargar.*\n\n*Ejemplo:* `.play diles`,
+      text: `${e} Ingresa el nombre de la música a descargar.*\n\n*Ejemplo:* .play diles`,
     });
   }
 
