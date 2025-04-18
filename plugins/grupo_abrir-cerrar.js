@@ -1,4 +1,4 @@
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { conn, args, text, usedPrefix, command }) => {
 const pp = await conn.profilePictureUrl(m.chat, 'image').catch(_ => null) || './src/grupos.jpg'  
 let isClose = { // Switch Case Like :v
 'open': 'not_announcement',
@@ -9,10 +9,9 @@ let isClose = { // Switch Case Like :v
 'cerrar': 'announcement',
 }[(args[0] || '')]
 if (isClose === undefined)
-throw `${e} *Ejemplo:*
+conn.reply(m.chat, `${e} *Ejemplo:*
 .grupo abrir
-.grupo cerrar
-`.trim()
+.grupo cerrar`, m)
 await conn.groupSettingUpdate(m.chat, isClose)
   
 if (isClose === 'not_announcement'){
