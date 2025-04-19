@@ -8,7 +8,7 @@ let handler = async (m, { conn: star, args, usedPrefix, command }) => {
   if (!args || !args[0]) {
     return star.reply(
       m.chat,
-      `${e} Ejemplo: .play diles`,
+      `${e} Ejemplo: .${command} diles`,
       m
     );
   }
