@@ -110,7 +110,7 @@ m.react('🕒')
         const result = api.downloadUrl;
         await conn.sendMessage(m.chat, { audio: { url: result }, mimetype: "audio/mpeg" }, { quoted: m });
 
-    } else if (command === 'playvideo' || command === 'ytv' || command === 'mp4' || command === 'play2) {
+    } else if (command === 'playvideo' || command === 'ytv' || command === 'mp4' || command === 'play2') {
       let sources = [
         `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`,
         `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
