@@ -63,7 +63,7 @@ txt +=  `*Canal* ${video.author.name}`;
     txt += `*Publicación* ${ago}\n`;
     txt += `*Tamaño:* ${sizeHumanReadable}\n`;
     txt += `*Link* ${url}\n`;
-    txt += `> *- ↻ El videoDoc se está enviando, espera un momento...*`;
+    txt += `> *- ↻ El video se está enviando, espera un momento...*`;
 
 
     await star.sendFile(m.chat, thumbnail, 'thumbnail.jpg', txt, m, null, rcanal);
