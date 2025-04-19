@@ -20,13 +20,12 @@ out = await ffmpeg(media, [
 '-shortest'
 ], 'mp3', 'mp4')
 }
-await conn.sendFile(m.chat, out, 'thumbnail.jpg', wm , m)
+await conn.sendFile(m.chat, out, 'thumbnail.jpg', wm , m, null, rcanal)
 await m.react('✅')
 } catch {
 await m.react('✖️')
 }}
-handler.help = ['tovid *<sticker>*']
-handler.tags = ['sticker', 'tools']
+
 handler.command = ['tovideo', 'tovid']
 handler.group = true;
 
