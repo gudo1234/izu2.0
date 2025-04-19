@@ -106,5 +106,5 @@ txt +=  `*Canal* ${video.author.name}\n`;
 
 
 handler.command = ['play2', 'ytv', 'mp4', 'ytmp4'];
-
+handler.group = true;
 export default handler;
