@@ -1,0 +1,17 @@
+import { sticker } from '../lib/sticker.js'
+import fg from 'api-dylux'
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+
+    if (!text) throw `Agregue un texto junto a al comando, ejemplo: ${usedPrefix + command} edar` 
+    let color = '2FFF2E' //color
+    let res = await fg.ttp(text, color) 
+    let stiker = await sticker(null, res.result, global.packname, global.author)
+m.react('🕒')
+    if (stiker) return conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m }
+    throw stiker.toString()
+}
+
+handler.command = ['ttp']
+handler.group = true;
+
+export default handler
