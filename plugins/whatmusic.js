@@ -9,7 +9,7 @@ const acr = new acrcloud({
 let handler = async(m, { conn, text }) => {
    let q = m.quoted ? m.quoted : m
    if (!q.mimetype || !q.mimetype.includes("audio")) {
-      return m.reply("❀ Por favor, responde al audio del cual deseas buscar el título.")
+      return m.reply(`${e} Por favor, responde al audio del cual deseas buscar el título.`)
    }
    m.react('🕒')
    let buffer = await q.download()
@@ -19,10 +19,10 @@ let handler = async(m, { conn, text }) => {
 
       let cap = "乂 S H A Z A M - M U S I C 乂\n\n"
       for (let result of data) {
-         cap += `> ✐ Título » ${result.title}\n`
-         cap += `> ✦ Artista » ${result.artist}\n`
-         cap += `> ⴵ Duración » ${result.duration}\n`
-         cap += `> 🜸 Enlace » ${result.url.filter(x => x).map(i => `\n${i}`).join("\n")}\n\n`
+         cap += `> *Título:* ${result.title}\n`
+         cap += `> *Artista:* ${result.artist}\n`
+         cap += `> *Duración* ${result.duration}\n`
+         cap += `> *Enlace:* ${result.url.filter(x => x).map(i => `\n${i}`).join("\n")}\n\n`
       }
       conn.relayMessage(m.chat, {
          extendedTextMessage: {
@@ -30,7 +30,7 @@ let handler = async(m, { conn, text }) => {
             contextInfo: {
                mentionedJid: conn.parseMention(cap),
                externalAdReply: {
-                  title: '✧ Whats • Music ✧',
+                  title: `${e} Whats • Music`,
                   mediaType: 1,
                   previewType: 0,
                   renderLargerThumbnail: true,
@@ -47,8 +47,7 @@ let handler = async(m, { conn, text }) => {
 }
 
 handler.command = ["whatmusic", "shazam"]
-handler.help = ["whatmusic"]
-handler.tags = ["tools"]
+handler.group = true;
 export default handler
 
 async function whatmusic(buffer) {
