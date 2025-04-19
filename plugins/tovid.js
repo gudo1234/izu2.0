@@ -4,7 +4,6 @@ let handler = async (m, { conn }) => {
 if (!m.quoted) return conn.reply(m.chat, `${e} Responde a un *Sticker Animado.*`, m)
 let mime = m.quoted.mimetype || ''
 if (!/webp|audio/.test(mime)) return conn.reply(m.chat, `${e} Responde a un *Sticker Animado.*`, m)
-conn.sendMessage(m.chat, { text: global.espere + `*${m.pushName}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, thumbnailUrl: img.getRandom(), thumbnail: img.getRandom(), showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
 await m.react('🕓')
 try {
 let media = await m.quoted.download()
