@@ -16,8 +16,8 @@ if (!args[0]) return m.reply(`${e} Ejemplo: *${usedPrefix + command}* 😎+🤑`
 let [emoji, emoji2] = text.split`+`
 let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(emoji)}_${encodeURIComponent(emoji2)}`)
 for (let res of anu.results) {
-let stiker = await sticker(false, res.url, global.packname, global.author)
-conn.sendFile(m.chat, stiker, null, { asSticker: true }, m)
+let stiker = await sticker(false, res.url, `${m.pushName}`)
+conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
 }}
 handler.help = ['emojimix *<emoji+emoji>*']
 handler.tags = ['sticker']
