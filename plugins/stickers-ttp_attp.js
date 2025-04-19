@@ -7,7 +7,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
         if (m.quoted && m.quoted.text) {
             text = m.quoted.text
         } else {
-            return m.reply(`❀ Por Favor, Ingresa Un Texto Para Realizar Tu Sticker.`)
+            return m.reply(`${e} Por Favor, Ingresa Un Texto Para Realizar Tu Sticker.`)
         }
     }
 
@@ -18,13 +18,13 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     let texto2 = packstickers.text2 || global.packsticker2
 
     if (command == 'attp') {
-        let stiker = await sticker(null, `https://api.fgmods.xyz/api/maker/attp?text=${teks}&apikey=elrebelde21`, texto1, texto2)
-        conn.sendFile(m.chat, stiker, 'sticker.webp', '', m, true)
+        let stiker = await sticker(null, `https://api.fgmods.xyz/api/maker/attp?text=${teks}&apikey=elrebelde21`, `${m.pushName}`)
+        conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
     }
 
     if (command == 'ttp') {
-        let stiker = await sticker(null, `https://api.fgmods.xyz/api/maker/ttp?text=${teks}&apikey=elrebelde21`, texto1, texto2)
-        conn.sendFile(m.chat, stiker, 'sticker.webp', '', m, true)
+        let stiker = await sticker(null, `https://api.fgmods.xyz/api/maker/ttp?text=${teks}&apikey=elrebelde21`, `${m.pushName}`)
+        conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
     }
 }
 
