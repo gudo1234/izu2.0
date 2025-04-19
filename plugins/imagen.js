@@ -16,6 +16,6 @@ console.log(`error`)
 console.log(e)
 }}
 
-handler.command = /^(gimage|image|imagen|jpg)$/i
+handler.command = ['gimage', 'image', 'imagen', 'jpg'];
 handler.group = true;
 export default handler
