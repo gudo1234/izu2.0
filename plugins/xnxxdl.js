@@ -11,7 +11,7 @@ const handler = async (m, {conn, args, command, usedPrefix}) => {
   }
   
   try {
-    m.react('🔥')
+    await conn.reply(m.chat, `${emoji} El vídeo está siendo procesado, espere un momento...\n\n- El tiempo de envío depende del peso y duración del video.`, m);
     let xnxxLink = '';
     
     if (args[0].includes('xnxx')) {
