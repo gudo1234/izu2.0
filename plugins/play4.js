@@ -85,14 +85,14 @@ txt +=  `*Canal* ${video.author.name}\n`;
       // Enviar como documento si el tamaño supera los 100 MB o si dura más de 30 minutos
       
 // para docVideo🗿
-    } else if (command === 'play4' || command === 'ytvdoc' || command === 'play2doc' || command === 'ytmp4doc') 
+    } else if (command === 'play4' || command === 'ytvdoc' || command === 'play2doc' || command === 'ytmp4doc') {
       await star.sendMessage(
         m.chat,
         { document: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `${title}.mp4` },
         { quoted: m }
       );
       await m.react('📄'); // Reacción de documento
-    } else {
+    }} else {
       // Enviar como video normal si es menor o igual al límite y dura menos de 30 minutos
       await star.sendMessage(
         m.chat,
@@ -103,16 +103,17 @@ txt +=  `*Canal* ${video.author.name}\n`;
     }
  
  // para audio🗿
-    if (command === 'play' || command === 'yta' || command === 'mp3') 
+    if (command === 'play' || command === 'yta' || command === 'mp3') {
         await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
- 
+ }
 // para docAudio📃
- else if (command === 'play3' || command === 'ytadoc' || command === 'playdoc' || command === 'ytmp3doc') 
+ else if (command === 'play3' || command === 'ytadoc' || command === 'playdoc' || command === 'ytmp3doc') {
         await conn.sendMessage(m.chat, { document: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}`, caption: `${e} Aqui tienes tu audio` }, { quoted: m });
-        
+   }
  // para video🗿
- else if (command === 'play2' || command === 'ytv' || command === 'mp4')
+ else if (command === 'play2' || command === 'ytv' || command === 'mp4') {
  await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
+ }
   } catch (error) {
     console.error(error);
     await m.react('✖️'); // Error durante el proceso
