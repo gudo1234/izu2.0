@@ -1,8 +1,9 @@
 import fetch from 'node-fetch'
 const regex = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i
-let handler = async (m, { args, usedPrefix, command }) => {
-if (!args[0]) return conn.reply(m.chat, `${e} Ingrese un enlace de github, ejemplo: ${usedPrefix + command} https://github.com/WhiskeySockets/Baileys`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: mg, body: 'GitClone', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})    
-if (!regex.test(args[0])) return conn.reply(m.chat, `Link no valido`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: iig, body: 'GitClone', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})
+let handler = async (m, { args, usedPrefix, command, text}) => {
+//if (!args[0]) return conn.reply(m.chat, `${e} Ingrese un enlace de github, ejemplo: ${usedPrefix + command} https://github.com/WhiskeySockets/Baileys`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: mg, body: 'GitClone', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})    
+if (!text) return conn.reply(m.chat, `${emoji} Por favor, ingrese el nombre de la apk para descargarlo.`, m)
+  if (!regex.test(args[0])) return conn.reply(m.chat, `Link no valido`, m, {contextInfo: {externalAdReply :{ mediaUrl: null, mediaType: 1, description: null, title: iig, body: 'GitClone', previewType: 0, thumbnail: img.getRandom(), sourceUrl: redes.getRandom()}}})
 try {   
 let [_, user, repo] = args[0].match(regex) || []
 repo = repo.replace(/.git$/, '')
