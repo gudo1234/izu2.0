@@ -6,9 +6,9 @@
 
 import axios from 'axios';
 import cheerio from 'cheerio';
-let handler = async (m, { conn, text: tiktok, args, command, usedPrefix}) => {
-if (!tiktok) throw '${e} Ejemplo: https://vm.tiktok.com/ZM6obVE7h/';       
-conn.sendMessage(m.chat, { text: global.espere + `*${m.pushName}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, thumbnailUrl: img.getRandom(), thumbnail: img.getRandom(), showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
+let handler = async (m, { conn, text: tiktok, args, command, usedPrefix, text}) => {      
+if (!text) return conn.reply(m.chat, `${e} Ejemplo: https://vm.tiktok.com/ZM6obVE7h/`, m)
+  conn.sendMessage(m.chat, { text: global.espere + `*${m.pushName}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, thumbnailUrl: img.getRandom(), thumbnail: img.getRandom(), showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
 let imagesSent
 if (imagesSent) return;
 imagesSent = true    
