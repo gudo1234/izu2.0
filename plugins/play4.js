@@ -64,7 +64,7 @@ txt +=  `*Canal* ${video.author.name}\n`;
     txt += `*Publicación* ${ago}\n`;
     txt += `*Tamaño:* ${sizeHumanReadable}\n`;
     txt += `*Link* ${url}`;
-    //txt += `> *↻ El video se está enviando, espera un momento...*`;
+    //txt += `> *↻Se está enviando, espera un momento...*`;
 
 
     await star.sendFile(m.chat, thumbnail, 'thumbnail.jpg', txt, m);
@@ -83,6 +83,9 @@ txt +=  `*Canal* ${video.author.name}\n`;
     // Enviar el video según el tamaño o la duración
     if (sizeMB > limit || durationInMinutes > 30) {
       // Enviar como documento si el tamaño supera los 100 MB o si dura más de 30 minutos
+      
+// para docVideo🗿
+    } else if (command === 'play4' || command === 'ytvdoc' || command === 'play2doc' || command === 'ytmp4doc') 
       await star.sendMessage(
         m.chat,
         { document: { url: downloadUrl }, mimetype: 'video/mp4', fileName: `${title}.mp4` },
@@ -98,6 +101,18 @@ txt +=  `*Canal* ${video.author.name}\n`;
       );
       await m.react('✅'); // Reacción de éxito
     }
+ 
+ // para audio🗿
+    if (command === 'play' || command === 'yta' || command === 'mp3') 
+        await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
+ 
+// para docAudio📃
+ else if (command === 'play3' || command === 'ytadoc' || command === 'playdoc' || command === 'ytmp3doc') 
+        await conn.sendMessage(m.chat, { document: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}`, caption: `${e} Aqui tienes tu audio` }, { quoted: m });
+        
+ // para video🗿
+ else if (command === 'play2' || command === 'ytv' || command === 'mp4')
+ await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
   } catch (error) {
     console.error(error);
     await m.react('✖️'); // Error durante el proceso
@@ -106,6 +121,6 @@ txt +=  `*Canal* ${video.author.name}\n`;
 };
 
 
-handler.command = ['play4', 'ytvdoc', 'mp4doc']; // Comandos disponibles
+handler.command = ['play', 'play2', 'mp3', 'yta', 'mp4', 'ytv', 'play3', 'ytadoc', 'playdoc', 'ytmp3doc', 'play4', 'ytvdoc', 'play2doc', 'ytmp4doc'];
 
 export default handler;
