@@ -1,6 +1,6 @@
 import {search, download} from 'aptoide-scraper';
 const handler = async (m, {conn, usedPrefix: prefix, command, text}) => {
- if (!text) throw `${e} Este comando es solo para descargar aplicaciones gratuitas y de pago. Escribe de esta manera, por ejemplo: \n*.apk facebook lite*`;
+ conn.reply(m.chat, `${e} *Ejemplo:* .${command}facebook`, m)
   try {    
     const searchA = await search(text);
     const data5 = await download(searchA[0].id);
