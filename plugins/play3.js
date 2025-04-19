@@ -34,6 +34,6 @@ m.react('✖️');
   }
 }
 
-handler.command = ['play3', 'yta', 'mp3doc'];
+handler.command = ['play3', 'ytadoc', 'mp3doc'];
 
 export default handler
