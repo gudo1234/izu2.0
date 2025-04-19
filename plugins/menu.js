@@ -20,6 +20,7 @@ ${e}${s}play *‹τ×τ›*
 ${e}${s}play2 *‹τ×τ›*
 ${e}${s}play3 *‹τ×τ›*
 ${e}${s}play4 *‹τ×τ›*
+${e}${s}facebook *‹υяʟ›*
 ${e}${s}instagram *‹υяʟ›*
 ${e}${s}tiktokvid *‹τ×τ›*
 ${e}${s}tiktok *‹υяʟ›*
@@ -37,6 +38,9 @@ ${e}${s}ytmp4 *‹υяʟ›*
 ${e}${s}ytmp3doc *‹υяʟ›*
 ${e}${s}ytmp4doc *‹υяʟ›*
 ${e}${s}spotify *‹τ×τ›*
+${e}${s}mega *‹υяʟ›*
+${e}${s}gdrive *‹υяʟ›*
+${e}${s}terabox *‹υяʟ›*
 
 > ⁉ ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮
 ${e}${s}hd *‹rєρℓy›*`
