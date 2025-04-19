@@ -31,15 +31,16 @@ ${e}${s}gitclone *‹υяʟ›*
 ${e}${s}xnxxdl *‹υяʟ›*
 ${e}${s}xvideosdl *‹υяʟ›*
 ${e}${s}imagen *‹τ×τ›*
-${e}${s}pinterest *‹τ×τ›*
+${e}${s}pinterest *‹υяʟ›*
 ${e}${s}ytmp3 *‹υяʟ›*
 ${e}${s}ytmp4 *‹υяʟ›*
 ${e}${s}ytmp3doc *‹υяʟ›*
 ${e}${s}ytmp4doc *‹υяʟ›*
-${e}${s}spotify* ‹τ×τ›*
+${e}${s}spotify *‹τ×τ›*
 
 > ⁉ ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮
 ${e}${s}hd *‹rєρℓy›*`
+m.react('🏖️')
 await conn.sendMessage(m.chat, {
       text: txt,
       contextInfo: {
