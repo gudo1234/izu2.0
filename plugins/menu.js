@@ -58,6 +58,7 @@ await conn.sendMessage(m.chat, {
           forwardingScore: false,
           externalAdReply: {
               title: botname,
+             footer: textbot,
               body: textbot,
               thumbnailUrl: icono,
               mediaType: 1,
