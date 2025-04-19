@@ -12,7 +12,7 @@ await conn.sendMessage(m.chat, { text: global.espere + `*${name}*`, contextInfo:
   let pr = await remini(img, "enhance");
   conn.sendMessage(m.chat, {image: pr}, {quoted: m});
  } catch {
-  throw `${e} *Responda a una imagen*`;
+  > conn.reply(m.chat, `${e} Responda a una imagen para mejorar la calidad`, m, rcanal)
  }
 };
 handler.help = ["remini", "hd", "enhance"];
