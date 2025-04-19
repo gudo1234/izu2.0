@@ -1,5 +1,14 @@
+import { getDevice } from "@whiskeysockets/baileys"
+import PhoneNumber from 'awesome-phonenumber'
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-let txt = `🗣️ Hola ${m.pushName} mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar, buscar datos e información a través de \`WhatsApp\` y mucho más.
+const nkdt = new Date();
+const nktm = nkdt.getHours();
+let rpt = "🌠¡Recuerda descansar bien esta noche!🌙"
+      if (nktm >= 3) rpt = "🙃¡Buenas madrugadas!"
+      if (nktm > 6) rpt = "☀️¡Buenos días!🌻"
+      if (nktm >= 11) rpt = "🌇¡Buenas tardes!🍁"
+      if (nktm >= 18) rpt = "🌠¡Buenas noches!🌙"
+let txt = `🗣️ Hola ${m.pushName} *${rpt}*\n\n⚡Mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar, buscar datos e información a través de \`WhatsApp\` y mucho más.
 
 > ⁉ ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️
 ${e}${s}kick *‹@υsєя›*
