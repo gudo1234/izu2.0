@@ -1,20 +1,25 @@
-import {search, download} from 'aptoide-scraper';
-const handler = async (m, {conn, usedPrefix: prefix, command, text}) => {
- conn.reply(m.chat, `${e} *Ejemplo:* .${command}facebook`, m)
-  try {    
-    const searchA = await search(text);
-    const data5 = await download(searchA[0].id);
-    let response = `📲 Descargar aplicaciones 📲\n\n📌 *Nombre de la aplicación:* ${data5.name}\n📦 *Paquete:* ${data5.package}\n🕒 *Número de actualización:* ${data5.lastup}\n📥 *Tamaño de la aplicación:* ${data5.size}‎‏`
-    await conn.sendMessage(m.chat, {image: {url: data5.icon}, caption: response}, {quoted: m});
- if (data5.size.includes('GB') || data5.size.replace(' MB', '') > 999) {
-      return await conn.sendMessage(m.chat, {text: `${e} El archivo es demasiado grande, por lo que no se enviará.`}, {quoted: m});
-    }
-    await conn.sendMessage(m.chat, {document: {url: data5.dllink}, mimetype: 'application/vnd.android.package-archive', fileName: data5.name + '.apk', caption: null}, {quoted: m});
-  } catch {
-    throw `${e} *Error, no se encontraron resultados para tu búsqueda.*`;
-  }    
-};
-handler.command = ["apk","aplicación"]
+import { search, download } from 'aptoide-scraper'
+
+var handler = async (m, {conn, usedPrefix, command, text}) => {
+if (!text) return conn.reply(m.chat, `${emoji} Por favor, ingrese el nombre de la apk para descargarlo.`, m)
+try {
+await m.react(rwait)
+conn.reply(m.chat, `${emoji} Descargando su aplicación, espere un momento...`, m)
+let searchA = await search(text)
+let data5 = await download(searchA[0].id)
+txt += `*Nombre* : ${data5.name}\n`
+txt += `*Package* : ${data5.package}\n`
+txt += `*Update* : ${data5.lastup}\n`
+txt += `*Peso* :  ${data5.size}`
+await conn.sendFile(m.chat, data5.icon, 'thumbnail.jpg', txt, m, null, rcanal) 
+await m.react(done)  
+if (data5.size.includes('GB') || data5.size.replace(' MB', '') > 999) {
+return await conn.reply(m.chat, `${emoji2} El archivo es demaciado pesado.`, m)}
+await conn.sendMessage(m.chat, {document: {url: data5.dllink}, mimetype: 'application/vnd.android.package-archive', fileName: data5.name + '.apk', caption: null}, {quoted: fkontak})
+} catch {
+return conn.reply(m.chat, `${msm} Ocurrió un fallo...`, m)}}
+
+handler.command = ['apk', 'modapk', 'aptoide']
 handler.group = true;
 
-export default handler;
+export default handler
