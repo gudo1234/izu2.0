@@ -106,5 +106,5 @@ txt +=  `*Canal* ${video.author.name}\n`;
 
 
 handler.command = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
-
+handler.group = true;
 export default handler;
