@@ -18,7 +18,6 @@ let handler = async (m, { conn, usedPrefix, command, text, args }) => {
           txt += `> ${wm}`
 
       await conn.sendFile(m.chat, dl_url, `thumbnail.mp4`, txt, m, null, rcanal)
-    await conn.sendFile(m.chat, dl_url, `thumbnail.mp4`, txt, m, null, rcanal)
     await m.react('✅')
 
   } catch {
