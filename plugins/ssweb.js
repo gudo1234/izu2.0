@@ -6,16 +6,14 @@ if (!args[0]) return conn.reply(m.chat, `${e} Ingrese la url de una página web 
         conn.sendFile(m.chat, ss, '', '', m);
    } catch { 
    try {  
-     const ss2 = `https://api.screenshotmachine.com/?key=c04d3a&url=${args[0]}&screenshotmachine.com&dimension=720x720`;  
-        conn.sendMessage(m.chat, {image: {url: ss2}}, {quoted: m}); 
+     const ss2 = `https://api.screenshotmachine.com/?key=c04d3a&url=${args[0]}&screenshotmachine.com&dimension=720x720`;
+        await conn.sendFile(m.chat, ss2, "Thumbnail.jpg", `${m.pushName}`, m, null, rcanal)
    } catch {  
    try { 
      const ss3 =  `https://api.lolhuman.xyz/api/SSWeb?apikey=${lolkeysapi}&url=${text}`; 
         conn.sendMessage(m.chat, {image: {url: ss3}}, {quoted: m}); 
    } catch { 
      const ss4 = `https://api.lolhuman.xyz/api/SSWeb2?apikey=${lolkeysapi}&url=${text}`;
-
-        conn.sendMessage(m.chat, {image: {url: ss4}}, {quoted: m});
         conn.sendFile(m.chat, ss4, `thumbnail.jpg`, `${m.pushName}`, m, null, rcanal)
    }
   }
