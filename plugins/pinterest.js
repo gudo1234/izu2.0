@@ -15,7 +15,8 @@ txt += `  ✩   *Url* : ${url}\n\n`
 txt += `> *${wm}*`
 
 
-await conn.sendMessage(m.chat, { video: { url: dl_url }, caption: txt, mimetype: 'video/mp4', fileName:  `pinterest.mp4`}, {quoted: m })
+//await conn.sendMessage(m.chat, { video: { url: dl_url }, caption: txt, mimetype: 'video/mp4', fileName:  `pinterest.mp4`}, {quoted: m })
+await conn.sendFile(m.chat, dl_url, `thumbnail.mp4`, txt, m, null, rcanal)
 await m.react('✅');
 } catch {
 await m.react('✖️');
