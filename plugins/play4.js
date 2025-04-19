@@ -56,7 +56,7 @@ let handler = async (m, { conn: star, args, usedPrefix, command }) => {
     let durationInMinutes = parseFloat(timestamp.split(':')[0]) * 60 + parseFloat(timestamp.split(':')[1]);
 
 
-    let txt = `*${title}*\n`;
+    let txt = `*${title}*\n\n`;
 txt +=  `*Canal* ${video.author.name}\n`; 
  txt += `*Duración* ${timestamp}\n`;
     txt += `*Vistas* ${views}\n`;
