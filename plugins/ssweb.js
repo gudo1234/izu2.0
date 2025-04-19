@@ -3,7 +3,7 @@ const handler = async (m, {conn, text, args}) => {
 if (!args[0]) return conn.reply(m.chat, `${e} Ingrese la url de una página web para generar jpg`, m);
  try {
      const ss = await (await fetch(`https://image.thum.io/get/fullpage/${args[0]}`)).buffer();
-        conn.sendFile(m.chat, ss, '', '', m);
+        conn.sendFile(m.chat, ss, '', `${m.pushName}`, m, null, rcanal);
    } catch { 
    try {  
      const ss2 = `https://api.screenshotmachine.com/?key=c04d3a&url=${args[0]}&screenshotmachine.com&dimension=720x720`;
