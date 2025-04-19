@@ -105,6 +105,6 @@ txt +=  `*Canal* ${video.author.name}`;
 };
 
 
-handler.command = ['play4', 'ytvdoc', 'mp4doc']; // Comandos disponibles
+handler.command = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
 
 export default handler;
