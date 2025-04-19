@@ -7,10 +7,9 @@ const replies = '69';
 const retweets = '69'; 
 const theme = 'dark'; 
 const url = `https://some-random-api.com/canvas/misc/tweet?displayname=${encodeURIComponent(displayName)}&username=${encodeURIComponent(username)}&avatar=${encodeURIComponent(avatar)}&comment=${encodeURIComponent(text)}&replies=${encodeURIComponent(replies)}&retweets=${encodeURIComponent(retweets)}&theme=${encodeURIComponent(theme)}`;
-conn.sendFile(m.chat, url, 'tweet.png', '*Gracias por comentar*', m);
+conn.sendFile(m.chat, url, 'tweet.png', '*Gracias por comentar*', m, null, rcanal);
 };  
-handler.help = ['tweet <comment>'];
-handler.tags = ['maker'];
+
 handler.command = ['tweet']
 handler.group = true;
 export default handler;
