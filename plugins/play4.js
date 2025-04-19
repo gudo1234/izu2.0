@@ -62,7 +62,7 @@ txt +=  `*Canal* ${video.author.name}`;
     txt += `*Vistas* ${views}\n`;
     txt += `*Publicación* ${ago}\n`;
     txt += `*Tamaño:* ${sizeHumanReadable}\n`;
-    txt += `*Link* ${url}`;
+    txt += `*Link* ${url}\n`;
     txt += `> *- ↻ El videoDoc se está enviando, espera un momento...*`;
 
 
