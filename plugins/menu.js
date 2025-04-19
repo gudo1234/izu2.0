@@ -27,12 +27,16 @@ ${e}${s}tiktokimg *‹υяʟ›*
 ${e}${s}twitter *‹υяʟ›*
 ${e}${s}mediafire *‹υяʟ›*
 ${e}${s}apk *‹τ×τ›*
-${e}${s}applemusic *‹τ×τ›*
 ${e}${s}gitclone *‹υяʟ›*
 ${e}${s}xnxxdl *‹υяʟ›*
 ${e}${s}xvideosdl *‹υяʟ›*
 ${e}${s}imagen *‹τ×τ›*
 ${e}${s}pinterest *‹τ×τ›*
+${e}${s}ytmp3 *‹υяʟ›*
+${e}${s}ytmp4 *‹υяʟ›*
+${e}${s}ytmp3doc *‹υяʟ›*
+${e}${s}ytmp4doc *‹υяʟ›*
+${e}${s}spotify* ‹τ×τ›*
 
 > ⁉ ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮
 ${e}${s}hd *‹rєρℓy›*`
