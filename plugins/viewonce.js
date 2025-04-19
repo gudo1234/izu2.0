@@ -7,7 +7,7 @@ let buffer = await m.quoted.download(false);
 if (/videoMessage/.test(m.quoted.mtype)) {
 return conn.sendFile(m.chat, buffer, 'media.mp4', m.quoted.caption || '', m)
 } else if (/imageMessage/.test(m.quoted.mtype)) {
-return conn.sendFile(m.chat, buffer, 'media.jpg', m.quoted?.caption || '', m)
+return conn.sendFile(m.chat, buffer, 'media.jpg', m.quoted?.caption || '', m, null, rcanal)
 }}
 
 handler.command = ['readviewonce', 'read', 'readvo', 'rvo', 'ver'] 
