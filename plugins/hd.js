@@ -4,21 +4,18 @@ const handler = async (m, {conn, usedPrefix, command}) => {
  try {    
   let q = m.quoted ? m.quoted : m;
   let mime = (q.msg || q).mimetype || q.mediaType || "";
-  if (!mime) throw `${e} Responda a una imagen`;
-  if (!/image\/(jpe?g|png)/.test(mime)) throw `${e} No compatible: (${mime}) responda a una imagen`;
-let name = await conn.getName(m.sender)
-await conn.sendMessage(m.chat, { text: global.espere + `*${name}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, humbnailUrl: imagen4, thumbnail: imagen4, showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
+  conn.reply(m.chat, `${e} Responda a una imagen para mejorar la calidad`, m)
+  if (!/image\/(jpe?g|png)/.test(mime)) throw `error`
   let img = await q.download?.();
   let pr = await remini(img, "enhance");
   conn.sendMessage(m.chat, {image: pr}, {quoted: m});
  } catch {
-  conn.reply(m.chat, `${e} Responda a una imagen para mejorar la calidad`, m, rcanal)
+  throw "error";
  }
 };
 handler.help = ["remini", "hd", "enhance"];
 handler.tags = ["ai", "tools"];
 handler.command = ["remini", "hd", "enhance"];
-handler.group = true;
 export default handler;
 
 async function remini(imageData, operation) {
