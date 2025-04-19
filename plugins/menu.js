@@ -23,7 +23,10 @@ ${e}${s}play4 *‹τ×τ›*
 ${e}${s}instagram *‹υяʟ›*
 ${e}${s}tiktok *‹υяʟ›*
 ${e}${s}twitter *‹υяʟ›*
-${e}${s}mediafire *‹υяʟ›*`
+${e}${s}mediafire *‹υяʟ›*
+
+> ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮
+${e}${s}hd *‹rєρℓy›*`
 await conn.sendMessage(m.chat, {
       text: txt,
       contextInfo: {
