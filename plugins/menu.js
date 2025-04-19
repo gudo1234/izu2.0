@@ -8,7 +8,16 @@ let rpt = "🌠¡Recuerda descansar bien esta noche!🌙"
       if (nktm > 6) rpt = "☀️¡Buenos días!🌻"
       if (nktm >= 11) rpt = "🌇¡Buenas tardes!🍁"
       if (nktm >= 18) rpt = "🌠¡Buenas noches!🌙"
-let txt = `🗣️ Hola _${m.pushName}_ *${rpt}*\n\n⚡Mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar, buscar datos e información a través de \`WhatsApp\` y mucho más.
+let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
+  let paisdata = delirius.data.result
+  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}` : 'Desconocido'
+let txt = `🗣️ Hola, *${rpt}*\n\n⚡Mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar, buscar datos e información a través de \`WhatsApp\` y mucho más.
+
+> ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
+*🚩]▸Nombre:* ${m.pushName}
+🌎 *Pais/Móvil:* ${mundo}
+(${getDevice(m.key.id)})
+*🗓]▸Fecha:* ${moment.tz('America/Bogota').format('DD/MM/YY')}
 
 > ⁉ ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️
 ${e}${s}kick *‹@υsєя›*
