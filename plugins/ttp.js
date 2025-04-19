@@ -7,7 +7,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     let res = await fg.ttp(text, color) 
     let stiker = await sticker(null, res.result, global.packname, global.author)
 m.react('🕒')
-    if (stiker) return conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m }
+    if (stiker) return await conn.sendFile(m.chat, stiker, '', '', m, null)
     throw stiker.toString()
 }
 
