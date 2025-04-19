@@ -5,7 +5,6 @@ let handler = async (m, { conn, usedPrefix, command, text, args }) => {
   await m.react('🕓')
   try {
     let { title, author, duration, views, likes, comments_count, share_count, download_count, published, dl_url } = await Starlights.tiktokvid(text)
-conn.sendMessage(m.chat, { text: global.espere + `*${m.pushName}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, thumbnailUrl: img.getRandom(), thumbnail: img.getRandom(), showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
       let txt = '`乂  T I K T O K  -  D O W N L O A D`\n\n'
           txt += `    ✩  *Título* : ${title}\n`
           txt += `    ✩  *Autor* : ${author}\n`
