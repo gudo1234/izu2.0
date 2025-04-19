@@ -1,34 +1,40 @@
 import axios from 'axios'
 import fs from 'fs'
+import path from 'path'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-  const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
+  const quoted = m.quoted || m
+  const isImage = quoted.mimetype?.startsWith('image/')
   const username = `${conn.getName(m.sender)}`
   const basePrompt = `Tu nombre es ${wm}, creado por ${author}. Hablas en Español, te gusta bromear y no soportas estar sin hacer nada. Sé amigable con ${username}.`
 
-  if (isQuotedImage) {
-    const q = m.quoted
-    const img = await q.download?.()
-    if (!img) return conn.reply(m.chat, '❤️‍🔥 Error: No se pudo descargar la imagen.', m, fake)
+  if (isImage) {
+    try {
+      const imgBuffer = await quoted.download?.()
+      if (!imgBuffer) {
+        return conn.reply(m.chat, '❤️‍🔥 Error: No se pudo descargar la imagen.', m)
+      }
 
-    try {
-      const description = await openaiImageAnalysis(img, basePrompt)
-      await conn.reply(m.chat, description, m, fake)
-    } catch (error) {
-      console.error('🔥 Error al analizar la imagen:', error)
-      await conn.reply(m.chat, '🦋 Error al analizar la imagen.', m, fake)
+      const description = await openaiImageAnalysis(imgBuffer, basePrompt)
+      return await conn.reply(m.chat, description, m)
+    } catch (err) {
+      console.error('🔥 Error al analizar la imagen:', err)
+      return await conn.reply(m.chat, '🦋 Ocurrió un error analizando la imagen.', m)
     }
-  } else {
-    if (!text) return conn.reply(m.chat, `${e} *Ejemplo:* ${usedPrefix + command} ¿qué es un bot?`, m, rcanal)
+  }
+
+  if (!text) {
+    return conn.reply(m.chat, `${usedPrefix + command} ¿qué es un bot?`, m)
+  }
+
+  try {
     await m.react('💬')
-    try {
-      const prompt = `${basePrompt}. Responde lo siguiente: ${text}`
-      const response = await openaiText(prompt)
-      await conn.reply(m.chat, response, m, fake)
-    } catch (error) {
-      console.error('Error al obtener la respuesta:', error)
-      await conn.reply(m.chat, 'Error: intenta más tarde.', m, fake)
-    }
+    const prompt = `${basePrompt}. Responde lo siguiente: ${text}`
+    const reply = await openaiText(prompt)
+    return await conn.reply(m.chat, reply, m)
+  } catch (err) {
+    console.error('Error al obtener la respuesta:', err)
+    return await conn.reply(m.chat, 'Error: intenta más tarde.', m)
   }
 }
 
@@ -39,12 +45,12 @@ handler.register = false
 
 export default handler
 
-// FUNCIONES PARA OPENAI API
+// FUNCIONES DE OPENAI
+
 const OPENAI_API_KEY = 'tu_api_key_aquí'
 
-// Texto
 async function openaiText(prompt) {
-  const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+  const res = await axios.post('https://api.openai.com/v1/chat/completions', {
     model: 'gpt-4',
     messages: [{ role: 'user', content: prompt }]
   }, {
@@ -53,13 +59,13 @@ async function openaiText(prompt) {
       'Content-Type': 'application/json'
     }
   })
-  return response.data.choices[0].message.content.trim()
+
+  return res.data.choices[0].message.content.trim()
 }
 
-// Imagen (requiere GPT-4o o GPT-4 con visión)
 async function openaiImageAnalysis(imageBuffer, promptText) {
   const base64Image = imageBuffer.toString('base64')
-  const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+  const res = await axios.post('https://api.openai.com/v1/chat/completions', {
     model: 'gpt-4-vision-preview',
     messages: [
       {
@@ -77,5 +83,6 @@ async function openaiImageAnalysis(imageBuffer, promptText) {
       'Content-Type': 'application/json'
     }
   })
-  return response.data.choices[0].message.content.trim()
+
+  return res.data.choices[0].message.content.trim()
 }
