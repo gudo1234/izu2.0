@@ -1,19 +1,19 @@
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 
-
 const handler = async (m, {conn, args, command, usedPrefix}) => {
-  const datas = global
-  const idioma = datas.db.data.users[m.sender].language
-  //const _translate = JSON.parse(fs.readFileSync(`./language/${idioma}.json`))
-  //const tradutor = _translate.plugins.adult_xnxxdl
-
-  if (!db.data.chats[m.chat].modohorny && m.isGroup) throw `${e} *Modohorny desactivado, pidele a un admin que lo active*`;
-  if (!args[0]) throw `${e} Ejemplo: ${usedPrefix + command} https://www.xnxx.es/video-fslt53a/real_cfnm_a_caballo_polla_pov_estilo_consigue_corrida_en_hd`;
+  if (!db.data.chats[m.chat].nsfw && m.isGroup) {
+    return conn.reply(m.chat, `${emoji} El contenido *NSFW* está desactivado en este grupo.\n> Un administrador puede activarlo con el comando » *#nsfw on*`, m);
+  }
+  
+  if (!args[0]) {
+    return conn.reply(m.chat, `${emoji} Por favor, envía un link de Xnxx para descargar el video.\nUso: ${usedPrefix}${command} <link de Xnxx>`, m);
+  }
+  
   try {
-conn.sendMessage(m.chat, { text: global.espere + `*${m.pushName}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, thumbnailUrl: img.getRandom(), thumbnail: img.getRandom(), showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
-m.react('🕒')
+    m.react('🔥')
     let xnxxLink = '';
+    
     if (args[0].includes('xnxx')) {
       xnxxLink = args[0];
     } else {
@@ -25,25 +25,28 @@ m.react('🕒')
             if (index < matchingItem.urls.length) {
               xnxxLink = matchingItem.urls[index];
             } else {
-              throw `${matchingItem.urls.length}`;
+              throw `${emoji2} No se encontró un enlace para ese número, por favor ingrese un número entre el 1 y el ${matchingItem.urls.length}.`;
             }
           } else {
-            throw `${usedPrefix + command}xnxxsearch <texto>`;
+            throw `${emoji2} Para poder usar este comando de esta forma (${usedPrefix + command} <numero>), por favor realiza la búsqueda con el comando ${usedPrefix}xnxxsearch <texto>`;
           }
         } else {
-          throw `${usedPrefix + command}xnxxsearch <texto>`;
+          throw `${emoji2} Para poder usar este comando de esta (${usedPrefix + command} <numero>), por favor realiza la búsqueda con el comando ${usedPrefix}xnxxsearch <texto>`;
         }
       }
     }
+
     const res = await xnxxdl(xnxxLink);
     const json = await res.result.files;
     conn.sendMessage(m.chat, {document: {url: json.high}, mimetype: 'video/mp4', fileName: res.result.title}, {quoted: m});
-  } catch {
-    throw `error`;
+  } catch (error) {
+    return conn.reply(m.chat, `${msm} Ocurrió un error.\n\n- El enlace debe ser similar a:\n◉ https://www.xnxx.com/video-14lcwbe8/rubia_novia_follada_en_cuarto_de_bano\n\nDetalles del error: ${error}`, m);
   }
 };
-handler.command = ['xnxxdl']
+
+handler.command = ['xnxxdl'];
 handler.group = true;
+
 export default handler;
 
 async function xnxxdl(URL) {
@@ -65,7 +68,8 @@ async function xnxxdl(URL) {
         thumb: videoScript.match('html5player.setThumbUrl\\(\'(.*?)\'\\);' || [])[1],
         thumb69: videoScript.match('html5player.setThumbUrl169\\(\'(.*?)\'\\);' || [])[1],
         thumbSlide: videoScript.match('html5player.setThumbSlide\\(\'(.*?)\'\\);' || [])[1],
-        thumbSlideBig: videoScript.match('html5player.setThumbSlideBig\\(\'(.*?)\'\\);' || [])[1]};
+        thumbSlideBig: videoScript.match('html5player.setThumbSlideBig\\(\'(.*?)\'\\);' || [])[1]
+      };
       resolve({status: 200, result: {title, URL, duration, image, videoType, videoWidth, videoHeight, info, files}});
     }).catch((err) => reject({code: 503, status: false, result: err}));
   });
