@@ -9,7 +9,7 @@ let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country
 let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡Mi nombre es *izuBot* y cuento con un sistema automático con comandos que puede ayudar, buscar datos e información a través de \`WhatsApp\` y mucho más.
 
 > ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
-╔ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╗
+╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
 *🚩]▸Nombre:* ${m.pushName}
 🌎 *Pais/Móvil:* ${mundo}
 (${getDevice(m.key.id)})
@@ -17,7 +17,7 @@ let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡Mi nom
 ╚ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╝
 
 > ⁉ ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️
-╔ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╗
+╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
 ${e}${s}kick *‹@υsєя›*
 ${e}${s}link
 ${e}${s}admins *‹τ×τ›*
@@ -33,6 +33,7 @@ ${e}${s}demote *‹@υsєя›*
 ╚ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╝
 
 > ⁉ ᴅᴇsᴄᴀʀɢᴀs ᴍᴜʟᴛɪᴍᴇᴅɪᴀ📂
+╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
 ${e}${s}play *‹τ×τ›*
 ${e}${s}play2 *‹τ×τ›*
 ${e}${s}play3 *‹τ×τ›*
@@ -61,7 +62,7 @@ ${e}${s}terabox *‹υяʟ›*
 ╚ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╝
 
 > ⁉ ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮
-╔ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╗
+╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
 ${e}${s}hd *‹rєρℓy›*
 ╚ֺ─ְ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿╱⵿╳╱─━ׅ⃜─፝֟┅─ֺ╝`
 m.react('🏖️')
