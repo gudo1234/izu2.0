@@ -1,6 +1,6 @@
 import { toPTT } from '../lib/converter.js'
 
-var handler = async (m, { conn, usedPrefix, command }) => {
+var handler = async (m, { conn, usedPrefix, command, text}) => {
 
 let q = m.quoted ? m.quoted : m
 let mime = (m.quoted ? m.quoted : m.msg).mimetype || ''
