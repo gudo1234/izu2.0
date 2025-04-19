@@ -36,6 +36,6 @@ export async function before(m) {
     user.commands += 1;
   } else {
     const comando = m.text.trim().split(' ')[0];
-    await m.reply(`${e} El comando *${comando}* no existe.\nPara ver la lista de comandos usa:\n» *#help*`);
+    await m.reply(`${e} El comando *${comando}* no existe.\n🧮 Usa *.menu* para ver los comandos`);
   }
 }
