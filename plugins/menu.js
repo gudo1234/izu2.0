@@ -47,6 +47,7 @@ ${e}${s}hd *‹rєρℓy›*`
 m.react('🏖️')
 await conn.sendMessage(m.chat, {
       text: txt,
+      footer: textbot,
       contextInfo: {
           mentionedJid: [m.sender],
           isForwarded: true,
@@ -58,7 +59,6 @@ await conn.sendMessage(m.chat, {
           forwardingScore: false,
           externalAdReply: {
               title: botname,
-             footer: textbot,
               body: textbot,
               thumbnailUrl: icono,
               mediaType: 1,
