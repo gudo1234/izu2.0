@@ -9,8 +9,8 @@ if (/videoMessage/.test(m.quoted.mtype)) {
 return conn.sendFile(m.chat, buffer, 'media.mp4', m.quoted.caption || '', m, null, rcanal)
 } else if (/imageMessage/.test(m.quoted.mtype)) {
 return conn.sendFile(m.chat, buffer, 'media.jpg', m.quoted?.caption || '', m, null, rcanal)
-} else if (/aidioMessage/.test(m.quoted.mtype)) {
-conn.sendFile(m.chat, buffer, '', null, m, true, { 
+} else if (/audioMessage/.test(m.quoted.mtype)) {
+return conn.sendFile(m.chat, buffer, '', null, m, true, { 
 type: 'audioMessage', 
 ptt: true 
 })
