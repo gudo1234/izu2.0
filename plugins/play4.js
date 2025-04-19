@@ -91,15 +91,15 @@ let handler = async (m, { conn: star, args, usedPrefix, command }) => {
 
     // para audio🗿
     if (command === 'play' || command === 'yta' || command === 'mp3') {
-        await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
+        await star.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
     }
     // para docAudio📃
     else if (command === 'play3' || command === 'ytadoc' || command === 'playdoc' || command === 'ytmp3doc') {
-        await conn.sendMessage(m.chat, { document: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}`, caption: `Aquí tienes tu audio` }, { quoted: m });
+        await star.sendMessage(m.chat, { document: { url: downloadUrl }, mimetype: "audio/mpeg", fileName: `${title}`, caption: `Aquí tienes tu audio` }, { quoted: m });
     }
     // para video🗿
     else if (command === 'play2' || command === 'ytv' || command === 'mp4') {
-        await conn.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
+        await star.sendMessage(m.chat, { audio: { url: downloadUrl }, mimetype: "audio/mpeg" }, { quoted: m });
     }
 } catch (error) {
     console.error(error);
