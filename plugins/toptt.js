@@ -4,9 +4,9 @@ var handler = async (m, { conn, usedPrefix, command }) => {
 
 let q = m.quoted ? m.quoted : m
 let mime = (m.quoted ? m.quoted : m.msg).mimetype || ''
-if (!/video|audio/.test(mime)) throw `${e} Responda a un video o audio para convertirlo en nota de voz`
+if (!/video|audio/.test(mime)) 
+    if (!text) return conn.reply(m.chat, `${e} Responda a un audio para convertir en nota de voz.`, m)
 let name = await conn.getName(m.sender)
-await conn.sendMessage(m.chat, { text: global.espere + `*${name}*`, contextInfo: { externalAdReply: {title: `${wm}`, body: `${await conn.getName(m.chat)}`, humbnailUrl: imagen4, thumbnail: imagen4, showAdAttribution: true, sourceUrl: canal}}} , { quoted: fkontak })
 await m.react('🕓')
 let media = await q.download?.()
 if (!media && !/video/.test(mime)) throw ''
@@ -18,8 +18,7 @@ conn.sendFile(m.chat, audio.data, 'error.mp3', '', m, true, { mimetype: 'audio/m
 await m.react('✅')
     
 }
-handler.help = ['tovn']
-handler.tags = ['transformador']
+
 handler.command = ['toptt', 'tovn']
 handler.group = true;
 
