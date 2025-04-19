@@ -4,8 +4,6 @@ import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-    
-let name = await conn.getName(m.sender)
 let stiker = false
 try {
 let q = m.quoted ? m.quoted : m
@@ -19,7 +17,7 @@ if (!img) return conn.reply(m.chat, `${e} Responda a img, gif, video...`, m)
 let out
 m.react('🧩')
 try {
-stiker = await sticker(img, false, `${name}`)
+stiker = await sticker(img, false, `${m.pushName}`)
 } catch (e) {
 console.error(e)
 } finally {
@@ -28,10 +26,10 @@ if (/webp/g.test(mime)) out = await webp2png(img)
 else if (/image/g.test(mime)) out = await uploadImage(img)
 else if (/video/g.test(mime)) out = await uploadFile(img)
 if (typeof out !== 'string') out = await uploadImage(img)
-stiker = await sticker(false, out, `${name}`)
+stiker = await sticker(false, out, `${m.pushName}`)
 }}
 } else if (args[0]) {
-if (isUrl(args[0])) stiker = await sticker(false, args[0], `${name}`)
+if (isUrl(args[0])) stiker = await sticker(false, args[0], `${m.pushName}`)
 
 else return m.reply(`${e} El url es incorrecto`)
 
@@ -40,17 +38,15 @@ else return m.reply(`${e} El url es incorrecto`)
 console.error(e)
 if (!stiker) stiker = e
 } finally {
-if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: name, body: wm, mediaType: 2, sourceUrl: 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H', thumbnail: imagen4}}}, { quoted: m })
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: wm, mediaType: 2, sourceUrl: 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H', thumbnail: icono}}}, { quoted: m })
 
 else return conn.reply(m.chat, `${e} Responda a img, gif, video...`,m)
 
 
 }}
-handler.help = ['stiker <img>', 'sticker <url>']
-handler.tags = ['sticker']
-handler.group = true;
-handler.register = false
+
 handler.command = ['s', 'sticker', 'stiker']
+handler.group = true;
 
 export default handler
 
