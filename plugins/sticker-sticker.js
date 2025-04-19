@@ -4,6 +4,7 @@ import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
+
 let stiker = false
 try {
 let q = m.quoted ? m.quoted : m
@@ -12,7 +13,8 @@ if (/webp|image|video/g.test(mime)) {
 if (/video/g.test(mime)) if ((q.msg || q).seconds > 8) return m.reply(`¡El video no puede durar mas de 8 segundos!`)
 let img = await q.download?.()
 
-if (!img) return conn.reply(m.chat, `${e} Responda a img, gif, video...`, m)
+if (!img) return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para hacer un sticker.`, m, rcanal)
+
 
 let out
 m.react('🧩')
@@ -38,15 +40,16 @@ else return m.reply(`${e} El url es incorrecto`)
 console.error(e)
 if (!stiker) stiker = e
 } finally {
-if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: wm, mediaType: 2, sourceUrl: redes, thumbnail: icono}}}, { quoted: m })
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icono}}}, { quoted: m })
 
-else return conn.reply(m.chat, `${e} Responda a img, gif, video...`,m)
+else return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para hacer un sticker.`, m, rcanal)
+
 
 
 }}
 
-handler.command = ['s', 'sticker', 'stiker']
 handler.group = true;
+handler.command = ['s', 'sticker', 'stiker']
 
 export default handler
 
