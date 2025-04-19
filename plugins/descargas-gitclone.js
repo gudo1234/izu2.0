@@ -14,7 +14,6 @@ let handler = async (m, { args, usedPrefix, command }) => {
   let zipUrl = `https://api.github.com/repos/${user}/${sanitizedRepo}/zipball`
   await m.react(rwait)
   try {
-  conn.reply(m.chat, wait, m)
     let [repoResponse, zipResponse] = await Promise.all([
       fetch(repoUrl),
       fetch(zipUrl),
@@ -28,10 +27,9 @@ let handler = async (m, { args, usedPrefix, command }) => {
        txt += `✩  *Repositorio* : ${user}/${sanitizedRepo}\n`
        txt += `✩  *Creador* : ${repoData.owner.login}\n`
        txt += `✩  *Descripción* : ${repoData.description || 'Sin descripción disponible'}\n`
-       txt += `✩  *Url* : ${args[0]}\n\n`
-       txt += `> ${dev}`
+       txt += `✩  *Url* : ${args[0]}`
 
-await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m)
+await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, rcanal)
 await conn.sendFile(m.chat, await zipResponse.buffer(), filename, null, m)
 await m.react(done)
   } catch {
