@@ -16,35 +16,11 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
 } else {
     const estado = isEnable ? '✓ Activado' : '✗ Desactivado'
     return conn.reply(m.chat, `*${e}Ejemplo de uso:*\n.antilink on *para activar*\n.antilink off *para desactivar*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇ\nwelcome
-bienvenida
-antiprivado
-antiprivate
-restrict
-restringir
-autolevelup
-autonivel
-antibot
-antibots
 autoaceptar
-aceptarauto
-autorechazar
-rechazarauto
-autoresponder
-autorespond
-antisubbots
-antibot2
-modoadmin
 soloadmin
-reaction
-reaccion
 nsfw
 modohorny
-antispam
-jadibotmd
-modejadibot
-subbots
 detect
-avisos
 antilink
 antifake`, m)
   }
