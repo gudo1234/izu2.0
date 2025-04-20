@@ -10,7 +10,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     return m.reply(`${e} Responde a una imagen para mejorar la calidad`);
   }
   try {
-    await m.react('⌛')
+    await m.react('🍓')
     let media = await q.download();
     console.log('Media downloaded successfully.');
     const image = sharp(media);
