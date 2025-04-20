@@ -24,7 +24,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 
     conn.sendFile(m.chat, buffer, 'image.jpg', `${m.pushName}`, m, null, rcanal);
     await m.react('✅')
- ');
+//');
   } catch (error) {
  
     await m.react('❌')
