@@ -44,7 +44,7 @@ const handler = async (m, {conn, args, command, usedPrefix}) => {
   }
 };
 
-handler.command = ['xnxxdl'];
+handler.command = ['xnxxdl', 'xnxx'];
 handler.group = true;
 
 export default handler;
