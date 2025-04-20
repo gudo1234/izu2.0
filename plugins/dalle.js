@@ -10,10 +10,11 @@ const handler = async (m, { conn, args }) => {
     const apiUrl = `https://eliasar-yt-api.vercel.app/api/ai/text2img?prompt=${prompt}`;
 
     try {
+        conn.reply(m.chat, `${emoji2} Espere un momento...`, m)
 
         const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
-m.react('🕒')
-await conn.sendFile(m.chat, Buffer.from(response.data), `thumbnail.mp4`, `${m.pushName}`, m, null, rcanal)
+
+        await conn.sendMessage(m.chat, { image: Buffer.from(response.data) }, { quoted: m });
     } catch (error) {
         console.error('Error al generar la imagen:', error);
         await conn.reply(m.chat, `${msm} No se pudo generar la imagen, intenta nuevamente mas tarde.`, m);
