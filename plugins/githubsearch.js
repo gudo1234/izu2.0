@@ -15,7 +15,6 @@ let txt = `🍬 *Nombre:* ${result.name}\n👑 *Owner:* ${result.creator}\n🌟 
 
 let img = 'https://files.catbox.moe/oc4myc.png';
 
-conn.sendMessage(m.chat, { image: { url: img }, caption: txt }, { quoted: m});
 conn.sendFile(m.chat, img, `thumbnail.mp4`, txt, m, null, rcanal)
  
 } catch (error) {
