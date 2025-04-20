@@ -555,29 +555,7 @@ botAdmin: `${e} Para ejecutar el comando *${comando}* debo ser administrador del
 unreg: `${e} comando *${comando}* solo puede ser usado por los usuarios registrado, registrate usando:\n> #${verifyaleatorio} ${user2}.${edadaleatoria}`,
 restrict: `${e} Esta caracteristica está desactivada.`
 }[type];
-//if (msg) return m.reply(msg).then(_ => m.react('✖️'))
-if (msg) return conn.sendMessage(m.chat, {
-      text: msg,
-      contextInfo: {
-          mentionedJid: null,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-              newsletterJid: channelRD.id,
-              newsletterName: channelRD.name,
-              serverMessageId: '',
-          },
-          forwardingScore: false,
-          externalAdReply: {
-              title: botname,
-              body: textbot,
-              thumbnailUrl: icono,
-              mediaType: 1,
-              showAdAttribution: true,
-              renderLargerThumbnail: true,
-          },
-      },
-  }, { quoted: m });
-}
+if (msg) return m.reply(msg).then(_ => m.react('✖️'))}
 
 let file = global.__filename(import.meta.url, true)
 watchFile(file, async () => {
