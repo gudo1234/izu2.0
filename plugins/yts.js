@@ -1,7 +1,7 @@
 import Starlights from "@StarlightsTeam/Scraper"
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-    if (!text) return m.reply(` Ingresa el título de un video o canción de *YouTube*.\n\n`Ejemplo: *${usedPrefix + command}* Bad Bunny`)
+    if (!text) return m.reply(`${e} Ingresa el título de un video o canción de *YouTube*.\n\n*Ejemplo:* ${usedPrefix + command} Bad Bunny`)
     await m.react('🕓')
     try {
     let results = await Starlights.ytsearch(text)
