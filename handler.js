@@ -559,7 +559,7 @@ restrict: `${e} Esta caracteristica está desactivada.`
 if (msg) return conn.sendMessage(m.chat, {
       text: msg,
       contextInfo: {
-          mentionedJid: [m.sender],
+          mentionedJid: null,
           isForwarded: true,
           forwardedNewsletterMessageInfo: {
               newsletterJid: channelRD.id,
