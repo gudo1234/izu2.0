@@ -12,8 +12,8 @@ const handler = async (m, { conn, args }) => {
     try {
 
         const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
-
-await conn.sendFile(m.chat, Buffer.from(response.data), `thumbnail.mp4`, txt, m, null, rcanal)
+m.react('🕒')
+await conn.sendFile(m.chat, Buffer.from(response.data), `thumbnail.mp4`, `${m.pushName}`, m, null, rcanal)
     } catch (error) {
         console.error('Error al generar la imagen:', error);
         await conn.reply(m.chat, `${msm} No se pudo generar la imagen, intenta nuevamente mas tarde.`, m);
