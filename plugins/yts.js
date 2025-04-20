@@ -8,7 +8,7 @@ let results = await yts(text)
 let tes = results.all
 let teks = results.all.map(v => {
 switch (v.type) {
-case 'video': return ``\${v.title}`\
+case 'video': return `\`${v.title}\`
 *Enlace:* ${v.url}
 *Duración:* ${v.timestamp}
 *Subido:* ${v.ago}
