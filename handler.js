@@ -564,7 +564,7 @@ if (msg) return conn.sendMessage(m.chat, {
           forwardedNewsletterMessageInfo: {
               newsletterJid: channelRD.id,
               newsletterName: channelRD.name,
-              serverMessageId: -1,
+              serverMessageId: '',
           },
           forwardingScore: false,
           externalAdReply: {
