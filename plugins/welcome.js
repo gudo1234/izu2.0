@@ -19,7 +19,7 @@ let vn2 = './media/bien.mp3'; //welcome entrada épica
   };
   let who = m.messageStubParameters[0] + '@s.whatsapp.net';
   let userName = user ? user.name : await conn.getName(who);
-  let or = ['stiker', 'audio', 'boton', 'texto', 'gifPlayback', 'botons'];
+  let or = ['stiker', 'audio', 'texto', 'gifPlayback'];
   let media = or[Math.floor(Math.random() * 6)]
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
   let stiker2 = await sticker(imagen8, false, global.packname, global.author) //welcome
@@ -76,40 +76,6 @@ this.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5].getRandom() },
         }
     })};
 
-if (media === 'boton') {
-let a = `${e} _*¡Hola!*_ +${m.messageStubParameters[0].split`@`[0]} Bienvenido🎉`;
-  conn.sendMessage(m.chat, {
-    image: im,
-    caption: a,
-    footer: 'Izubot te da la bienvenida',
-    buttons: [
-      {
-        buttonId: ".trizte",
-        buttonText: {
-          displayText: "✨Welcom",
-        },
-        type: 1,
-      },
-      {
-        buttonId: ".consejo",
-        buttonText: {
-          displayText: `${e}`,
-        },
-        type: 1,
-      },
-    ],
-    viewOnce: true,
-    headerType: 4,
-    mentions:[m.sender, m.messageStubParameters[0]],
-  }, { quoted: fkontak }).then(async (message) => {
-        const emojis = ['🎉', '🫱🏻', '🫲🏻', '💚', ''];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
-
 if (media === 'texto') {
   let wel = `°   /)🎩/)
     (｡•ㅅ•｡)𖹭︩︪𝚆꯭᪶۫۫͝𝙴꯭᪶͡𝙻᪶۫۫͝𝙲꯭᪶֟፟፝͡𝙾᪶۫۫͝𝙼꯭᪶͡𝙴᪶𖹭︩︪*
@@ -128,7 +94,7 @@ if (media === 'texto') {
                 serverMessageId: 0
             },
             businessMessageForwardInfo: { businessOwnerJid: '50492280729@s.whatsapp.net' },
-            forwardingScore: 9999,
+            forwardingScore: false,
             externalAdReply: {
                 title: `🍒ᴡᴇʟᴄᴏᴍᴇ🍒`,
                 body: 'IzuBot te da la bienvenida',
@@ -161,7 +127,7 @@ await conn.sendMessage(m.chat, {
             serverMessageId: 0
         },
         businessMessageForwardInfo: { businessOwnerJid: '50492280729@s.whatsapp.net' },
-        forwardingScore: 9999,
+        forwardingScore: false,
         externalAdReply: {
             title: 'Izubot te da la bienvenida',
             body: `${await conn.getName(m.chat)}`,
@@ -177,82 +143,6 @@ await conn.sendMessage(m.chat, {
             }, i * 2000);
         }
     })};
-    
-if (media === 'botons') {
-conn.sendMessage(m.chat, {
- image: icono,
- caption: a,
-footer: 'Izumi te da la bienvenida',
- contextInfo: {
-mentionedJid: [m.messageStubParameters[0]],
-forwardingScore: 999,
-isForwarded: true,
-externalAdReply: {
-  showAdAttribution: true, 
-  title: `${await conn.getName(m.chat)}`,
-  body: wm,
-  thumbnailUrl: im,
-  thumbnail: im,
-  sourceUrl: redes,
-  mediaType: 1,
-  renderLargerThumbnail: false
-}}, 
-  buttons: [
-  {
- buttonId: '.trizte',
- buttonText: {
-displayText: '✨welcom'
- },
- type: 1,
-  },
-  {
- buttonId: '.consejo',
- buttonText: {
-displayText: 'Dime algo'
- },
- type: 1,
-  },
-  {
- type: 4,
- nativeFlowInfo: {
-name: 'single_select',
-paramsJson: JSON.stringify({
-  title: 'Dont click',
-  sections: [
- {
-title: `${e} Librería random`,
-highlight_label: '',
-rows: [
-  {
- header: '',
- title: '🥵 Menu Nsfw',
- description: ``, 
- id: '.menunsfw',
-  },
-  {
- header: '',
- title: 'Ping⚡',
- description: ``, 
- id: '.ping',
-  },
-  {
- header: '',
- title: '🖼️ Menu Random',
- description: ``, 
- id: '.menurandom',
-  },
-],
- },
-  ],
-}),
- },
-  },
-  ],
-  headerType: 1,
-  viewOnce: true
-})
-}
- 
 }
 
 // bye 
@@ -288,7 +178,7 @@ this.sendMessage(m.chat, { audio: { url: vn3 },
     contextInfo: { forwardedNewsletterMessageInfo: { 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
-    newsletterName: channelRD.name }, forwardingScore: 9999999, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
+    newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
     "title": `👋🏻 ADIOS +${m.messageStubParameters[0].split`@`[0]}`, 
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
@@ -298,39 +188,6 @@ this.sendMessage(m.chat, { audio: { url: vn3 },
     "showAdAttribution": true}}, 
      seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100}).then(async (message) => {
         const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '🛥️'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
-
-if (media === 'boton') {
-conn.sendMessage(m.chat, {
-    image: im,
-    caption: `🖐🏻 _*Adios*_ +${m.messageStubParameters[0].split`@`[0]}`,
-    footer: 'Esperemos que no vuelva -_-',
-    buttons: [
-      {
-        buttonId: ".trizte",
-        buttonText: {
-          displayText: "Adios 😔",
-        },
-        type: 1,
-      },
-      {
-        buttonId: ".consejo",
-        buttonText: {
-          displayText: "Dime algo",
-        },
-        type: 1,
-      },
-    ],
-    viewOnce: true,
-    headerType: 4,
-    mentions: [m.messageStubParameters[0]],
-  }, { quoted: fkontak}).then(async (message) => {
-        const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '🛫', ''];
         for (let i = 0; i < emojis.length; i++) {
             setTimeout(async () => {
                 await message.react(emojis[i]);
@@ -351,7 +208,7 @@ if (media === 'texto') {
                 serverMessageId: 0
             },
             businessMessageForwardInfo: { businessOwnerJid: '50492280729@s.whatsapp.net' },
-            forwardingScore: 9999,
+            forwardingScore: false,
             externalAdReply: {
                 title: `${await conn.getName(m.chat)}`,
                 body: 'Esperemos que no vuelva -_-',
@@ -384,7 +241,7 @@ await conn.sendMessage(m.chat, {
             serverMessageId: 0
         },
         businessMessageForwardInfo: { businessOwnerJid: '50492280729@s.whatsapp.net' },
-        forwardingScore: 9999,
+        forwardingScore: false,
         externalAdReply: {
             title: 'Esperemos que no vuelva -_-',
             body: `${await conn.getName(m.chat)}`,
@@ -400,81 +257,6 @@ await conn.sendMessage(m.chat, {
             }, i * 2000);
         }
     })};
-    
-if (media === 'botons') {
-conn.sendMessage(m.chat, {
- image: icono,
- caption: b,
-footer: 'Esperemos que no vuelva -_-',
- contextInfo: {
-mentionedJid: [m.messageStubParameters[0]],
-forwardingScore: 999,
-isForwarded: true,
-externalAdReply: {
-  showAdAttribution: true, 
-  title: `👋🏻ADIOS +${m.messageStubParameters[0].split`@`[0]}`,
-  body: wm,
-  thumbnailUrl: im,
-  thumbnail: im,
-  sourceUrl: redes,
-  mediaType: 1,
-  renderLargerThumbnail: false
-}}, 
-  buttons: [
-  {
- buttonId: '.trizte',
- buttonText: {
-displayText: 'Adios 🙂'
- },
- type: 1,
-  },
-  {
- buttonId: '.consejo',
- buttonText: {
-displayText: 'Dime algo'
- },
- type: 1,
-  },
-  {
- type: 4,
- nativeFlowInfo: {
-name: 'single_select',
-paramsJson: JSON.stringify({
-  title: 'Dont click',
-  sections: [
- {
-title: `${e} Librería random`,
-highlight_label: '',
-rows: [
-  {
- header: '',
- title: '🥵 Menu Nsfw',
- description: ``, 
- id: '.menunsfw',
-  },
-  {
- header: '',
- title: 'Ping⚡',
- description: ``, 
- id: '.ping',
-  },
-  {
- header: '',
- title: '🖼️ Menu Random',
- description: ``, 
- id: '.menurandom',
-  },
-],
- },
-  ],
-}),
- },
-  },
-  ],
-  headerType: 1,
-  viewOnce: true
-})
-}
  
   }
 }
