@@ -1,28 +1,24 @@
-import Starlights from "@StarlightsTeam/Scraper"
+import yts from 'yt-search'
 
-let handler = async (m, { conn, usedPrefix, command, text }) => {
-    if (!text) return m.reply(`${e} Ejemplo: .command}* ricardo Arjona`)
-    await m.react('🕓')
-    try {
-    let results = await Starlights.ytsearch(text)
-    if (!results || !results.length) return conn.reply(m.chat, `No se encontraron resultados.`, m, rcanal)
-    let img = await (await fetch(`${results[0].thumbnail}`)).buffer()
-    let txt = '`乂  Y T  -  S E A R C H`'
-    results.forEach((video, index) => {
-        txt += `\n\n`
-        txt += `	✩  *Nro* : ${index + 1}\n`
-        txt += `	✩  *Titulo* : ${video.title}\n`
-        txt += `	✩  *Duración* : ${video.duration}\n`
-        txt += `	✩  *Publicado* : ${video.published}\n`
-        txt += `	✩  *Autor* : ${video.author}\n`
-        txt += `	✩  *Url* : ${video.url}`
-    })
-await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, rcanal)
-await m.react('✅')
-} catch {
-await m.react('✖️')
-}}
+var handler = async (m, { text, conn, args, command, usedPrefix }) => {
 
-handler.command = ['ytsearch', 'yts']
+if (!text) return conn.reply(m.chat, `${e} *Escriba el título de algún vídeo de Youtube*\n\nEjemplo, ${usedPrefix + command} Ricardo Arjona`, m)
+
+let results = await yts(text)
+let tes = results.all
+let teks = results.all.map(v => {
+switch (v.type) {
+case 'video': return ``\${v.title}`\
+*Enlace:* ${v.url}
+*Duración:* ${v.timestamp}
+*Subido:* ${v.ago}
+*Vistas:* ${v.views}`}}).filter(v => v).join('\n\n')
+
+conn.sendFile(m.chat, tes[0].thumbnail, 'yts.jpeg', teks, m, null, rcanal)
+
+}
+
+handler.command = ['playlist', 'ytbuscar', 'yts', 'ytsearch']
 handler.group = true;
+
 export default handler
