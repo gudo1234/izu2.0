@@ -17,7 +17,7 @@ let fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status
 	let country = regionNames.of(format.getRegionCode('international'))
 	let wea = `> *WhatsApp Stalking🍁*\n\n*Pais :* ${country.toUpperCase()}\n*Nombre :* ${name ? name : '-'}\n*Formato:* ${format.getNumber('international')}\n*Url:* wa.me/${num.split('@')[0]}\n*Tag :* @${num.split('@')[0]}\n*Bio :* ${bio?.status || '-'}\n*Bio Uptade:* ${bio?.setAt ? moment(bio.setAt.toDateString()).locale('id').format('LL') : '-'}\n\n${business ? `*Business Info 🫐*\n*BusinessId:* ${business.wid}\n*Website:* ${business.website ? business.website : '-'}\n*Email:* ${business.email ? business.email : '-'}\n*Categoria:* ${business.category}\n*Direccion:* ${business.address ? business.address : '-'}\n\*Zona Horaria:* ${business.business_hours.timezone ? business.business_hours.timezone : '-'}\n*Descripcion*: ${business.description ? business.description : '-'}` : '> *Cuenta De WhatsApp*'}`
 	img ? await conn.sendMessage(m.chat, { image: { url: img }, caption: wea, mentions: [num] }, { quoted: m }) : m.reply(wea)
-	img? await conn.sendFile(m.chat, img, `thumbnail.jpg`, wea, m, null, rcanal)
+	img ? await conn.sendFile(m.chat, img, `thumbnail.jpg`, wea, m, null, rcanal)
 }
 
 
