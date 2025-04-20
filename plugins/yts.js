@@ -6,33 +6,37 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
 
   try {
     const results = await Starlights.ytsearch(text)
-    if (!results || !results.length) return m.reply('No se encontraron resultados.')
+    if (!results?.length) return m.reply('No se encontraron resultados.')
 
     const img = await (await fetch(results[0].thumbnail)).buffer()
-    let txt = '*乂  Y T  -  S E A R C H*\n\n'
+    let txt = '*乂  Y T  -  R E S U L T A D O S*\n\n'
 
-    results.forEach((video, index) => {
-      txt += `*${index + 1}.* ${video.title}\n`
-      txt += `   • Duración: ${video.duration}\n`
-      txt += `   • Publicado: ${video.published}\n`
-      txt += `   • Autor: ${video.author}\n\n`
+    results.forEach((v, i) => {
+      txt += `*${i + 1}.* ${v.title}\n`
+      txt += `   Duración: ${v.duration}\n`
+      txt += `   Autor: ${v.author}\n\n`
     })
 
     txt += '───────────────\n'
-    txt += '*Audio* ➠ Responde a este mensaje escribiendo `a número`\n'
-    txt += '*Video* ➠ Responde con `v número`\n'
-    txt += '*Documento* ➠ Responde con `d número tipo`\n'
+    txt += '*Audio* ➠ `a número`\n'
+    txt += '*Video* ➠ `v número`\n'
+    txt += '*Documento* ➠ `d número tipo`\n'
+    txt += '───────────────'
 
-    const sentMsg = await conn.sendFile(m.chat, img, 'yt.jpg', txt, m)
+    const msg = await conn.sendFile(m.chat, img, 'yt.jpg', txt.trim(), m)
+    
+    // Guardar resultados
     conn.ytsearch = conn.ytsearch || {}
-    conn.ytsearch[m.chat] = conn.ytsearch[m.chat] || {}
-    conn.ytsearch[m.chat][sentMsg.key.id] = results
+    conn.ytsearch[m.chat] = {
+      key: msg.key.id,
+      results
+    }
 
     await m.react('✅')
-  } catch (e) {
-    console.error(e)
+  } catch (err) {
+    console.error(err)
+    m.reply('Ocurrió un error buscando.')
     await m.react('❌')
-    m.reply('Ocurrió un error.')
   }
 }
 
