@@ -25,7 +25,7 @@ let handler = async (m, { conn, usedPrefix, command, text, args }) => {
   }
 }
 
-handler.command = ['tiktokvid','tiktoksearch','tiktokdl2','ttvid2']
+handler.command = ['tiktokvid','tiktoksearch','tiktokdl','ttvid']
 handler.group = true;
 
 export default handler
