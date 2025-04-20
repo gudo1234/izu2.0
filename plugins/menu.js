@@ -34,9 +34,21 @@ ${e}${s}hideteg *‹τ×τ›*
 ${e}${s}tag *‹rєρℓy›*
 ${e}${s}icongc *‹rєρℓy›*
 ${e}${s}grupo *‹αвrir/cєrrαr›*
-${e}${s}on/off
 ${e}${s}promote *‹@υsєя›*
 ${e}${s}demote *‹@υsєя›*
+╚ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╝
+
+> ⁉ ᴄᴏɴғɪɢ - ᴏɴ/ᴏғғ🔹
+╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
+${e}${s}on/off
+${e}${s}welcome *‹on/off›*
+${e}${s}autoaceptar *‹on/off›*
+${e}${s}soloadmin *‹on/off›*
+${e}${s}nsfw *‹on/off›*
+${e}${s}modohorny *‹on/off›*
+${e}${s}detect *‹on/off›*
+${e}${s}antilink *‹on/off›*
+${e}${s}antifake *‹on/off›*
 ╚ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╝
 
 > ⁉ ᴅᴇsᴄᴀʀɢᴀs ᴍᴜʟᴛɪᴍᴇᴅɪᴀ📂
