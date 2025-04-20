@@ -18,8 +18,6 @@ let handler = async (m, { conn, text, isOwner }) => {
     }
 };
 
-handler.help = ['invite'];
-handler.tags = ['owner', 'tools'];
-handler.command = ['invite', 'join'];
+handler.command = ['invite', 'join', 'entra', 'entrabot'];
 
 export default handler;
