@@ -75,6 +75,7 @@ ${e}${s}ytmp4 *‹υяʟ›*
 ${e}${s}ytmp3doc *‹υяʟ›*
 ${e}${s}ytmp4doc *‹υяʟ›*
 ${e}${s}spotify *‹τ×τ›*
+${e}${s}spotifydl *‹υяʟ›*
 ${e}${s}mega *‹υяʟ›*
 ${e}${s}gdrive *‹υяʟ›*
 ${e}${s}terabox *‹υяʟ›*
