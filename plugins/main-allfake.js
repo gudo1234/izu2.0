@@ -27,9 +27,9 @@ return res.data
 console.log(`Error : ${e}`)
 }}
   
-global.creador = 'Wa.me/528211111111'
+global.creador = 'Wa.me/50492280729'
 global.ofcbot = `${conn.user.jid.split('@')[0]}`
-global.asistencia = 'Wa.me/528211111111'
+global.asistencia = 'Wa.me/50492280729'
 global.namechannel = '🤖⃧►iʑυвöτ◃2.0▹'
 global.namechannel2 = 'Zeus Bot🔆Channel-OFC'
 global.namegrupo = '🤖⃧►iʑυвöτ◃2.0▹'
@@ -104,7 +104,20 @@ global.icono = [
 'https://files.catbox.moe/nsfx7f.jpg',
 'https://files.catbox.moe/p3wdxz.jpg',
 'https://files.catbox.moe/cbagtg.jpg',
-'https://files.catbox.moe/ojqdd0.jpg'].getRandom()
+'https://files.catbox.moe/ojqdd0.jpg',
+'https://files.catbox.moe/9tkqgt.jpg',
+'https://files.catbox.moe/3s7htp.jpg',
+'https://files.catbox.moe/kkcj69.jpg',
+'https://files.catbox.moe/mkjnzl.jpg',
+'https://files.catbox.moe/mkjnzl.jpg',
+'https://files.catbox.moe/zxwp9c.jpg',
+'https://files.catbox.moe/p3fssk.jpg',
+'https://files.catbox.moe/u5bspe.jpg',
+'https://files.catbox.moe/wf4bb1.jpg',
+'https://files.catbox.moe/f28poz.jpg',
+'https://files.catbox.moe/dpx2s1.jpg',
+'https://files.catbox.moe/wg1vbo.jpg',
+'https://files.catbox.moe/grk81s.jpg'].getRandom()
 
 global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: packname, body: dev, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: icono, sourceUrl: redes, mediaType: 1, renderLargerThumbnail: false }, }, }}
 
