@@ -1,10 +1,10 @@
 import Starlights from "@StarlightsTeam/Scraper"
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-  const isQuery = command === 'ytsearch' || command === 'yts'
+  conn.ytsearch = conn.ytsearch || {}
 
-  // Si es búsqueda
-  if (isQuery) {
+  // Si es comando de búsqueda
+  if (command === 'ytsearch' || command === 'yts') {
     if (!text) return m.reply(`Ejemplo: ${usedPrefix + command} Ricardo Arjona`)
     await m.react('🕓')
 
@@ -23,53 +23,57 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
       })
 
       txt += '───────────────\n'
-      txt += '*Audio* ➠ Responde a este mensaje escribiendo `a número`\n'
-      txt += '*Video* ➠ Responde a este mensaje escribiendo `v número`\n'
-      txt += '*Documento* ➠ Responde con `d número tipo`\n'
+      txt += '*Audio* ➠ Responde a este mensaje con `a número`\n'
+      txt += '*Video* ➠ Responde a este mensaje con `v número`\n'
+      txt += '*Documento* ➠ Responde a este mensaje con `d número tipo`\n'
       txt += '*Ejemplo:* `d 1 audio`\n'
 
-      const sent = await conn.sendFile(m.chat, img, 'thumb.jpg', txt, m)
+      const sentMsg = await conn.sendFile(m.chat, img, 'thumb.jpg', txt.trim(), m)
 
-      conn.ytsearch = conn.ytsearch || {}
       conn.ytsearch[m.chat] = {
-        id: sent.key.id,
-        results
+        results,
+        msgId: sentMsg.key.id
       }
 
       await m.react('✅')
     } catch (e) {
       console.error(e)
-      await m.react('✖️')
-      m.reply('Error al realizar la búsqueda.')
+      await m.react('❌')
+      m.reply('Ocurrió un error al realizar la búsqueda.')
     }
+    return
   }
 
-  // Si es respuesta tipo `a 1`, `v 2`, `d 3 audio`
+  // Si es respuesta como: a 1 | v 2 | d 1 audio
   if (/^(a|v|d)\s+\d+(\s+\w+)?$/i.test(text)) {
     const args = text.trim().split(/\s+/)
     const tipo = args[0].toLowerCase()
     const index = parseInt(args[1]) - 1
-    const formato = args[2]?.toLowerCase()
+    const extra = args[2]?.toLowerCase()
 
-    const data = conn.ytsearch?.[m.chat]
-    if (!data || !m.quoted || m.quoted.id !== data.id) return
+    const ref = conn.ytsearch[m.chat]
+    if (!ref || !ref.results || !m.quoted || m.quoted.id !== ref.msgId) {
+      return m.reply('No se reconoció el mensaje de referencia o ya expiró.')
+    }
 
-    const video = data.results[index]
+    const video = ref.results[index]
     if (!video) return m.reply('Número inválido.')
 
-    let cmd = ''
-    if (tipo === 'a') cmd = `.play ${video.url}`
-    else if (tipo === 'v') cmd = `.play2 ${video.url}`
+    let finalCommand = ''
+    if (tipo === 'a') finalCommand = `.play ${video.url}`
+    else if (tipo === 'v') finalCommand = `.play2 ${video.url}`
     else if (tipo === 'd') {
-      if (!formato) return m.reply('Falta el tipo: audio o video.')
-      cmd = `.play4 ${video.url} ${formato}`
-    } else return
+      if (!extra) return m.reply('Debes especificar el tipo: audio o video.\nEjemplo: d 1 audio')
+      finalCommand = `.play4 ${video.url} ${extra}`
+    }
 
-    m.text = cmd
-    conn.handleMessage(m, m)
+    m.text = finalCommand
+    return conn.handleMessage(m, m)
   }
 }
 
-handler.customPrefix = /^(ytsearch|yts|a\s+\d+|v\s+\d+|d\s+\d+(\s+\w+)?)$/i
-handler.command = new RegExp
+handler.command = ['ytsearch', 'yts']
+handler.customPrefix = /^(a|v|d)\s+\d+(\s+\w+)?$/i
+handler.group = true
+handler.register = false
 export default handler
