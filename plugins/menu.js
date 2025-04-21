@@ -162,24 +162,24 @@ await conn.sendMessage(m.chat, {
     gifPlayback: true,
     caption: txt,
     contextInfo: {
-        mentionedJid: [m.messageStubParameters[0]],
-        groupMentions: [],
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-            newsletterJid: channelRD.id,
-            newsletterName: channelRD.name,
-            serverMessageId: 0
-        },
-        businessMessageForwardInfo: { businessOwnerJid: '50492280729@s.whatsapp.net' },
-        forwardingScore: false,
-        externalAdReply: {
-            title: 'izuBot te da la bienvenida',
-            body: `${await conn.getName(m.chat)}`,
-            sourceUrl: redes,
-            thumbnail: icono
-        }
-    }
-}, { quoted: m })};
+          mentionedJid: [m.sender],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+              newsletterJid: channelRD.id,
+              newsletterName: channelRD.name,
+              serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+              title: botname,
+              body: textbot,
+              thumbnailUrl: icono,
+              mediaType: 1,
+              showAdAttribution: true,
+              renderLargerThumbnail: true,
+          },
+      },
+  }, { quoted: m })};
 
 }
 
