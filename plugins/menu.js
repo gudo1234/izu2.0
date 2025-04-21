@@ -1,11 +1,12 @@
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-const nkdt = new Date();
-const nktm = nkdt.getHours();
+
 let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
   let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}` : 'Desconocido'
+let or = ['anu', 'gif'];
+  let media = or[Math.floor(Math.random() * 2)]
 let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
 > ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
@@ -131,6 +132,7 @@ ${e}${s}antiprivado *‹ᴏɴ/ᴏғғ›*
 ${e}${s}icon *‹rєρℓy›*
 ╚ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟╝`
 m.react('🏖️')
+if (media === 'anu') {
 await conn.sendMessage(m.chat, {
       text: txt,
       footer: textbot,
@@ -152,9 +154,35 @@ await conn.sendMessage(m.chat, {
               renderLargerThumbnail: true,
           },
       },
-  }, { quoted: m });
+  }, { quoted: m })};
+  
+  if (media === 'gif') {
+await conn.sendMessage(m.chat, {
+    video: { url: 'https://files.catbox.moe/rdyj5q.mp4' },
+    gifPlayback: true,
+    caption: txt,
+    contextInfo: {
+        mentionedJid: [m.messageStubParameters[0]],
+        groupMentions: [],
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+            newsletterJid: channelRD.id,
+            newsletterName: channelRD.name,
+            serverMessageId: 0
+        },
+        businessMessageForwardInfo: { businessOwnerJid: '50492280729@s.whatsapp.net' },
+        forwardingScore: false,
+        externalAdReply: {
+            title: 'izuBot te da la bienvenida',
+            body: `${await conn.getName(m.chat)}`,
+            sourceUrl: redes,
+            thumbnail: icono
+        }
+    }
+}, { quoted: m })};
+
 }
 
-handler.command = ['menu', 'm']
+handler.command = ['menu', 'm', 'menú', 'help', 'comandos', 'memu']
 handler.group = true
 export default handler
