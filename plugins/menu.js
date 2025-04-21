@@ -5,7 +5,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
   let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}` : 'Desconocido'
-let or = ['anu', 'gif'];
+let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
+let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
+  let or = ['anu', 'gif'];
   let media = or[Math.floor(Math.random() * 2)]
 let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
@@ -161,7 +163,7 @@ await conn.sendMessage(m.chat, {
   
   if (media === 'gif') {
 await conn.sendMessage(m.chat, {
-    video: { url: 'https://files.catbox.moe/rdyj5q.mp4' },
+    video: { url: [jpg, jpg2].getRandom()},
     gifPlayback: true,
     caption: txt,
     contextInfo: {
