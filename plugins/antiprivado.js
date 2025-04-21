@@ -12,7 +12,7 @@ export async function before(m, { isAdmin, isBotAdmin, isOwner }) {
     let bot = global.db.data.settings[this.user.jid] || {}
 if (m.chat === '120363395205399025@newsletter') return !0
     if (bot.antiPrivate && !isOwner) {
-let edar = `wa.me/50492280729?text=${redes}`
+let img = await (await fetch(`https://files.catbox.moe/li1fsj.jpg`)).buffer()
 let vn = './media/prueba.mp3'
 let vn2 = './media/prueba2.mp3'
 let vn3 = './media/prueba3.mp3'
@@ -22,11 +22,11 @@ let str = `,    /)🎩/)
     ╭∪─∪─────────❤︎₊᪲
 Hola *${m.pushName}*\n\nNo está permitido usar el bot en chat privado.\n\n🚩Si está interesado en mis servicios contacte a mi desarrollador.\n wa.me/50492280729.\n\n> Puedes seguir el canal para mantenerte informado de las actualizaciones.
     ╰────────────❤︎₊᪲`.trim()
-await this.sendFile(m.chat, icono, "Thumbnail.jpg", str.trim(), null, null, rcanal)
+await this.sendFile(m.chat, img, "Thumbnail.jpg", str.trim(), null, null, rcanal)
 conn.sendFile(m.chat, [vn, vn2, vn3, vn4].getRandom(), 'a.mp3', null, m, true, { 
 type: 'audioMessage', 
 ptt: true })
-       //await this.updateBlockStatus(m.chat, 'block')
+       await this.updateBlockStatus(m.chat, 'block')
     }
     return !1
          }
