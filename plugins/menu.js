@@ -176,7 +176,7 @@ await conn.sendMessage(m.chat, {
               title: botname,
               body: textbot,
               thumbnailUrl: icono,
-              thumbnail: icono,
+              //thumbnail: icono,
               //sourceUrl: redes,
               mediaType: 1,
               showAdAttribution: true,
