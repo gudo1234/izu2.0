@@ -26,7 +26,7 @@ await this.sendFile(m.chat, icono, "Thumbnail.jpg", str.trim(), null, null, rcan
 conn.sendFile(m.chat, [vn, vn2, vn3, vn4].getRandom(), 'a.mp3', null, m, true, { 
 type: 'audioMessage', 
 ptt: true })
-       await this.updateBlockStatus(m.chat, 'block')
+       //await this.updateBlockStatus(m.chat, 'block')
     }
     return !1
          }
