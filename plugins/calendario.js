@@ -30,8 +30,12 @@ let handler = async (m, { conn }) => {
 
     txt += `\n\n🧭 *Hora actual:* ${hour}`;
 
-    let img = await (await fetch(`https://canvas.adfay.io/canvas/cute-calendar`)).buffer();
-    await conn.sendFile(m.chat, img, "calendar.jpg", txt, m, null, rcanal);
+    // Enviamos imagen directamente por URL (sin buffer)
+    const imageUrl = 'https://canvas.adfay.io/canvas/cute-calendar';
+    await conn.sendMessage(m.chat, {
+        image: { url: imageUrl },
+        caption: txt
+    }, { quoted: m });
 };
 
 handler.command = ['calendario'];
