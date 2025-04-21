@@ -10,7 +10,7 @@ let handler = async (m, { conn, text, command }) => {
 
   m.reply(`\`\`\`Saliendo automáticamente del grupo...\`\`\`\n*Nombre:* ${groupMetadata.subject}\n*ID:* ${id}\n*Fecha de salida:* ${fechaHoraMX}`)
 
-  await conn.groupLeave(id)
+  //await conn.groupLeave(id)
 }
 
 handler.command = ['salir']
