@@ -7,8 +7,8 @@ let handler = async (m, { conn, text, command }) => {
   let fechaHoraMX = moment().tz('America/Mexico_City').format('DD/MM/YYYY HH:mm:ss')
 
   m.reply(`${e}\`Saliendo automáticamente del grupo...\`\n*ID:* ${groupMetadata.subject}\n*ID:* ${id}\n*Fecha y hora (MX):* ${fechaHoraMX}`)
-
-  await conn.groupLeave(id)
+m.reply('xd')
+  //await conn.groupLeave(id)
 }
 
 handler.command = ['salir']
