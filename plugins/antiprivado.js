@@ -20,7 +20,13 @@ let str = `,    /)🎩/)
 Hola *${m.pushName}*\n\nNo está permitido usar el bot en chat privado.\n\n🚩Si está interesado en mis servicios contacte a mi desarrollador.\n wa.me/50492280729.\n\n> Puedes seguir el canal para mantenerte informado de las actualizaciones.
     ╰────────────❤︎₊᪲`.trim()
 await this.sendFile(m.chat, icono, "Thumbnail.jpg", str.trim(), null, null, rcanal)
-await this.sendFile(m.chat, vn, 'error.mp3', null,null, true, { type: 'audioMessage', ptt: true })
+let vn = './media/prueba.mp3'
+let vn2 = './media/prueba2.mp3'
+let vn3 = './media/prueba3.mp3'
+let vn4 = './media/prueba4.mp3'
+conn.sendFile(m.chat, [vn, vn2, vn3, vn4].getRandom(), 'a.mp3', null, m, true, { 
+type: 'audioMessage', 
+ptt: true })
        await this.updateBlockStatus(m.chat, 'block')
     }
     return !1
