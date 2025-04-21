@@ -24,7 +24,7 @@ let handler = async (m, { conn, command, text }) => {
   if (!text) return m.reply(`Ejemplo de uso: .${command} ¿Qué es la inteligencia artificial?`)
 
   try {
-    const url = `https://api.dorratz.com/ai/gemini?prompt=${encodeURIComponent(text)}`
+    const url = `https://api.dorratz.com/ai/gemini?prompt=${text}`
     const res = await fetch(url)
     const data = await res.json()
 
