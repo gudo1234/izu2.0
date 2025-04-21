@@ -75,5 +75,6 @@ let handler = async (m, { conn, args }) => {
 }
 
 handler.command = ['s2', 'sticker2', 'stiker2']
+handler.group = true;
 
 export default handler
