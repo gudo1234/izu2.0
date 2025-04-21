@@ -4,11 +4,13 @@ import moment from 'moment-timezone'
 let handler = async (m, { conn, text, command }) => {
   let id = text ? text : m.chat  
   let groupMetadata = await conn.groupMetadata(id)
-  let fechaHoraMX = moment().tz('America/Mexico_City').format('DD/MM/YYYY HH:mm:ss')
 
-  m.reply(`${e}\`Saliendo automáticamente del grupo...\`\n*ID:* ${groupMetadata.subject}\n*ID:* ${id}\n*Fecha y hora (MX):* ${fechaHoraMX}`)
-m.reply('xd')
-  //await conn.groupLeave(id)
+  // Establecer fecha en formato deseado: Lunes 21 de abril del 2025 a las 5:00 pm hora México
+  let fechaHoraMX = moment().tz('America/Mexico_City').locale('es').format('dddd D [de] MMMM [del] YYYY [a las] h:mm a [hora México]')
+
+  m.reply(`\`\`\`Saliendo automáticamente del grupo...\`\`\`\n*Nombre:* ${groupMetadata.subject}\n*ID:* ${id}\n*Fecha de salida:* ${fechaHoraMX}`)
+
+  await conn.groupLeave(id)
 }
 
 handler.command = ['salir']
