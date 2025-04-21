@@ -4,13 +4,16 @@ let handler = async (m, { conn, command, text }) => {
 if (!text) return m.reply(`${e} Ejemplo de uso .${command} hola`)
 
 try {
-let api = await fetch(`https://delirius-apiofc.vercel.app/ia/gptweb?text=${text}`)
-let json = await api.json()
+//let api = await fetch(`https://delirius-apiofc.vercel.app/ia/gptweb?text=${text}`)
+let api = await fetch(`https://api.dorratz.com/ai/gemini?prompt=${text}`)
+
+  let json = await api.json()
 m.reply(json.data)
 } catch (error) {
 console.error(error)
 }}
 
-handler.command = ['ia','chatgpt']
+handler.command = ['ia','chatgpt', 'gpt']
+handler.group = true;
 
 export default handler
