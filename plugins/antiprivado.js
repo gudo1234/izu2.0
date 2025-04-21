@@ -12,7 +12,7 @@ export async function before(m, { isAdmin, isBotAdmin, isOwner }) {
     let bot = global.db.data.settings[this.user.jid] || {}
 if (m.chat === '120363395205399025@newsletter') return !0
     if (bot.antiPrivate && !isOwner) {
-let edar = 'wa.me/50492280729?text=${redes}`
+let edar = `wa.me/50492280729?text=${redes}`
 let vn = './media/ocupado.mp3'
 let txt = `,    /)🎩/)
     (｡•ㅅ•｡)𖹭︩︪𝚆꯭᪶۫۫͝𝙴꯭᪶͡𝙻᪶۫۫͝𝙲꯭᪶֟፟፝͡𝙾᪶۫۫͝𝙼꯭᪶͡𝙴᪶𖹭︩︪*
