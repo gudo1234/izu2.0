@@ -13,17 +13,16 @@ export async function before(m, { isAdmin, isBotAdmin, isOwner }) {
 if (m.chat === '120363395205399025@newsletter') return !0
     if (bot.antiPrivate && !isOwner) {
 let edar = `wa.me/50492280729?text=${redes}`
-//let vn = './media/ocupado.mp3'
+let vn = './media/prueba.mp3'
+let vn2 = './media/prueba2.mp3'
+let vn3 = './media/prueba3.mp3'
+let vn4 = './media/prueba4.mp3'
 let str = `,    /)🎩/)
     (｡•ㅅ•｡)𖹭︩︪𝚆꯭᪶۫۫͝𝙴꯭᪶͡𝙻᪶۫۫͝𝙲꯭᪶֟፟፝͡𝙾᪶۫۫͝𝙼꯭᪶͡𝙴᪶𖹭︩︪*
     ╭∪─∪─────────❤︎₊᪲
 Hola *${m.pushName}*\n\nNo está permitido usar el bot en chat privado.\n\n🚩Si está interesado en mis servicios contacte a mi desarrollador.\n wa.me/50492280729.\n\n> Puedes seguir el canal para mantenerte informado de las actualizaciones.
     ╰────────────❤︎₊᪲`.trim()
 await this.sendFile(m.chat, icono, "Thumbnail.jpg", str.trim(), null, null, rcanal)
-let vn = './media/prueba.mp3'
-let vn2 = './media/prueba2.mp3'
-let vn3 = './media/prueba3.mp3'
-let vn4 = './media/prueba4.mp3'
 conn.sendFile(m.chat, [vn, vn2, vn3, vn4].getRandom(), 'a.mp3', null, m, true, { 
 type: 'audioMessage', 
 ptt: true })
