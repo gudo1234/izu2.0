@@ -6,8 +6,7 @@ if (!text) throw `${e} INGRESA EL TEXTO DEL PLUGIN\nejemplo:\n${usedPrefix + com
 if (!ar1.includes(text)) return m.reply(`'${text}' tidak ditemukan!\n\n${ar1.map(v => ' ' + v).join`\n`}`)
 m.reply(fs.readFileSync('./plugins/' + text + '.js', 'utf-8'))
 }
-handler.help = ['getplugin'].map(v => v + ' <teks>')
-handler.tags = ['host']
+
 handler.command = ['verplu']
 handler.owner = true
 export default handler
