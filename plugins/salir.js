@@ -8,7 +8,7 @@ let MessageType =  (await import(global.baileys)).default
 let handler = async (m, { conn, text, command }) => {
 const fechahon = moment().tz('America/Tegucigalpa').format('DD/MM HH:mm')
 let id = text ? text : m.chat
-let txt = `${e} \`Saliendo automáticamente...\` _\n\n*Fecha de Salida:* ${fechahon}\n*ID*: ${await conn.getName(m.chat)}`
+let txt = `${e} `\Saliendo automáticamente...`\ _\n\n*Fecha de Salida:* ${fechahon}\n*ID*: ${await conn.getName(m.chat)}`
 m.reply(txt)
 await conn.groupLeave(id)}
 
