@@ -151,9 +151,9 @@ await conn.sendMessage(m.chat, {
               thumbnailUrl: icono,
               //thumbnail: redes,
               sourceUrl: redes,
-              //mediaType: 1,
+              mediaType: 1,
               showAdAttribution: true,
-              renderLargerThumbnail: true,
+              //renderLargerThumbnail: true,
           },
       },
   }, { quoted: m })};
@@ -178,9 +178,9 @@ await conn.sendMessage(m.chat, {
               thumbnailUrl: icono,
               //thumbnail: redes,
               sourceUrl: redes,
-              //mediaType: 1,
+              mediaType: 1,
               showAdAttribution: true,
-              renderLargerThumbnail: true,
+              //renderLargerThumbnail: true,
           },
       },
   }, { quoted: m })};
