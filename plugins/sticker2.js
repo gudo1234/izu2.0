@@ -47,7 +47,7 @@ async function generarStickerConTexto(texto) {
 }
 
 let handler = async (m, { conn, args }) => {
-  if (!args[0]) return m.reply('✏️ Escribe un texto para convertir en sticker.\nEjemplo:\n*.s2 Hola mundo*')
+  if (!args[0]) return m.reply(`${e} *Genera un sticker junto con el texto asignado*\n\`Ejemplo:\` .s2 hola`)
 
   let stiker = null
   try {
@@ -57,14 +57,14 @@ let handler = async (m, { conn, args }) => {
     let botSettings = globalThis.db.data.settings[botId]
     let botname = botSettings.namebot
 
-  let text1 = user.metadatos ? user.metadatos : `♯𝐓꯭̱𝔥̱𝑒̱ . ㌦‥ꪱ꯭̱ꪆ꯭̱í̱α꯭̱ო꯭̱ꤩꤨօ꯭̱ղ꯭̱꤬ძ ̱  ──͟͞🄱̱ǿ̱𝔱…ꤩꤨ‧💎\n`
+  let text1 = user.metadatos ? user.metadatos : ``
   let text2 = user.metadatos2 ? user.metadatos2 : `Socket:\n↳@${botname}\n👹Usuario:\n↳@${name}`
 
     let userText = args.join(' ')
-    if (userText.length > 30) return m.reply('ꕥ El texto no puede tener más de 30 caracteres')
+    if (userText.length > 30) return m.reply(`${e} El texto no puede tener más de 30 caracteres`)
 
     let imgBuffer = await generarStickerConTexto(userText)
-    stiker = await sticker(imgBuffer, false, text1, text2)
+    stiker = await sticker(imgBuffer, false, `${m.pushName}`)
 
   } catch (e) {
     console.error('Error generando sticker:', e)
