@@ -148,8 +148,8 @@ await conn.sendMessage(m.chat, {
           externalAdReply: {
               title: botname,
               body: textbot,
-              thumbnail: icono,
               thumbnailUrl: icono,
+              thumbnail: icono,
               //sourceUrl: redes,
               mediaType: 1,
               showAdAttribution: true,
@@ -175,8 +175,8 @@ await conn.sendMessage(m.chat, {
           externalAdReply: {
               title: botname,
               body: textbot,
-              thumbnail: icono,
               thumbnailUrl: icono,
+              thumbnail: icono,
               //sourceUrl: redes,
               mediaType: 1,
               showAdAttribution: true,
