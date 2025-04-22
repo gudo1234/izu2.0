@@ -96,6 +96,7 @@ ${e}${s}tomp3 *‹rєρℓy›*
 ${e}${s}toimg *‹rєρℓy›*
 ${e}${s}ver *‹rєρℓy›*
 ${e}${s}sticker *‹rєρℓy›*
+${e}${s}brat *‹τ×τ›*
 ${e}${s}hd *‹rєρℓy›*
 ${e}${s}ssweb *‹υяʟ›*
 ${e}${s}qc *‹τ×τ›*
