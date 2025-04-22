@@ -6,7 +6,7 @@ let handler = async (m, { conn, usedPrefix, command, text, args }) => {
   try {
     let { title, author, duration, views, likes, comments_count, share_count, download_count, published, dl_url } = await Starlights.tiktokvid(text)
     
-const res = await Starlights.tiktokvid(text)
+const res = await dl_url
 const image = await res.getRandom();
 
       let txt = '`乂  T I K T O K  -  D O W N L O A D`\n\n'
