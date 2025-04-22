@@ -130,7 +130,7 @@ ${e}${s}githubsearch *‹τ×τ›*
 ${e}${s}update *‹›*
 ${e}${s}join *‹ł¡หк›*
 ${e}${s}=> *‹rєρℓy›*
-${e}${s}> *‹rєρℓy›*
+${e}${s}restart *‹›*
 ${e}${s}$ *‹›*
 ${e}${s}antiprivado *‹ᴏɴ/ᴏғғ›*
 ${e}${s}icon *‹rєρℓy›*
