@@ -35,7 +35,7 @@ global.nameqr = '🤖⃧►iʑυвöτ◃2.0▹'
 global.namebot = '🤖⃧►iʑυвöτ◃2.0▹'
 global.sessions = 'Sessions'
 global.jadi = 'JadiBots' 
-global.yukiJadibts = true
+global.yukiJadibts = false
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
