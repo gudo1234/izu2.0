@@ -14,6 +14,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         await conn.sendMessage(m.chat, {
             sticker: { url: apiUrl }
         }, { quoted: m });
+        await conn.sendFile(m.chat, apiUrl, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
 
         await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
