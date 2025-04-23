@@ -44,14 +44,7 @@ if (media === 'stiker') {
                 thumbnail: im
             }
         }
-    }, { quoted: null }).then(async (message) => {
-        const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '🔥'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    });
+    }, { quoted: null });
 }
 
 if (media === 'audio') {
@@ -67,14 +60,7 @@ this.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5].getRandom() },
     "thumbnail": im, 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
-     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100}).then(async (message) => {
-        const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '✨'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
+     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
   let wel = `°   /)🎩/)
@@ -103,14 +89,7 @@ if (media === 'texto') {
                 sourceUrl: redes
             }
         }
-    }, { quoted: fkontak }).then(async (message) => {
-        const emojis = ['🎉', '🫱🏻', '🫲🏻', '💯'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
+    }, { quoted: fkontak })};
 
 if (media === 'gifPlayback') {
 await conn.sendMessage(m.chat, {
@@ -135,14 +114,7 @@ await conn.sendMessage(m.chat, {
             thumbnail: im
         }
     }
-}, { quoted: fkontak }).then(async (message) => {
-        const emojis = ['🎉', '🫱🏻', '🫲🏻', '💯'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
+}, { quoted: fkontak })};
 }
 
 // bye 
@@ -163,14 +135,7 @@ if (media === 'stiker') {
                 thumbnail: im
             }
         }
-    }, { quoted: null }).then(async (message) => {
-        const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '🛫'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    });
+    }, { quoted: null });
 }
 
 if (media === 'audio') {
@@ -186,14 +151,7 @@ this.sendMessage(m.chat, { audio: { url: vn3 },
     "thumbnail": im, 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
-     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100}).then(async (message) => {
-        const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '🛥️'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
+     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
   this.sendMessage(m.chat, { 
@@ -217,14 +175,7 @@ if (media === 'texto') {
                 sourceUrl: redes
             }
         }
-    }, { quoted: fkontak }).then(async (message) => {
-        const emojis = ['🙂‍↔️', '🫱🏻', '🫲🏻', '🛫'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
+    }, { quoted: fkontak })};
 
 if (media === 'gifPlayback') {
 await conn.sendMessage(m.chat, {
@@ -249,14 +200,7 @@ await conn.sendMessage(m.chat, {
             thumbnail: im
         }
     }
-}, { quoted: fkontak }).then(async (message) => {
-        const emojis = ['🎉', '🫱🏻', '🫲🏻', '💯'];
-        for (let i = 0; i < emojis.length; i++) {
-            setTimeout(async () => {
-                await message.react(emojis[i]);
-            }, i * 2000);
-        }
-    })};
+}, { quoted: fkontak })};
  
   }
 }
