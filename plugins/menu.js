@@ -9,6 +9,7 @@ let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
 let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
   let or = ['anu', 'gif'];
   let media = or[Math.floor(Math.random() * 2)]
+  const thumbnail = await (await fetch(icono)).buffer()
 let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
 > ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
@@ -139,29 +140,19 @@ ${e}${s}salir *‹›*
 m.react('🏖️')
 if (media === 'anu') {
 await conn.sendMessage(m.chat, {
-      text: txt,
-      footer: textbot,
-      contextInfo: {
-          mentionedJid: [m.sender],
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-              newsletterJid: channelRD.id,
-              newsletterName: channelRD.name,
-              serverMessageId: -1,
-          },
-          forwardingScore: false,
-          externalAdReply: {
-              title: botname,
-              body: textbot,
-              thumbnailUrl: icono,
-              //thumbnail: redes,
-              sourceUrl: redes,
-              mediaType: 1,
-              showAdAttribution: true,
-              //renderLargerThumbnail: true,
-          },
-      },
-  }, { quoted: m })};
+  text: txt,
+  contextInfo: {
+    externalAdReply: {
+      title: wm,
+      body: 'Haz clic para unirte',
+      thumbnailUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+      thumbnail,
+      sourceUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+      mediaType: 1,
+      renderLargerThumbnail: true
+    }
+  }
+}, { quoted: m })};
   
   if (media === 'gif') {
 await conn.sendMessage(m.chat, {
