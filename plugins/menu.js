@@ -144,7 +144,7 @@ await conn.sendMessage(m.chat, {
   contextInfo: {
     externalAdReply: {
       title: wm,
-      body: 'Haz clic para unirte',
+      body: textbot,
       thumbnailUrl: redes,
       thumbnail,
       sourceUrl: redes,
