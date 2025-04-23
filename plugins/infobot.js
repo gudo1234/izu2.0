@@ -10,6 +10,7 @@ let format = sizeFormatter({
   render: (literal, symbol) => `${literal} ${symbol}B`,
 })
 let handler = async (m, { conn, usedPrefix, command }) => {
+const thumbnail = await (await fetch(icono)).buffer()
 let _uptime = process.uptime() * 1000
 let uptime = clockString(_uptime) 
 let totalreg = Object.keys(global.db.data.users).length
@@ -44,24 +45,37 @@ let totalreg = Object.keys(global.db.data.users).length
   let old = performance.now()
   let neww = performance.now()
   let speed = neww - old
-  let infobt = `*I N F O - I N F O R M A C I Ó N*
-  
-*ESTADO*
-Chats de grupo: *${groupsIn.length}*
-Grupos unidos: *${groupsIn.length}*
-Grupos abandonados: *${groupsIn.length - groupsIn.length}*
-Chats privados: *${chats.length - groupsIn.length}*
-Total Chats: *${chats.length}*
-Tiempo Activo: *${uptime}*
-
-
-
-🚩 *NodeJS Uso de memoria*
-${'```' + Object.keys(used).map((key, _, arr) => `${key.padEnd(Math.max(...arr.map(v => v.length)), ' ')}: ${format(used[key])}`).join('\n') + '```'}
-`
-  m.reply(infobt)
-const prep = generateWAMessageFromContent(m.chat, { "orderMessage": { "orderId":"6288215463787", "itemCount": 2022, "message": infobt, "orderTitle": wm, "footerText": "Nixie Bot - MD", "token": "AR6xBKbXZn0Xwmu76Ksyd7rnxI+Rx87HfinVlW4lwXa6JA==", "thumbnail": "https://telegra.ph/file/b8240f359eabfaa657286.jpg", "surface": "CATALOG" } }, { quoted: m })
-//await conn.relayMessage(m.chat, prep.message,  { messageId: prep.key.id })
+  let txt = `> ⁉ ɪɴғᴏ - ʙᴏᴛ
+╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
+${e}${s} *ᴍᴏᴅᴏ* ‹público›
+${e}${s} *ᴘʀᴇғɪᴊᴏ* (#./!)*
+${e}${s} *ɢʀᴜᴘᴏs ᴜɴɪᴅᴏs* *${groupsIn.length}*
+${e}${s} *ᴛɪᴇᴍᴘᴏ ᴀᴄᴛɪᴠᴏ:*  *${uptime}*
+╚ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟╝╯`
+await conn.sendMessage(m.chat, {
+      text: txt,
+      footer: textbot,
+      contextInfo: {
+          mentionedJid: [m.sender],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+              newsletterJid: channelRD.id,
+              newsletterName: channelRD.name,
+              serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+              title: botname,
+              body: textbot,
+              thumbnailUrl: redes,
+              thumbnail,
+              sourceUrl: redes,
+              mediaType: 1,
+              showAdAttribution: true,
+              renderLargerThumbnail: true,
+          },
+      },
+  }, { quoted: m })
 
 }
 
