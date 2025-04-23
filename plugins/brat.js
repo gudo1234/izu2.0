@@ -11,7 +11,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
         await conn.sendMessage(m.chat, { react: { text: '🎨', key: m.key } });
         const thumbnail = await (await fetch(icono)).buffer()
-        await conn.sendFile(m.chat, apiUrl, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 1, sourceUrl: redes, thumbnailUrl: icono, thumbnail}}}, { quoted: m })
+        await conn.sendFile(m.chat, apiUrl, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 1, sourceUrl: redes, thumbnailUrl: redes, thumbnail}}}, { quoted: m })
 
         await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
