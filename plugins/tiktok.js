@@ -16,7 +16,7 @@ let txt = '`乂  T I K T O K  -  D O W N L O A D`\n\n'
     txt += `	✩  *Compartidos* : ${share}\n`
     txt += `	✩  *Publicado* : ${published}\n`
     txt += `	✩  *Descargas* : ${downloads}\n\n`
-    txt += `> 🚩 *${wm}*`
+    txt += `> *${wm}*`
 await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m, null, rcanal)
 await m.react('✅')
 } catch {
