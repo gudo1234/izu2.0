@@ -4,7 +4,7 @@ import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-
+const thumbnail = await (await fetch(icono)).buffer()
 let stiker = false
 try {
 let q = m.quoted ? m.quoted : m
@@ -40,7 +40,7 @@ else return m.reply(`${e} El url es incorrecto`)
 console.error(e)
 if (!stiker) stiker = e
 } finally {
-if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnailUrl: icono}}}, { quoted: m })
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 1, sourceUrl: redes, thumbnailUrl: redes, thumbnail}}}, { quoted: m })
 
 else return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para hacer un sticker.`, m, rcanal)
 
