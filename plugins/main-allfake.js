@@ -118,7 +118,8 @@ global.icono = [
 'https://files.catbox.moe/dpx2s1.jpg',
 'https://files.catbox.moe/wg1vbo.jpg',
 'https://files.catbox.moe/grk81s.jpg'].getRandom()
-
+global.img = await (await fetch(icono)).buffer()
+  
 global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: packname, body: dev, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: icono, sourceUrl: redes, mediaType: 1, renderLargerThumbnail: false }, }, }}
 
 export default handler
