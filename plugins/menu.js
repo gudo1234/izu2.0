@@ -7,8 +7,8 @@ let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country
   let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}` : 'Desconocido'
 let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
 let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
-  let or = ['anu', 'gif'];
-  let media = or[Math.floor(Math.random() * 2)]
+  let or = ['grupo', 'gif', 'anu'];
+  let media = or[Math.floor(Math.random() * 3)]
   const thumbnail = await (await fetch(icono)).buffer()
 let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
@@ -138,7 +138,7 @@ ${e}${s}icon *‹rєρℓy›*
 ${e}${s}salir *‹›*
 ╚ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟╝`
 m.react('🏖️')
-if (media === 'anu') {
+if (media === 'grupo') {
 await conn.sendMessage(m.chat, {
   text: txt,
   contextInfo: {
@@ -171,12 +171,38 @@ await conn.sendMessage(m.chat, {
           externalAdReply: {
               title: botname,
               body: textbot,
-              thumbnailUrl: icono,
-              //thumbnail: redes,
-              sourceUrl: redes,
+              thumbnailUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+              thumbnail,
+              sourceUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
               mediaType: 1,
               showAdAttribution: true,
               //renderLargerThumbnail: true,
+          },
+      },
+  }, { quoted: m })};
+
+if (media === 'anu') {
+await conn.sendMessage(m.chat, {
+      text: txt,
+      footer: textbot,
+      contextInfo: {
+          mentionedJid: [m.sender],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+              newsletterJid: channelRD.id,
+              newsletterName: channelRD.name,
+              serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+              title: botname,
+              body: textbot,
+              thumbnailUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+              thumbnail,
+              sourceUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+              mediaType: 1,
+              showAdAttribution: true,
+              renderLargerThumbnail: true,
           },
       },
   }, { quoted: m })};
