@@ -152,7 +152,7 @@ this.sendMessage(m.chat, { audio: { url: vn3 },
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
-    "thumbnail", 
+    thumbnail, 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
      seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
