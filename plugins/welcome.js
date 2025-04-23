@@ -148,7 +148,7 @@ this.sendMessage(m.chat, { audio: { url: vn3 },
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `👋🏻 ADIOS +${m.messageStubParameters[0].split`@`[0]}`, 
+    "title": `${e} ADIOS +${m.messageStubParameters[0].split`@`[0]}`, 
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
