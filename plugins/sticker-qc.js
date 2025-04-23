@@ -16,12 +16,13 @@ const mishi = text.replace(mentionRegex, '');
 if (mishi.length > 40) return conn.reply(m.chat, `${e} El texto no puede tener mas de 30 caracteres`, m);
 const pp = await conn.profilePictureUrl(who).catch((_) => 'https://telegra.ph/file/24fa902ead26340f3df2c.png')
 const nombre = await conn.getName(who)
+const thumbnail = await (await fetch(icono)).buffer()
 const obj = {"type": "quote", "format": "png", "backgroundColor": "#000000", "width": 512, "height": 768, "scale": 2, "messages": [{"entities": [], "avatar": true, "from": {"id": 1, "name": `${who?.name || nombre}`, "photo": {url: `${pp}`}}, "text": mishi, "replyMessage": {}}]};
 const json = await axios.post('https://bot.lyo.su/quote/generate', obj, {headers: {'Content-Type': 'application/json'}});
 const buffer = Buffer.from(json.data.result.image, 'base64');
 let stiker = await sticker(buffer, false, `${m.pushName}`);
   m.react('🕒')
-if (stiker) return conn.sendFile(m.chat, stiker, 'error.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
+if (stiker) return conn.sendFile(m.chat, stiker, 'error.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 1, sourceUrl: redes, thumbnailUrl: redes, thumbnail}}}, { quoted: m })
 }
 
 handler.group = true;
