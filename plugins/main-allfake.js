@@ -71,10 +71,10 @@ var comunidad = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
 var ig = 'https://www.instagram.com/edar504__'
 var github = 'https://www.instagram.com/edar504__'
 let correo = 'izumilitee@gmail.com'*/
-let ca = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
+let ca = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
 let com = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
-let i = 'https://www.instagram.com/edar504__'
-let cor = 'izumilitee@gmail.com'
+let i = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
+let cor = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
 global.redes = [ca, com, i, cor].getRandom()
 
 let category = "imagen"
