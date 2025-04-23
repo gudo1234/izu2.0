@@ -1,11 +1,11 @@
 import Starlights from '@StarlightsTeam/Scraper'
 
-let handler = async (m, { conn, args, usedPrefix, command, text }) => {
-if (!text) return conn.reply(m.chat, `${e} Ingresa un enlace del vídeo de TikTok junto al comando.\n\n`Ejemplo:`\n' + `> *${usedPrefix + command}* https://vm.tiktok.com/ZMrFCX5jf/`, m)
-    if (!text[0].match(/tiktok/gi)) return conn.reply(m.chat, `Verifica que el link sea de TikTok`, m).then(_ => m.react('✖️'))
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+if (!args || !args[0]) return conn.reply(m.chat, `${e} Ingresa un enlace del vídeo de TikTok junto al comando.`, m)
+    if (!args[0].match(/tiktok/gi)) return conn.reply(m.chat, `Verifica que el link sea de TikTok`, m, rcanal).then(_ => m.react('✖️'))
   await m.react('🕓')
 try {
-let { title, author, duration, views, likes, comment, share, published, downloads, dl_url } = await Starlights.tiktokdl(text[0])
+let { title, author, duration, views, likes, comment, share, published, downloads, dl_url } = await Starlights.tiktokdl(args[0])
 let txt = '`乂  T I K T O K  -  D O W N L O A D`\n\n'
     txt += `	✩  *Título* : ${title}\n`
     txt += `	✩  *Autor* : ${author}\n`
@@ -22,7 +22,6 @@ await m.react('✅')
 } catch {
 await m.react('✖️')
 }}
-
 handler.command = ['tiktok', 'ttdl', 'tiktokdl', 'tiktoknowm', 'tt']
 handler.group = true
 
