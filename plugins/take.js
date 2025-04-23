@@ -3,6 +3,7 @@ let handler = async (m, { conn, text }) => {
   if (!text) return conn.reply(m.chat, `${e} Responda a un sticker para personalizarlo`, m)
   let stiker = false
   try {
+    const thumbnail = await (await fetch(icono)).buffer()
     let [packname, ...author] = text.split('|')
     author = (author || []).join('|')
     let mime = m.quoted.mimetype || ''
@@ -14,7 +15,7 @@ let handler = async (m, { conn, text }) => {
     console.error(e)
     if (Buffer.isBuffer(e)) stiker = e
   } finally {
-  if (stiker) conn.sendFile(m.chat, stiker, 'wm.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
+  if (stiker) conn.sendFile(m.chat, stiker, 'wm.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 1, sourceUrl: redes, thumbnailUrl: redes, thumbnail}}}, { quoted: m })
     else throw '⚠️ *_La conversión falló._*'
   }
 }
