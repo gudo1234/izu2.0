@@ -12,6 +12,8 @@ let vn2 = './media/bien.mp3'; //welcome entrada épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
   let vn4 = './media/prueba3.mp3'; //welcome calamar
   let vn5 = './media/prueba4.mp3'; //welcome mortals
+  let vn6 = './media/prueba.mp3'; //la calin
+  
   
   let chat = global.db.data.chats[m.chat];
   const user = `@${m.sender.split`@`[0]}`;
@@ -143,7 +145,7 @@ if (media === 'stiker') {
 }
 
 if (media === 'audio') {
-this.sendMessage(m.chat, { audio: { url: vn3 }, 
+this.sendMessage(m.chat, { audio: { url: [vn3, vn6].getRandom() }, 
     contextInfo: { forwardedNewsletterMessageInfo: { 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
