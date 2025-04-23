@@ -12,7 +12,7 @@ var handler = async (m, { conn, args, usedPrefix, command }) => {
         if (!tiktokData || !tiktokData.data || !tiktokData.data.play) {
             return conn.reply(m.chat, "Error: No se pudo obtener el video.", m);
         }
-
+m.react('🕒')
         const videoURL = tiktokData.data.play;
 
         if (videoURL) {
