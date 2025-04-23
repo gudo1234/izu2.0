@@ -45,7 +45,7 @@ if (media === 'stiker') {
                 mediaType: 1,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
-                thumbnail
+                thumbnail: im
             }
         }
     }, { quoted: null });
@@ -61,7 +61,7 @@ this.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5].getRandom() },
     "body": 'IzuBot te da la bienvenida', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
-    thumbnail, 
+    thumbnail: im,
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
      seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
@@ -89,7 +89,7 @@ if (media === 'texto') {
                 title: `🍒ᴡᴇʟᴄᴏᴍᴇ🍒`,
                 body: 'IzuBot te da la bienvenida',
                 thumbnailUrl: redes,
-                thumbnail,
+                thumbnail: im,
                 sourceUrl: redes
             }
         }
@@ -116,7 +116,7 @@ await conn.sendMessage(m.chat, {
             body: `${await conn.getName(m.chat)}`,
             sourceUrl: redes,
             thumbnailUrl: redes,
-            thumbnail
+            thumbnail: im
         }
     }
 }, { quoted: m })};
@@ -138,7 +138,7 @@ if (media === 'stiker') {
                 mediaType: 1,
                 sourceUrl: redes,
                 thumbnailUrl:redes,
-                thumbnail
+                thumbnail: im
             }
         }
     }, { quoted: null });
@@ -154,7 +154,7 @@ this.sendMessage(m.chat, { audio: { url: [vn3, vn6].getRandom() },
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
-    thumbnail, 
+    thumbnail: im, 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
      seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
@@ -177,7 +177,7 @@ if (media === 'texto') {
                 title: `${await conn.getName(m.chat)}`,
                 body: 'Esperemos que no vuelva -_-',
                 thumbnailUrl: redes,
-                thumbnail,
+                thumbnail: im,
                 sourceUrl: redes
             }
         }
@@ -204,7 +204,7 @@ await conn.sendMessage(m.chat, {
             body: `${await conn.getName(m.chat)}`,
             sourceUrl: redes,
             thumbnailUrl: redes,
-            thumbnail
+            thumbnail: im
         }
     }
 }, { quoted: null })};
