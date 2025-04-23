@@ -2,8 +2,8 @@ import { addExif } from '../lib/sticker.js'
 let handler = async (m, { conn, text }) => {
   if (!text) return conn.reply(m.chat, `${e} Responda a un sticker para personalizarlo`, m)
   let stiker = false
+  const thumbnail = await (await fetch(icono)).buffer()
   try {
-    const thumbnail = await (await fetch(icono)).buffer()
     let [packname, ...author] = text.split('|')
     author = (author || []).join('|')
     let mime = m.quoted.mimetype || ''
