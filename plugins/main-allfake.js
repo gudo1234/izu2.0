@@ -66,10 +66,10 @@ global.waitt = '❍ Espera un momento, soy lenta...';
 global.waittt = '❍ Espera un momento, soy lenta...';
 global.waitttt = '❍ Espera un momento, soy lenta...';
 
-var canal = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
-var comunidad = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
-var git = 'https://www.instagram.com/edar504__'
-var github = 'https://www.instagram.com/edar504__' 
+let canal = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
+let comunidad = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
+let ig = 'https://www.instagram.com/edar504__'
+let github = 'https://www.instagram.com/edar504__'
 let correo = 'izumilitee@gmail.com'
 global.redes = [canal, comunidad, git, github, correo].getRandom()
 
