@@ -10,7 +10,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         const apiUrl = `https://api.siputzx.my.id/api/m/brat?text=${text}`;
 
         await conn.sendMessage(m.chat, { react: { text: '🎨', key: m.key } });
-        await conn.sendFile(m.chat, apiUrl, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnailUrl: icono}}}, { quoted: m })
+        const thumbnail = await (await fetch(icono)).buffer()
+        await conn.sendFile(m.chat, apiUrl, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 1, sourceUrl: redes, thumbnailUrl: icono, thumbnail}}}, { quoted: m })
 
         await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 
