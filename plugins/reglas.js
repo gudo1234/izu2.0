@@ -19,9 +19,9 @@ await conn.sendMessage(m.chat, {
           externalAdReply: {
               title: botname,
               body: textbot,
-              thumbnailUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+              thumbnailUrl: redes,
               thumbnail,
-            sourceUrl: 'https://chat.whatsapp.com/E7FwA25TmvS2ncJragtbYV',
+            sourceUrl: redes,
               mediaType: 1,
               showAdAttribution: true,
               renderLargerThumbnail: true,
