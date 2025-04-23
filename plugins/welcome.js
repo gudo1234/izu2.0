@@ -4,7 +4,8 @@ import fetch from 'node-fetch';
 export async function before(m, { conn, participants, groupMetadata }) {
 
   if (!m.messageStubType || !m.isGroup) return true;
-let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
+const thumbnail = await (await fetch(icono)).buffer()
+  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => thumbnail)
   let im = await (await fetch(`${pp}`)).buffer()
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entrada épica
@@ -39,9 +40,10 @@ if (media === 'stiker') {
                 showAdAttribution: false,
                 title: `💫 WELCOME +${m.messageStubParameters[0].split`@`[0]}`,
                 body: 'IzuBot te da la bienvenida',
-                mediaType: 2,
+                mediaType: 1,
                 sourceUrl: redes,
-                thumbnail: im
+                thumbnailUrl: redes,
+                thumbnail
             }
         }
     }, { quoted: null });
@@ -56,11 +58,11 @@ this.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5].getRandom() },
     "title": `❤️WELCOME +${m.messageStubParameters[0].split`@`[0]}`, 
     "body": 'IzuBot te da la bienvenida', 
     "previewType": "PHOTO", 
-    "thumbnailUrl": null,
-    "thumbnail": im, 
+    "thumbnailUrl": redes,
+    "thumbnail", 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
-     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
+     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
   let wel = `°   /)🎩/)
@@ -84,12 +86,12 @@ if (media === 'texto') {
             externalAdReply: {
                 title: `🍒ᴡᴇʟᴄᴏᴍᴇ🍒`,
                 body: 'IzuBot te da la bienvenida',
-                thumbnailUrl: im,
-                thumbnail: im,
+                thumbnailUrl: redes,
+                thumbnail,
                 sourceUrl: redes
             }
         }
-    }, { quoted: fkontak })};
+    }, { quoted: null })};
 
 if (media === 'gifPlayback') {
 await conn.sendMessage(m.chat, {
@@ -111,10 +113,11 @@ await conn.sendMessage(m.chat, {
             title: 'Izubot te da la bienvenida',
             body: `${await conn.getName(m.chat)}`,
             sourceUrl: redes,
-            thumbnail: im
+            thumbnailUrl: redes,
+            thumbnail
         }
     }
-}, { quoted: fkontak })};
+}, { quoted: m })};
 }
 
 // bye 
@@ -130,9 +133,10 @@ if (media === 'stiker') {
                 showAdAttribution: false,
                 title: `👋🏻ADIOS +${m.messageStubParameters[0].split`@`[0]}`,
                 body: 'Esperemos que no vuelva -_-',
-                mediaType: 2,
+                mediaType: 1,
                 sourceUrl: redes,
-                thumbnail: im
+                thumbnailUrl:redes,
+                thumbnail
             }
         }
     }, { quoted: null });
@@ -147,11 +151,11 @@ this.sendMessage(m.chat, { audio: { url: vn3 },
     "title": `👋🏻 ADIOS +${m.messageStubParameters[0].split`@`[0]}`, 
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
-    "thumbnailUrl": null,
-    "thumbnail": im, 
+    "thumbnailUrl": redes,
+    "thumbnail", 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
-     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: fkontak, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
+     seconds: '4556', ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
   this.sendMessage(m.chat, { 
@@ -170,12 +174,12 @@ if (media === 'texto') {
             externalAdReply: {
                 title: `${await conn.getName(m.chat)}`,
                 body: 'Esperemos que no vuelva -_-',
-                thumbnailUrl: im,
-                thumbnail: im,
+                thumbnailUrl: redes,
+                thumbnail,
                 sourceUrl: redes
             }
         }
-    }, { quoted: fkontak })};
+    }, { quoted: null })};
 
 if (media === 'gifPlayback') {
 await conn.sendMessage(m.chat, {
@@ -197,10 +201,11 @@ await conn.sendMessage(m.chat, {
             title: 'Esperemos que no vuelva -_-',
             body: `${await conn.getName(m.chat)}`,
             sourceUrl: redes,
-            thumbnail: im
+            thumbnailUrl: redes,
+            thumbnail
         }
     }
-}, { quoted: fkontak })};
+}, { quoted: null })};
  
   }
 }
