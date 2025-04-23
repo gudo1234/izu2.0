@@ -45,12 +45,12 @@ let totalreg = Object.keys(global.db.data.users).length
   let old = performance.now()
   let neww = performance.now()
   let speed = neww - old
-  let txt = `> ⁉ ɪɴғᴏ - ʙᴏᴛ
+  let txt = `\`⁉ ɪɴғᴏ - ʙᴏᴛ*\`
 ╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
 ${e}${s} *ᴍᴏᴅᴏ* ‹público›
-${e}${s} *ᴘʀᴇғɪᴊᴏ* (#./!)*
-${e}${s} *ɢʀᴜᴘᴏs ᴜɴɪᴅᴏs* *${groupsIn.length}*
-${e}${s} *ᴛɪᴇᴍᴘᴏ ᴀᴄᴛɪᴠᴏ:*  *${uptime}*
+${e}${s} *ᴘʀᴇғɪᴊᴏ* ‹(#./!)›
+${e}${s} *ɢʀᴜᴘᴏs ᴜɴɪᴅᴏs* ‹${groupsIn.length}›
+${e}${s} *ᴛɪᴇᴍᴘᴏ ᴀᴄᴛɪᴠᴏ:*  ‹${uptime}›
 ╚ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟╝╯`
 await conn.sendMessage(m.chat, {
       text: txt,
