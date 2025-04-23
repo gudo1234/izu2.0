@@ -66,9 +66,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     let muptime = clockString(_muptime)
    let timestamp = speed()
    let latensi = speed() - timestamp
-       txt = `*Speed* : *${latensi.toFixed(4)} ms*\n`
-       txt += `*Grupos Registrados* :: *${formatNumber(totalchats)}*\n`
-       txt += `> ${wm}`
+       txt = `*Speed* : *${latensi.toFixed(4)} ms*\n*Grupos Registrados* : *${formatNumber(totalchats)}*\n> ${wm}`
 
 const thumbnail = await (await fetch(icono)).buffer()
 await conn.sendMessage(m.chat, {
