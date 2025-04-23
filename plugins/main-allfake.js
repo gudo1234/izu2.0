@@ -66,12 +66,16 @@ global.waitt = '❍ Espera un momento, soy lenta...';
 global.waittt = '❍ Espera un momento, soy lenta...';
 global.waitttt = '❍ Espera un momento, soy lenta...';
 
-var canal = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
+/*var canal = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
 var comunidad = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
 var ig = 'https://www.instagram.com/edar504__'
 var github = 'https://www.instagram.com/edar504__'
-let correo = 'izumilitee@gmail.com'
-global.redes = [canal, comunidad, git, github, correo].getRandom()
+let correo = 'izumilitee@gmail.com'*/
+let ca = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
+let com = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G'
+let i = 'https://www.instagram.com/edar504__'
+let cor = 'izumilitee@gmail.com'
+global.redes = [ca, com, i, cor].getRandom()
 
 let category = "imagen"
 const db = './src/database/db.json'
