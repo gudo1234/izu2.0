@@ -44,8 +44,6 @@ if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextI
 
 else return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para hacer un sticker.`, m, rcanal)
 
-
-
 }}
 
 handler.group = true;
