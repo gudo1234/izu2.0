@@ -45,7 +45,7 @@ let totalreg = Object.keys(global.db.data.users).length
   let old = performance.now()
   let neww = performance.now()
   let speed = neww - old
-  let txt = `\`⁉ ɪɴғᴏ - ʙᴏᴛ*\`
+  let txt = `\`⁉ ɪɴғᴏ - ʙᴏᴛ\`
 ╔ְֺ─┅፝֟─ׅ━⃜─╲╳⵿╲⵿݊╱⵿╳╱─━ׅ⃜─፝֟┅ְֺ╗
 ${e}${s} *ᴍᴏᴅᴏ* ‹público›
 ${e}${s} *ᴘʀᴇғɪᴊᴏ* ‹(#./!)›
