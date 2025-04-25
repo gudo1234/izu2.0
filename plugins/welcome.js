@@ -4,6 +4,8 @@ import fetch from 'node-fetch';
 export async function before(m, { conn, participants, groupMetadata }) {
 
   if (!m.messageStubType || !m.isGroup) return true;
+let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
+  let mentionedJid = [who]
 const thumbnail = await (await fetch(icono)).buffer()
   let  im = await conn.profilePictureUrl(who, 'image').catch((_) => thumbnail)
   let vn = './media/a.mp3'; //welcome bendicion
