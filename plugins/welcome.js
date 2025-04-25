@@ -11,7 +11,8 @@ let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
   let vn4 = './media/prueba3.mp3'; //welcome calamar
   let vn5 = './media/prueba4.mp3'; //welcome mortals
-  let vn6 = './media/prueba.mp3'; //la calin
+  let vn6 = './media/prueba.mp3'; //la calin bye
+  let vn7 = './media/bloody.mp3'; //welcome
   let or = ['stiker', 'audio', 'texto', 'gifPlayback'];
   let media = or[Math.floor(Math.random() * 4)];
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
@@ -51,7 +52,7 @@ let vn2 = './media/bien.mp3'; //welcome entra épica
 }
 
 if (media === 'audio') {
-await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5].getRandom() }, 
+await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRandom() }, 
     contextInfo: { forwardedNewsletterMessageInfo: { 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
