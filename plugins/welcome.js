@@ -5,11 +5,14 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
   if (!m.messageStubType || !m.isGroup) return true;
 if (m.quoted && m.quoted.sender) {
+        let userId;
+    if (m.quoted && m.quoted.sender) {
         userId = m.quoted.sender;
     } else {
         userId = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.sender;
     }
-    //let user = global.db.data.users[userId];
+
+    let user = global.db.data.users[userId];
 const thumbnail = await (await fetch(icono)).buffer()
   let perfil = await conn.profilePictureUrl(userId, 'image').catch(_ => thumbnail);
   let vn = './media/a.mp3'; //welcome bendicion
