@@ -7,7 +7,8 @@ export async function before(m, { conn, participants, groupMetadata }) {
 if (m.quoted && m.quoted.sender) {
         
 const thumbnail = await (await fetch(icono)).buffer()
-  let im = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => thumbnail);
+  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => thumbnail);
+  let im = await (await fetch(`${pp}`)).buffer()
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entrada épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
