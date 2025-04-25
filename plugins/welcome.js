@@ -27,7 +27,7 @@ let vn2 = './media/bien.mp3'; //welcome entrada épica
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
   let stiker2 = await sticker(imagen8, false, global.packname, global.author) //welcome
   let a = `🎉 _Welcome_ *@${m.messageStubParameters[0].split`@`[0]}*`
-  let b = `🖐🏻 _Adios_ *@${m.messageStubParameters[0].split`@`[0]}*`
+  let b = `${e} _Adios_ *@${m.messageStubParameters[0].split`@`[0]}*`
 
 // Welcome 
 if (chat.welcome && m.messageStubType == 27) {
