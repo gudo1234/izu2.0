@@ -4,10 +4,14 @@ import fetch from 'node-fetch';
 export async function before(m, { conn, participants, groupMetadata }) {
 
   if (!m.messageStubType || !m.isGroup) return true;
-let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
-  let mentionedJid = [who]
+if (m.quoted && m.quoted.sender) {
+        userId = m.quoted.sender;
+    } else {
+        userId = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.sender;
+    }
+    let user = global.db.data.users[userId];
 const thumbnail = await (await fetch(icono)).buffer()
-  let  im = await conn.profilePictureUrl(who, 'image').catch((_) => thumbnail)
+  let perfil = await conn.profilePictureUrl(userId, 'image').catch(_ => thumbnail);
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entrada épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
