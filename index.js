@@ -273,21 +273,23 @@ global.reloadHandler = async function (restartConn) {
   conn.connectionUpdate = connectionUpdate.bind(global.conn);
   conn.credsUpdate = saveCreds.bind(global.conn, true);
 
-  // Mejora aquí: procesamiento en lotes, para evitar que se pierdan mensajes
-  conn.ev.on('messages.upsert', async (msg) => {
-  try {
+  // Procesamiento concurrente sin bloquear otros mensajes
+  conn.ev.on('messages.upsert', (msg) => {
     const messages = msg.messages || [];
-    for (const m of messages) {
-      // Procesamos cada mensaje de forma aislada
-      await handler.handler.call(global.conn, {
-        messages: [m],
-        type: msg.type,
-      });
-    }
-  } catch (err) {
-    console.error('Error procesando mensajes:', err);
-  }
-});
+    if (messages.length === 0) return;
+
+    // Procesa todos los mensajes a la vez, sin bloquearse
+    Promise.allSettled(
+      messages.map(m => 
+        conn.handler({
+          messages: [m],
+          type: msg.type
+        }).catch(err => {
+          console.error('Error procesando mensaje:', err);
+        })
+      )
+    );
+  });
 
   conn.ev.on('connection.update', conn.connectionUpdate);
   conn.ev.on('creds.update', conn.credsUpdate);
