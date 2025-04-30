@@ -243,46 +243,55 @@ process.on('uncaughtException', console.error)
 
 let isInit = true;
 let handler = await import('./handler.js')
-global.reloadHandler = async function(restatConn) {
-try {
-const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error);
-if (Object.keys(Handler || {}).length) handler = Handler
-} catch (e) {
-console.error(e);
-}
-if (restatConn) {
-const oldChats = global.conn.chats
-try {
-global.conn.ws.close()
-} catch { }
-conn.ev.removeAllListeners()
-global.conn = makeWASocket(connectionOptions, {chats: oldChats})
-isInit = true
-}
-if (!isInit) {
-conn.ev.off('messages.upsert', conn.handler)
-conn.ev.off('connection.update', conn.connectionUpdate)
-conn.ev.off('creds.update', conn.credsUpdate)
-}
+global.reloadHandler = async function (restartConn) {
+  try {
+    const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error);
+    if (Handler && Object.keys(Handler).length) {
+      handler = Handler;
+    }
+  } catch (e) {
+    console.error(e);
+  }
 
-conn.handler = handler.handler.bind(global.conn)
-conn.connectionUpdate = connectionUpdate.bind(global.conn)
-conn.credsUpdate = saveCreds.bind(global.conn, true)
+  if (restartConn) {
+    const oldChats = global.conn.chats;
+    try {
+      global.conn.ws.close();
+    } catch { }
+    conn.ev.removeAllListeners();
+    global.conn = makeWASocket(connectionOptions, { chats: oldChats });
+    isInit = true;
+  }
 
-const currentDateTime = new Date()
-const messageDateTime = new Date(conn.ev)
-if (currentDateTime >= messageDateTime) {
-const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
+  if (!isInit) {
+    conn.ev.off('messages.upsert', conn.handler);
+    conn.ev.off('connection.update', conn.connectionUpdate);
+    conn.ev.off('creds.update', conn.credsUpdate);
+  }
 
-} else {
-const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
-}
+  conn.handler = handler.handler.bind(global.conn);
+  conn.connectionUpdate = connectionUpdate.bind(global.conn);
+  conn.credsUpdate = saveCreds.bind(global.conn, true);
 
-conn.ev.on('messages.upsert', conn.handler)
-conn.ev.on('connection.update', conn.connectionUpdate)
-conn.ev.on('creds.update', conn.credsUpdate)
-isInit = false
-return true
+  // Mejora aquí: procesamiento en lotes, para evitar que se pierdan mensajes
+  conn.ev.on('messages.upsert', async (msg) => {
+    try {
+      // Recorremos todos los mensajes del lote
+      if (msg.messages && msg.messages.length) {
+        for (let m of msg.messages) {
+          await conn.handler({ messages: [m], type: msg.type });
+        }
+      }
+    } catch (err) {
+      console.error('Error procesando mensaje:', err);
+    }
+  });
+
+  conn.ev.on('connection.update', conn.connectionUpdate);
+  conn.ev.on('creds.update', conn.credsUpdate);
+
+  isInit = false;
+  return true;
 };
 
 //Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
