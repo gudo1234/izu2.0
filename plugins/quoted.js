@@ -1,4 +1,3 @@
-@⁨―͟͞🍁͓̽𝆥⟅᮫ₑᵤ⟆𝇂𝇃𝇄͓⳻֟፝͜⳺𝇄𝇃𝇂͓⁩ 
 import { createCanvas, loadImage } from 'canvas'
 import { writeFileSync } from 'fs'
 import { tmpdir } from 'os'
