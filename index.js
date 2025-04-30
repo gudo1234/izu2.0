@@ -203,7 +203,7 @@ global.stopped = connection;
 if (isNewLogin) conn.isInit = true;
 const code = lastDisconnect?.error?.output?.statusCode || lastDisconnect?.error?.output?.payload?.statusCode;
 if (code && code !== DisconnectReason.loggedOut && conn?.ws.socket == null) {
-await tryReconnect();
+await global.reloadHandler(true).catch(console.error);
 global.timestamp.connect = new Date;
 }
 if (global.db.data == null) loadDatabase();
@@ -220,65 +220,25 @@ if (reason === DisconnectReason.badSession) {
 console.log(chalk.bold.cyanBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
 } else if (reason === DisconnectReason.connectionClosed) {
 console.log(chalk.bold.magentaBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹\n┆ ⚠︎ CONEXION CERRADA, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹`))
-await tryReconnect()
+await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.connectionLost) {
 console.log(chalk.bold.blueBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂\n┆ ⚠︎ CONEXIÓN PERDIDA CON EL SERVIDOR, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂`))
-await tryReconnect()
+await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.connectionReplaced) {
 console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ CONEXIÓN REEMPLAZADA, SE HA ABIERTO OTRA NUEVA SESION, POR FAVOR, CIERRA LA SESIÓN ACTUAL PRIMERO.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
 } else if (reason === DisconnectReason.loggedOut) {
 console.log(chalk.bold.redBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
-await tryReconnect()
+await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.restartRequired) {
 console.log(chalk.bold.cyanBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓\n┆ ✧ CONECTANDO AL SERVIDOR...\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓`))
-await tryReconnect()
+await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.timedOut) {
 console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸\n┆ ⧖ TIEMPO DE CONEXIÓN AGOTADO, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸`))
-await tryReconnect() //process.send('reset')
+await global.reloadHandler(true).catch(console.error) //process.send('reset')
 } else {
 console.log(chalk.bold.redBright(`\n⚠︎！ RAZON DE DESCONEXIÓN DESCONOCIDA: ${reason || 'No encontrado'} >> ${connection || 'No encontrado'}`))
 }}
 }
-
-let reconnectAttempts = 0;
-async function tryReconnect(maxAttempts = 5, delayMs = 5000) {
-  if (reconnectAttempts >= maxAttempts) {
-    console.log(chalk.bold.red('✖ Reintentos máximos alcanzados. Abortando.'));
-    return;
-  }
-  if (conn?.ws?.readyState === 1) {
-    console.log('✦ Ya está conectado.');
-    return;
-  }
-  try {
-    reconnectAttempts++;
-    console.log(chalk.bold.yellow(`Intentando reconectar... (${reconnectAttempts})`));
-    await global.reloadHandler(true);
-    reconnectAttempts = 0; // Éxito
-  } catch (e) {
-    console.error('Error al reconectar:', e);
-    setTimeout(() => tryReconnect(maxAttempts, delayMs * 2), delayMs);
-  }
-}
-
-process.on('unhandledRejection', err => {
-  console.error('✦ Error no manejado:', err);
-});
-
-let isClearing = false;
-setInterval(async () => {
-  if (isClearing || stopped === 'close' || !conn || !conn.user) return;
-  isClearing = true;
-  try {
-    await clearTmp();
-    console.log('✦ TMP limpiado');
-  } catch (e) {
-    console.error('✦ Error al limpiar TMP:', e);
-  } finally {
-    isClearing = false;
-  }
-}, 1000 * 60 * 4);
-
 process.on('uncaughtException', console.error)
 
 let isInit = true;
@@ -318,7 +278,18 @@ const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('
 const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
 }
 
-conn.ev.on('messages.upsert', conn.handler)
+import PQueue from 'p-queue';
+const messageQueue = new PQueue({ concurrency: 1 });
+
+conn.ev.on('messages.upsert', async (m) => {
+  messageQueue.add(async () => {
+    try {
+      await conn.handler(m);
+    } catch (err) {
+      console.error('Error procesando mensaje:', err);
+    }
+  });
+})
 conn.ev.on('connection.update', conn.connectionUpdate)
 conn.ev.on('creds.update', conn.credsUpdate)
 isInit = false
