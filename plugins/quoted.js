@@ -76,12 +76,12 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   const out = join(tmpdir(), `frase_${user.split('@')[0]}.png`)
   writeFileSync(out, canvas.toBuffer())
 
-  /*await conn.sendMessage(m.chat, {
+  await conn.sendMessage(m.chat, {
     image: { url: out },
     caption: `_Frase de ${name}_`,
     mentions: [user]
-  }, { quoted: m })*/
-conn.sendFile(m.chat, await out, 'error.jpg', `${e} _Frase de ${m.pushName}_`, m, null, rcanal)
+  }, { quoted: m })
+//conn.sendFile(m.chat, await out, 'error.jpg', `${e} _Frase de ${m.pushName}_`, m, null, rcanal)
 }
 
 handler.command = ['mensaje', 'quote', 'frases']
