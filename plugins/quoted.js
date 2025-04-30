@@ -1,3 +1,4 @@
+@⁨―͟͞🍁͓̽𝆥⟅᮫ₑᵤ⟆𝇂𝇃𝇄͓⳻֟፝͜⳺𝇄𝇃𝇂͓⁩ 
 import { createCanvas, loadImage } from 'canvas'
 import { writeFileSync } from 'fs'
 import { tmpdir } from 'os'
@@ -84,7 +85,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 conn.sendFile(m.chat, await out, 'error.jpg', `${e} _Frase de ${m.pushName}_`, m, null, rcanal)
 }
 
-handler.command = ['mensaje|quote', 'frases']
+handler.command = ['mensaje', 'quote', 'frases']
 handler.group = true;
 
 export default handler
