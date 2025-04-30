@@ -14,11 +14,8 @@ ${listAdmin}
 ${e} Evita usar este comando con otras intenciones o seras *eliminado* o *baneado* del Bot.`.trim();
   conn.sendFile(m.chat, pp, 'error.jpg', text, m, false, {mentions: [...groupAdmins.map((v) => v.id), owner]});
 };
-handler.help = ['admins <texto>'];
-handler.tags = ['grupo'];
-// regex detect A word without case sensitive
-handler.customPrefix = /a|@/i;
-handler.command = /^(admins|@admins|dmins)$/i;
+
+handler.command = ['admins', '@admins', 'dmins']
 handler.group = true;
 
 export default handler;
