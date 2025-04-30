@@ -52,7 +52,7 @@ export async function before(m) {
 
     await m.reply(
       `${e} El comando *${usedPrefix + command}* no existe.\n` +
-      `🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n` +
+      `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n` +
       `*¿Quisiste decir?* ➤ *${usedPrefix + closest}* (${similarity}% de coincidencia)`
     );
   }
