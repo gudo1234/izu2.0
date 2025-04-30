@@ -1,5 +1,5 @@
 {
-"name": "YukiBot-MD",
+"name": "Yotsuba-MD",
 "version": "2.2.0",
 "description": "Super WhatsApp Bot Multi Device",
 "main": "index.js",
@@ -18,16 +18,16 @@
 "eslint": "eslint .",
 "eslintfix": "eslint --fix ."
 },
-"homepage": "https://github.com/The-King-Destroy/Yuki_Suou-Bot",
+"homepage": "https://github.com/Alba070503/YotsubaBot",
 "author": {
-"name": "The-King-Destroy"
+"name": "Alba070503"
 },
 "repository": {
 "type": "git",
-"url": "git+https://github.com/The-King-Destroy/Yuki_Suou-Bot.git"
+"url": "git+https://github.com/Alba070503/YotsubaBot.git"
 },
 "bugs": {
-"url": "https://github.com/The-King-Destroy/Yuki_Suou-Bot/issues"
+"url": "https://github.com/Alba070503/YotsubaBot/issues"
 },
 "license": "GPL-3.0-or-later",
 "dependencies": {
@@ -37,12 +37,16 @@
 "@bochilteam/scraper-sosmed": "^1.0.5",
 "@xct007/frieren-scraper": "^0.0.2",
 "@ibaraki-douji/pixivts": "^2.4.1",
+"@nechlophomeriaa/spotifydl": "^1.0.7",
+"@SumiFX/Scraper": "github:SumiFX/SumiFX-Scraper",
+"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "awesome-phonenumber": "^3.4.0",
 "ruhend-scraper": "^7.0.4",
 "gradient-string": "^2.0.2",
 "google-libphonenumber": "3.2.38",
 "axios": "^1.1.2",
 "acrcloud": "^1.4.0",
+"canvas": "^2.5.0",
 "form-data": "^4.0.0",
 "cfonts": "^3.3.0",
 "boxen": "^7.1.1",
@@ -54,10 +58,11 @@
 "file-type": "^18.0.0",
 "fluent-ffmpeg": "^2.1.2",
 "formdata-node": "^5.0.0",
+"form-data": "^4.0.0",
 "human-readable": "^0.2.1",
 "didyoumean": "^1.2.2",
 "jsdom": "^20.0.1",
-"jimp": "^0.16.1",
+"axios-cookiejar-support": "^5.0.5",
 "link-preview-js": "^3.0.0",
 "lodash": "^4.17.21",
 "lowdb": "^3.0.0",
@@ -74,8 +79,8 @@
 "pino-pretty": "^9.1.1",
 "pdfkit": "^0.13.0",
 "qrcode": "^1.5.1",
-"sanzy-spotifydl": "*",
 "qrcode-terminal": "^0.12.0",
+"sanzy-spotifydl": "*",
 "readline": "^1.3.0",
 "similarity": "^1.2.1",
 "g-i-s": "^2.1.6",
@@ -93,10 +98,9 @@
 "aptoide-scraper": "github:DIEGO-OFC/dv-aptoide-scraper",
 "megajs": "^1.1.3",
 "mime-types": "^2.1.35",
+"@hiudyy/ytdl": "^0.2.3",   
 "api-dylux": "^1.7.2",
-"yargs": "^17.3.1",
-"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
-"@nechlophomeriaa/spotifydl": "^1.0.31"
+"yargs": "^17.3.1"
 },
 "optionalDependencies": {
 "wa-sticker-formatter": "^4.3.2",
