@@ -275,17 +275,19 @@ global.reloadHandler = async function (restartConn) {
 
   // Mejora aquí: procesamiento en lotes, para evitar que se pierdan mensajes
   conn.ev.on('messages.upsert', async (msg) => {
-    try {
-      // Recorremos todos los mensajes del lote
-      if (msg.messages && msg.messages.length) {
-        for (let m of msg.messages) {
-          await conn.handler({ messages: [m], type: msg.type });
-        }
-      }
-    } catch (err) {
-      console.error('Error procesando mensaje:', err);
+  try {
+    const messages = msg.messages || [];
+    for (const m of messages) {
+      // Procesamos cada mensaje de forma aislada
+      await handler.handler.call(global.conn, {
+        messages: [m],
+        type: msg.type,
+      });
     }
-  });
+  } catch (err) {
+    console.error('Error procesando mensajes:', err);
+  }
+});
 
   conn.ev.on('connection.update', conn.connectionUpdate);
   conn.ev.on('creds.update', conn.credsUpdate);
