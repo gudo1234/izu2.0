@@ -244,16 +244,15 @@ setInterval(async function () {
 if (queque.indexOf(previousID) === -1) clearInterval(this)
 await delay(time)
 }, time)*/
-let queque = this.msgqueque, time = 0
+let queque = this.msgqueque
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
 
-const interval = setInterval(async () => {
+const interval = setInterval(() => {
     if (queque.indexOf(previousID) === -1) {
         clearInterval(interval)
     }
-    await delay(time)
-}, time)
+}, 0)
 }
 
 if (m.isBaileys) {
