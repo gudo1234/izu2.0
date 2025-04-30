@@ -20,6 +20,7 @@ import boxen from 'boxen'
 import P from 'pino'
 import pino from 'pino'
 import Pino from 'pino'
+import PQueue from 'p-queue'
 import path, { join, dirname } from 'path'
 import {Boom} from '@hapi/boom'
 import {makeWASocket, protoType, serialize} from './lib/simple.js'
@@ -278,7 +279,7 @@ const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('
 const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
 }
 
-import PQueue from 'p-queue';
+//import PQueue from 'p-queue';
 const messageQueue = new PQueue({ concurrency: 1 });
 
 conn.ev.on('messages.upsert', async (m) => {
