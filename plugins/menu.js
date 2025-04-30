@@ -16,7 +16,7 @@ let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izu
 ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
 ┌────────────
 │ 🚩 Nombre: ${m.pushName}
-│ 🌎 País/Móvil: ${mundo} ${getDevice(m.key.id)}
+│ 🌎 País: ${mundo}
 │ 🗓 Fecha: ${moment.tz('America/Bogota').format('DD/MM/YY')}
 └────────────
 
