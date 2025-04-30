@@ -96,7 +96,8 @@
 "api-dylux": "^1.7.2",
 "yargs": "^17.3.1",
 "@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
-"@nechlophomeriaa/spotifydl": "^1.0.31"
+"@nechlophomeriaa/spotifydl": "^1.0.31",
+"p-queue": "^7.3.3"
 },
 "optionalDependencies": {
 "wa-sticker-formatter": "^4.3.2",
