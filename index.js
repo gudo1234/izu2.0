@@ -278,18 +278,7 @@ const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('
 const chats = Object.entries(conn.chats).filter(([jid, chat]) => !jid.endsWith('@g.us') && chat.isChats).map((v) => v[0])
 }
 
-import PQueue from 'p-queue';
-const messageQueue = new PQueue({ concurrency: 1 });
-
-conn.ev.on('messages.upsert', async (m) => {
-  messageQueue.add(async () => {
-    try {
-      await conn.handler(m);
-    } catch (err) {
-      console.error('Error procesando mensaje:', err);
-    }
-  });
-})
+conn.ev.on('messages.upsert', conn.handler)
 conn.ev.on('connection.update', conn.connectionUpdate)
 conn.ev.on('creds.update', conn.credsUpdate)
 isInit = false
