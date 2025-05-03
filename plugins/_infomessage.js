@@ -2,7 +2,7 @@ let handler = m => m
 handler.before = async function (m, { conn, isBotAdmin }) {
 
 let chat = globalThis.db.data.chats[m.chat];
-
+let tag = `@${m.sender.split`@`[0]}`
 if (isBotAdmin && chat.autoRechazar) {
 const prefixes = ['6', '90', '963', '966', '967', '249', '212', '92', '93', '94', '7', '49', '2', '91', '48']
 if (prefixes.some(prefix => m.sender.startsWith(prefix))) {
@@ -20,6 +20,7 @@ await conn.groupRequestParticipantsUpdate(m.chat, [jid], "approve")}}
 
 } if (isBotAdmin && chat.antifake) {
 const antiFakePrefixes = ['6', '90', '212', '92', '93', '94', '7', '49', '2', '91', '48']
+conn.reply(m.chat, `*Los números árabes no están permitidos en este grupo.*\n${e} Eliminado ${tag}`, m)
 if (antiFakePrefixes.some(prefix => m.sender.startsWith(prefix))) {
 global.db.data.users[m.sender].block = true
 await conn.groupParticipantsUpdate(m.chat, [m.sender], 'remove')}}
