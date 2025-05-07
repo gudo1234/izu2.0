@@ -97,6 +97,8 @@ let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izu
 │ ${e}${s}toimg *‹rєρℓy›*
 │ ${e}${s}ver *‹rєρℓy›*
 │ ${e}${s}sticker *‹rєρℓy›*
+│ ${e}${s}sticker2 *‹rєρℓy›*
+│ ${e}${s}sticker -c *‹rєρℓy›*
 │ ${e}${s}brat *‹τ×τ›*
 │ ${e}${s}hd *‹rєρℓy›*
 │ ${e}${s}ssweb *‹υяʟ›*
