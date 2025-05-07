@@ -13,7 +13,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
 
   // Detectar si el texto es una URL
   if (/^https?:\/\/[^ ]+$/.test(text)) {
-    return conn.reply(m.chat, `${e} Solo se permite ingresar texto para realizar una búsqueda. Si deseas descargar directamente, utiliza el comando con una URL permitida.`, m);
+    return conn.reply(m.chat, `${e} Solo se permite ingresar texto para realizar una búsqueda.\n\nSi deseas descargar directamente, utiliza el comando ${usedPrefix + command}dl https://www.xnxx.es/video-1331hhfa/rubia_de_tetas_grandes_es_golpeada_y_un_bocado_de_semen`, m);
   }
 
   try {
