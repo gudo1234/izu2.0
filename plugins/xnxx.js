@@ -11,39 +11,44 @@ const handler = async (m, {conn, text, usedPrefix, command}) => {
   }
 
   try {
-    await conn.reply(m.chat, `Buscando y descargando 5 videos aleatorios, espera un momento...`, m);
+    await conn.reply(m.chat, `Buscando y procesando el video, espera un momento...`, m);
 
-    let videos = [];
+    let videoData = null;
 
     if (text.includes('xnxx.com')) {
-      // Si es link directo, solo descarga ese
-      const res = await xnxxdl(text);
-      videos.push({title: res.result.title, url: res.result.files.high});
+      // Si es un link directo
+      try {
+        const res = await xnxxdl(text);
+        videoData = { title: res.result.title, url: res.result.files.high };
+      } catch (err) {
+        throw new Error('No se pudo descargar el video desde el enlace proporcionado.');
+      }
     } else {
       // Búsqueda por texto
       const res = await xnxxsearch(text);
       const list = res.result;
       if (!list.length) throw new Error('No se encontraron resultados.');
 
-      // Mezclar aleatoriamente y seleccionar 5
-      const shuffled = list.sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 5);
+      // Escoge un video aleatorio
+      const randomVideo = list[Math.floor(Math.random() * list.length)];
 
-      for (const vid of selected) {
-        const dl = await xnxxdl(vid.link);
-        videos.push({title: dl.result.title, url: dl.result.files.high});
+      try {
+        const dl = await xnxxdl(randomVideo.link);
+        videoData = { title: dl.result.title, url: dl.result.files.high };
+      } catch (err) {
+        throw new Error('Ocurrió un error al intentar descargar el video encontrado.');
       }
     }
 
-    // Enviar videos uno por uno
-    for (const v of videos) {
-      if (!v.url) continue;
-      await conn.sendMessage(m.chat, {
-        document: { url: v.url },
-        mimetype: 'video/mp4',
-        fileName: `${v.title}.mp4`
-      }, { quoted: m });
+    if (!videoData || !videoData.url) {
+      throw new Error('No se pudo obtener el enlace de descarga del video.');
     }
+
+    await conn.sendMessage(m.chat, {
+      document: { url: videoData.url },
+      mimetype: 'video/mp4',
+      fileName: `${videoData.title}.mp4`
+    }, { quoted: m });
 
   } catch (e) {
     return conn.reply(m.chat, `Ocurrió un error:\n${e.message}`, m);
@@ -85,4 +90,4 @@ async function xnxxdl(URL) {
   };
   const title = $('meta[property="og:title"]').attr('content') || 'video_xnxx';
   return {status: 200, result: {title, files}};
-}
+                            }
