@@ -2,62 +2,54 @@ import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 
 const handler = async (m, {conn, text, usedPrefix, command}) => {
-  if (!db.data.chats[m.chat].nsfw && m.isGroup) {
-    return conn.reply(m.chat, `El contenido *NSFW* está desactivado en este grupo.\nUn admin puede activarlo con: *${usedPrefix}nsfw on*`, m);
-  }
-
-  if (!text) {
-    return conn.reply(m.chat, `Por favor, ingresa un término o un enlace de Xnxx.\nEjemplo: *${usedPrefix + command} colegiala latina*`, m);
-  }
-
   try {
-    await conn.reply(m.chat, `Buscando y procesando el video, espera un momento...`, m);
-
-    let videoData = null;
-
-    if (text.includes('xnxx.com')) {
-      // Si es un link directo
-      try {
-        const res = await xnxxdl(text);
-        videoData = { title: res.result.title, url: res.result.files.high };
-      } catch (err) {
-        throw new Error(`Error al procesar el enlace directo: ${err.message}`);
-      }
-    } else {
-      // Búsqueda por texto
-      const res = await xnxxsearch(text);
-      const list = res.result;
-      if (!list.length) throw new Error('No se encontraron resultados en la búsqueda.');
-
-      // Escoge un video aleatorio
-      const randomVideo = list[Math.floor(Math.random() * list.length)];
-
-      try {
-        const dl = await xnxxdl(randomVideo.link);
-        videoData = { title: dl.result.title, url: dl.result.files.high };
-      } catch (err) {
-        throw new Error(`Error al intentar descargar el video encontrado: ${err.message}`);
-      }
+    if (!db.data.chats[m.chat].nsfw && m.isGroup) {
+      return conn.reply(m.chat, `El contenido NSFW está desactivado en este grupo.\nActívalo con: *${usedPrefix}nsfw on*`, m);
     }
 
-    if (!videoData || !videoData.url) {
+    if (!text) {
+      return conn.reply(m.chat, `Envía una búsqueda. Ejemplo:\n${usedPrefix}${command} latina`, m);
+    }
+
+    // BUSQUEDA
+    const res = await xnxxsearch(text);
+    const resultados = res.result;
+
+    if (!resultados || resultados.length === 0) {
+      throw new Error('No se encontraron resultados para tu búsqueda.');
+    }
+
+    // VIDEO ALEATORIO
+    const elegido = resultados[Math.floor(Math.random() * resultados.length)];
+
+    await conn.reply(m.chat, `Buscando y descargando:\n*${elegido.title}*`, m);
+
+    // DESCARGA
+    const data = await xnxxdl(elegido.link);
+    const video = data.result.files.high;
+
+    if (!video) {
       throw new Error('No se pudo obtener el enlace de descarga del video.');
     }
 
-    try {
-      await conn.sendMessage(m.chat, {
-        document: { url: videoData.url },
+    await conn.sendMessage(
+      m.chat,
+      {
+        document: { url: video },
         mimetype: 'video/mp4',
-        fileName: `${videoData.title}.mp4`
-      }, { quoted: m });
-    } catch (sendError) {
-      throw new Error(`Error al enviar el video: ${sendError.message}`);
-    }
+        fileName: data.result.title || 'xnxx_video.mp4'
+      },
+      { quoted: m }
+    );
 
-  } catch (e) {
-    // Agregar detalles del stack trace con la línea de error
-    console.error(e);  // Esto te mostrará en la consola del servidor de ejecución el error completo
-    return conn.reply(m.chat, `Ocurrió un error en el proceso:\n\n${e.stack || e.message}\n\nPosibles soluciones:\n- Revisa el enlace o la búsqueda.\n- Asegúrate de que el formato del enlace sea correcto.`, m);
+  } catch (err) {
+    const errorMsg = `Ocurrió un error en el proceso:\n\n` +
+      `*Error:* ${err.message}\n` +
+      `*Stack:* ${err.stack?.split('\n').slice(0, 2).join('\n')}\n\n` +
+      `Posibles causas:\n- El video no tiene link directo.\n- El HTML de la página cambió.\n- El selector falló.\n\n` +
+      `Intenta con otro término o revisa el código.`;
+
+    return conn.reply(m.chat, errorMsg, m);
   }
 };
 
@@ -66,34 +58,47 @@ handler.group = true;
 
 export default handler;
 
-// Funciones auxiliares
-
+// FUNCIONES
 async function xnxxsearch(query) {
   const baseurl = 'https://www.xnxx.com';
-  const res = await fetch(`${baseurl}/search/${encodeURIComponent(query)}/${Math.floor(Math.random() * 3) + 1}`);
+  const page = Math.floor(Math.random() * 3) + 1;
+
+  const res = await fetch(`${baseurl}/search/${encodeURIComponent(query)}/${page}`);
   const html = await res.text();
   const $ = cheerio.load(html);
 
   const results = [];
-  $('div.mozaique div.thumb').each((i, el) => {
-    const link = baseurl + $(el).find('a').attr('href').replace('/THUMBNUM/', '/');
-    const title = $(el).find('a').attr('title') || 'Sin título';
-    const info = $(el).find('p.metadata').text() || 'Sin info';
-    results.push({title, info, link});
+
+  $('div.mozaique div.thumb').each((_, el) => {
+    const a = $(el).find('a');
+    const link = baseurl + (a.attr('href') || '').replace('/THUMBNUM/', '/');
+    const title = a.attr('title') || 'Sin título';
+    const info = $(el).next('div.thumb-under').find('p.metadata').text() || 'Sin info';
+
+    if (link && title) results.push({ title, info, link });
   });
 
-  return {code: 200, status: true, result: results};
+  if (results.length === 0) throw new Error('No se encontraron videos.');
+
+  return { code: 200, status: true, result: results };
 }
 
 async function xnxxdl(URL) {
   const res = await fetch(URL);
   const html = await res.text();
   const $ = cheerio.load(html);
+
   const videoScript = $('#video-player-bg > script:nth-child(6)').html();
+  if (!videoScript) throw new Error('No se encontró el script del video.');
+
   const files = {
     low: (videoScript.match(/html5player\.setVideoUrlLow'(.*?)'/) || [])[1],
-    high: (videoScript.match(/html5player\.setVideoUrlHigh'(.*?)'/) || [])[1],
+    high: (videoScript.match(/html5player\.setVideoUrlHigh'(.*?)'/) || [])[1]
   };
+
+  if (!files.high) throw new Error('No se encontró la URL de alta calidad.');
+
   const title = $('meta[property="og:title"]').attr('content') || 'video_xnxx';
-  return {status: 200, result: {title, files}};
-      }
+
+  return { status: 200, result: { title, files } };
+}
