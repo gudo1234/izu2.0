@@ -74,6 +74,7 @@ let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izu
 │ ${e}${s}mediafire *‹υяʟ›*
 │ ${e}${s}apk *‹τ×τ›*
 │ ${e}${s}gitclone *‹υяʟ›*
+│ ${e}${s}porno *‹τ×τ›*
 │ ${e}${s}xnxxdl *‹υяʟ›*
 │ ${e}${s}xvideosdl *‹υяʟ›*
 │ ${e}${s}imagen *‹τ×τ›*
