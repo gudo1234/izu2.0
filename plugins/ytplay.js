@@ -21,7 +21,7 @@ await m.react('✅')
 await m.react('✖️')
 }}
 
-handler.command = ['play']
+handler.command = ['p']
 handler.group = true;
 export default handler
 
