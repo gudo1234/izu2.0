@@ -1,28 +1,52 @@
-import Starlights from '@StarlightsTeam/Scraper'
+import Starlights from '@StarlightsTeam/Scraper';
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-if (!args || !args[0]) return conn.reply(m.chat, `${e} Ingresa un enlace del vídeo de TikTok junto al comando.`, m)
-    if (!args[0].match(/tiktok/gi)) return conn.reply(m.chat, `Verifica que el link sea de TikTok`, m, rcanal).then(_ => m.react('✖️'))
-  await m.react('🕓')
-try {
-let { title, author, duration, views, likes, comment, share, published, downloads, dl_url } = await Starlights.tiktokdl(args[0])
-let txt = '`乂  T I K T O K  -  D O W N L O A D`\n\n'
-    txt += `	✩  *Título* : ${title}\n`
-    txt += `	✩  *Autor* : ${author}\n`
-    txt += `	✩  *Duración* : ${duration} segundos\n`
-    txt += `	✩  *Vistas* : ${views}\n`
-    txt += `	✩  *Likes* : ${likes}\n`
-    txt += `	✩  *Comentarios* : ${comment}\n`
-    txt += `	✩  *Compartidos* : ${share}\n`
-    txt += `	✩  *Publicado* : ${published}\n`
-    txt += `	✩  *Descargas* : ${downloads}\n\n`
-    txt += `> *${wm}*`
-await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m, null, rcanal)
-await m.react('✅')
-} catch {
-await m.react('✖️')
-}}
-handler.command = ['tiktok', 'ttdl', 'tiktokdl', 'tiktoknowm', 'tt']
-handler.group = true
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) {
+    return conn.reply(m.chat, `${e} Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola\n*${usedPrefix + command}* https://vt.tiktok.com/ZShhtdsRh/` , m)
+  }
 
-export default handler
+  await m.react('🕒');
+
+  try {
+    let result, dl_url;
+
+    if (text.match(/tiktok\.com\/[^\s]+/gi)) {
+      result = await Starlights.tiktokdl(text);
+    } else {
+      result = await Starlights.tiktokvid(text);
+    }
+
+    dl_url = result.dl_url;
+
+    let txt = `╭───── • ─────╮\n`;
+    txt += `  𖤐 \`TIKTOK EXTRACTOR\` 𖤐\n`;
+    txt += `╰───── • ─────╯\n\n`;
+
+    txt += `✦ *Título* : ${result.title}\n`;
+    txt += `✦ *Autor* : ${result.author}\n`;
+    txt += `✦ *Duración* : ${result.duration} segundos\n`;
+    txt += `✦ *Vistas* : ${result.views}\n`;
+    txt += `✦ *Likes* : ${result.likes}\n`;
+    txt += `✦ *Comentarios* : ${result.comment || result.comments_count}\n`;
+    txt += `✦ *Compartidos* : ${result.share || result.share_count}\n`;
+    txt += `✦ *Publicado* : ${result.published}\n`;
+    txt += `✦ *Descargas* : ${result.downloads || result.download_count}\n\n`;
+
+    txt += `╭───── • ─────╮\n`;
+    txt += `> *${global.textbot || 'Bot'}*\n`;
+    txt += `╰───── • ─────╯\n`;
+
+    await m.react('✅');
+    await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m, null, rcanal)
+
+  } catch (err) {
+    console.error(err);
+    await conn.sendMessage(m.chat, {
+      text: `❌ Ocurrió un error al procesar el video.`
+    }, { quoted: m });
+  }
+};
+
+handler.command = ['t', 'tiktokvid', 'tiktoksearch', 'tiktokdl', 'ttvid', 'tt', 'tiktok'];
+handler.group = true;
+export default handler;
