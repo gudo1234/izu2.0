@@ -21,13 +21,13 @@ const handler = async (m, {conn, text, usedPrefix, command}) => {
         const res = await xnxxdl(text);
         videoData = { title: res.result.title, url: res.result.files.high };
       } catch (err) {
-        throw new Error('No se pudo descargar el video desde el enlace proporcionado.');
+        throw new Error(`Error al procesar el enlace directo: ${err.message}`);
       }
     } else {
       // Búsqueda por texto
       const res = await xnxxsearch(text);
       const list = res.result;
-      if (!list.length) throw new Error('No se encontraron resultados.');
+      if (!list.length) throw new Error('No se encontraron resultados en la búsqueda.');
 
       // Escoge un video aleatorio
       const randomVideo = list[Math.floor(Math.random() * list.length)];
@@ -36,7 +36,7 @@ const handler = async (m, {conn, text, usedPrefix, command}) => {
         const dl = await xnxxdl(randomVideo.link);
         videoData = { title: dl.result.title, url: dl.result.files.high };
       } catch (err) {
-        throw new Error('Ocurrió un error al intentar descargar el video encontrado.');
+        throw new Error(`Error al intentar descargar el video encontrado: ${err.message}`);
       }
     }
 
@@ -44,14 +44,18 @@ const handler = async (m, {conn, text, usedPrefix, command}) => {
       throw new Error('No se pudo obtener el enlace de descarga del video.');
     }
 
-    await conn.sendMessage(m.chat, {
-      document: { url: videoData.url },
-      mimetype: 'video/mp4',
-      fileName: `${videoData.title}.mp4`
-    }, { quoted: m });
+    try {
+      await conn.sendMessage(m.chat, {
+        document: { url: videoData.url },
+        mimetype: 'video/mp4',
+        fileName: `${videoData.title}.mp4`
+      }, { quoted: m });
+    } catch (sendError) {
+      throw new Error(`Error al enviar el video: ${sendError.message}`);
+    }
 
   } catch (e) {
-    return conn.reply(m.chat, `Ocurrió un error:\n${e.message}`, m);
+    return conn.reply(m.chat, `Ocurrió un error:\nFuente del error: ${e.message}`, m);
   }
 };
 
@@ -90,4 +94,4 @@ async function xnxxdl(URL) {
   };
   const title = $('meta[property="og:title"]').attr('content') || 'video_xnxx';
   return {status: 200, result: {title, files}};
-                            }
+    }
