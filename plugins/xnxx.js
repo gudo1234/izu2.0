@@ -27,12 +27,12 @@ const handler = async (m, { text, conn, usedPrefix, command }) => {
     await conn.reply(m.chat, 'Procesando video, espera un momento...', m);
 
     const res = await xnxxdl(url);
-    const video = res.result.files.high;
+    const videoUrl = res.result.files.low || res.result.files.HLS;
 
-    if (!video) throw new Error('No se encontró la URL de alta calidad.');
+    if (!videoUrl) throw new Error('No se encontró ninguna URL de video.');
 
     await conn.sendMessage(m.chat, {
-      document: { url: video },
+      document: { url: videoUrl },
       mimetype: 'video/mp4',
       fileName: res.result.title + '.mp4'
     }, { quoted: m });
@@ -80,19 +80,17 @@ async function xnxxdl(URL) {
   const title = $('meta[property="og:title"]').attr('content') || 'Sin título';
 
   const regexLow = /setVideoUrlLow'(https:\/\/[^']+)'/.exec(html);
-  const regexHigh = /setVideoUrlHigh'(https:\/\/[^']+)'/.exec(html);
   const regexHLS = /setVideoHLS'(https:\/\/[^']+)'/.exec(html);
 
   const files = {
     low: regexLow?.[1] || null,
-    high: regexHigh?.[1] || null,
     HLS: regexHLS?.[1] || null
   };
 
-  if (!files.high) throw new Error('No se encontró la URL de alta calidad.');
+  if (!files.low && !files.HLS) throw new Error('No se encontró la URL de video.');
 
   return {
     status: 200,
     result: { title, URL, files }
   };
-      }
+}
