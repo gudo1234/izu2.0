@@ -13,7 +13,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
 
   // Detectar si el texto es una URL
   if (/^https?:\/\/[^ ]+$/.test(text)) {
-    return conn.reply(m.chat, `${e} Solo se permite ingresar texto para realizar una búsqueda.\n\nSi deseas descargar directamente, utiliza el comando *${usedPrefix + command}dl* https://www.xnxx.es/video-1331hhfa/rubia_de_tetas_grandes_es_golpeada_y_un_bocado_de_semen`, m);
+    return conn.reply(m.chat, `${e} Solo se permite ingresar texto para realizar una búsqueda.\n\nSi deseas descargar directamente, utiliza el comando *${usedPrefix}xnxxdl* https://www.xnxx.es/video-1331hhfa/rubia_de_tetas_grandes_es_golpeada_y_un_bocado_de_semen`, m);
   }
 
   try {
@@ -46,10 +46,8 @@ const handler = async (m, { text, usedPrefix, command }) => {
     // Descarga el video
     const { title, dl_url } = await Starlights.xnxxdl(firstVideoLink);
 
-    // Enviar el archivo
+    await m.react('✅');
     await conn.sendFile(m.chat, dl_url, title + '.mp4', `\`Título:\` ${title}`, m);
-
-    await m.react('✅'); // Reacción de éxito
     global.videoListXXX.push(vids_);
   } catch (err) {
     return conn.reply(m.chat, `${e} Ocurrió un error: ${err.message}`, m);
