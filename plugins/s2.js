@@ -74,7 +74,7 @@ let handler = async (m, { conn, args }) => {
   if (stiker) return conn.sendFile(m.chat, stiker, 'sticker.webp', '', m)
 }
 
-handler.command = ['s2']
+handler.command = ['s2', 'sticker2', 'stiker2']
 handler.group = true;
 
 export default handler
