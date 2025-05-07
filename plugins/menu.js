@@ -4,7 +4,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}` : 'Desconocido'
+  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
 let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
 let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
   let or = ['grupo', 'gif', 'anu'];
