@@ -5,7 +5,7 @@ import uploadFile from '../lib/uploadFile.js';
 import uploadImage from '../lib/uploadImage.js';
 import { webp2png } from '../lib/webp2mp4.js';
 
-let handler = async (m, { conn, args }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   const isCircle = args.includes('-c');
   let q = m.quoted ? m.quoted : m;
   let mime = (q.msg || q).mimetype || q.mediaType || '';
@@ -19,7 +19,12 @@ let handler = async (m, { conn, args }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `${e} Por favor, envia una imagen, video corto o link de imagen para hacer un sticker.`, m, rcanal);
+    return conn.reply(m.chat, `${e} Menciona una *imagen/video/gif* junto al comando: ${command} para convertirlo en un sticker.
+
+Variantes para crear stickers, *solo disponible para imágenes* 🧩
+
+> Sticker Circular
+⚡ *Comando* : ${usedPrefix + command} -c`, m);
   }
 
   m.react('🧩');
@@ -62,7 +67,7 @@ let handler = async (m, { conn, args }) => {
 };
 
 handler.group = true;
-handler.command = ['r', 's', 'sticker', 'stiker'];
+handler.command = ['s', 'sticker', 'stiker'];
 export default handler;
 
 async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
