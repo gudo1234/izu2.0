@@ -77,7 +77,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 }
 ╰───── • ─────╯
 `.trim();
-    await conn.sendFile(m.chat, thumbnail, 'thumbnail.jpg', txt, m, null, rcanal);
+    await conn.sendFile(m.chat, thumbnail, 'thumbnail.jpg', caption, m, null, rcanal);
 
     let downloadUrl;
 
