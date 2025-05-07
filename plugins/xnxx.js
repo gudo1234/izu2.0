@@ -44,7 +44,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
     const { title, dl_url } = await Starlights.xnxxdl(firstVideoLink);
 
     // Envía el video al grupo
-    await conn.sendFile(m.chat, dl_url, title + '.mp4', `*» Título* : ${title}`, m);
+    await conn.sendFile(m.chat, dl_url, title + '.mp4', `\`Título:\` ${title}`, m);
     
     global.videoListXXX.push(vids_);
   } catch (e) {
@@ -52,8 +52,8 @@ const handler = async (m, { text, usedPrefix, command }) => {
   }
 };
 
-handler.command = ['xnxxsearch', 'xnxxs', 'xnxx'];
-handler.group = false;
+handler.command = ['xnxx', 'porno', 'sexo'];
+handler.group = true;
 
 export default handler;
 
