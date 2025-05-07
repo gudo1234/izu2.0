@@ -29,7 +29,7 @@ const handler = async (m, {conn, text, usedPrefix, command}) => {
     const video = data.result.files.high;
 
     if (!video) {
-      throw new Error('No se pudo obtener el enlace de descarga del video.');
+      throw new Error('No se encontró la URL de alta calidad.');
     }
 
     await conn.sendMessage(
@@ -59,6 +59,7 @@ handler.group = true;
 export default handler;
 
 // FUNCIONES
+
 async function xnxxsearch(query) {
   const baseurl = 'https://www.xnxx.com';
   const page = Math.floor(Math.random() * 3) + 1;
@@ -88,17 +89,18 @@ async function xnxxdl(URL) {
   const html = await res.text();
   const $ = cheerio.load(html);
 
-  const videoScript = $('#video-player-bg > script:nth-child(6)').html();
-  if (!videoScript) throw new Error('No se encontró el script del video.');
-
-  const files = {
-    low: (videoScript.match(/html5player\.setVideoUrlLow'(.*?)'/) || [])[1],
-    high: (videoScript.match(/html5player\.setVideoUrlHigh'(.*?)'/) || [])[1]
-  };
-
-  if (!files.high) throw new Error('No se encontró la URL de alta calidad.');
-
   const title = $('meta[property="og:title"]').attr('content') || 'video_xnxx';
 
-  return { status: 200, result: { title, files } };
+  // Buscar entre todos los scripts
+  const scripts = $('script').map((i, el) => $(el).html()).get();
+  const scriptWithVideo = scripts.find(s => s && s.includes('html5player.setVideoUrlHigh'));
+
+  if (!scriptWithVideo) throw new Error('No se encontró ningún script que contenga la URL del video.');
+
+  const high = (scriptWithVideo.match(/html5player\.setVideoUrlHigh'(.*?)'/) || [])[1];
+  const low = (scriptWithVideo.match(/html5player\.setVideoUrlLow'(.*?)'/) || [])[1];
+
+  if (!high) throw new Error('No se encontró la URL de alta calidad.');
+
+  return { status: 200, result: { title, files: { high, low } } };
 }
