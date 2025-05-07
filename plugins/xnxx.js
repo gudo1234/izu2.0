@@ -55,7 +55,9 @@ const handler = async (m, {conn, text, usedPrefix, command}) => {
     }
 
   } catch (e) {
-    return conn.reply(m.chat, `Ocurrió un error:\nFuente del error: ${e.message}`, m);
+    // Agregar detalles del stack trace con la línea de error
+    console.error(e);  // Esto te mostrará en la consola del servidor de ejecución el error completo
+    return conn.reply(m.chat, `Ocurrió un error en el proceso:\n\n${e.stack || e.message}\n\nPosibles soluciones:\n- Revisa el enlace o la búsqueda.\n- Asegúrate de que el formato del enlace sea correcto.`, m);
   }
 };
 
@@ -94,4 +96,4 @@ async function xnxxdl(URL) {
   };
   const title = $('meta[property="og:title"]').attr('content') || 'video_xnxx';
   return {status: 200, result: {title, files}};
-    }
+      }
