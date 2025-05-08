@@ -102,7 +102,7 @@ const formatos = [
           title: title,
           body: en,
           thumbnailUrl: redes,
-          thumbnail: imBuffer,
+          thumbnail: thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true,
@@ -126,7 +126,7 @@ const formatos = [
           title: title,
           body: en,
           thumbnailUrl: redes,
-          thumbnail: imBuffer,
+          thumbnail: thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true
@@ -150,7 +150,7 @@ const formatos = [
           title: title,
           body: en,
           thumbnailUrl: redes,
-          thumbnail: imBuffer,
+          thumbnail: thumbnail,
           sourceUrl: redes,
           mediaType: 1
         }
@@ -170,7 +170,7 @@ const formatos = [
         mediaType: 1,
         sourceUrl: redes,
         thumbnailUrl: redes,
-        thumbnail: imBuffer }}},
+        thumbnail: thumbnail }}},
   { quoted: m })
 ];
 
