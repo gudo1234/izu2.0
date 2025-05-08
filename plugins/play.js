@@ -95,25 +95,23 @@ const getBuffer = async (url) => {
 const imBuffer = await getBuffer(thumbnail);
 
 const formatos = [
-  async () => conn.sendMessage(
-    m.chat,
-    {
-      text: caption,
-      contextInfo: {
-        externalAdReply: {
-          title: title,
-          body: en,
-          thumbnailUrl: redes,
-          thumbnail: imBuffer,
-          sourceUrl: redes,
-          mediaType: 1,
-          showAdAttribution: true,
-          renderLargerThumbnail: true
-        }
+  async () => conn.sendMessage(m.chat,
+  {
+    text: caption,
+    contextInfo: {
+      externalAdReply: {
+        title: title,
+        body: en,
+        thumbnailUrl: red,
+        thumbnail: imBuffer,
+        sourceUrl: red,
+        mediaType: 1,
+        showAdAttribution: true,
+        renderLargerThumbnail: true
       }
-    },
-    { quoted: m }
-  ),
+    }
+  },
+  { quoted: m }),
 
   async () => conn.sendMessage(
     m.chat,
