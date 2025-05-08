@@ -1,8 +1,6 @@
 import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
 import fetch from 'node-fetch'
 import yts from 'yt-search'
-import ytdl from 'ytdl-core'
-import axios from 'axios'
 import { createRequire } from 'module'
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -13,46 +11,35 @@ const { ytmp3, ytmp4 } = require("@hiudyy/ytdl")
 
 let tempStorage = {}
 
-const extractYouTubeID = (url = '') => {
-  try {
-    if (ytdl.validateURL(url)) {
-      return ytdl.getURLVideoID(url)
-    }
-    return null
-  } catch (e) {
-    console.error('Error extrayendo ID con ytdl-core:', e)
-    return null
-  }
-}
-
-const handler = async (m, {conn, command, args, text, usedPrefix}) => {
+const handler = async (m, { conn, command, args, text, usedPrefix }) => {
   try {
     if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
 
-    const videoIdToFind = extractYouTubeID(text)
+    const query = args.join(' ')
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    const ytMatch = query.match(ytRegex)
 
     await m.react('🕓')
 
-    let ytplay2
+    let video = null
     try {
-      const searchResult = await search(args.join(' '))
-      ytplay2 = await yts(videoIdToFind ? `https://youtu.be/${videoIdToFind}` : text)
+      if (ytMatch) {
+        const videoId = ytMatch[1]
+        const result = await yts({ videoId })
+        video = result
+      } else {
+        const search = await yts(query)
+        video = search.videos[0]
+        if (!video) return m.reply('❌ No se pudo encontrar el video.')
+      }
     } catch (e) {
-      console.error('Error haciendo búsqueda YTS en línea ~31:', e)
+      console.error('Error línea ~32:', e)
+      return m.reply(`❗ Error en búsqueda de YouTube: ${e.message}`)
     }
 
-    if (videoIdToFind) {
-      const videoId = videoIdToFind
-      ytplay2 = ytplay2.all?.find(item => item.videoId === videoId) || ytplay2.videos?.find(item => item.videoId === videoId)
-    }
+    if (!video?.url) return m.reply('❌ No se pudo encontrar el video.')
 
-    ytplay2 = ytplay2?.all?.[0] || ytplay2?.videos?.[0] || ytplay2
-
-    if (!ytplay2?.url) {
-      return m.reply('❌ No se pudo encontrar el video.')
-    }
-
-    const caption = `「✦」Descargando *<${ytplay2.title || 'Desconocido'}>*\n> ✦ Descripción » *${ytplay2.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(ytplay2.views) || 'Desconocido'}*\n> ⴵ Duración » *${ytplay2.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2.url}*\n
+    const caption = `「✦」Descargando *<${video.title || 'Desconocido'}>*\n> ✦ Descripción » *${video.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(video.views) || 'Desconocido'}*\n> ⴵ Duración » *${video.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${video.ago || 'Desconocido'}*\n> ✦ Url » *${video.url}*\n
 *_Para seleccionar, responde a este mensaje:_*
 > "a" o "audio" → *Audio*
 > "v" o "video" → *Video*
@@ -60,13 +47,13 @@ const handler = async (m, {conn, command, args, text, usedPrefix}) => {
 > "vdoc" → *Video (doc)*
 `.trim()
 
-    tempStorage[m.sender] = { url: ytplay2.url, title: ytplay2.title, resp: m, usedPrefix, command }
+    tempStorage[m.sender] = { url: video.url, title: video.title, resp: m, usedPrefix, command }
 
     let thumb
     try {
-      thumb = (await conn.getFile(ytplay2.thumbnail))?.data
+      thumb = (await conn.getFile(video.thumbnail))?.data
     } catch (e) {
-      console.error('Error obteniendo thumbnail en línea ~54:', e)
+      console.error('Error línea ~54 al obtener thumbnail:', e)
     }
 
     const JT = {
@@ -76,8 +63,8 @@ const handler = async (m, {conn, command, args, text, usedPrefix}) => {
           body: textbot,
           mediaType: 1,
           previewType: 0,
-          mediaUrl: ytplay2.url,
-          sourceUrl: ytplay2.url,
+          mediaUrl: video.url,
+          sourceUrl: video.url,
           thumbnail: thumb,
           renderLargerThumbnail: true,
         },
@@ -87,8 +74,8 @@ const handler = async (m, {conn, command, args, text, usedPrefix}) => {
     await conn.reply(m.chat, caption, m, JT)
 
   } catch (err) {
-    console.error('Error general en línea ~74:', err)
-    m.reply(`❗ Error inesperado:\n${err.message}`)
+    console.error('Error general línea ~74:', err)
+    m.reply(`❗ Error inesperado en línea ~74:\n${err.message}`)
   }
 }
 
@@ -129,17 +116,13 @@ handler.before = async (m, { conn }) => {
     }
 
   } catch (err) {
-    console.error('Error en handler.before en línea ~112:', err)
-    m.reply(`❗ Error al procesar la descarga: ${err.message}`)
+    console.error('Error en handler.before línea ~112:', err)
+    m.reply(`❗ Error al procesar la descarga en línea ~112: ${err.message}`)
   }
 }
 
 handler.command = handler.help = ['pla', 'play2']
 export default handler
-
-async function search(query, options = {}) {
-  return (await yts.search({ query, hl: 'es', gl: 'ES', ...options })).videos
-}
 
 function formatViews(views) {
   if (!views) return "No disponible"
@@ -147,4 +130,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-                                                                                                                                                                                                                                                                                    }
+}
