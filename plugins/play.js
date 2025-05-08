@@ -101,9 +101,9 @@ const formatos = [
     externalAdReply: {
       title: title,
       body: en,
-      thumbnailUrl: g,
+      thumbnailUrl: redes,
       thumbnail: imBuffer,
-      sourceUrl: g,
+      sourceUrl: redes,
       mediaType: 1,
       renderLargerThumbnail: true
     }
