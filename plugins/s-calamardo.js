@@ -6,7 +6,7 @@ async function generarStickerConTexto(texto) {
   const canvas = createCanvas(width, height)
   const ctx = canvas.getContext('2d')
   const imagenes = [
-    'https://files.catbox.moe/1gjno8.jpg',
+    'https://files.catbox.moe/g125nh.jpg',
     'https://files.catbox.moe/f3t7xs.jpg'
   ]
   const urlAleatoria = imagenes[Math.floor(Math.random() * imagenes.length)]
