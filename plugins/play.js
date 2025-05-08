@@ -59,8 +59,6 @@ const videoUrls = [
   'https://files.catbox.moe/rdyj5q.mp4',
   'https://files.catbox.moe/693ws4.mp4'
 ]
-const im = await global.getRandomIcon();
-const red = await global.getRandomRed();
 const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
 
 const en = `${
