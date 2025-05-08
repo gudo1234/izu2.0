@@ -14,30 +14,31 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     tempSearchResults[m.sender] = videos
 
-    let list = `✦.──  Youtube Search  ──.✦
-
+    let list = `╭───── • ─────╮
+✩ \`Youtube Search\` ✩
+╰───── • ─────╯
 𔖲𔖮𔖭 *Búsqueda* : ${text}
 𔖲𔖮𔖭 *Resultados* : ${videos.length}
 
-✦.──  Download Methods  ──.✦
+> 📌 Tutorial Download
 
-⪦ *Audio* ➠ Responde a este mensaje escribiendo \`a número\`
+✑ *Audio* ➧ Responde a este mensaje escribiendo \`a número\`
 *Ejemplo:* \`a 1\`
 
-⪦ *Video* ➠ Responde a este mensaje escribiendo \`v número\`
+✑ *Video* ➧ Responde a este mensaje escribiendo \`v número\`
 *Ejemplo:* \`v 1\`
 
-⪦ *Documento* ➠ Responde a este mensaje escribiendo \`d número [tipo]\`
+✑ *Documento* ➧ Responde a este mensaje escribiendo \`d número [tipo]\`
 *Ejemplo:* \`d 1 audio\``
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n✩ *Nro* : ${i + 1}
-✩ *Título* : ${vid.title}
-✩ *Duración* : ${vid.timestamp}
-✩ *Publicado* : ${vid.ago}
-✩ *Autor* : ${vid.author.name}
-✩ *Url* : ${vid.url}`
+      list += `\n\n⟣ *Nro* : ${i + 1}
+⟣ *Título* : ${vid.title}
+⟣ *Duración* : ${vid.timestamp}
+⟣ *Publicado* : ${vid.ago}
+⟣ *Autor* : ${vid.author.name}
+⟣ *Url* : ${vid.url}`
     }
 
     let thumb = await (await fetch(videos[0].thumbnail)).buffer()
