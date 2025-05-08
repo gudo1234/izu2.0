@@ -1,4 +1,4 @@
-/*import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
+import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
 import fetch from 'node-fetch'
 import yts from 'yt-search'
 import { createRequire } from 'module'
@@ -121,7 +121,7 @@ handler.before = async (m, { conn }) => {
   }
 }
 
-handler.command = handler.help = ['pla', 'play2']
+handler.command = handler.help = ['audio', 'video']
 export default handler
 
 function formatViews(views) {
@@ -130,4 +130,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-}*/
+}
