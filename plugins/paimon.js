@@ -42,7 +42,7 @@ const JT = {
       contextInfo: {
         externalAdReply: {
           title: '✧ Youtube • Music ✧',
-          body: dev,
+          body: textbot,
           mediaType: 1,
           previewType: 0,
           mediaUrl: ytplay2.url,
