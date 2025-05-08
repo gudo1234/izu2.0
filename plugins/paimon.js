@@ -12,7 +12,9 @@ import { join } from 'path'
 import { tmpdir } from 'os'
 
 let tempStorage = {}
-const youtubeRegexID = /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+
+// Se actualizó esta expresión para detectar todos los tipos de enlaces de YouTube
+const youtubeRegexID = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
 
 const handler = async (m, {conn, command, args, text, usedPrefix}) => {
 try {
@@ -153,12 +155,14 @@ server = 'Siputzx'
 result = null
 server = null
 }}
+//}
 if (result) {
 m.reply(`> ✅ *Vídeo procesado. Servidor:* \`${server}\``)
 await conn.sendMessage(m.chat, { [typeVideo.type]: { url: result }, fileName: `${title || videoData.title || 'video'}.mp4`, mimetype: 'video/mp4'}, { quoted: gata.resp })
 } else {
 m.reply('❌ No se pudo obtener el video desde ningún servidor.')
 }}
+//delete tempStorage[m.sender]
 }
 handler.command = handler.help = ['pla', 'play2']
 export default handler
@@ -217,4 +221,4 @@ async function downloadToTempFile(url) {
   const tempPath = join(tmpdir(), `${Date.now()}.mp4`)
   await writeFile(tempPath, videoBuffer.data)
   return tempPath
-  }
+      }
