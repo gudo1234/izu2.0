@@ -15,12 +15,12 @@ let tempStorage = {}
 
 const extractYouTubeID = (url = '') => {
   try {
-    const cleanedUrl = url.trim().replace(/&.*$/, '') // Elimina parámetros adicionales
-    const regex = /(?:youtube\.com\/(?:.*v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-    const match = cleanedUrl.match(regex)
-    return match ? match[1] : null
+    if (ytdl.validateURL(url)) {
+      return ytdl.getURLVideoID(url)
+    }
+    return null
   } catch (e) {
-    console.error('Error extrayendo ID:', e)
+    console.error('Error extrayendo ID con ytdl-core:', e)
     return null
   }
 }
@@ -147,4 +147,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-        }
+      }
