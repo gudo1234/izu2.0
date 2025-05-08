@@ -158,22 +158,7 @@ const formatos = [
         }
       }
     },
-    { quoted: m }),
-
-  async () => conn.sendFile(m.chat, im, 'sticker.webp',
-  '', m, true,
-  { contextInfo: {
-      forwardingScore: 200,
-      isForwarded: false,
-      externalAdReply: {
-        showAdAttribution: false,
-        title: title,
-        body: en,
-        mediaType: 1,
-        sourceUrl: redes,
-        thumbnailUrl: redes,
-        thumbnail: imBuffer }}},
-  { quoted: m })
+    { quoted: m })
 ];
 
 const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
