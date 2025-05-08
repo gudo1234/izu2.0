@@ -34,7 +34,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
       }
     } catch (e) {
       console.error('Error línea ~32:', e)
-      return m.reply(`❗ Error en búsqueda de YouTube: ${e.message}`)
+      return m.reply(`Error en búsqueda de YouTube: ${e.message}`)
     }
 
     if (!video?.url) return m.reply('❌ No se pudo encontrar el video.')
