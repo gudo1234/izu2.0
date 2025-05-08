@@ -86,8 +86,10 @@ const caption = `
 `.trim();
 
 const getBuffer = async (url) => {
-  const res = await axios.get(url, { responseType: 'arraybuffer' });
-  return Buffer.from(res.data, 'binary');
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Error al obtener buffer: ${res.statusText}`);
+  const arrayBuffer = await res.arrayBuffer();
+  return Buffer.from(arrayBuffer);
 };
 
 const imBuffer = await getBuffer(thumbnail);
@@ -102,7 +104,7 @@ const formatos = [
           title: title,
           body: en,
           thumbnailUrl: redes,
-          thumbnail: thumbnail,
+          thumbnail: imBuffer,
           sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true,
@@ -126,7 +128,7 @@ const formatos = [
           title: title,
           body: en,
           thumbnailUrl: redes,
-          thumbnail: thumbnail,
+          thumbnail: imBuffer,
           sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true
@@ -150,7 +152,7 @@ const formatos = [
           title: title,
           body: en,
           thumbnailUrl: redes,
-          thumbnail: thumbnail,
+          thumbnail: imBuffer,
           sourceUrl: redes,
           mediaType: 1
         }
@@ -170,7 +172,7 @@ const formatos = [
         mediaType: 1,
         sourceUrl: redes,
         thumbnailUrl: redes,
-        thumbnail: thumbnail }}},
+        thumbnail: imBuffer }}},
   { quoted: m })
 ];
 
