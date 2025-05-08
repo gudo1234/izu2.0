@@ -60,7 +60,7 @@ const videoUrls = [
   'https://files.catbox.moe/693ws4.mp4'
 ]
 const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
-
+const im = await (await fetch(icono)).buffer()
 const en = `${
   isAudioDoc ? '📂 Enviando audio como documento...' :
   isVideo ? '🎞️ Enviando video...' :
@@ -101,9 +101,9 @@ const formatos = [
         externalAdReply: {
           title: title,
           body: en,
-          thumbnailUrl: red,
+          thumbnailUrl: redes,
           thumbnail: imBuffer,
-          sourceUrl: red,
+          sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true,
           renderLargerThumbnail: true
@@ -125,9 +125,9 @@ const formatos = [
         externalAdReply: {
           title: title,
           body: en,
-          thumbnailUrl: red,
+          thumbnailUrl: redes,
           thumbnail: imBuffer,
-          sourceUrl: red,
+          sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true
         }
@@ -149,9 +149,9 @@ const formatos = [
         externalAdReply: {
           title: title,
           body: en,
-          thumbnailUrl: red,
+          thumbnailUrl: redes,
           thumbnail: imBuffer,
-          sourceUrl: red,
+          sourceUrl: redes,
           mediaType: 1
         }
       }
@@ -168,8 +168,8 @@ const formatos = [
         title: title,
         body: en,
         mediaType: 1,
-        sourceUrl: red,
-        thumbnailUrl: red,
+        sourceUrl: redes,
+        thumbnailUrl: redes,
         thumbnail: imBuffer }}},
   { quoted: m })
 ];
