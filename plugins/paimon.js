@@ -12,19 +12,24 @@ const require = createRequire(import.meta.url)
 const { ytmp3, ytmp4 } = require("@hiudyy/ytdl")
 
 let tempStorage = {}
-const youtubeRegexID = /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+
+const extractYouTubeID = (url = '') => {
+  try {
+    const cleanedUrl = url.trim().replace(/&.*$/, '') // Elimina parámetros adicionales
+    const regex = /(?:youtube\.com\/(?:.*v=|embed\/|v\/|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    const match = cleanedUrl.match(regex)
+    return match ? match[1] : null
+  } catch (e) {
+    console.error('Error extrayendo ID:', e)
+    return null
+  }
+}
 
 const handler = async (m, {conn, command, args, text, usedPrefix}) => {
   try {
     if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
 
-    let videoIdToFind = null
-    try {
-      const match = text.match(youtubeRegexID)
-      if (match) videoIdToFind = match[1]
-    } catch (e) {
-      console.error('Error extrayendo videoId en línea ~24:', e)
-    }
+    const videoIdToFind = extractYouTubeID(text)
 
     await m.react('🕓')
 
@@ -142,4 +147,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-          }
+        }
