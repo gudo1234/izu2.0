@@ -95,23 +95,20 @@ const getBuffer = async (url) => {
 const imBuffer = await getBuffer(thumbnail);
 
 const formatos = [
-  async () => conn.sendMessage(m.chat,
-  {
-    text: caption,
-    contextInfo: {
-      externalAdReply: {
-        title: title,
-        body: en,
-        thumbnailUrl: red,
-        thumbnail: imBuffer,
-        sourceUrl: red,
-        mediaType: 1,
-        showAdAttribution: true,
-        renderLargerThumbnail: true
-      }
+  async () => conn.sendMessage(m.chat, {
+  text: caption,
+  contextInfo: {
+    externalAdReply: {
+      title: title,
+      body: en,
+      thumbnailUrl: g,
+      thumbnail: imBuffer,
+      sourceUrl: g,
+      mediaType: 1,
+      renderLargerThumbnail: true
     }
-  },
-  { quoted: m }),
+  }
+}, { quoted: m }),
 
   async () => conn.sendMessage(
     m.chat,
@@ -136,27 +133,29 @@ const formatos = [
     { quoted: m }
   ),
 
-  async () => conn.sendMessage(
-    m.chat,
-    {
+  async () => conn.sendMessage(m.chat, {
       text: caption,
       contextInfo: {
-        forwardingScore: 0,
-        isForwarded: true,
-        businessMessageForwardInfo: {
-          businessOwnerJid: '50492280729@s.whatsapp.net'
-        },
-        externalAdReply: {
-          title: title,
-          body: en,
-          thumbnailUrl: redes,
-          thumbnail: imBuffer,
-          sourceUrl: redes,
-          mediaType: 1
-        }
-      }
-    },
-    { quoted: m })
+          mentionedJid: [],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+              newsletterJid: channelRD.id,
+              newsletterName: channelRD.name,
+              serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+              title: title,
+              body: en,
+              thumbnailUrl: redes,
+              thumbnail: imBuffer,
+              sourceUrl: redes,
+              mediaType: 1,
+              showAdAttribution: true,
+              renderLargerThumbnail: true,
+          },
+      },
+  }, { quoted: m })
 ];
 
 const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
