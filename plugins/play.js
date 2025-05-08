@@ -55,12 +55,26 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const isVideo = videoCommands.includes(command);
     const isVideoDoc = docVideoCommands.includes(command);
 
-    const caption = `
+const videoUrls = [
+  'https://files.catbox.moe/rdyj5q.mp4',
+  'https://files.catbox.moe/693ws4.mp4'
+]
+const im = await global.getRandomIcon();
+const red = await global.getRandomRed();
+const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
+
+const en = `${
+  isAudioDoc ? '📂 Enviando audio como documento...' :
+  isVideo ? '🎞️ Enviando video...' :
+  isVideoDoc ? '📂 Enviando video como documento...' :
+  '🔊 Enviando audio...'
+}`;
+
+const caption = `
 ╭───── • ─────╮
   𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
-✦ *🎶 Título:* ${title}
 ✦ *📺 Canal:* ${author?.name || 'Desconocido'}
 ✦ *⏱️ Duración:* ${timestamp || 'N/A'}
 ✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
@@ -69,16 +83,101 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ✦ *🔗 Link:* ${url}
 
 ╭───── • ─────╮
-> ${
-  isAudioDoc ? '📂 Enviando audio como documento...' :
-  isVideo ? '🎞️ Enviando video...' :
-  isVideoDoc ? '📂 Enviando video como documento...' :
-  '🔊 Enviando audio...'
-}
+> ${textbot}
 ╰───── • ─────╯
 `.trim();
-    await conn.sendFile(m.chat, thumbnail, 'thumbnail.jpg', caption, m, null, rcanal);
 
+const getBuffer = async (url) => {
+  const res = await axios.get(url, { responseType: 'arraybuffer' });
+  return Buffer.from(res.data, 'binary');
+};
+
+const imBuffer = await getBuffer(thumbnail);
+
+const formatos = [
+  async () => conn.sendMessage(
+    m.chat,
+    {
+      text: caption,
+      contextInfo: {
+        externalAdReply: {
+          title: title,
+          body: en,
+          thumbnailUrl: red,
+          thumbnail: imBuffer,
+          sourceUrl: red,
+          mediaType: 1,
+          showAdAttribution: true,
+          renderLargerThumbnail: true
+        }
+      }
+    },
+    { quoted: m }
+  ),
+
+  async () => conn.sendMessage(
+    m.chat,
+    {
+      video: { url: jpg },
+      gifPlayback: true,
+      caption: caption,
+      contextInfo: {
+        forwardingScore: 0,
+        isForwarded: true,
+        externalAdReply: {
+          title: title,
+          body: en,
+          thumbnailUrl: red,
+          thumbnail: imBuffer,
+          sourceUrl: red,
+          mediaType: 1,
+          showAdAttribution: true
+        }
+      }
+    },
+    { quoted: m }
+  ),
+
+  async () => conn.sendMessage(
+    m.chat,
+    {
+      text: caption,
+      contextInfo: {
+        forwardingScore: 0,
+        isForwarded: true,
+        businessMessageForwardInfo: {
+          businessOwnerJid: '50492280729@s.whatsapp.net'
+        },
+        externalAdReply: {
+          title: title,
+          body: en,
+          thumbnailUrl: red,
+          thumbnail: imBuffer,
+          sourceUrl: red,
+          mediaType: 1
+        }
+      }
+    },
+    { quoted: m }),
+
+  async () => conn.sendFile(m.chat, im, 'sticker.webp',
+  '', m, true,
+  { contextInfo: {
+      forwardingScore: 200,
+      isForwarded: false,
+      externalAdReply: {
+        showAdAttribution: false,
+        title: title,
+        body: en,
+        mediaType: 1,
+        sourceUrl: red,
+        thumbnailUrl: red,
+        thumbnail: imBuffer }}},
+  { quoted: m })
+];
+
+const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
+await randomFormato();
     let downloadUrl;
 
     try {
