@@ -115,7 +115,6 @@ handler.before = async (m, { conn }) => {
       await send(asDocument ? 'document' : 'video', download, `${title}.mp4`, 'video/mp4')
     }
 
-    delete tempSearchResults[m.sender]
   } catch (e) {
     console.error(e)
     m.reply(`❌ Error en la descarga:\n${e.message}`)
