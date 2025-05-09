@@ -24,9 +24,10 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     let video = null
     try {
       if (ytMatch) {
-        const videoId = ytMatch[1]
-        const result = await yts({ videoId })
-        video = result
+        const videoUrl = ytMatch[0] // usamos la URL completa
+        const result = await yts(videoUrl)
+        video = result?.videos?.[0]
+        if (!video) return m.reply('❌ No se pudo obtener información del video.')
       } else {
         const search = await yts(query)
         video = search.videos[0]
@@ -130,4 +131,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-                                                                                                                                                                                                                                                                            }
+}
