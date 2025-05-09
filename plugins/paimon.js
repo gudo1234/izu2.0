@@ -16,7 +16,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
 
     const query = args.join(' ')
-    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s]*)?/
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     const ytMatch = query.match(ytRegex)
 
     await m.react('🕓')
@@ -24,9 +24,9 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     let video = null
     try {
       if (ytMatch) {
-        const videoUrl = ytMatch[0] // usamos la URL completa
-        const result = await yts(videoUrl)
-        video = result?.videos?.[0]
+        const videoId = ytMatch[1]
+        const search = await yts(videoId)
+        video = search.videos.find(v => v.videoId === videoId)
         if (!video) return m.reply('❌ No se pudo obtener información del video.')
       } else {
         const search = await yts(query)
