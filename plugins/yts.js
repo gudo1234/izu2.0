@@ -33,7 +33,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n#*${i + 1}.* ${vid.title}
+      list += `\n\n*#${i + 1}.* ${vid.title}
 ⌚ ${vid.timestamp} | ${vid.ago}
 👤 ${vid.author.name}
 🔗 ${vid.url}`
