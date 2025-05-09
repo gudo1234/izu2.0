@@ -21,8 +21,8 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 𔖲𔖮𔖭 *Búsqueda* : ${text}
 𔖲𔖮𔖭 *Resultados* : ${videos.length}
 
-> 📌 Tutorial Download
-
+📌 \`Tutorial Download\`
+━━━━━━━━━━━━━
 ✑ *Audio* ➧ Responde a este mensaje escribiendo \`a número\`
 *Ejemplo:* \`a 1\`
 
@@ -30,7 +30,8 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 *Ejemplo:* \`v 1\`
 
 ✑ *Documento* ➧ Responde a este mensaje escribiendo \`d número [tipo]\`
-*Ejemplo:* \`d 1 audio\`\n━━━━━━━━━━━━━`
+*Ejemplo:* \`d 1 audio\`
+━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
