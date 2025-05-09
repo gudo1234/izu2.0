@@ -1,11 +1,12 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
 import axios from 'axios';
+
 let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`❌ Por favor, ingresa una petición para realizar una búsqueda en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
+  if (!text) return m.reply(`${e} Por favor, ingresa una petición para realizar una búsqueda en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
   await m.react('🕓')
 
   try {
@@ -35,7 +36,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n✦ *Nro* : ${i + 1}
+      list += `\n\n${e} *Nro* : ${i + 1}
 ⟣ *Título* : ${vid.title}
 ⟣ *Duración* : ${vid.timestamp}
 ⟣ *Publicado* : ${vid.ago}
@@ -48,7 +49,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
       'https://files.catbox.moe/rdyj5q.mp4',
       'https://files.catbox.moe/693ws4.mp4'
     ]
-    const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
+    const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)]
 
     const formatos = [
       async () => conn.sendMessage(m.chat, {
@@ -105,13 +106,13 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
             mediaType: 1,
             showAdAttribution: true,
             renderLargerThumbnail: true,
-          },
-        },
+          }
+        }
       }, { quoted: m })
     ]
 
-    const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
-    await randomFormato();
+    const randomFormato = formatos[Math.floor(Math.random() * formatos.length)]
+    await randomFormato()
     await m.react('✅')
   } catch (e) {
     console.error(e)
@@ -123,7 +124,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 handler.before = async (m, { conn }) => {
   if (!m.quoted || !m.quoted.text || !tempSearchResults[m.sender]) return
   const text = m.text.trim().toLowerCase()
-  const match = text.match(/^(a|v|d)\s?(\d+)(?:\s(audio|video))?$/i)
+  const match = text.match(/^(a|v|d)\s?#?(\d+)(?:\s+(audio|video))?$/i)
   if (!match) return
 
   const [_, type, numStr, docType] = match
@@ -141,11 +142,12 @@ handler.before = async (m, { conn }) => {
         [msgType]: { url: downloadUrl },
         fileName,
         mimetype
-      }, { quoted: m }) // <- Aquí sí usamos quoted: m
+      }, { quoted: m })
     }
 
+    await m.reply(`Enviando *${title}*...`)
+
     if (type === 'a') {
-      await m.reply(`Enviando *${title}*...`)
       const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
       const json = await res.json()
       const download = json?.result?.download?.url
@@ -154,7 +156,6 @@ handler.before = async (m, { conn }) => {
     }
 
     if (type === 'v') {
-      await m.reply(`Enviando *${title}*...`)
       const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
       const json = await res.json()
       const download = json?.data?.url
@@ -164,7 +165,6 @@ handler.before = async (m, { conn }) => {
 
     if (type === 'd') {
       const formato = docType === 'video' ? 'video' : 'audio'
-      await m.reply(`Enviando *${title}*...`)
       if (formato === 'audio') {
         const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
         const json = await res.json()
@@ -189,5 +189,5 @@ handler.before = async (m, { conn }) => {
 }
 
 handler.command = ['yts', 'ytsearch']
-handler.group = true;
+handler.group = true
 export default handler
