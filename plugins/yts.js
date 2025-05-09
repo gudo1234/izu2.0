@@ -16,21 +16,24 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     tempSearchResults[m.sender] = videos
 
-    let list = `╭─── 『 *YouTube Search* 』 ───⬣
+    let list = `╭───── • ─────╮
+✩ \`Youtube Search\` ✩
+
 🔍 *Consulta:* ${text}
 📥 *Resultados:* ${videos.length}
-📌 *Responde a este mensaje con:*
-╰────────────────⬣
+╰───── • ─────╯
 
-• \`a 1\` o \`audio 1\` → Audio
-• \`v 1\` o \`video 1\` → Video
-• \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
-• \`d 1 v\` o \`documento 1 video\` → Documento de Video
+📌 *Responde a este mensaje con:*
+━━━━━━━━━━━━━
+✑ \`a 1\` o \`audio 1\` → Audio
+✑ \`v 1\` o \`video 1\` → Video
+✒ \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
+✒ \`d 1 v\` o \`documento 1 video\` → Documento de Video
 ━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n*${i + 1}.* ${vid.title}
+      list += `\n\n#*${i + 1}.* ${vid.title}
 ⌚ ${vid.timestamp} | ${vid.ago}
 👤 ${vid.author.name}
 🔗 ${vid.url}`
@@ -95,7 +98,7 @@ handler.before = async (m, { conn }) => {
 
   try {
     await conn.sendMessage(m.chat, {
-      text: `Enviando *${title}* como ${asDocument ? 'documento' : format}...`,
+      text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : format}...`,
     }, { quoted: m })
 
     const send = async (msgType, downloadUrl, fileName, mimetype) => {
