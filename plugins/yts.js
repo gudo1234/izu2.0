@@ -30,11 +30,11 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 *Ejemplo:* \`v 1\`
 
 ✑ *Documento* ➧ Responde a este mensaje escribiendo \`d número [tipo]\`
-*Ejemplo:* \`d 1 audio\``
+*Ejemplo:* \`d 1 audio\`\n━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n⟣ *Nro* : ${i + 1}
+      list += `\n\n${e} *Nro* : ${i + 1}
 ⟣ *Título* : ${vid.title}
 ⟣ *Duración* : ${vid.timestamp}
 ⟣ *Publicado* : ${vid.ago}
