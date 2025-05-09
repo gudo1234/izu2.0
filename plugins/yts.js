@@ -5,7 +5,7 @@ let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`${e} Por favor, ingresa una petición para realizar una búsqueda en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
+  if (!text) return m.reply(`❌ Por favor, ingresa una petición para realizar una búsqueda en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
   await m.react('🕓')
 
   try {
@@ -35,7 +35,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n${e} *Nro* : ${i + 1}
+      list += `\n\n✦ *Nro* : ${i + 1}
 ⟣ *Título* : ${vid.title}
 ⟣ *Duración* : ${vid.timestamp}
 ⟣ *Publicado* : ${vid.ago}
@@ -44,80 +44,74 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     }
 
     let thumb = await (await fetch(videos[0].thumbnail)).buffer()
- const videoUrls = [
-  'https://files.catbox.moe/rdyj5q.mp4',
-  'https://files.catbox.moe/693ws4.mp4'
-]
-const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
-const im = await (await fetch(icono)).buffer()
+    const videoUrls = [
+      'https://files.catbox.moe/rdyj5q.mp4',
+      'https://files.catbox.moe/693ws4.mp4'
+    ]
+    const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
 
-const formatos = [
-  async () => conn.sendMessage(m.chat, {
-  text: list,
-  contextInfo: {
-    externalAdReply: {
-      title: wm,
-      body: textbot,
-      thumbnailUrl: redes,
-      thumbnail: thumb,
-      sourceUrl: redes,
-      mediaType: 1,
-      renderLargerThumbnail: true
-    }
-  }
-}, { quoted: m }),
-
-  async () => conn.sendMessage(
-    m.chat,
-    {
-      video: { url: jpg },
-      gifPlayback: true,
-      caption: list,
-      contextInfo: {
-        forwardingScore: 0,
-        isForwarded: true,
-        externalAdReply: {
-          title: wm,
-          body: textbot,
-          thumbnailUrl: redes,
-          thumbnail: thumb,
-          sourceUrl: redes,
-          mediaType: 1,
-          showAdAttribution: true
+    const formatos = [
+      async () => conn.sendMessage(m.chat, {
+        text: list,
+        contextInfo: {
+          externalAdReply: {
+            title: wm,
+            body: textbot,
+            thumbnailUrl: redes,
+            thumbnail: thumb,
+            sourceUrl: redes,
+            mediaType: 1,
+            renderLargerThumbnail: true
+          }
         }
-      }
-    },
-    { quoted: m }
-  ),
+      }, { quoted: m }),
 
-  async () => conn.sendMessage(m.chat, {
-      text: list,
-      contextInfo: {
+      async () => conn.sendMessage(m.chat, {
+        video: { url: jpg },
+        gifPlayback: true,
+        caption: list,
+        contextInfo: {
+          forwardingScore: 0,
+          isForwarded: true,
+          externalAdReply: {
+            title: wm,
+            body: textbot,
+            thumbnailUrl: redes,
+            thumbnail: thumb,
+            sourceUrl: redes,
+            mediaType: 1,
+            showAdAttribution: true
+          }
+        }
+      }, { quoted: m }),
+
+      async () => conn.sendMessage(m.chat, {
+        text: list,
+        contextInfo: {
           mentionedJid: [],
           isForwarded: true,
           forwardedNewsletterMessageInfo: {
-              newsletterJid: channelRD.id,
-              newsletterName: channelRD.name,
-              serverMessageId: -1,
+            newsletterJid: channelRD.id,
+            newsletterName: channelRD.name,
+            serverMessageId: -1,
           },
           forwardingScore: false,
           externalAdReply: {
-              title: wm,
-              body: textbot,
-              thumbnailUrl: redes,
-              thumbnail: thumb,
-              sourceUrl: redes,
-              mediaType: 1,
-              showAdAttribution: true,
-              renderLargerThumbnail: true,
+            title: wm,
+            body: textbot,
+            thumbnailUrl: redes,
+            thumbnail: thumb,
+            sourceUrl: redes,
+            mediaType: 1,
+            showAdAttribution: true,
+            renderLargerThumbnail: true,
           },
-      },
-  }, { quoted: m })
-];
+        },
+      }, { quoted: m })
+    ]
 
-const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
-await randomFormato();
-// 🟢🟢
+    const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
+    await randomFormato();
     await m.react('✅')
   } catch (e) {
     console.error(e)
@@ -147,11 +141,11 @@ handler.before = async (m, { conn }) => {
         [type]: { url: downloadUrl },
         fileName,
         mimetype
-      }, { quoted: m.quoted })
+      }, { quoted: m })
     }
 
     if (type === 'a') {
-      await m.reply(`Enviando`)
+      await m.reply(`Enviando *${title}*...`)
       const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
       const json = await res.json()
       const download = json?.result?.download?.url
@@ -160,7 +154,7 @@ handler.before = async (m, { conn }) => {
     }
 
     if (type === 'v') {
-      await m.reply(`Enviando`)
+      await m.reply(`Enviando *${title}*...`)
       const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
       const json = await res.json()
       const download = json?.data?.url
@@ -170,7 +164,7 @@ handler.before = async (m, { conn }) => {
 
     if (type === 'd') {
       const form = docType === 'video' ? 'video' : 'audio'
-      await m.reply(`Enviando`)
+      await m.reply(`Enviando *${title}*...`)
       if (form === 'audio') {
         const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
         const json = await res.json()
@@ -185,6 +179,9 @@ handler.before = async (m, { conn }) => {
         await sendMsg('document', download, title + '.mp4', 'video/mp4')
       }
     }
+
+    delete tempSearchResults[m.sender] // Limpia los resultados tras enviar
+
   } catch (e) {
     console.error('Error en descarga:', e)
     m.reply(`❌ Error en la descarga:\n${e.message}`)
