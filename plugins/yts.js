@@ -177,7 +177,7 @@ handler.before = async (m, { conn }) => {
       }
     }
 
-    delete tempSearchResults[m.sender]
+    //delete tempSearchResults[m.sender]
   } catch (e) {
     console.error('Error en descarga:', e)
     m.reply(`❌ Error en la descarga:\n${e.message}`)
