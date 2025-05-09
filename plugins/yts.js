@@ -27,8 +27,8 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 ━━━━━━━━━━━━━
 ✑ \`a 1\` o \`audio 1\` → Audio
 ✑ \`v 1\` o \`video 1\` → Video
-✒ \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
-✒ \`d 1 v\` o \`documento 1 video\` → Documento de Video
+⁌ \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
+⁌ \`d 1 v\` o \`documento 1 video\` → Documento de Video
 ━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
@@ -36,7 +36,8 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
       list += `\n\n*#${i + 1}.* ${vid.title}
 ⌚ ${vid.timestamp} | ${vid.ago}
 👤 ${vid.author.name}
-🔗 ${vid.url}`
+🔗 ${vid.url}
+_______________`
     }
 
     const thumb = await (await fetch(videos[0].thumbnail)).buffer()
