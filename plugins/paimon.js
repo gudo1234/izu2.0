@@ -16,18 +16,15 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
 
     const query = args.join(' ')
-    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-    const ytMatch = query.match(ytRegex)
+    const videoId = extractVideoId(query)
 
     await m.react('🕓')
 
     let video = null
     try {
-      if (ytMatch) {
-        const videoId = ytMatch[1]
-        const search = await yts(videoId)
-        video = search.videos.find(v => v.videoId === videoId)
-        if (!video) return m.reply('❌ No se pudo obtener información del video.')
+      if (videoId) {
+        const result = await yts({ videoId })
+        video = result
       } else {
         const search = await yts(query)
         video = search.videos[0]
@@ -35,7 +32,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
       }
     } catch (e) {
       console.error('Error línea ~32:', e)
-      return m.reply(`Error en búsqueda de YouTube: ${e.message}`)
+      return m.reply(`❗ Error en búsqueda de YouTube: ${e.message}`)
     }
 
     if (!video?.url) return m.reply('❌ No se pudo encontrar el video.')
@@ -76,7 +73,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
 
   } catch (err) {
     console.error('Error general línea ~74:', err)
-    m.reply(`❗ Error inesperado en línea ~74:\n${err.message}`)
+    m.reply(`Error inesperado en línea ~74:\n${err.message}`)
   }
 }
 
@@ -118,12 +115,33 @@ handler.before = async (m, { conn }) => {
 
   } catch (err) {
     console.error('Error en handler.before línea ~112:', err)
-    m.reply(`❗ Error al procesar la descarga en línea ~112: ${err.message}`)
+    m.reply(`Error al procesar la descarga en línea ~112: ${err.message}`)
   }
 }
 
 handler.command = handler.help = ['audio', 'video']
+handler.group = true
 export default handler
+
+function extractVideoId(url = '') {
+  try {
+    const cleanUrl = new URL(url.trim())
+    if (cleanUrl.hostname.includes('youtu.be')) {
+      return cleanUrl.pathname.replace('/', '').substring(0, 11)
+    }
+    if (cleanUrl.hostname.includes('youtube.com')) {
+      const v = cleanUrl.searchParams.get('v')
+      if (v) return v.substring(0, 11)
+      const parts = cleanUrl.pathname.split('/')
+      return parts.includes('shorts') || parts.includes('embed') ? parts.pop().substring(0, 11) : null
+    }
+  } catch {
+    const regex = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/|live\/))([a-zA-Z0-9_-]{11})/
+    const match = url.match(regex)
+    return match?.[1] || null
+  }
+  return null
+}
 
 function formatViews(views) {
   if (!views) return "No disponible"
@@ -131,4 +149,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-}
+                           }
