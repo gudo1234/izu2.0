@@ -18,8 +18,8 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     let list = `╭───── • ─────╮
 ✩ \`Youtube Search\` ✩
 ╰───── • ─────╯
-𔖲𔖮𔖭 *Búsqueda* : ${text}
-𔖲𔖮𔖭 *Resultados* : ${videos.length}
+✑ *Búsqueda* : ${text}
+✑ *Resultados* : ${videos.length}
 
 📌 \`Tutorial Download\`
 ━━━━━━━━━━━━━
@@ -50,16 +50,6 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 ]
 const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
 const im = await (await fetch(icono)).buffer()
-    //await conn.sendFile(m.chat, thumb, 'yt.jpg', list, m)
-// 🟢🟢
-/*const getBuffer = async (url) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Error al obtener buffer: ${res.statusText}`);
-  const arrayBuffer = await res.arrayBuffer();
-  return Buffer.from(arrayBuffer);
-};
-
-const imBuffer = await getBuffer(thumbnail);*/
 
 const formatos = [
   async () => conn.sendMessage(m.chat, {
