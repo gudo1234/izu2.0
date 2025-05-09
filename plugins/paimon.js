@@ -2,10 +2,6 @@ import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
 import fetch from 'node-fetch'
 import yts from 'yt-search'
 import { createRequire } from 'module'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
-import { tmpdir } from 'os'
-
 const require = createRequire(import.meta.url)
 const { ytmp3, ytmp4 } = require("@hiudyy/ytdl")
 
@@ -13,51 +9,38 @@ let tempStorage = {}
 
 const handler = async (m, { conn, command, args, text, usedPrefix }) => {
   try {
-    if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
-
-    const query = args.join(' ')
-    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g
-    const matches = [...query.matchAll(ytRegex)]
+    if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o URL(s) de la música a descargar.`, m)
 
     await m.react('🕓')
 
-    let video = null
-    try {
-      if (matches.length > 0) {
-        const videoId = matches[0][1]
+    const ytRegexGlobal = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g
+    const matches = [...text.matchAll(ytRegexGlobal)]
+
+    if (matches.length === 0) {
+      // No hay URLs, usar como búsqueda
+      const search = await yts(text)
+      const video = search.videos[0]
+      if (!video) return m.reply('❌ No se pudo encontrar el video.')
+
+      await enviarRespuesta(video, m, conn, usedPrefix, command)
+    } else {
+      // Iterar sobre todas las URLs encontradas
+      for (const match of matches) {
+        const videoId = match[1]
         const result = await yts({ videoId })
-        video = result
-      } else {
-        let search = await yts(query)
-        video = search.videos[0]
-
-        // Fallback si yt-search no devuelve resultados
-        if (!video) {
-          const res = await fetch(`https://delirius-apiofc.vercel.app/search/ytsearch?q=${encodeURIComponent(query)}`)
-          const json = await res.json()
-          const first = json?.result?.[0]
-          if (!first?.url) throw new Error('No se pudo obtener resultados desde la API alternativa.')
-          video = {
-            title: first.title,
-            description: first.description || '',
-            views: parseInt(first.views.replace(/[^0-9]/g, '')) || 0,
-            timestamp: first.duration,
-            ago: first.uploaded || '',
-            url: first.url,
-            thumbnail: first.thumbnail
-          }
-        }
-
-        if (!video) return m.reply('❌ No se pudo encontrar el video.')
+        if (!result || !result.title) continue
+        await enviarRespuesta(result, m, conn, usedPrefix, command)
       }
-    } catch (e) {
-      console.error('Error en la búsqueda de YouTube, línea ~32:', e)
-      return m.reply(`❗ Error en búsqueda de YouTube: ${e.message}`)
     }
 
-    if (!video?.url) return m.reply('❌ No se pudo obtener información del video.')
+  } catch (err) {
+    console.error('Error general línea ~35:', err)
+    m.reply(`Error inesperado en línea ~35:\n${err.message}`)
+  }
+}
 
-    const caption = `「✦」Descargando *<${video.title || 'Desconocido'}>*\n> ✦ Descripción » *${video.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(video.views) || 'Desconocido'}*\n> ⴵ Duración » *${video.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${video.ago || 'Desconocido'}*\n> ✦ Url » *${video.url}*\n
+async function enviarRespuesta(video, m, conn, usedPrefix, command) {
+  const caption = `「✦」Descargando *<${video.title || 'Desconocido'}>*\n> ✦ Descripción » *${video.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(video.views) || 'Desconocido'}*\n> ⴵ Duración » *${video.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${video.ago || 'Desconocido'}*\n> ✦ Url » *${video.url}*\n
 *_Para seleccionar, responde a este mensaje:_*
 > "a" o "audio" → *Audio*
 > "v" o "video" → *Video*
@@ -65,36 +48,31 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
 > "vdoc" → *Video (doc)*
 `.trim()
 
-    tempStorage[m.sender] = { url: video.url, title: video.title, resp: m, usedPrefix, command }
+  tempStorage[m.sender] = { url: video.url, title: video.title, resp: m, usedPrefix, command }
 
-    let thumb
-    try {
-      thumb = (await conn.getFile(video.thumbnail))?.data
-    } catch (e) {
-      console.error('Error al obtener thumbnail, línea ~54:', e)
-    }
-
-    const JT = {
-      contextInfo: {
-        externalAdReply: {
-          title: '✧ Youtube • Music ✧',
-          body: textbot,
-          mediaType: 1,
-          previewType: 0,
-          mediaUrl: video.url,
-          sourceUrl: video.url,
-          thumbnail: thumb,
-          renderLargerThumbnail: true,
-        },
-      },
-    }
-
-    await conn.reply(m.chat, caption, m, JT)
-
-  } catch (err) {
-    console.error('Error inesperado en la línea general ~74:', err)
-    m.reply(`Error inesperado en la línea ~74:\n${err.message}`)
+  let thumb
+  try {
+    thumb = (await conn.getFile(video.thumbnail))?.data
+  } catch (e) {
+    console.error('Error al obtener thumbnail:', e)
   }
+
+  const JT = {
+    contextInfo: {
+      externalAdReply: {
+        title: '✧ Youtube • Music ✧',
+        body: 'Selecciona el formato de descarga',
+        mediaType: 1,
+        previewType: 0,
+        mediaUrl: video.url,
+        sourceUrl: video.url,
+        thumbnail: thumb,
+        renderLargerThumbnail: true,
+      },
+    },
+  }
+
+  await conn.reply(m.chat, caption, m, JT)
 }
 
 handler.before = async (m, { conn }) => {
@@ -134,8 +112,8 @@ handler.before = async (m, { conn }) => {
     }
 
   } catch (err) {
-    console.error('Error al procesar la descarga, línea ~112:', err)
-    m.reply(`Error al procesar la descarga en la línea ~112: ${err.message}`)
+    console.error('Error en handler.before línea ~112:', err)
+    m.reply(`Error al procesar la descarga en línea ~112: ${err.message}`)
   }
 }
 
@@ -149,4 +127,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-                       }
+}
