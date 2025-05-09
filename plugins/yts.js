@@ -6,7 +6,7 @@ let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`Por favor, ingresa una petición para buscar en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Shakira - Acróstico`)
+  if (!text) return m.reply(`${e} Por favor, ingresa una petición para buscar en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Bad Bunny`)
   await m.react('🕓')
 
   try {
@@ -56,7 +56,6 @@ _______________`
       }
     }, { quoted: m })
 
-    // Guardamos el ID del mensaje enviado
     tempSearchResults[m.sender]._msg = sentMsg
 
     await m.react('✅')
@@ -86,7 +85,7 @@ handler.before = async (m, { conn }) => {
   const title = video.title
   const quotedMsg = tempSearchResults[m.sender]._msg || m.quoted
 
-  let format = 'audio' // por defecto
+  let format = 'audio'
   let asDocument = false
 
   if (['video', 'v'].includes(type1)) format = 'video'
@@ -98,16 +97,18 @@ handler.before = async (m, { conn }) => {
   }
 
   try {
+    // Mensaje de "Enviando..." responde al mensaje del BOT (lista de resultados)
     await conn.sendMessage(m.chat, {
       text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : format}...`,
-    }, { quoted: m })
+    }, { quoted: quotedMsg })
 
     const send = async (msgType, downloadUrl, fileName, mimetype) => {
+      // Archivo se responde al mensaje del USUARIO (el que dijo "v 1", etc.)
       await conn.sendMessage(m.chat, {
         [msgType]: { url: downloadUrl },
         fileName,
         mimetype
-      }, { quoted: quotedMsg }) // responde al mensaje de lista
+      }, { quoted: m })
     }
 
     if (format === 'audio') {
