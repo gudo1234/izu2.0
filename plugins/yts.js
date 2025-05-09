@@ -14,8 +14,6 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     const videos = search.videos.slice(0, 20)
     if (!videos.length) return m.reply('❌ No se encontraron resultados.')
 
-    tempSearchResults[m.sender] = videos
-
     let list = `╭───── • ─────╮
 ✩ \`Youtube Search\` ✩
 
@@ -56,7 +54,11 @@ _______________`
       }
     }, { quoted: m })
 
-    tempSearchResults[m.sender]._msg = sentMsg
+    // Guardar por ID del mensaje de resultados
+    tempSearchResults[sentMsg.key.id] = {
+      videos,
+      _msg: sentMsg
+    }
 
     await m.react('✅')
   } catch (e) {
@@ -67,7 +69,10 @@ _______________`
 }
 
 handler.before = async (m, { conn }) => {
-  if (!m.quoted || !m.quoted.text || !tempSearchResults[m.sender]) return
+  if (!m.quoted || !m.quoted.id) return
+
+  const data = tempSearchResults[m.quoted.id]
+  if (!data) return
 
   const text = m.text.trim().toLowerCase()
   const match = text.match(/^(?:(a|v|audio|video|d|documento))\s*#?\s*(\d+)\s*(a|v|audio|video)?$/i)
@@ -77,13 +82,13 @@ handler.before = async (m, { conn }) => {
   const type1 = (cmd1 || '').toLowerCase()
   const type2 = (cmd2 || '').toLowerCase()
   const index = parseInt(numStr) - 1
-  const videos = tempSearchResults[m.sender]
+  const videos = data.videos
   if (!videos || !videos[index]) return m.reply('❌ Número inválido.')
 
   const video = videos[index]
   const url = video.url
   const title = video.title
-  const quotedMsg = tempSearchResults[m.sender]._msg || m.quoted
+  const quotedMsg = data._msg || m.quoted
 
   let format = 'audio'
   let asDocument = false
@@ -97,13 +102,11 @@ handler.before = async (m, { conn }) => {
   }
 
   try {
-    // Mensaje de "Enviando..." responde al mensaje del BOT (lista de resultados)
     await conn.sendMessage(m.chat, {
       text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : format}...`,
     }, { quoted: quotedMsg })
 
     const send = async (msgType, downloadUrl, fileName, mimetype) => {
-      // Archivo se responde al mensaje del USUARIO (el que dijo "v 1", etc.)
       await conn.sendMessage(m.chat, {
         [msgType]: { url: downloadUrl },
         fileName,
