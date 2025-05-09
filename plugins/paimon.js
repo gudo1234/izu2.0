@@ -24,12 +24,30 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     let video = null
     try {
       if (matches.length > 0) {
-        const videoId = matches[0][1] // Solo usamos el primero si hay varios
+        const videoId = matches[0][1]
         const result = await yts({ videoId })
         video = result
       } else {
-        const search = await yts(query)
+        let search = await yts(query)
         video = search.videos[0]
+
+        // Fallback si yt-search no devuelve resultados
+        if (!video) {
+          const res = await fetch(`https://delirius-apiofc.vercel.app/search/ytsearch?q=${encodeURIComponent(query)}`)
+          const json = await res.json()
+          const first = json?.result?.[0]
+          if (!first?.url) throw new Error('No se pudo obtener resultados desde la API alternativa.')
+          video = {
+            title: first.title,
+            description: first.description || '',
+            views: parseInt(first.views.replace(/[^0-9]/g, '')) || 0,
+            timestamp: first.duration,
+            ago: first.uploaded || '',
+            url: first.url,
+            thumbnail: first.thumbnail
+          }
+        }
+
         if (!video) return m.reply('❌ No se pudo encontrar el video.')
       }
     } catch (e) {
@@ -60,7 +78,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
       contextInfo: {
         externalAdReply: {
           title: '✧ Youtube • Music ✧',
-          body: textbot,
+          body: dev,
           mediaType: 1,
           previewType: 0,
           mediaUrl: video.url,
@@ -131,4 +149,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-}
+                       }
