@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
-import axios from 'axios';
+import axios from 'axios'
 
 let tempSearchResults = {}
 
@@ -24,14 +24,9 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
 📌 \`Tutorial Download\`
 ━━━━━━━━━━━━━
-✑ *Audio* ➧ Responde a este mensaje escribiendo \`a número\`
-*Ejemplo:* \`a 1\`
-
-✑ *Video* ➧ Responde a este mensaje escribiendo \`v número\`
-*Ejemplo:* \`v 1\`
-
-✑ *Documento* ➧ Responde a este mensaje escribiendo \`d número [tipo]\`
-*Ejemplo:* \`d 1 audio\`
+✑ *Audio* ➧ \`a 1\`, \`audio 1\`, \`d 1 a\`
+✑ *Video* ➧ \`v 1\`, \`video 1\`, \`d 1 v\`
+✑ *Documento* ➧ \`d 1 audio\`, \`d 2 video\`, \`documento 1 video\`
 ━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
@@ -123,11 +118,14 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
 handler.before = async (m, { conn }) => {
   if (!m.quoted || !m.quoted.text || !tempSearchResults[m.sender]) return
+
   const text = m.text.trim().toLowerCase()
-  const match = text.match(/^(a|v|d)\s?#?(\d+)(?:\s+(audio|video))?$/i)
+  const match = text.match(/^(?:(a|v)|d|documento|audio|video)\s*#?\s*(\d+)\s*(a|v|audio|video)?$/i)
   if (!match) return
 
-  const [_, type, numStr, docType] = match
+  const [_, t1, numStr, t2] = match
+  const type = (t1 || t2 || '').toLowerCase().charAt(0) // 'a' o 'v'
+  const isDoc = /d|documento/.test(match[0])
   const index = parseInt(numStr) - 1
   const videos = tempSearchResults[m.sender]
   if (!videos || !videos[index]) return m.reply('❌ Número inválido.')
@@ -147,7 +145,7 @@ handler.before = async (m, { conn }) => {
 
     await m.reply(`Enviando *${title}*...`)
 
-    if (type === 'a') {
+    if (!isDoc && type === 'a') {
       const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
       const json = await res.json()
       const download = json?.result?.download?.url
@@ -155,7 +153,7 @@ handler.before = async (m, { conn }) => {
       await sendMsg('audio', download, `${title}.mp3`, 'audio/mpeg')
     }
 
-    if (type === 'v') {
+    if (!isDoc && type === 'v') {
       const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
       const json = await res.json()
       const download = json?.data?.url
@@ -163,9 +161,8 @@ handler.before = async (m, { conn }) => {
       await sendMsg('video', download, `${title}.mp4`, 'video/mp4')
     }
 
-    if (type === 'd') {
-      const formato = docType === 'video' ? 'video' : 'audio'
-      if (formato === 'audio') {
+    if (isDoc) {
+      if (type === 'a') {
         const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
         const json = await res.json()
         const download = json?.result?.download?.url
@@ -181,7 +178,6 @@ handler.before = async (m, { conn }) => {
     }
 
     delete tempSearchResults[m.sender]
-
   } catch (e) {
     console.error('Error en descarga:', e)
     m.reply(`❌ Error en la descarga:\n${e.message}`)
