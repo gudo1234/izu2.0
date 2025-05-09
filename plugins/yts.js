@@ -1,10 +1,11 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
+import axios from 'axios';
 let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`❀ Por favor, ingresa el nombre o url de la música a descargar.\n\n*Ejemplo:* ${usedPrefix + command} Bad Bunny`)
+  if (!text) return m.reply(`${e} Por favor, ingresa una petición para realizar una búsqueda en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
   await m.react('🕓')
 
   try {
@@ -42,7 +43,90 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     }
 
     let thumb = await (await fetch(videos[0].thumbnail)).buffer()
-    await conn.sendFile(m.chat, thumb, 'yt.jpg', list, m)
+ const videoUrls = [
+  'https://files.catbox.moe/rdyj5q.mp4',
+  'https://files.catbox.moe/693ws4.mp4'
+]
+const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
+const im = await (await fetch(icono)).buffer()
+    //await conn.sendFile(m.chat, thumb, 'yt.jpg', list, m)
+// 🟢🟢
+/*const getBuffer = async (url) => {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Error al obtener buffer: ${res.statusText}`);
+  const arrayBuffer = await res.arrayBuffer();
+  return Buffer.from(arrayBuffer);
+};
+
+const imBuffer = await getBuffer(thumbnail);*/
+
+const formatos = [
+  async () => conn.sendMessage(m.chat, {
+  text: list,
+  contextInfo: {
+    externalAdReply: {
+      title: wm,
+      body: textbot,
+      thumbnailUrl: redes,
+      thumbnail: thumb,
+      sourceUrl: redes,
+      mediaType: 1,
+      renderLargerThumbnail: true
+    }
+  }
+}, { quoted: m }),
+
+  async () => conn.sendMessage(
+    m.chat,
+    {
+      video: { url: jpg },
+      gifPlayback: true,
+      caption: list,
+      contextInfo: {
+        forwardingScore: 0,
+        isForwarded: true,
+        externalAdReply: {
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail: thumb,
+          sourceUrl: redes,
+          mediaType: 1,
+          showAdAttribution: true
+        }
+      }
+    },
+    { quoted: m }
+  ),
+
+  async () => conn.sendMessage(m.chat, {
+      text: list,
+      contextInfo: {
+          mentionedJid: [],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+              newsletterJid: channelRD.id,
+              newsletterName: channelRD.name,
+              serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+              title: wm,
+              body: textbot,
+              thumbnailUrl: redes,
+              thumbnail: thumb,
+              sourceUrl: redes,
+              mediaType: 1,
+              showAdAttribution: true,
+              renderLargerThumbnail: true,
+          },
+      },
+  }, { quoted: m })
+];
+
+const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
+await randomFormato();
+// 🟢🟢
     await m.react('✅')
   } catch (e) {
     console.error(e)
@@ -117,4 +201,5 @@ handler.before = async (m, { conn }) => {
 }
 
 handler.command = ['yts', 'ytsearch']
+handler.group = true;
 export default handler
