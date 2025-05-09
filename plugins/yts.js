@@ -136,12 +136,12 @@ handler.before = async (m, { conn }) => {
   const title = video.title
 
   try {
-    const sendMsg = async (type, downloadUrl, fileName, mimetype) => {
+    const sendMsg = async (msgType, downloadUrl, fileName, mimetype) => {
       await conn.sendMessage(m.chat, {
-        [type]: { url: downloadUrl },
+        [msgType]: { url: downloadUrl },
         fileName,
         mimetype
-      }, { quoted: m })
+      }, { quoted: m }) // <- Aquí sí usamos quoted: m
     }
 
     if (type === 'a') {
@@ -150,7 +150,7 @@ handler.before = async (m, { conn }) => {
       const json = await res.json()
       const download = json?.result?.download?.url
       if (!download) throw new Error('No se pudo obtener el audio.')
-      await sendMsg('audio', download, title + '.mp3', 'audio/mpeg')
+      await sendMsg('audio', download, `${title}.mp3`, 'audio/mpeg')
     }
 
     if (type === 'v') {
@@ -159,28 +159,28 @@ handler.before = async (m, { conn }) => {
       const json = await res.json()
       const download = json?.data?.url
       if (!download) throw new Error('No se pudo obtener el video.')
-      await sendMsg('video', download, title + '.mp4', 'video/mp4')
+      await sendMsg('video', download, `${title}.mp4`, 'video/mp4')
     }
 
     if (type === 'd') {
-      const form = docType === 'video' ? 'video' : 'audio'
+      const formato = docType === 'video' ? 'video' : 'audio'
       await m.reply(`Enviando *${title}*...`)
-      if (form === 'audio') {
+      if (formato === 'audio') {
         const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
         const json = await res.json()
         const download = json?.result?.download?.url
         if (!download) throw new Error('No se pudo obtener el audio.')
-        await sendMsg('document', download, title + '.mp3', 'audio/mpeg')
+        await sendMsg('document', download, `${title}.mp3`, 'audio/mpeg')
       } else {
         const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
         const json = await res.json()
         const download = json?.data?.url
         if (!download) throw new Error('No se pudo obtener el video.')
-        await sendMsg('document', download, title + '.mp4', 'video/mp4')
+        await sendMsg('document', download, `${title}.mp4`, 'video/mp4')
       }
     }
 
-    delete tempSearchResults[m.sender] // Limpia los resultados tras enviar
+    delete tempSearchResults[m.sender]
 
   } catch (e) {
     console.error('Error en descarga:', e)
