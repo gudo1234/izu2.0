@@ -6,7 +6,7 @@ let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`${e} Por favor, ingresa una petición para realizar una búsqueda en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
+  if (!text) return m.reply(`Por favor, ingresa una petición para buscar en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Shakira - Acróstico`)
   await m.react('🕓')
 
   try {
@@ -16,103 +16,47 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     tempSearchResults[m.sender] = videos
 
-    let list = `╭───── • ─────╮
-✩ \`Youtube Search\` ✩
-╰───── • ─────╯
-✑ *Búsqueda* : ${text}
-✑ *Resultados* : ${videos.length}
+    let list = `╭─── 『 *YouTube Search* 』 ───⬣
+🔍 *Consulta:* ${text}
+📥 *Resultados:* ${videos.length}
+📌 *Responde a este mensaje con:*
+╰────────────────⬣
 
-📌 \`Tutorial Download\`
-━━━━━━━━━━━━━
-✑ *Audio* ➧ \`a 1\`, \`audio 1\`, \`d 1 a\`
-✑ *Video* ➧ \`v 1\`, \`video 1\`, \`d 1 v\`
-✑ *Documento* ➧ \`d 1 audio\`, \`d 2 video\`, \`documento 1 video\`
+• \`a 1\` o \`audio 1\` → Audio
+• \`v 1\` o \`video 1\` → Video
+• \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
+• \`d 1 v\` o \`documento 1 video\` → Documento de Video
 ━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n${e} *Nro* : ${i + 1}
-⟣ *Título* : ${vid.title}
-⟣ *Duración* : ${vid.timestamp}
-⟣ *Publicado* : ${vid.ago}
-⟣ *Autor* : ${vid.author.name}
-⟣ *Url* : ${vid.url}`
+      list += `\n\n*${i + 1}.* ${vid.title}
+⌚ ${vid.timestamp} | ${vid.ago}
+👤 ${vid.author.name}
+🔗 ${vid.url}`
     }
 
-    let thumb = await (await fetch(videos[0].thumbnail)).buffer()
-    const videoUrls = [
-      'https://files.catbox.moe/rdyj5q.mp4',
-      'https://files.catbox.moe/693ws4.mp4'
-    ]
-    const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)]
-
-    const formatos = [
-      async () => conn.sendMessage(m.chat, {
-        text: list,
-        contextInfo: {
-          externalAdReply: {
-            title: wm,
-            body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: thumb,
-            sourceUrl: redes,
-            mediaType: 1,
-            renderLargerThumbnail: true
-          }
+    const thumb = await (await fetch(videos[0].thumbnail)).buffer()
+    await conn.sendMessage(m.chat, {
+      text: list,
+      contextInfo: {
+        externalAdReply: {
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail: thumb,
+          sourceUrl: redes,
+          mediaType: 1,
+          renderLargerThumbnail: true
         }
-      }, { quoted: m }),
+      }
+    }, { quoted: m })
 
-      async () => conn.sendMessage(m.chat, {
-        video: { url: jpg },
-        gifPlayback: true,
-        caption: list,
-        contextInfo: {
-          forwardingScore: 0,
-          isForwarded: true,
-          externalAdReply: {
-            title: wm,
-            body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: thumb,
-            sourceUrl: redes,
-            mediaType: 1,
-            showAdAttribution: true
-          }
-        }
-      }, { quoted: m }),
-
-      async () => conn.sendMessage(m.chat, {
-        text: list,
-        contextInfo: {
-          mentionedJid: [],
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterJid: channelRD.id,
-            newsletterName: channelRD.name,
-            serverMessageId: -1,
-          },
-          forwardingScore: false,
-          externalAdReply: {
-            title: wm,
-            body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: thumb,
-            sourceUrl: redes,
-            mediaType: 1,
-            showAdAttribution: true,
-            renderLargerThumbnail: true,
-          }
-        }
-      }, { quoted: m })
-    ]
-
-    const randomFormato = formatos[Math.floor(Math.random() * formatos.length)]
-    await randomFormato()
     await m.react('✅')
   } catch (e) {
     console.error(e)
-    await m.reply(`Error durante la búsqueda:\n${e.message}`)
-    await m.react('✖️')
+    await m.reply(`Error en la búsqueda:\n${e.message}`)
+    await m.react('❌')
   }
 }
 
@@ -120,12 +64,12 @@ handler.before = async (m, { conn }) => {
   if (!m.quoted || !m.quoted.text || !tempSearchResults[m.sender]) return
 
   const text = m.text.trim().toLowerCase()
-  const match = text.match(/^(?:(a|v)|d|documento|audio|video)\s*#?\s*(\d+)\s*(a|v|audio|video)?$/i)
+  const match = text.match(/^(?:(a|v|audio|video|d|documento))\s*#?\s*(\d+)\s*(a|v|audio|video)?$/i)
   if (!match) return
 
-  const [_, t1, numStr, t2] = match
-  const type = (t1 || t2 || '').toLowerCase().charAt(0) // 'a' o 'v'
-  const isDoc = /d|documento/.test(match[0])
+  const [__, cmd1, numStr, cmd2] = match
+  const type1 = (cmd1 || '').toLowerCase()
+  const type2 = (cmd2 || '').toLowerCase()
   const index = parseInt(numStr) - 1
   const videos = tempSearchResults[m.sender]
   if (!videos || !videos[index]) return m.reply('❌ Número inválido.')
@@ -134,8 +78,22 @@ handler.before = async (m, { conn }) => {
   const url = video.url
   const title = video.title
 
+  // Determinar tipo de envío
+  let format = 'audio' // por defecto
+  let asDocument = false
+
+  if (['video', 'v'].includes(type1)) format = 'video'
+  if (['audio', 'a'].includes(type1)) format = 'audio'
+  if (['d', 'documento'].includes(type1)) {
+    asDocument = true
+    if (['video', 'v'].includes(type2)) format = 'video'
+    if (['audio', 'a'].includes(type2)) format = 'audio'
+  }
+
   try {
-    const sendMsg = async (msgType, downloadUrl, fileName, mimetype) => {
+    await m.reply(`Enviando *${title}* como ${asDocument ? 'documento' : format}...`)
+
+    const send = async (msgType, downloadUrl, fileName, mimetype) => {
       await conn.sendMessage(m.chat, {
         [msgType]: { url: downloadUrl },
         fileName,
@@ -143,43 +101,23 @@ handler.before = async (m, { conn }) => {
       }, { quoted: m })
     }
 
-    await m.reply(`Enviando *${title}*...`)
-
-    if (!isDoc && type === 'a') {
+    if (format === 'audio') {
       const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
       const json = await res.json()
       const download = json?.result?.download?.url
       if (!download) throw new Error('No se pudo obtener el audio.')
-      await sendMsg('audio', download, `${title}.mp3`, 'audio/mpeg')
-    }
-
-    if (!isDoc && type === 'v') {
+      await send(asDocument ? 'document' : 'audio', download, `${title}.mp3`, 'audio/mpeg')
+    } else {
       const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
       const json = await res.json()
       const download = json?.data?.url
       if (!download) throw new Error('No se pudo obtener el video.')
-      await sendMsg('video', download, `${title}.mp4`, 'video/mp4')
+      await send(asDocument ? 'document' : 'video', download, `${title}.mp4`, 'video/mp4')
     }
 
-    if (isDoc) {
-      if (type === 'a') {
-        const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
-        const json = await res.json()
-        const download = json?.result?.download?.url
-        if (!download) throw new Error('No se pudo obtener el audio.')
-        await sendMsg('document', download, `${title}.mp3`, 'audio/mpeg')
-      } else {
-        const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
-        const json = await res.json()
-        const download = json?.data?.url
-        if (!download) throw new Error('No se pudo obtener el video.')
-        await sendMsg('document', download, `${title}.mp4`, 'video/mp4')
-      }
-    }
-
-    //delete tempSearchResults[m.sender]
+    delete tempSearchResults[m.sender]
   } catch (e) {
-    console.error('Error en descarga:', e)
+    console.error(e)
     m.reply(`❌ Error en la descarga:\n${e.message}`)
   }
 }
