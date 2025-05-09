@@ -1,11 +1,12 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
 import axios from 'axios'
+
 let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`Por favor, ingresa una petición para buscar en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Lady Gaga`)
+  if (!text) return m.reply(`Por favor, ingresa una petición para buscar en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Shakira - Acróstico`)
   await m.react('🕓')
 
   try {
@@ -15,84 +16,50 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
     tempSearchResults[m.sender] = videos
 
-    let list = `╭───── • ─────╮
-✩ \`Youtube Search\` ✩
-╰───── • ─────╯
-✑ *Búsqueda* : ${text}
-✑ *Resultados* : ${videos.length}
+    let list = `╭─── 『 *YouTube Search* 』 ───⬣
+🔍 *Consulta:* ${text}
+📥 *Resultados:* ${videos.length}
+📌 *Responde a este mensaje con:*
+╰────────────────⬣
 
-📌 \`Tutorial Download\`
-━━━━━━━━━━━━━
-✑ *Audio* ➧ \`a # número\` o \`audio # número\`
-✑ *Video* ➧ \`v # número\` o \`video # número\`
-✑ *Documento* ➧ \`d # número tipo\` o \`documento # número tipo\`
+• \`a 1\` o \`audio 1\` → Audio
+• \`v 1\` o \`video 1\` → Video
+• \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
+• \`d 1 v\` o \`documento 1 video\` → Documento de Video
 ━━━━━━━━━━━━━`
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n*#${i + 1}* - ${vid.title}
-Duración: ${vid.timestamp}
-Publicado: ${vid.ago}
-Autor: ${vid.author.name}
-URL: ${vid.url}`
+      list += `\n\n*${i + 1}.* ${vid.title}
+⌚ ${vid.timestamp} | ${vid.ago}
+👤 ${vid.author.name}
+🔗 ${vid.url}`
     }
 
-    let thumb = await (await fetch(videos[0].thumbnail)).buffer()
-
-    const formatos = [
-      async () => conn.sendMessage(m.chat, {
-        text: list,
-        contextInfo: {
-          externalAdReply: {
-            title: 'Resultados de Youtube',
-            body: 'Bot WhatsApp',
-            thumbnail: thumb,
-            sourceUrl: videos[0].url,
-            mediaType: 1,
-            renderLargerThumbnail: true
-          }
+    const thumb = await (await fetch(videos[0].thumbnail)).buffer()
+    const sentMsg = await conn.sendMessage(m.chat, {
+      text: list,
+      contextInfo: {
+        externalAdReply: {
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail: thumb,
+          sourceUrl: redes,
+          mediaType: 1,
+          renderLargerThumbnail: true
         }
-      }, { quoted: m }),
+      }
+    }, { quoted: m })
 
-      async () => conn.sendMessage(m.chat, {
-        video: { url: 'https://files.catbox.moe/rdyj5q.mp4' },
-        gifPlayback: true,
-        caption: list,
-        contextInfo: {
-          externalAdReply: {
-            title: 'Resultados de Youtube',
-            body: 'Bot WhatsApp',
-            thumbnail: thumb,
-            sourceUrl: videos[0].url,
-            mediaType: 1,
-            showAdAttribution: true
-          }
-        }
-      }, { quoted: m }),
+    // Guardamos el ID del mensaje enviado
+    tempSearchResults[m.sender]._msg = sentMsg
 
-      async () => conn.sendMessage(m.chat, {
-        text: list,
-        contextInfo: {
-          isForwarded: true,
-          externalAdReply: {
-            title: 'Resultados de Youtube',
-            body: 'Bot WhatsApp',
-            thumbnail: thumb,
-            sourceUrl: videos[0].url,
-            mediaType: 1,
-            showAdAttribution: true,
-            renderLargerThumbnail: true
-          }
-        }
-      }, { quoted: m })
-    ]
-
-    await formatos[Math.floor(Math.random() * formatos.length)]()
     await m.react('✅')
   } catch (e) {
     console.error(e)
-    await m.reply(`Error durante la búsqueda:\n${e.message}`)
-    await m.react('✖️')
+    await m.reply(`Error en la búsqueda:\n${e.message}`)
+    await m.react('❌')
   }
 }
 
@@ -100,60 +67,61 @@ handler.before = async (m, { conn }) => {
   if (!m.quoted || !m.quoted.text || !tempSearchResults[m.sender]) return
 
   const text = m.text.trim().toLowerCase()
-  const regex = /^(?:d\s?#\s?(a|v)|documento\s?#\s?(audio|video)|audio\s?#|video\s?#|v\s?#|a\s?#)\s?(\d+)/i
-  const match = text.match(regex)
+  const match = text.match(/^(?:(a|v|audio|video|d|documento))\s*#?\s*(\d+)\s*(a|v|audio|video)?$/i)
   if (!match) return
 
-  const format = (match[1] || match[2] || (text.includes('audio') ? 'audio' : 'video')).toLowerCase()
-  const index = parseInt(match[3]) - 1
-  const asDocument = text.includes('documento') || text.startsWith('d')
-
+  const [__, cmd1, numStr, cmd2] = match
+  const type1 = (cmd1 || '').toLowerCase()
+  const type2 = (cmd2 || '').toLowerCase()
+  const index = parseInt(numStr) - 1
   const videos = tempSearchResults[m.sender]
   if (!videos || !videos[index]) return m.reply('❌ Número inválido.')
 
   const video = videos[index]
   const url = video.url
   const title = video.title
+  const quotedMsg = tempSearchResults[m.sender]._msg || m.quoted
+
+  let format = 'audio' // por defecto
+  let asDocument = false
+
+  if (['video', 'v'].includes(type1)) format = 'video'
+  if (['audio', 'a'].includes(type1)) format = 'audio'
+  if (['d', 'documento'].includes(type1)) {
+    asDocument = true
+    if (['video', 'v'].includes(type2)) format = 'video'
+    if (['audio', 'a'].includes(type2)) format = 'audio'
+  }
 
   try {
-    const sendMsg = async (type, downloadUrl, fileName, mimetype) => {
+    await conn.sendMessage(m.chat, {
+      text: `Enviando *${title}* como ${asDocument ? 'documento' : format}...`,
+    }, { quoted: m })
+
+    const send = async (msgType, downloadUrl, fileName, mimetype) => {
       await conn.sendMessage(m.chat, {
-        [type]: { url: downloadUrl },
+        [msgType]: { url: downloadUrl },
         fileName,
         mimetype
-      }, { quoted: m })
+      }, { quoted: quotedMsg }) // responde al mensaje de lista
     }
-
-    // Mensaje simulado como si fuera del usuario
-    const fakeMsg = await conn.sendMessage(m.chat, {
-      text: `Enviando *${title}* como ${asDocument ? 'documento' : format}...`
-    }, {
-      quoted: {
-        key: { fromMe: false, participant: m.sender, remoteJid: m.chat },
-        message: { conversation: m.text }
-      }
-    })
-
-    // Borrar mensaje después de 6 segundos
-    setTimeout(() => {
-      conn.sendMessage(m.chat, { delete: fakeMsg.key })
-    }, 6000)
 
     if (format === 'audio') {
       const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
       const json = await res.json()
       const download = json?.result?.download?.url
       if (!download) throw new Error('No se pudo obtener el audio.')
-      await sendMsg(asDocument ? 'document' : 'audio', download, title + '.mp3', 'audio/mpeg')
-    } else if (format === 'video') {
+      await send(asDocument ? 'document' : 'audio', download, `${title}.mp3`, 'audio/mpeg')
+    } else {
       const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
       const json = await res.json()
       const download = json?.data?.url
       if (!download) throw new Error('No se pudo obtener el video.')
-      await sendMsg(asDocument ? 'document' : 'video', download, title + '.mp4', 'video/mp4')
+      await send(asDocument ? 'document' : 'video', download, `${title}.mp4`, 'video/mp4')
     }
+
   } catch (e) {
-    console.error('Error en descarga:', e)
+    console.error(e)
     m.reply(`❌ Error en la descarga:\n${e.message}`)
   }
 }
