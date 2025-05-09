@@ -151,7 +151,7 @@ handler.before = async (m, { conn }) => {
     }
 
     if (type === 'a') {
-      await m.reply(`*Enviando Audio...*`)
+      await m.reply(`Enviando *${vid.title}*`)
       const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
       const json = await res.json()
       const download = json?.result?.download?.url
@@ -160,7 +160,7 @@ handler.before = async (m, { conn }) => {
     }
 
     if (type === 'v') {
-      await m.reply(`*Enviando Video...*`)
+      await m.reply(`Enviando *${vid.title}*`)
       const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
       const json = await res.json()
       const download = json?.data?.url
@@ -170,7 +170,7 @@ handler.before = async (m, { conn }) => {
 
     if (type === 'd') {
       const form = docType === 'video' ? 'video' : 'audio'
-      await m.reply(`*Enviando ${form === 'audio' ? 'Audio' : 'Video'} como documento...*`)
+      await m.reply(`Enviando *${vid.title}*`)
       if (form === 'audio') {
         const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
         const json = await res.json()
