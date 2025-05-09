@@ -16,13 +16,15 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
 
     const query = args.join(' ')
-    const videoId = extractVideoId(query)
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g
+    const matches = [...query.matchAll(ytRegex)]
 
     await m.react('🕓')
 
     let video = null
     try {
-      if (videoId) {
+      if (matches.length > 0) {
+        const videoId = matches[0][1] // Solo usamos el primero si hay varios
         const result = await yts({ videoId })
         video = result
       } else {
@@ -35,7 +37,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
       return m.reply(`❗ Error en búsqueda de YouTube: ${e.message}`)
     }
 
-    if (!video?.url) return m.reply('❌ No se pudo encontrar el video.')
+    if (!video?.url) return m.reply('❌ No se pudo obtener información del video.')
 
     const caption = `「✦」Descargando *<${video.title || 'Desconocido'}>*\n> ✦ Descripción » *${video.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(video.views) || 'Desconocido'}*\n> ⴵ Duración » *${video.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${video.ago || 'Desconocido'}*\n> ✦ Url » *${video.url}*\n
 *_Para seleccionar, responde a este mensaje:_*
@@ -123,30 +125,10 @@ handler.command = handler.help = ['audio', 'video']
 handler.group = true
 export default handler
 
-function extractVideoId(url = '') {
-  try {
-    const cleanUrl = new URL(url.trim())
-    if (cleanUrl.hostname.includes('youtu.be')) {
-      return cleanUrl.pathname.replace('/', '').substring(0, 11)
-    }
-    if (cleanUrl.hostname.includes('youtube.com')) {
-      const v = cleanUrl.searchParams.get('v')
-      if (v) return v.substring(0, 11)
-      const parts = cleanUrl.pathname.split('/')
-      return parts.includes('shorts') || parts.includes('embed') ? parts.pop().substring(0, 11) : null
-    }
-  } catch {
-    const regex = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/|v\/|live\/))([a-zA-Z0-9_-]{11})/
-    const match = url.match(regex)
-    return match?.[1] || null
-  }
-  return null
-}
-
 function formatViews(views) {
   if (!views) return "No disponible"
   if (views >= 1e9) return `${(views / 1e9).toFixed(1)}B (${views.toLocaleString()})`
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-                           }
+        }
