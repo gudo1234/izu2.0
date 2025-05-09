@@ -16,7 +16,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     if (!text) return conn.reply(m.chat, `❀ Por favor, ingresa el nombre o url de la música a descargar.`, m)
 
     const query = args.join(' ')
-    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s]*)?/
     const ytMatch = query.match(ytRegex)
 
     await m.react('🕓')
@@ -130,4 +130,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-}
+                                                                                                                                                                                                                                                                            }
