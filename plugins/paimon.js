@@ -33,7 +33,7 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
         if (!video) return m.reply('❌ No se pudo encontrar el video.')
       }
     } catch (e) {
-      console.error('Error línea ~32:', e)
+      console.error('Error en la búsqueda de YouTube, línea ~32:', e)
       return m.reply(`❗ Error en búsqueda de YouTube: ${e.message}`)
     }
 
@@ -53,14 +53,14 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     try {
       thumb = (await conn.getFile(video.thumbnail))?.data
     } catch (e) {
-      console.error('Error línea ~54 al obtener thumbnail:', e)
+      console.error('Error al obtener thumbnail, línea ~54:', e)
     }
 
     const JT = {
       contextInfo: {
         externalAdReply: {
           title: '✧ Youtube • Music ✧',
-          body: textbot,
+          body: dev,
           mediaType: 1,
           previewType: 0,
           mediaUrl: video.url,
@@ -74,8 +74,8 @@ const handler = async (m, { conn, command, args, text, usedPrefix }) => {
     await conn.reply(m.chat, caption, m, JT)
 
   } catch (err) {
-    console.error('Error general línea ~74:', err)
-    m.reply(`Error inesperado en línea ~74:\n${err.message}`)
+    console.error('Error inesperado en la línea general ~74:', err)
+    m.reply(`Error inesperado en la línea ~74:\n${err.message}`)
   }
 }
 
@@ -116,8 +116,8 @@ handler.before = async (m, { conn }) => {
     }
 
   } catch (err) {
-    console.error('Error en handler.before línea ~112:', err)
-    m.reply(`Error al procesar la descarga en línea ~112: ${err.message}`)
+    console.error('Error al procesar la descarga, línea ~112:', err)
+    m.reply(`Error al procesar la descarga en la línea ~112: ${err.message}`)
   }
 }
 
@@ -131,4 +131,4 @@ function formatViews(views) {
   if (views >= 1e6) return `${(views / 1e6).toFixed(1)}M (${views.toLocaleString()})`
   if (views >= 1e3) return `${(views / 1e3).toFixed(1)}k (${views.toLocaleString()})`
   return views.toString()
-        }
+}
