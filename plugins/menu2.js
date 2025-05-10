@@ -10,12 +10,10 @@ import axios from 'axios'
 const extractCommands = (filePath) => {
   try {
     const content = fs.readFileSync(filePath, 'utf-8')
-    const match = content.match(/handler\.command\s*=\s*([^]+)/s)
+    const match = content.match(/handler\.command\s*=\s*([^]+)/)
     if (match) {
-      const commandsArray = eval(match[1]) // eval usado con cautela
-      return Array.isArray(commandsArray)
-        ? commandsArray.map(cmd => String(cmd))
-        : []
+      const commandsArray = eval(match[1]) // Cuidado con eval en producción
+      return Array.isArray(commandsArray) ? commandsArray.map(cmd => `${cmd}`) : []
     }
   } catch (err) {
     console.error(`Error leyendo ${filePath}:`, err)
@@ -23,7 +21,6 @@ const extractCommands = (filePath) => {
   return []
 }
 
-// Función para obtener comandos desde archivos de un directorio con prefijo
 const getCommandsFromDir = (dir, prefix) => {
   try {
     const files = fs.readdirSync(dir).filter(file => file.startsWith(prefix) && file.endsWith('.js'))
@@ -62,17 +59,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 ⁉ anime
 ┌────────────
-│ ${anime}\n│
+│ ${anime || 'No hay comandos'}
 └────────────
 
 ⁉ fun
 ┌────────────
-│ ${fun}\n│
+│ ${fun || 'No hay comandos'}
 └────────────
 
 ⁉ nsfw
 ┌────────────
-│ ${nsfw}\n│
+│ ${nsfw || 'No hay comandos'}
 └────────────`
 
   m.react('🏖️')
