@@ -34,7 +34,7 @@ Responde a este mensaje usando ese número para elegir qué descargar:
 
     for (let i = 0; i < videos.length; i++) {
       let vid = videos[i]
-      list += `\n\n*#${i + 1}.* ${vid.title}
+      list += `\n\n*#${i + 1}.* _${vid.title}_
 ⌚ ${vid.timestamp} | ${vid.ago}
 👤 ${vid.author.name}
 🔗 ${vid.url}
