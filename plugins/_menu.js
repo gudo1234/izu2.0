@@ -17,22 +17,23 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const thumbnail = await (await fetch(icono)).buffer()
 
-  // Obtener comandos solo de archivos que comienzan con anime, fun o nsfw
-  const obtenerComandos = () => {
+  const comandosPorCategoria = (categoria) => {
     return Object.entries(global.plugins)
       .filter(([file, plugin]) => {
         let fileName = path.basename(file)
-        return /^(anime|fun|nsfw)[\w-]*\.js$/i.test(fileName) && plugin?.command
+        return fileName.toLowerCase().startsWith(categoria) && plugin?.command
       })
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
       .map(cmd => `│ ➜ ${usedPrefix}${cmd}`)
       .sort()
-      .join('\n')
+      .join('\n') || '│ (No se encontraron comandos)'
   }
 
-  const listaComandos = obtenerComandos()
+  const comandosAnime = comandosPorCategoria('anime')
+  const comandosFun = comandosPorCategoria('fun')
+  const comandosNsfw = comandosPorCategoria('nsfw')
 
   let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
@@ -47,9 +48,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 └────────────
 
 ⁉ Comandos anime, fun y nsfw
-┌────────────
-${listaComandos || '│ (No se encontraron comandos)'}
-└────────────`
+
+┌───《 ANIME 》───
+${comandosAnime}
+├───《 FUN 》─────
+${comandosFun}
+└───《 NSFW 》────
+${comandosNsfw}`
 
   m.react('🏖️')
 
