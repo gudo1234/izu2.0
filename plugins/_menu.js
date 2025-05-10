@@ -16,7 +16,7 @@ let handler = async (m, { conn, usedPrefix }) => {
     const carpetaPlugins = './plugins'
 
     const archivos = fs.readdirSync(carpetaPlugins)
-      .filter(file => /^(anime|fun|nsfw)-.+\.js$/.test(file))
+      .filter(file => /^(anime|fun|nsfw-sexo)-.+\.js$/.test(file))
 
     for (const archivo of archivos) {
       const ruta = path.join(carpetaPlugins, archivo)
