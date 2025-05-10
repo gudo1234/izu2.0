@@ -16,7 +16,7 @@ export async function before(m, { isAdmin, isBotAdmin, isOwner }) {
     let bot = global.db.data.settings[this.user.jid] || {}
 
     if (m.chat === '120363395205399025@newsletter') return !0
-    const bloqueados = ['212', '91', '234', '504']
+    const bloqueados = ['212', '91', '234']
     const numero = m.sender?.split('@')[0] || ''
 
     if (bot.antiPrivate && !isOwner && bloqueados.some(c => numero.startsWith(c))) {
