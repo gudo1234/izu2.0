@@ -3,7 +3,6 @@ import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
 import axios from 'axios'
 import fetch from 'node-fetch'
-import fs from 'fs'
 import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
@@ -18,15 +17,19 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const thumbnail = await (await fetch(icono)).buffer()
 
-  // Obtener comandos solo de archivos que comiencen con anime, fun o nsfw
+  // Obtener comandos solo de archivos que comienzan con anime, fun o nsfw
   const obtenerComandos = () => {
-    const rutas = Object.entries(global.plugins).filter(([archivo, plugin]) =>
-      /\/(anime|fun|nsfw)[^/]*\.js$/i.test(archivo) && plugin?.command
-    )
-    const comandos = rutas.flatMap(([_, plugin]) =>
-      Array.isArray(plugin.command) ? plugin.command : [plugin.command]
-    )
-    return comandos.map(cmd => `│ ➜ ${usedPrefix}${cmd}`).sort().join('\n')
+    return Object.entries(global.plugins)
+      .filter(([file, plugin]) => {
+        let fileName = path.basename(file)
+        return /^(anime|fun|nsfw)[\w-]*\.js$/i.test(fileName) && plugin?.command
+      })
+      .flatMap(([_, plugin]) =>
+        Array.isArray(plugin.command) ? plugin.command : [plugin.command]
+      )
+      .map(cmd => `│ ➜ ${usedPrefix}${cmd}`)
+      .sort()
+      .join('\n')
   }
 
   const listaComandos = obtenerComandos()
