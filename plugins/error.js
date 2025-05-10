@@ -13,6 +13,16 @@ let handler = async (m, { conn }) => {
     for (let file of files) {
       try {
         let fullPath = path.join(pluginsDir, file)
+        
+        // Verificar si el archivo existe antes de intentar importarlo
+        if (!fs.existsSync(fullPath)) {
+          errores.push(`❌ ${file} - No se encontró el archivo en la ruta: ${fullPath}`)
+          continue
+        }
+
+        // Depuración para ver la ruta que estamos intentando importar
+        console.log(`Intentando importar: ${fullPath}`)
+
         // Intentar importar dinámicamente el archivo
         await import(`file://${fullPath}`)
       } catch (err) {
