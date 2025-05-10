@@ -1,59 +1,50 @@
-import fs from 'fs'
-import path from 'path'
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
+import fs from 'fs'
+import path from 'path'
 import moment from 'moment-timezone'
-import fetch from 'node-fetch'
 import axios from 'axios'
 
-// Función para extraer comandos desde un archivo
-const extractCommands = (filePath) => {
-  try {
-    const content = fs.readFileSync(filePath, 'utf-8')
-    const match = content.match(/handler\.command\s*=\s*([^]+)/)
-    if (match) {
-      const commandsArray = eval(match[1])
-      return Array.isArray(commandsArray) ? commandsArray.map(cmd => cmd.trim().replace(/['"`]/g, '')) : []
-    }
-  } catch (err) {
-    console.error(`Error leyendo ${filePath}:`, err)
-  }
-  return []
-}
+// Detectar comandos desde los archivos en /plugins
+const obtenerComandos = () => {
+  const pluginFolder = './plugins'
+  let comandos = []
 
-const getCommandsFromDir = (dir, prefix) => {
-  try {
-    const files = fs.readdirSync(dir).filter(file => file.startsWith(prefix) && file.endsWith('.js'))
-    let allCommands = []
-    for (const file of files) {
-      const commands = extractCommands(path.join(dir, file))
-      allCommands.push(...commands)
+  fs.readdirSync(pluginFolder).forEach(file => {
+    const filePath = path.join(pluginFolder, file)
+    if (fs.lstatSync(filePath).isFile() && file.endsWith('.js')) {
+      const content = fs.readFileSync(filePath, 'utf8')
+      const match = content.match(/handler\.command\s*=\s*([^]*)/)
+      if (match) {
+        const arrayContent = match[1]
+        const extraidos = arrayContent
+          .split(',')
+          .map(c => c.trim().replace(/^['"`]|['"`]$/g, ''))
+          .filter(c => c.length > 0)
+        comandos.push(...extraidos)
+      }
     }
-    return allCommands
-  } catch (e) {
-    console.error(`Error leyendo directorio ${dir}:`, e)
-    return []
-  }
+  })
+
+  return [...new Set(comandos)].sort()
 }
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
   let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
-
   let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
   let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
   let or = ['grupo', 'gif', 'anu']
-  let media = or[Math.floor(Math.random() * 3)]
-
+  let media = or[Math.floor(Math.random() * or.length)]
   const thumbnail = await (await fetch(icono)).buffer()
 
-  // Lee comandos desde archivos en ./plugins
-  let anime = getCommandsFromDir('./plugins', 'anime-sexo.js').join('\n│ ') || 'Sin comandos disponibles'
-  let fun = getCommandsFromDir('../plugins', 'fun-').join('\n│ ') || 'Sin comandos disponibles'
-  let nsfw = getCommandsFromDir('../plugins', 'nsfw-').join('\n│ ') || 'Sin comandos disponibles'
+  // Obtener comandos desde la carpeta plugins
+  const listaComandos = obtenerComandos().map(c => `│ ➜ ${usedPrefix}${c}`).join('\n')
 
-  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\`.
+  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*
+
+⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
 ━━━━━━━━━━━━━
 ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
@@ -63,19 +54,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ 🗓 Fecha: ${moment.tz('America/Bogota').format('DD/MM/YY')}
 └────────────
 
-⁉ anime
+⁉ todos los comandos
 ┌────────────
-│ ${anime}
-└────────────
-
-⁉ fun
-┌────────────
-│ ${fun}
-└────────────
-
-⁉ nsfw
-┌────────────
-│ ${nsfw}
+${listaComandos}
 └────────────`
 
   m.react('🏖️')
@@ -118,7 +99,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           thumbnail,
           sourceUrl: redes,
           mediaType: 1,
-          showAdAttribution: true,
+          showAdAttribution: true
         },
       },
     }, { quoted: m })
