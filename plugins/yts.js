@@ -21,8 +21,10 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 📥 *Resultados:* ${videos.length}
 ╰───── • ─────╯
 
-📌 *Responde a este mensaje con:*
-━━━━━━━━━━━━━
+📌 *¿Cómo descargar?*  
+━━━━━━━━━━━━━  
+Cada resultado tiene un número (#1, #2, #3...).  
+Responde a este mensaje usando ese número para elegir qué descargar:
 ✑ \`a 1\` o \`audio 1\` → Audio
 ✑ \`v 1\` o \`video 1\` → Video
 ⁌ \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
