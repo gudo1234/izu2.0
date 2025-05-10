@@ -1,48 +1,37 @@
-import fs from 'fs'
-import path from 'path'
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
 import axios from 'axios'
 import fetch from 'node-fetch'
+import fs from 'fs'
+import path from 'path'
 
-let handler = async (m, { conn, usedPrefix }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
   let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
 
+  let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
+  let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
+  let or = ['grupo', 'gif', 'anu']
+  let media = or[Math.floor(Math.random() * or.length)]
+
+  const thumbnail = await (await fetch(icono)).buffer()
+
+  // Obtener comandos solo de archivos que comiencen con anime, fun o nsfw
   const obtenerComandos = () => {
-    const comandos = []
-    const carpetaPlugins = './plugins'
-
-    const archivos = fs.readdirSync(carpetaPlugins)
-      .filter(file => /^(anime|fun|nsfw-sexo)-.+\.js$/.test(file))
-
-    for (const archivo of archivos) {
-      const ruta = path.join(carpetaPlugins, archivo)
-      const contenido = fs.readFileSync(ruta, 'utf8')
-      const coincidencias = contenido.match(/handler\.command\s*=\s*(.*?|['"`].+?['"`])/gs)
-
-      if (coincidencias) {
-        for (let match of coincidencias) {
-          let comandosExtraidos
-          try {
-            comandosExtraidos = eval(match.split('=')[1].trim())
-            if (!Array.isArray(comandosExtraidos)) comandosExtraidos = [comandosExtraidos]
-            comandos.push(...comandosExtraidos.map(cmd => `│ ➜ ${usedPrefix}${cmd}`))
-          } catch (e) {
-            continue
-          }
-        }
-      }
-    }
-
-    return comandos.sort().join('\n')
+    const rutas = Object.entries(global.plugins).filter(([archivo, plugin]) =>
+      /\/(anime|fun|nsfw)[^/]*\.js$/i.test(archivo) && plugin?.command
+    )
+    const comandos = rutas.flatMap(([_, plugin]) =>
+      Array.isArray(plugin.command) ? plugin.command : [plugin.command]
+    )
+    return comandos.map(cmd => `│ ➜ ${usedPrefix}${cmd}`).sort().join('\n')
   }
 
   const listaComandos = obtenerComandos()
 
-  const txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Sistema automático para ejecutar comandos.
+  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
 ━━━━━━━━━━━━━
 ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
@@ -54,13 +43,83 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ 📅 Fecha: ${moment.tz('America/Bogota').format('DD/MM/YY')}
 └────────────
 
-⁉ comandos random
+⁉ Comandos anime, fun y nsfw
 ┌────────────
-${listaComandos}
+${listaComandos || '│ (No se encontraron comandos)'}
 └────────────`
 
   m.react('🏖️')
-  await conn.sendMessage(m.chat, { text: txt }, { quoted: m })
+
+  if (media === 'grupo') {
+    await conn.sendMessage(m.chat, {
+      text: txt,
+      contextInfo: {
+        externalAdReply: {
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail,
+          sourceUrl: redes,
+          mediaType: 1,
+          renderLargerThumbnail: true
+        }
+      }
+    }, { quoted: m })
+  }
+
+  if (media === 'gif') {
+    await conn.sendMessage(m.chat, {
+      video: { url: [jpg, jpg2].sort(() => Math.random() - 0.5)[0] },
+      gifPlayback: true,
+      caption: txt,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: channelRD.id,
+          newsletterName: channelRD.name,
+          serverMessageId: -1,
+        },
+        forwardingScore: false,
+        externalAdReply: {
+          title: botname,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail,
+          sourceUrl: redes,
+          mediaType: 1,
+          showAdAttribution: true,
+        },
+      },
+    }, { quoted: m })
+  }
+
+  if (media === 'anu') {
+    await conn.sendMessage(m.chat, {
+      text: txt,
+      footer: textbot,
+      contextInfo: {
+        mentionedJid: [m.sender],
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: channelRD.id,
+          newsletterName: channelRD.name,
+          serverMessageId: -1,
+        },
+        forwardingScore: false,
+        externalAdReply: {
+          title: botname,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail,
+          sourceUrl: redes,
+          mediaType: 1,
+          showAdAttribution: true,
+          renderLargerThumbnail: true,
+        },
+      },
+    }, { quoted: m })
+  }
 }
 
 handler.command = ['menurandom', 'menu2']
