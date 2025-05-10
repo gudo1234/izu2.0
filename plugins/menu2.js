@@ -10,10 +10,11 @@ import axios from 'axios'
 const extractCommands = (filePath) => {
   try {
     const content = fs.readFileSync(filePath, 'utf-8')
-    const match = content.match(/handler\.command\s*=\s*([^]+)/)
+    const match = content.match(/handler\.command\s*=\s*([^]+)/)
     if (match) {
-      const commandsArray = eval(match[1]) // Cuidado con eval en producción
-      return Array.isArray(commandsArray) ? commandsArray.map(cmd => `${cmd}`) : []
+      const rawArray = `[${match[1]}]`
+      const commandsArray = eval(rawArray) // Precaución: eval solo si controlas el contenido
+      return Array.isArray(commandsArray) ? commandsArray.map(cmd => cmd.trim()) : []
     }
   } catch (err) {
     console.error(`Error leyendo ${filePath}:`, err)
@@ -42,12 +43,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const thumbnail = await (await fetch(icono)).buffer()
 
-  // Extrae comandos
   let anime = getCommandsFromDir('./plugins', 'anime-').join('\n│ ')
   let fun = getCommandsFromDir('./plugins', 'fun-').join('\n│ ')
   let nsfw = getCommandsFromDir('./plugins', 'nsfw-').join('\n│ ')
 
-  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
+  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\`.
 
 ━━━━━━━━━━━━━
 ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
@@ -59,17 +59,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 ⁉ anime
 ┌────────────
-│ ${anime || 'No hay comandos'}
+│ ${anime}
 └────────────
 
 ⁉ fun
 ┌────────────
-│ ${fun || 'No hay comandos'}
+│ ${fun}
 └────────────
 
 ⁉ nsfw
 ┌────────────
-│ ${nsfw || 'No hay comandos'}
+│ ${nsfw}
 └────────────`
 
   m.react('🏖️')
