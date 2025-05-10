@@ -23,7 +23,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 
 📌 *¿Cómo descargar?*  
 ━━━━━━━━━━━━━  
-Cada resultado tiene un número (#1, #2, #3...).  
+${e} Cada resultado tiene un número (#1, #2, #3...).  
 Responde a este mensaje usando ese número para elegir qué descargar:
 ✑ \`a 1\` o \`audio 1\` → Audio
 ✑ \`v 1\` o \`video 1\` → Video
