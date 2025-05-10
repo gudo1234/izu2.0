@@ -10,11 +10,10 @@ import axios from 'axios'
 const extractCommands = (filePath) => {
   try {
     const content = fs.readFileSync(filePath, 'utf-8')
-    const match = content.match(/handler\.command\s*=\s*([^]+)/)
+    const match = content.match(/handler\.command\s*=\s*([^]+)/)
     if (match) {
-      const rawArray = `[${match[1]}]`
-      const commandsArray = eval(rawArray) // Precaución: eval solo si controlas el contenido
-      return Array.isArray(commandsArray) ? commandsArray.map(cmd => cmd.trim()) : []
+      const commandsArray = eval(match[1])
+      return Array.isArray(commandsArray) ? commandsArray.map(cmd => cmd.trim().replace(/['"`]/g, '')) : []
     }
   } catch (err) {
     console.error(`Error leyendo ${filePath}:`, err)
@@ -25,8 +24,14 @@ const extractCommands = (filePath) => {
 const getCommandsFromDir = (dir, prefix) => {
   try {
     const files = fs.readdirSync(dir).filter(file => file.startsWith(prefix) && file.endsWith('.js'))
-    return files.flatMap(file => extractCommands(path.join(dir, file)))
+    let allCommands = []
+    for (const file of files) {
+      const commands = extractCommands(path.join(dir, file))
+      allCommands.push(...commands)
+    }
+    return allCommands
   } catch (e) {
+    console.error(`Error leyendo directorio ${dir}:`, e)
     return []
   }
 }
@@ -43,9 +48,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const thumbnail = await (await fetch(icono)).buffer()
 
-  let anime = getCommandsFromDir('./plugins', 'anime-').join('\n│ ')
-  let fun = getCommandsFromDir('./plugins', 'fun-').join('\n│ ')
-  let nsfw = getCommandsFromDir('./plugins', 'nsfw-').join('\n│ ')
+  // Lee comandos desde archivos en ./plugins
+  let anime = getCommandsFromDir('./plugins', 'anime-').join('\n│ ') || 'Sin comandos disponibles'
+  let fun = getCommandsFromDir('./plugins', 'fun-').join('\n│ ') || 'Sin comandos disponibles'
+  let nsfw = getCommandsFromDir('./plugins', 'nsfw-').join('\n│ ') || 'Sin comandos disponibles'
 
   let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\`.
 
