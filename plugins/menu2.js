@@ -6,25 +6,31 @@ import moment from 'moment-timezone'
 import fetch from 'node-fetch'
 import axios from 'axios'
 
-let handler = async (m, { conn }) => {
-  const getCommandsFromDir = (dir, prefix) => {
-    try {
-      let files = fs.readdirSync(dir)
-      return files
-        .filter(file => file.startsWith(prefix) && file.endsWith('.js'))
-        .map(file => `${file.replace('.js', '')}`)
-    } catch (e) {
-      return []
+// Función para extraer comandos desde un archivo
+const extractCommands = (filePath) => {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const match = content.match(/handler\.command\s*=\s*([^]+)/)
+    if (match) {
+      const commandsArray = eval(match[1]) // Cuidado con eval en producción
+      return Array.isArray(commandsArray) ? commandsArray.map(cmd => `${cmd}`) : []
     }
+  } catch (err) {
+    console.error(`Error leyendo ${filePath}:`, err)
   }
+  return []
+}
 
-  // Ruta de la carpeta 'plugins'
-  const pluginsPath = './plugins'
+const getCommandsFromDir = (dir, prefix) => {
+  try {
+    const files = fs.readdirSync(dir).filter(file => file.startsWith(prefix) && file.endsWith('.js'))
+    return files.flatMap(file => extractCommands(path.join(dir, file)))
+  } catch (e) {
+    return []
+  }
+}
 
-  const anime = getCommandsFromDir(pluginsPath, 'anime-').join('\n│ ')
-  const fun = getCommandsFromDir(pluginsPath, 'fun-').join('\n│ ')
-  const nsfw = getCommandsFromDir(pluginsPath, 'nsfw-').join('\n│ ')
-
+let handler = async (m, { conn, args, usedPrefix, command }) => {
   let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
   let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
@@ -32,12 +38,16 @@ let handler = async (m, { conn }) => {
   let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
   let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
   let or = ['grupo', 'gif', 'anu']
-  let media = or[Math.floor(Math.random() * or.length)]
+  let media = or[Math.floor(Math.random() * 3)]
+
   const thumbnail = await (await fetch(icono)).buffer()
 
-  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*
+  // Extrae comandos
+  let anime = getCommandsFromDir('./plugins', 'anime-').join('\n│ ')
+  let fun = getCommandsFromDir('./plugins', 'fun-').join('\n│ ')
+  let nsfw = getCommandsFromDir('./plugins', 'nsfw-').join('\n│ ')
 
-⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\`.
+  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
 
 ━━━━━━━━━━━━━
 ⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
@@ -64,7 +74,6 @@ let handler = async (m, { conn }) => {
 
   m.react('🏖️')
 
-  // Envío del mensaje según el tipo de media
   if (media === 'grupo') {
     await conn.sendMessage(m.chat, {
       text: txt,
@@ -103,9 +112,9 @@ let handler = async (m, { conn }) => {
           thumbnail,
           sourceUrl: redes,
           mediaType: 1,
-          showAdAttribution: true
-        }
-      }
+          showAdAttribution: true,
+        },
+      },
     }, { quoted: m })
   }
 
@@ -131,8 +140,8 @@ let handler = async (m, { conn }) => {
           mediaType: 1,
           showAdAttribution: true,
           renderLargerThumbnail: true,
-        }
-      }
+        },
+      },
     }, { quoted: m })
   }
 }
