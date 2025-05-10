@@ -49,9 +49,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const thumbnail = await (await fetch(icono)).buffer()
 
   // Lee comandos desde archivos en ./plugins
-  let anime = getCommandsFromDir('./plugins', 'anime-sexo').join('\n│ ') || 'Sin comandos disponibles'
-  let fun = getCommandsFromDir('./plugins', 'fun-').join('\n│ ') || 'Sin comandos disponibles'
-  let nsfw = getCommandsFromDir('./plugins', 'nsfw-').join('\n│ ') || 'Sin comandos disponibles'
+  let anime = getCommandsFromDir('../plugins', 'anime-sexo.js').join('\n│ ') || 'Sin comandos disponibles'
+  let fun = getCommandsFromDir('../plugins', 'fun-').join('\n│ ') || 'Sin comandos disponibles'
+  let nsfw = getCommandsFromDir('../plugins', 'nsfw-').join('\n│ ') || 'Sin comandos disponibles'
 
   let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\`.
 
