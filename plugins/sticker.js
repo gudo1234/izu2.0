@@ -31,8 +31,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     mime = 'image/url';
     //let im = await (await fetch(`https://files.catbox.moe/nir33y.jpg`)).buffer()
   } else {
-    /*return conn.reply(m.chat,*/
-let txt = `${e} Responde a una imágen o video/gif para generar un sticker y agrega una de las siguientes opciones:
+    return conn.reply(m.chat,`${e} Responde a una imágen o video/gif para generar un sticker y agrega una de las siguientes opciones:
 
 ┌───────────
 │ 🖼 *Requiere:* Imagen o video corto
@@ -60,8 +59,8 @@ let txt = `${e} Responde a una imágen o video/gif para generar un sticker y agr
 │ └─ -i ⟶ Ampliado
 └───────────
 
-◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`;
-  await conn.sendFile(m.chat, `https://files.catbox.moe/nir33y.jpg`, "Thumbnail.jpg", txt, m, null, rcanal)
+◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`, m);
+  //await conn.sendFile(m.chat, `https://files.catbox.moe/nir33y.jpg`, "Thumbnail.jpg", txt, m, null, rcanal)
   }
 
   m.react('🧩');
