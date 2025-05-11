@@ -80,13 +80,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       }
 
       const masked = await applyShapeMask(frameBuffer, selectedShape, 500);
-      const stickerBuffer = await sharp(masked)
+      const finalBuffer = await sharp(masked)
         .ensureAlpha()
         .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
         .webp()
         .toBuffer();
 
-      stiker = stickerBuffer;
+      // Incluye el nombre del usuario en el packname
+      stiker = await sticker(finalBuffer, false, `${m.pushName}`);
     } else {
       try {
         stiker = await sticker(img, false, `${m.pushName}`);
