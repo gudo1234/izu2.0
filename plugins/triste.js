@@ -8,6 +8,6 @@ ptt: true
 })
 }
 
-handler.customPrefix = /💔|😒|😐|🥴|😯|😢|😭|😞|😔|😟|😫|😩|🥺|🙁|😣|😖|😿/
+handler.customPrefix = /💔|😢|😭|😞|😔|😟|😫|😩|🥺|🙁|😣|😖|😿/
 handler.command = new RegExp
 export default handler
