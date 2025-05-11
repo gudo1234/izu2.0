@@ -87,7 +87,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         .webp()
         .toBuffer();
 
-      return conn.sendMessage(m.chat, { sticker: stickerBuffer }, {
+      return conn.sendFile(m.chat, { sticker: stickerBuffer }, {
         quoted: m,
         contextInfo: {
           forwardingScore: 200,
