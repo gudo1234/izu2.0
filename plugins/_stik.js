@@ -28,10 +28,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `${e} Responde a una imagen o video/gif para generar un sticker o agrega una de las siguientes opciones:
+    return conn.reply(m.chat, `Responde a una imagen o video/gif para generar un sticker o agrega una de las siguientes opciones:
 
 ┌───────────
-│ 🖼 Requiere: Imagen o video corto
 │ 🧪 Tipo: Sticker personalizado
 │ ⚙ Formas disponibles:
 │  ● Básicas:
@@ -48,7 +47,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -s ⟶ Estrella
 │ └─ -z ⟶ Rayo
 │  ● Especiales:
-│ ├─ -r ⟶ Curvado (arco)
+│ ├─ -r ⟶ Curvado
 │ ├─ -e ⟶ Esquinas redondeadas
 │ ├─ -m ⟶ Espejo
 │ ├─ -f ⟶ Flecha
@@ -56,12 +55,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ └─ -i ⟶ Ampliado
 └───────────
 
-◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`, m);
+◈ Usa ${usedPrefix + command} -a respondiendo a una imagen o video.`, m);
   }
 
   m.react('🧩');
-  let stiker = false;
 
+  let stiker = false;
   try {
     if (selectedShape && /image|webp|url|video|gif/.test(mime)) {
       let frameBuffer = img;
@@ -87,32 +86,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         .webp()
         .toBuffer();
 
-      return conn.sendFile(m.chat, { sticker: stickerBuffer }, {
-        quoted: m,
-        contextInfo: {
-          forwardingScore: 200,
-          isForwarded: false,
-          externalAdReply: {
-            showAdAttribution: false,
-            title: `${m.pushName}`,
-            body: 'Stickers Personalizados',
-            mediaType: 1,
-            sourceUrl: redes,
-            thumbnail: thumbnail
-          }
-        }
-      });
-    }
-
-    try {
-      stiker = await sticker(img, false, `${m.pushName}`);
-    } catch (e) {
-      let out;
-      if (/webp/.test(mime)) out = await webp2png(img);
-      else if (/image|url/.test(mime)) out = await uploadImage(img);
-      else if (/video/.test(mime)) out = await uploadFile(img);
-      if (typeof out !== 'string') out = await uploadImage(img);
-      stiker = await sticker(false, out, `${m.pushName}`);
+      stiker = stickerBuffer;
+    } else {
+      try {
+        stiker = await sticker(img, false, `${m.pushName}`);
+      } catch (e) {
+        let out;
+        if (/webp/.test(mime)) out = await webp2png(img);
+        else if (/image|url/.test(mime)) out = await uploadImage(img);
+        else if (/video/.test(mime)) out = await uploadFile(img);
+        if (typeof out !== 'string') out = await uploadImage(img);
+        stiker = await sticker(false, out, `${m.pushName}`);
+      }
     }
 
     if (stiker) {
@@ -183,4 +168,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-          }
+}
