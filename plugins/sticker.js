@@ -214,9 +214,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mime = (q.msg || q).mimetype || q.mediaType || '';
   let img;
 
+  const isAnimated = (q.msg || q).seconds > 0 || (q.msg || q).isAnimated;
+
   if (/webp|image|video/g.test(mime)) {
-    if (/video/g.test(mime) && (q.msg || q).seconds > 8)
-      return m.reply('¡El video no puede durar más de 8 segundos!');
+    if ((q.msg || q).seconds > 8) return m.reply('¡El video no puede durar más de 8 segundos!');
     img = await q.download?.();
   } else if (args[0] && isUrl(args[0])) {
     img = await fetch(args[0]).then(res => res.buffer());
@@ -229,7 +230,30 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let stiker = false;
 
   try {
-    // Si es imagen y tiene forma
+    if (selectedShape && isAnimated) {
+      const tempInput = path.join(tmpdir(), `input_${Date.now()}.mp4`);
+      const tempMasked = path.join(tmpdir(), `masked_${Date.now()}.png`);
+      const tempOutput = path.join(tmpdir(), `output_${Date.now()}.webp`);
+
+      fs.writeFileSync(tempInput, img);
+      await sharp(img)
+        .resize(500, 500)
+        .png()
+        .toFile(tempMasked);
+
+      const masked = await applyShapeMask(fs.readFileSync(tempMasked), selectedShape, 500);
+      fs.writeFileSync(tempMasked, masked);
+
+      await convertToAnimatedSticker(tempMasked, tempOutput);
+
+      const animatedSticker = fs.readFileSync(tempOutput);
+      fs.unlinkSync(tempInput);
+      fs.unlinkSync(tempMasked);
+      fs.unlinkSync(tempOutput);
+
+      return await conn.sendMessage(m.chat, { sticker: animatedSticker }, { quoted: m });
+    }
+
     if (selectedShape && /image|webp|url/.test(mime)) {
       const masked = await applyShapeMask(img, selectedShape, 500);
       const stickerBuffer = await sharp(masked)
@@ -243,29 +267,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return await conn.sendMessage(m.chat, { sticker: stickerBuffer }, { quoted: m });
     }
 
-    // Si es video o gif y tiene forma, aplicar forma cuadro por cuadro
-    if (selectedShape && /video|gif/.test(mime)) {
-      const tempInput = path.join(tmpdir(), `input_${Date.now()}.mp4`);
-      const tempFramesDir = path.join(tmpdir(), `frames_${Date.now()}`);
-      const tempOutput = path.join(tmpdir(), `output_${Date.now()}.webp`);
-
-      fs.mkdirSync(tempFramesDir);
-      fs.writeFileSync(tempInput, img);
-
-      await extractFrames(tempInput, tempFramesDir);
-      await applyMaskToFrames(tempFramesDir, selectedShape);
-      await buildAnimatedSticker(tempFramesDir, tempOutput);
-
-      const animatedSticker = fs.readFileSync(tempOutput);
-      fs.unlinkSync(tempInput);
-      fs.rmSync(tempFramesDir, { recursive: true, force: true });
-      fs.unlinkSync(tempOutput);
-
-      return await conn.sendMessage(m.chat, { sticker: animatedSticker }, { quoted: m });
-    }
-
-    // Video sin forma
-    if (/video|gif/.test(mime)) {
+    if (isAnimated) {
       const tempInput = path.join(tmpdir(), `input_${Date.now()}.mp4`);
       const tempOutput = path.join(tmpdir(), `output_${Date.now()}.webp`);
       fs.writeFileSync(tempInput, img);
@@ -276,7 +278,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       return await conn.sendMessage(m.chat, { sticker: animatedSticker }, { quoted: m });
     }
 
-    // Imagen normal
     try {
       stiker = await sticker(img, false, `${m.pushName}`);
     } catch (e) {
@@ -300,42 +301,10 @@ handler.group = true;
 handler.command = ['s', 'sticker', 'stiker'];
 export default handler;
 
-// Extras
-
 async function convertToAnimatedSticker(inputPath, outputPath) {
   return new Promise((resolve, reject) => {
     const cmd = `ffmpeg -i "${inputPath}" -vcodec libwebp -filter:v fps=15 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 "${outputPath}"`;
-    exec(cmd, (err) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
-}
-
-async function extractFrames(videoPath, outputDir) {
-  return new Promise((resolve, reject) => {
-    const cmd = `ffmpeg -i "${videoPath}" -vf fps=15 "${outputDir}/frame_%03d.png"`;
-    exec(cmd, (err) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
-}
-
-async function applyMaskToFrames(framesDir, shape) {
-  const files = fs.readdirSync(framesDir).filter(file => file.endsWith('.png'));
-  for (const file of files) {
-    const framePath = path.join(framesDir, file);
-    const frameBuffer = fs.readFileSync(framePath);
-    const masked = await applyShapeMask(frameBuffer, shape, 512);
-    fs.writeFileSync(framePath, masked);
-  }
-}
-
-async function buildAnimatedSticker(framesDir, outputPath) {
-  return new Promise((resolve, reject) => {
-    const cmd = `ffmpeg -y -framerate 15 -i "${framesDir}/frame_%03d.png" -vcodec libwebp -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 "${outputPath}"`;
-    exec(cmd, (err) => {
+    exec(cmd, (err, stdout, stderr) => {
       if (err) return reject(err);
       resolve();
     });
@@ -383,4 +352,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-  }
+                       }
