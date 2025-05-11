@@ -21,7 +21,6 @@ let handler = async (m, { conn }) => {
 
         await import(`file://${fullPath}`)
       } catch (err) {
-        // Extraer línea y columna si existen
         let linea = err.stack?.match(/:(\d+):(\d+)/)
         let detalle = `❌ ${file} - ${err.name}: ${err.message.split('\n')[0]}`
         if (linea) {
