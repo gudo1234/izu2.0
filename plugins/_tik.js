@@ -1,54 +1,78 @@
-import Starlights from '@StarlightsTeam/Scraper';
+import Starlights from '@StarlightsTeam/Scraper'
+
+let tempTikTok = {}
 
 const handler = async (m, { conn }) => {
-  const tiktokRegex = /(?:https?:\/\/)?(?:www\.)?(?:vt\.tiktok\.com|tiktok\.com)\/[^\s]+/gi;
-  const match = m.text.match(tiktokRegex);
-  if (!match) return;
+  const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s]+/gi
+  const links = [...m.text.matchAll(tiktokRegex)]
 
-  await m.react('🕒');
+  if (links.length === 0) return
+
+  for (const match of links) {
+    const url = match[0]
+
+    try {
+      const data = await Starlights.tiktokdl(url)
+      if (!data || !data.dl_url) throw new Error('No se pudo obtener el video.')
+
+      const caption = `╭───── • ─────╮\n` +
+                      `  𖤐 \`TIKTOK EXTRACTOR\` 𖤐\n` +
+                      `╰───── • ─────╯\n\n` +
+                      `✦ *Título* : ${data.title}\n` +
+                      `✦ *Autor* : ${data.author}\n` +
+                      `✦ *Duración* : ${data.duration} segundos\n` +
+                      `✦ *Vistas* : ${data.views}\n` +
+                      `✦ *Likes* : ${data.likes}\n` +
+                      `✦ *Comentarios* : ${data.comment || data.comments_count}\n` +
+                      `✦ *Compartidos* : ${data.share || data.share_count}\n` +
+                      `✦ *Publicado* : ${data.published}\n` +
+                      `✦ *Descargas* : ${data.downloads || data.download_count}\n\n` +
+                      `*_Para seleccionar, responde a este mensaje:_*\n` +
+                      `> "v" o "video" → *Video*\n> "vdoc" → *Video (doc)*`
+
+      m.react('🕒')
+      tempTikTok[m.sender] = {
+        url: data.dl_url,
+        title: data.title,
+        resp: m,
+      }
+
+      await conn.reply(m.chat, caption, m)
+    } catch (err) {
+      console.error(err)
+      m.reply(`❌ Error al procesar el enlace de TikTok.\n${err.message}`)
+    }
+  }
+}
+
+handler.before = async (m, { conn }) => {
+  if (!m.quoted || !m.quoted.sender) return
+  if (conn.user.jid !== m.quoted.sender) return
+
+  const text = m.text.trim().toLowerCase()
+  if (!['v', 'video', 'vdoc'].includes(text)) return
+
+  const data = tempTikTok[m.sender]
+  if (!data || !data.url) return
 
   try {
-    const url = match[0];
-    const result = await Starlights.tiktokdl(url);
-
-    if (!result || !result.dl_url) {
-      await m.react('❌');
-      return conn.reply(m.chat, '❌ No se pudo obtener el video de TikTok. Intenta con otro enlace.', m);
+    const send = async (type, url, fileName, mimetype) => {
+      await conn.sendMessage(m.chat, {
+        [type]: { url },
+        fileName,
+        mimetype,
+      }, { quoted: data.resp })
     }
 
-    const dl_url = result.dl_url;
-
-    let txt = `╭───── • ─────╮\n`;
-    txt += `  𖤐 \`TIKTOK EXTRACTOR\` 𖤐\n`;
-    txt += `╰───── • ─────╯\n\n`;
-
-    txt += `✦ *Título* : ${result.title}\n`;
-    txt += `✦ *Autor* : ${result.author}\n`;
-    txt += `✦ *Duración* : ${result.duration} segundos\n`;
-    txt += `✦ *Vistas* : ${result.views}\n`;
-    txt += `✦ *Likes* : ${result.likes}\n`;
-    txt += `✦ *Comentarios* : ${result.comment || result.comments_count}\n`;
-    txt += `✦ *Compartidos* : ${result.share || result.share_count}\n`;
-    txt += `✦ *Publicado* : ${result.published}\n`;
-    txt += `✦ *Descargas* : ${result.downloads || result.download_count}\n\n`;
-
-    txt += `╭───── • ─────╮\n`;
-    txt += `> *${global.textbot || 'Bot'}*\n`;
-    txt += `╰───── • ─────╯\n`;
-
-    await m.react('✅');
-    await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
-
+    await conn.reply(m.chat, `*Enviando Video...*`, data.resp)
+    await send(text === 'vdoc' ? 'document' : 'video', data.url, data.title + '.mp4', 'video/mp4')
   } catch (err) {
-    console.error(err);
-    await m.react('❌');
-    await conn.sendMessage(m.chat, {
-      text: `❌ Ocurrió un error al procesar el video.`
-    }, { quoted: m });
+    console.error('Error en respuesta automática:', err)
+    m.reply(`Error al enviar el video:\n${err.message}`)
   }
-};
+}
 
-handler.customPrefix = /(?:https?:\/\/)?(?:www\.)?(?:vt\.tiktok\.com|tiktok\.com)\/[^\s]+/i;
-handler.command = new RegExp; // sin comando
-handler.group = true;
-export default handler;
+handler.customPrefix = /https?:\/\/(www\.)?tiktok\.com\/[^\s]+/i
+handler.command = new RegExp // sin comandos
+handler.group = true
+export default handler
