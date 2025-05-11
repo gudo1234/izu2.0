@@ -14,26 +14,28 @@ let handler = async (m, { conn }) => {
       try {
         let fullPath = path.join(pluginsDir, file)
         
-        // Verificar si el archivo existe antes de intentar importarlo
         if (!fs.existsSync(fullPath)) {
-          errores.push(`❌ ${file} - No se encontró el archivo en la ruta: ${fullPath}`)
+          errores.push(`❌ ${file} - Archivo no encontrado en la ruta: ${fullPath}`)
           continue
         }
 
-        // Depuración para ver la ruta que estamos intentando importar
-        console.log(`Intentando importar: ${fullPath}`)
-
-        // Intentar importar dinámicamente el archivo
         await import(`file://${fullPath}`)
       } catch (err) {
-        errores.push(`❌ ${file} - ${err.name}: ${err.message.split('\n')[0]}`)
+        // Extraer línea y columna si existen
+        let linea = err.stack?.match(/:(\d+):(\d+)/)
+        let detalle = `❌ ${file} - ${err.name}: ${err.message.split('\n')[0]}`
+        if (linea) {
+          detalle += `\n  Línea: ${linea[1]}, Columna: ${linea[2]}`
+        }
+        detalle += `\n  Sugerencia: Verifica la sintaxis y dependencias del archivo.`
+        errores.push(detalle)
       }
     }
 
     if (errores.length === 0) {
       conn.reply(m.chat, '✅ No se detectaron errores en los archivos de plugins.', m)
     } else {
-      let respuesta = 'Se encontraron los siguientes errores:\n\n' + errores.join('\n')
+      let respuesta = 'Se encontraron los siguientes errores:\n\n' + errores.join('\n\n')
       conn.reply(m.chat, respuesta, m)
     }
 
