@@ -1,3 +1,4 @@
+import fetch from 'node-fetch'
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 import { sticker } from '../lib/sticker.js';
