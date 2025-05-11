@@ -26,16 +26,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
-      .map(cmd => `│ ${e}${s}${cmd} ‹rєρℓy›`)
+      .map(cmd => `│ ${e}${cmd} *‹@υsєя›*`)
       .sort()
       .join('\n') || '│ (No se encontraron comandos)'
   }
 
   const comandosAnime = comandosPorCategoria('anime')
-  const comandosFun = comandosPorCategoria('fun')
+  //const comandosFun = comandosPorCategoria('fun')
+  const comandosFun = `${comandosPorCategoria('fun')} *‹@υsєя›*`;
   const comandosNsfw = comandosPorCategoria('nsfw')
 
-  let txt = `🗣️ Hola, 🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
+  let txt = `🗣️ _¡Hola!,_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
 
 ━━━━━━━━━━━━━
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
@@ -159,7 +160,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 \`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
 ┌────────────
-${comandosAnime} ‹rєρℓy›
+${comandosAnime}
 └────────────
 
 \`⭓ғɪʀᴇ ғᴜɴᴄᴛɪᴏɴ - ᴊᴜᴇɢᴏs🎮\`
