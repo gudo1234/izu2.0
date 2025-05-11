@@ -15,7 +15,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-s': 'star',
     '-d': 'diamond',
     '-h': 'hexagon',
-    '-m': 'mirror'
+    '-m': 'mirror',
+    '-l': 'heart',      // Nuevo: corazón
+    '-p': 'pentagon',   // Nuevo: pentágono
+    '-f': 'arrow'       // Nuevo: flecha
   };
 
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
@@ -35,7 +38,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   } else {
     return conn.reply(m.chat, `「 Generador de Stickers 」
 
-${e} Por favor, *envía una imagen* para crear tu sticker personalizado.
+Por favor, *envía una imagen* para crear tu sticker personalizado.
 
 ▸ *Variantes disponibles* (solo imágenes):
 ╭───「 Formas 」
@@ -48,9 +51,12 @@ ${e} Por favor, *envía una imagen* para crear tu sticker personalizado.
 │ ✦ ${usedPrefix + command} -d » Sticker Diamante
 │ ✦ ${usedPrefix + command} -h » Sticker Hexágono
 │ ✦ ${usedPrefix + command} -m » Sticker Espejo
+│ ✦ ${usedPrefix + command} -l » Sticker Corazón
+│ ✦ ${usedPrefix + command} -p » Sticker Pentágono
+│ ✦ ${usedPrefix + command} -f » Sticker Flecha
 ╰────────────
 
-Puedes responder a una imagen con el comando`, m);
+Puedes responder a una imagen con el comando.`, m);
   }
 
   m.react('🧩');
@@ -110,6 +116,8 @@ async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
 function getSVGMask(shape, size) {
   const half = size / 2;
   const quarter = size / 4;
+  const threeQuarter = (3 * quarter);
+
   switch (shape) {
     case 'circle':
       return `<svg width="${size}" height="${size}"><circle cx="${half}" cy="${half}" r="${half}" fill="black"/></svg>`;
@@ -120,7 +128,7 @@ function getSVGMask(shape, size) {
     case 'diamond':
       return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${half} ${half},${size} 0,${half}" fill="black"/></svg>`;
     case 'hexagon':
-      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${quarter} ${size},${(3 * quarter)} ${half},${size} 0,${(3 * quarter)} 0,${quarter}" fill="black"/></svg>`;
+      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${quarter} ${size},${threeQuarter} ${half},${size} 0,${threeQuarter} 0,${quarter}" fill="black"/></svg>`;
     case 'mirror':
       return `<svg width="${size}" height="${size}"><rect width="${half}" height="${size}" x="0" fill="black"/></svg>`;
     case 'curve':
@@ -128,6 +136,19 @@ function getSVGMask(shape, size) {
     case 'attach':
     case 'expand':
       return `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="black"/></svg>`;
+    case 'heart':
+      return `<svg width="${size}" height="${size}" viewBox="0 0 32 29.6">
+        <path transform="scale(${size / 32})" d="M23.6,0c-2.9,0-5.4,1.8-6.6,4.4C15.8,1.8,13.3,0,10.4,0C4.7,0,0,4.7,0,10.4
+        c0,6.6,6.4,10.2,16,19.2c9.6-9,16-12.6,16-19.2C32,4.7,27.3,0,21.6,0H23.6z" fill="black"/>
+      </svg>`;
+    case 'pentagon':
+      return `<svg width="${size}" height="${size}">
+        <polygon points="${half},0 ${size},${quarter} ${(3 * quarter)},${size} ${quarter},${size} 0,${quarter}" fill="black"/>
+      </svg>`;
+    case 'arrow':
+      return `<svg width="${size}" height="${size}">
+        <polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/>
+      </svg>`;
     default:
       throw new Error(`Forma no soportada: ${shape}`);
   }
@@ -135,4 +156,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/i.test(text);
-        }
+}
