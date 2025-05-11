@@ -70,7 +70,7 @@ if (media === 'texto') {
   let wel = `°   /)🎩/)
     (｡•ㅅ•｡)𖹭︩︪𝚆꯭᪶۫۫͝𝙴꯭᪶͡𝙻᪶۫۫͝𝙲꯭᪶֟፟፝͡𝙾᪶۫۫͝𝙼꯭᪶͡𝙴᪶𖹭︩︪*
     ╭∪─∪─────────❤︎₊᪲
-¡Hola!🍷 *@${m.messageStubParameters[0].split`@`[0]}* buenos días/tardes/noches.\n🎉¡Bienvenido a *${groupMetadata.subject}*!\n\n> 🐢Disfruta del grupo, diviértete, no olvides en leer las reglas...
+¡Hola!🍷 *@${m.messageStubParameters[0].split`@`[0]}* buenos días/tardes/noches.\n🎉Bienvenido a *${groupMetadata.subject}*\n\n> 🐢Disfruta del grupo, diviértete, no olvides en leer las reglas...
     ╰────────────❤︎₊᪲`
  await conn.sendMessage(m.chat, {
         text: wel, 
