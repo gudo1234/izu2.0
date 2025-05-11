@@ -108,10 +108,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           externalAdReply: {
             showAdAttribution: false,
             title: `${m.pushName}`,
-            body: 'Stickers Personalizados',
+            body: textbot,
             mediaType: 1,
             sourceUrl: redes,
-            thumbnail: thumbnail
+            thumbnail: thumbnail,
+            thumbnailUrl: redes
           }
         }
       });
