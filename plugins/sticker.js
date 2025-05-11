@@ -4,29 +4,16 @@ import { sticker } from '../lib/sticker.js';
 import uploadFile from '../lib/uploadFile.js';
 import uploadImage from '../lib/uploadImage.js';
 import { webp2png } from '../lib/webp2mp4.js';
+import { spawn } from 'child_process';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const shapeFlags = {
     // Básicas
-    '-c': 'circle',
-    '-t': 'triangle',
-    '-d': 'diamond',
-    '-h': 'hexagon',
-    '-p': 'pentagon',
+    '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-h': 'hexagon', '-p': 'pentagon',
     // Decorativas
-    '-a': 'heart',
-    '-b': 'blob',
-    '-l': 'leaf',
-    '-n': 'moon',
-    '-s': 'star',
-    '-z': 'zap',
+    '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     // Especiales
-    '-r': 'curve',      // Arco
-    '-e': 'edges',      // Esquinas redondeadas
-    '-m': 'mirror',
-    '-f': 'arrow',
-    '-x': 'attach',
-    '-i': 'expand'
+    '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
   };
 
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
@@ -36,7 +23,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mime = (q.msg || q).mimetype || q.mediaType || '';
   let img;
 
-  if (/webp|image|video/g.test(mime)) {
+  if (/webp|image|video|gif/g.test(mime)) {
     if (/video/g.test(mime) && (q.msg || q).seconds > 8)
       return m.reply('¡El video no puede durar más de 8 segundos!');
     img = await q.download?.();
@@ -45,7 +32,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     mime = 'image/url';
   } else {
     return conn.reply(m.chat, `━━━━━━━━━━━━━━
-${e} Convierte imágenes o videos en stickers con formas personalizadas. Solo responde a una imagen y agrega una de las siguientes opciones:
+${e} Convierte imágenes o videos en stickers con formas personalizadas. Solo responde a una imagen o video y agrega una de las siguientes opciones:
 ┌──────────────
 │ 🖼 Requiere: Imagen o video corto
 │ 🧪 Tipo: Sticker personalizado
@@ -79,8 +66,30 @@ ${e} Convierte imágenes o videos en stickers con formas personalizadas. Solo re
   let stiker = false;
 
   try {
-    if (selectedShape && /image|webp|url/.test(mime)) {
-      const masked = await applyShapeMask(img, selectedShape, 500);
+    if (selectedShape && /image|webp|url|video|gif/.test(mime)) {
+      let frameBuffer = img;
+
+      if (/video|gif/.test(mime)) {
+        const ffmpeg = spawn('ffmpeg', [
+          '-i', 'pipe:0',
+          '-vframes', '1',
+          '-f', 'image2',
+          '-'
+        ]);
+
+        ffmpeg.stdin.write(img);
+        ffmpeg.stdin.end();
+
+        frameBuffer = await new Promise((resolve, reject) => {
+          const chunks = [];
+          ffmpeg.stdout.on('data', chunk => chunks.push(chunk));
+          ffmpeg.stderr.on('data', () => {}); // ignorar logs de error
+          ffmpeg.on('close', () => resolve(Buffer.concat(chunks)));
+          ffmpeg.on('error', reject);
+        });
+      }
+
+      const masked = await applyShapeMask(frameBuffer, selectedShape, 500);
       const stickerBuffer = await sharp(masked)
         .ensureAlpha()
         .resize(512, 512, {
@@ -117,6 +126,8 @@ ${e} Convierte imágenes o videos en stickers con formas personalizadas. Solo re
 handler.group = true;
 handler.command = ['s', 'sticker', 'stiker'];
 export default handler;
+
+// Funciones auxiliares
 
 async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
   const svgMask = getSVGMask(shape, size);
@@ -175,5 +186,5 @@ function getSVGMask(shape, size) {
 }
 
 function isUrl(text) {
-  return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/i.test(text);
-  }
+  return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
+}
