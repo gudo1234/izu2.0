@@ -1,44 +1,46 @@
 import Starlights from '@StarlightsTeam/Scraper'
 
 const handler = async (m, { conn }) => {
-  const tiktokRegex = /https?:\/\/(www\.)?tiktok\.com\/[^\s]+/gi
-  const links = [...m.text.matchAll(tiktokRegex)]
+  const tiktokRegex = /https?:\/\/(?:vt|vm|www)?\.?tiktok\.com\/[^\s]+/gi
+  const matches = [...m.text.matchAll(tiktokRegex)]
 
-  if (links.length === 0) return
+  if (matches.length === 0) return
 
-  for (const match of links) {
+  for (const match of matches) {
     const url = match[0]
 
     try {
-      await m.react('🕒')
-      const data = await Starlights.tiktokdl(url)
-      if (!data || !data.dl_url) throw new Error('No se pudo obtener el video.')
+      m.react('🕒')
+
+      const result = await Starlights.tiktokdl(url)
+      if (!result || !result.dl_url) throw new Error('No se pudo obtener el video.')
 
       const caption = `╭───── • ─────╮\n` +
                       `  𖤐 \`TIKTOK EXTRACTOR\` 𖤐\n` +
                       `╰───── • ─────╯\n\n` +
-                      `✦ *Título* : ${data.title}\n` +
-                      `✦ *Autor* : ${data.author}\n` +
-                      `✦ *Duración* : ${data.duration} segundos\n` +
-                      `✦ *Vistas* : ${data.views}\n` +
-                      `✦ *Likes* : ${data.likes}\n` +
-                      `✦ *Comentarios* : ${data.comment || data.comments_count}\n` +
-                      `✦ *Compartidos* : ${data.share || data.share_count}\n` +
-                      `✦ *Publicado* : ${data.published}\n` +
-                      `✦ *Descargas* : ${data.downloads || data.download_count}\n\n` +
+                      `✦ *Título* : ${result.title}\n` +
+                      `✦ *Autor* : ${result.author}\n` +
+                      `✦ *Duración* : ${result.duration} segundos\n` +
+                      `✦ *Vistas* : ${result.views}\n` +
+                      `✦ *Likes* : ${result.likes}\n` +
+                      `✦ *Comentarios* : ${result.comment || result.comments_count}\n` +
+                      `✦ *Compartidos* : ${result.share || result.share_count}\n` +
+                      `✦ *Publicado* : ${result.published}\n` +
+                      `✦ *Descargas* : ${result.downloads || result.download_count}\n\n` +
                       `> *${global.textbot || 'Bot'}*`
 
-      await conn.sendFile(m.chat, data.dl_url, 'tiktok.mp4', caption, m)
+      await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', caption, m)
       await m.react('✅')
     } catch (err) {
       console.error(err)
       await m.react('❌')
-      m.reply(`❌ Error al descargar video de TikTok:\n${err.message}`)
+      await m.reply(`❌ Error al descargar video de TikTok:\n${err.message}`)
     }
   }
 }
 
-handler.customPrefix = /https?:\/\/(www\.)?tiktok\.com\/[^\s]+/i
-handler.command = new RegExp // se activa automáticamente
+// Detecta automáticamente enlaces de TikTok en cualquier mensaje del grupo
+handler.customPrefix = /https?:\/\/(?:vt|vm|www)?\.?tiktok\.com\/[^\s]+/i
+handler.command = new RegExp
 handler.group = true
 export default handler
