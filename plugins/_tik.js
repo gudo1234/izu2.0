@@ -27,7 +27,7 @@ const handler = async (m, { conn }) => {
                       `✦ *Compartidos* : ${result.share || result.share_count}\n` +
                       `✦ *Publicado* : ${result.published}\n` +
                       `✦ *Descargas* : ${result.downloads || result.download_count}\n\n` +
-                      `> *${global.textbot || 'Bot'}*`
+                      `> *${textbot}*`
 
       await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', caption, m)
       await m.react('✅')
