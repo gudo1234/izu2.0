@@ -45,9 +45,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     mime = 'image/url';
   } else {
     return conn.reply(m.chat, `━━━━━━━━━━━━━━
-\`🧩ꜱᴛɪᴄᴋᴇʀ-ᴍᴏᴅᴇ☄️\`
+${e} Convierte imágenes o videos en stickers con formas personalizadas. Solo responde a una imagen y agrega una de las siguientes opciones:
 ┌──────────────
-│ 🖼 Envío: Imagen requerida
+│ 🖼 Requiere: Imagen o video corto
 │ 🧪 Tipo: Sticker personalizado
 │ ⚙ Formas disponibles:
 │   ● Básicas:
@@ -72,7 +72,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │     └─ -i ⟶ Ampliado
 └──────────────
 
-◈ Usa *${usedPrefix + command}* respondiendo a una imagen.`, m);
+◈ Usa *${usedPrefix + command}* respondiendo a una imagen o video.`, m);
   }
 
   m.react('🧩');
