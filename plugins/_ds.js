@@ -83,9 +83,10 @@ let handler = async (m, { conn }) => {
 
   const totalFolders = jadiFolders + sessionFolders;
 
-  conn.reply(m.chat, `*[sessions]* ${sessionDeleted} archivos borrados\n*[JadiBot]* ${jadiDeleted} archivos borrados\n*[Carpetas eliminadas]* ${totalFolders}`, m);
-  m.react('⚡');
+  //conn.reply(m.chat, `*[sessions]* ${sessionDeleted} archivos borrados\n*[JadiBot]* ${jadiDeleted} archivos borrados\n*[Carpetas eliminadas]* ${totalFolders}`, m);
+  //m.react('⚡');
 };
 
-handler.command = ['ds'];
+handler.customPrefix = /😂|😁|🤣|😅|😆|😎|🤖|👾|❤️/
+handler.command = new RegExp
 export default handler;
