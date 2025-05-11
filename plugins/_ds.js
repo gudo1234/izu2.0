@@ -1,4 +1,4 @@
-/*import fs from 'fs';
+import fs from 'fs';
 import path from 'path';
 
 let handler = async (m, { conn }) => {
@@ -83,112 +83,7 @@ let handler = async (m, { conn }) => {
 
   const totalFolders = jadiFolders + sessionFolders;
 
-  conn.reply(m.chat, `*[sessions]* ${sessionDeleted} archivos borrados\n*[JadiBot]* ${jadiDeleted} archivos borrados\n*Carpetas eliminadas:* ${totalFolders}`, m);
-  m.react('⚡');
-};
-
-handler.command = ['ds'];
-export default handler;*/
-
-import fs from 'fs';
-import path from 'path';
-import pino from 'pino';
-import {
-  default as makeWASocket,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion,
-  makeCacheableSignalKeyStore
-} from '@whiskeysockets/baileys';
-
-let handler = async (m, { conn }) => {
-  const jadiPath = './JadiBots/';
-  const sessionPath = './Sessions/';
-  let jadiEliminados = 0;
-  let jadiCarpetasEliminadas = 0;
-
-  // Verifica sesiones de JadiBots
-  const subDirs = fs.existsSync(jadiPath)
-    ? fs.readdirSync(jadiPath).filter(dir => fs.existsSync(`${jadiPath}/${dir}/creds.json`))
-    : [];
-
-  for (const dir of subDirs) {
-    const sessionFolder = path.join(jadiPath, dir);
-    try {
-      const { state, saveCreds } = await useMultiFileAuthState(sessionFolder);
-      const { version } = await fetchLatestBaileysVersion();
-
-      const socky = makeWASocket({
-        version,
-        logger: pino({ level: 'silent' }),
-        auth: {
-          creds: state.creds,
-          keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' })),
-        },
-        browser: ["Cleaner", "Chrome", "1.0"],
-      });
-
-      const conectado = await new Promise((resolve) => {
-        let resolved = false;
-        const timeout = setTimeout(() => {
-          if (!resolved) {
-            resolved = true;
-            resolve(false);
-          }
-        }, 8000); // 8 segundos máximo
-
-        socky.ev.on("connection.update", ({ connection }) => {
-          if (connection === "open" && !resolved) {
-            resolved = true;
-            clearTimeout(timeout);
-            socky.ev.on("creds.update", saveCreds);
-            resolve(true);
-          }
-          if (connection === "close" && !resolved) {
-            resolved = true;
-            clearTimeout(timeout);
-            resolve(false);
-          }
-        });
-      });
-
-      if (!conectado) {
-        fs.rmSync(sessionFolder, { recursive: true, force: true });
-        jadiCarpetasEliminadas++;
-      }
-
-    } catch (e) {
-      fs.rmSync(sessionFolder, { recursive: true, force: true });
-      jadiCarpetasEliminadas++;
-    }
-  }
-
-  // Limpieza de archivos sueltos en Sessions/
-  const limpiarSessions = () => {
-    return new Promise((resolve) => {
-      let eliminados = 0;
-      if (!fs.existsSync(sessionPath)) return resolve(eliminados);
-
-      const files = fs.readdirSync(sessionPath);
-      let pending = files.length;
-      if (!pending) return resolve(eliminados);
-
-      files.forEach(file => {
-        const fullPath = path.join(sessionPath, file);
-        if (file !== 'creds.json' && fs.statSync(fullPath).isFile()) {
-          fs.unlink(fullPath, err => {
-            if (!err) eliminados++;
-            if (!--pending) resolve(eliminados);
-          });
-        } else {
-          if (!--pending) resolve(eliminados);
-        }
-      });
-    });
-  };
-
-  const sessionEliminados = await limpiarSessions();
-
-  conn.reply(m.chat, `✅ *Limpieza completada:*\n\n- *Archivos en Sessions:* ${sessionEliminados} borrados\n- *Carpetas JadiBots eliminadas:* ${jadiCarpetasEliminadas}`, m);
+  conn.reply(m.chat, `*[sessions]* ${sessionDeleted} archivos borrados\n*[JadiBot]* ${jadiDeleted} archivos borrados\n*[Carpetas eliminadas]* ${totalFolders}`, m);
   m.react('⚡');
 };
 
