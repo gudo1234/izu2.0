@@ -18,7 +18,7 @@ const handler = async (m, { conn }) => {
     if (!result || !result.title) continue
 
     const caption = `「✦」Descargando *<${result.title}>*\n> ✦ Descripción » *${result.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(result.views)}*\n> ⴵ Duración » *${result.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${result.ago || 'Desconocido'}*\n> ✦ Url » *${result.url}*\n\n*_Para seleccionar, responde a este mensaje:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`
-
+m.react('🕒')
     tempStorage[m.sender] = {
       url: result.url,
       title: result.title,
