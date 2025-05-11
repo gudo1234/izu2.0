@@ -16,7 +16,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     // Especiales
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
   };
-
+let img = await (await fetch(`https://files.catbox.moe/nir33y.jpg`)).buffer()
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
@@ -34,7 +34,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     //let img = await (await fetch(`https://files.catbox.moe/nir33y.jpg`)).buffer()
   } else {
     /*return conn.reply(m.chat,*/
-let img = await (await fetch(`https://files.catbox.moe/nir33y.jpg`)).buffer()
 let txt = `${e} Responde a una imágen o video/gif para generar un sticker y agrega una de las siguientes opciones:
 
 ┌───────────
