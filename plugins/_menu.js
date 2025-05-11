@@ -26,7 +26,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
-      .map(cmd => `│ ${e}${cmd} *‹@υsєя›*`)
+      .map(cmd => `│ ${e}${cmd}`)
       .sort()
       .join('\n') || '│ (No se encontraron comandos)'
   }
@@ -41,8 +41,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 ━━━━━━━━━━━━━
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
-│ 🚩 Nombre: ${m.pushName}
-│ 🌎 País: ${mundo}
+│ 🚩 *Nombre:* ${m.pushName}
+│ 🌎 *País:* ${mundo}
 └────────────
 
 \`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
