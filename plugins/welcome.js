@@ -5,7 +5,7 @@ import fetch from 'node-fetch'
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
-  const thumbnail = await (await fetch(icono)).buffer();
+  //const thumbnail = await (await fetch(icono)).buffer();
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
@@ -20,7 +20,7 @@ let vn2 = './media/bien.mp3'; //welcome entra épica
   let a = `🎉 _Welcome_ *@${m.messageStubParameters[0].split`@`[0]}*`
   let b = `✋🏻 Adiós *@${m.messageStubParameters[0].split`@`[0]}*`
   //😍mi desmadre
-  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => thumbnail )
+  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono )
   let im = await (await fetch(`${pp}`)).buffer()
   let chat = global.db.data.chats[m.chat]
   let groupSize = participants.length
