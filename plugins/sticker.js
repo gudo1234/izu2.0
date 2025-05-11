@@ -21,7 +21,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-s': 'star',
     '-z': 'zap',
     // Especiales
-    '-r': 'curve',
+    '-r': 'curve',      // Arco
+    '-e': 'edges',      // Esquinas redondeadas
     '-m': 'mirror',
     '-f': 'arrow',
     '-x': 'attach',
@@ -63,7 +64,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │     ├─ -s ⟶ Estrella
 │     └─ -z ⟶ Rayo
 │   ● Especiales:
-│     ├─ -r ⟶ Curvado
+│     ├─ -r ⟶ Curvado (arco)
+│     ├─ -e ⟶ Esquinas redondeadas
 │     ├─ -m ⟶ Espejo
 │     ├─ -f ⟶ Flecha
 │     ├─ -x ⟶ Acoplado
@@ -131,6 +133,7 @@ function getSVGMask(shape, size) {
   const half = size / 2;
   const quarter = size / 4;
   const threeQuarter = 3 * quarter;
+  const radius = size * 0.15;
 
   switch (shape) {
     case 'circle':
@@ -148,7 +151,7 @@ function getSVGMask(shape, size) {
     case 'blob':
       return `<svg width="${size}" height="${size}"><path d="M150 0 C250 50, 250 150, 150 200 C50 250, 0 150, 50 50 Z" fill="black" transform="scale(${size/300})"/></svg>`;
     case 'leaf':
-      return `<svg width="${size}" height="${size}"><path d="M${size/2},0 C${size},${size/3},${size/3},${size},0,${size} C0,${size/2},0,${size/3},${size/2},0 Z" fill="black"/></svg>`;
+      return `<svg width="${size}" height="${size}"><path d="M${half},0 C${size},${quarter},${quarter},${size} 0,${size} C0,${half} 0,${quarter} ${half},0 Z" fill="black"/></svg>`;
     case 'moon':
       return `<svg width="${size}" height="${size}"><path d="M${half},0 A${half},${half} 0 1,0 ${half},${size} A${size*0.6},${half} 0 1,1 ${half},0 Z" fill="black"/></svg>`;
     case 'star':
@@ -157,6 +160,8 @@ function getSVGMask(shape, size) {
       return `<svg width="${size}" height="${size}"><polygon points="${half - 20},${half} ${half + 10},${half} ${half - 10},${size} ${half + 30},${half} ${half},${half} ${half + 10},0" fill="black"/></svg>`;
     case 'curve':
       return `<svg width="${size}" height="${size}"><path d="M0,${size} Q${half},0 ${size},${size} Z" fill="black"/></svg>`;
+    case 'edges':
+      return `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${radius}" ry="${radius}" fill="black"/></svg>`;
     case 'mirror':
       return `<svg width="${size}" height="${size}"><rect width="${half}" height="${size}" x="0" fill="black"/></svg>`;
     case 'arrow':
@@ -171,4 +176,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp)$/i.test(text);
-}
+  }
