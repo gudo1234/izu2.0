@@ -5,7 +5,6 @@ import fetch from 'node-fetch'
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
-  //const thumbnail = await (await fetch(icono)).buffer();
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
