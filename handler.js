@@ -177,7 +177,7 @@ chat.antiLink = true
 if (!('reaction' in chat))
 chat.reaction = false
 if (!('nsfw' in chat))
-chat.nsfw = false
+chat.nsfw = true
 if (!('antifake' in chat))
 chat.antifake = false
 if (!('delete' in chat))
@@ -201,7 +201,7 @@ modoadmin: false,
 antiLink: true,
 antifake: false,
 reaction: false,
-nsfw: false,
+nsfw: true,
 expired: 0, 
 }
 var settings = global.db.data.settings[this.user.jid]
