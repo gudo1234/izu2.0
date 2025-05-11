@@ -1,8 +1,8 @@
 import fs from 'fs';
 
 let handler = async (m, { conn }) => {
-  const jadiPath = './jadi/';
-  const sessionPath = './sessions/';
+  const jadiPath = './JadiBots/';
+  const sessionPath = './Sessions/';
 
   const countDeletedFiles = (path, isSubfolder = false) => {
     return new Promise((resolve) => {
@@ -60,6 +60,7 @@ let handler = async (m, { conn }) => {
   const sessionDeleted = await countDeletedFiles(sessionPath);
 
   conn.reply(m.chat, `*[sessions]* ${sessionDeleted} archivos borrados\n*[JadiBot]* ${jadiDeleted} archivos borrados`, m);
+m.react('⚡')
 };
 
 handler.command = ['ds'];
