@@ -7,17 +7,25 @@ import { webp2png } from '../lib/webp2mp4.js';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const shapeFlags = {
-    '-i': 'expand',
-    '-x': 'attach',
+    // Básicas
     '-c': 'circle',
     '-t': 'triangle',
-    '-r': 'curve',
-    '-s': 'star',
     '-d': 'diamond',
     '-h': 'hexagon',
-    '-m': 'mirror',
     '-p': 'pentagon',
-    '-f': 'arrow'
+    // Decorativas
+    '-a': 'heart',
+    '-b': 'blob',
+    '-l': 'leaf',
+    '-n': 'moon',
+    '-s': 'star',
+    '-z': 'zap',
+    // Especiales
+    '-r': 'curve',
+    '-m': 'mirror',
+    '-f': 'arrow',
+    '-x': 'attach',
+    '-i': 'expand'
   };
 
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
@@ -29,7 +37,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   if (/webp|image|video/g.test(mime)) {
     if (/video/g.test(mime) && (q.msg || q).seconds > 8)
-      return m.reply(`¡El video no puede durar más de 8 segundos!`);
+      return m.reply('¡El video no puede durar más de 8 segundos!');
     img = await q.download?.();
   } else if (args[0] && isUrl(args[0])) {
     img = await fetch(args[0]).then(res => res.buffer());
@@ -40,18 +48,26 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 ┌──────────────
 │ 🖼 Envío: Imagen requerida
 │ 🧪 Tipo: Sticker personalizado
-│ ⚙ Opciones:
-│   ├─ -i ⟶ Ampliado
-│   ├─ -x ⟶ Acoplado
-│   ├─ -c ⟶ Circular
-│   ├─ -t ⟶ Triangular
-│   ├─ -r ⟶ Curvado
-│   ├─ -s ⟶ Estrella
-│   ├─ -d ⟶ Diamante
-│   ├─ -h ⟶ Hexágono
-│   ├─ -m ⟶ Espejo
-│   ├─ -p ⟶ Pentágono
-│   └─ -f ⟶ Flecha
+│ ⚙ Formas disponibles:
+│   ● Básicas:
+│     ├─ -c ⟶ Circular
+│     ├─ -t ⟶ Triangular
+│     ├─ -d ⟶ Diamante
+│     ├─ -h ⟶ Hexágono
+│     └─ -p ⟶ Pentágono
+│   ● Decorativas:
+│     ├─ -a ⟶ Corazón
+│     ├─ -b ⟶ Burbuja
+│     ├─ -l ⟶ Hoja
+│     ├─ -n ⟶ Luna
+│     ├─ -s ⟶ Estrella
+│     └─ -z ⟶ Rayo
+│   ● Especiales:
+│     ├─ -r ⟶ Curvado
+│     ├─ -m ⟶ Espejo
+│     ├─ -f ⟶ Flecha
+│     ├─ -x ⟶ Acoplado
+│     └─ -i ⟶ Ampliado
 └──────────────
 
 ◈ Usa *${usedPrefix + command}* respondiendo a una imagen.`, m);
@@ -114,30 +130,40 @@ async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
 function getSVGMask(shape, size) {
   const half = size / 2;
   const quarter = size / 4;
-  const threeQuarter = (3 * quarter);
+  const threeQuarter = 3 * quarter;
 
   switch (shape) {
     case 'circle':
       return `<svg width="${size}" height="${size}"><circle cx="${half}" cy="${half}" r="${half}" fill="black"/></svg>`;
     case 'triangle':
       return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${size} 0,${size}" fill="black"/></svg>`;
-    case 'star':
-      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${half + 15},${half - 10} ${size},${half} ${half + 15},${half + 10} ${half},${size} ${half - 15},${half + 10} 0,${half} ${half - 15},${half - 10}" fill="black"/></svg>`;
     case 'diamond':
       return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${half} ${half},${size} 0,${half}" fill="black"/></svg>`;
     case 'hexagon':
       return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${quarter} ${size},${threeQuarter} ${half},${size} 0,${threeQuarter} 0,${quarter}" fill="black"/></svg>`;
-    case 'mirror':
-      return `<svg width="${size}" height="${size}"><rect width="${half}" height="${size}" x="0" fill="black"/></svg>`;
+    case 'pentagon':
+      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${quarter} ${(3 * quarter)},${size} ${quarter},${size} 0,${quarter}" fill="black"/></svg>`;
+    case 'heart':
+      return `<svg width="${size}" height="${size}" viewBox="0 0 32 29.6"><path d="M23.6,0c-2.7,0-5.1,1.3-6.6,3.3C15.5,1.3,13.1,0,10.4,0C4.7,0,0,4.7,0,10.4c0,6,6.2,10.9,15.7,18.5L16,29.6l0.3-0.3 C25.8,21.3,32,16.4,32,10.4C32,4.7,27.3,0,21.6,0H23.6z" fill="black"/></svg>`;
+    case 'blob':
+      return `<svg width="${size}" height="${size}"><path d="M150 0 C250 50, 250 150, 150 200 C50 250, 0 150, 50 50 Z" fill="black" transform="scale(${size/300})"/></svg>`;
+    case 'leaf':
+      return `<svg width="${size}" height="${size}"><path d="M${size/2},0 C${size},${size/3},${size/3},${size},0,${size} C0,${size/2},0,${size/3},${size/2},0 Z" fill="black"/></svg>`;
+    case 'moon':
+      return `<svg width="${size}" height="${size}"><path d="M${half},0 A${half},${half} 0 1,0 ${half},${size} A${size*0.6},${half} 0 1,1 ${half},0 Z" fill="black"/></svg>`;
+    case 'star':
+      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${half + 15},${half - 10} ${size},${half} ${half + 15},${half + 10} ${half},${size} ${half - 15},${half + 10} 0,${half} ${half - 15},${half - 10}" fill="black"/></svg>`;
+    case 'zap':
+      return `<svg width="${size}" height="${size}"><polygon points="${half - 20},${half} ${half + 10},${half} ${half - 10},${size} ${half + 30},${half} ${half},${half} ${half + 10},0" fill="black"/></svg>`;
     case 'curve':
       return `<svg width="${size}" height="${size}"><path d="M0,${size} Q${half},0 ${size},${size} Z" fill="black"/></svg>`;
+    case 'mirror':
+      return `<svg width="${size}" height="${size}"><rect width="${half}" height="${size}" x="0" fill="black"/></svg>`;
+    case 'arrow':
+      return `<svg width="${size}" height="${size}"><polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/></svg>`;
     case 'attach':
     case 'expand':
       return `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="black"/></svg>`;
-    case 'pentagon':
-      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${quarter} ${(3 * quarter)},${size} ${quarter},${size} 0,${quarter}" fill="black"/></svg>`;
-    case 'arrow':
-      return `<svg width="${size}" height="${size}"><polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/></svg>`;
     default:
       throw new Error(`Forma no soportada: ${shape}`);
   }
