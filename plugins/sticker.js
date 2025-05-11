@@ -28,7 +28,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `${e}Responde a una imagen o video/gif para generar un sticker o agrega una de las siguientes opciones:
+    return conn.reply(m.chat, `${e} Responde a una imagen o video/gif para generar un sticker o agrega una de las siguientes opciones:
 
 ┌───────────
 │ 🧪 Tipo: Sticker personalizado
