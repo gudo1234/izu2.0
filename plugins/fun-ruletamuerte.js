@@ -24,6 +24,7 @@ const handler = async (m, { conn }) => {
 };
 
 handler.command = ['ruletamuerte'];
+handler.group = true;
 
 export default handler;
 
@@ -72,7 +73,7 @@ export default handler;
         const perdedor = Math.random() < 0.5 ? jugador1 : jugador2;
 
         await conn.sendMessage(m.chat, { 
-            text: `${e} *Veredicto final* ${e}\n\n@${perdedor.split('@')[0]} ha sido el perdedor.\n\n> ${e} Tiene 60 segundos para tus últimas palabras...`, 
+            text: `${e} *Veredicto final*\n\n@${perdedor.split('@')[0]} ha sido el perdedor.\n\n> ${e} Tiene 60 segundos para tus últimas palabras...`, 
             mentions: [perdedor] 
         });
 
@@ -90,4 +91,3 @@ export default handler;
         await conn.sendMessage(m.chat, { text: '${e} El juego ha sido cancelado por el retador.' });
     }
 };
-handler.group = true;
