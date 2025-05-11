@@ -99,7 +99,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             mediaType: 1,
             sourceUrl: redes,
             thumbnailUrl: redes,
-            thumbnai: thumbnail
+            thumbnai: icono
           }
         }
       });
@@ -128,7 +128,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             mediaType: 1,
             sourceUrl: redes,
             thumbnailUrl: redes,
-            thumbnai: thumbnail
+            thumbnai: icono
           }
         }
       });
