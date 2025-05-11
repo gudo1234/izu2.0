@@ -26,14 +26,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
-      .map(cmd => `│ ${e}${cmd}`)
+      .map(cmd => `│ ${e}${cmd} *‹›*`)
       .sort()
       .join('\n') || '│ (No se encontraron comandos)'
   }
 
   const comandosAnime = comandosPorCategoria('anime')
-  //const comandosFun = comandosPorCategoria('fun')
-  const comandosFun = `${comandosPorCategoria(fun + *@υsєя*)}`;
+  const comandosFun = comandosPorCategoria('fun')
   const comandosNsfw = comandosPorCategoria('nsfw')
 
   let txt = `🗣️ _¡Hola!,_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
