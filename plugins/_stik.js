@@ -104,6 +104,25 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       });
     }
 
+    if (/video|gif/.test(mime) && !selectedShape) {
+      const animatedSticker = await convertToAnimatedWebp(img);
+      return conn.sendFile(m.chat, { sticker: animatedSticker }, {
+        quoted: m,
+        contextInfo: {
+          forwardingScore: 200,
+          isForwarded: false,
+          externalAdReply: {
+            showAdAttribution: false,
+            title: `${m.pushName}`,
+            body: 'Sticker Animado',
+            mediaType: 1,
+            sourceUrl: redes,
+            thumbnail: thumbnail
+          }
+        }
+      });
+    }
+
     try {
       stiker = await sticker(img, false, `${m.pushName}`);
     } catch (e) {
@@ -183,4 +202,24 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-          }
+}
+
+async function convertToAnimatedWebp(buffer) {
+  return new Promise((resolve, reject) => {
+    const ffmpeg = spawn('ffmpeg', [
+      '-i', 'pipe:0',
+      '-vf', 'scale=512:512:force_original_aspect_ratio=decrease,fps=15',
+      '-loop', '0',
+      '-c:v', 'libwebp',
+      '-qscale', '50',
+      '-preset', 'picture',
+      '-an', '-f', 'webp', 'pipe:1'
+    ]);
+    const chunks = [];
+    ffmpeg.stdin.write(buffer);
+    ffmpeg.stdin.end();
+    ffmpeg.stdout.on('data', chunk => chunks.push(chunk));
+    ffmpeg.on('close', () => resolve(Buffer.concat(chunks)));
+    ffmpeg.on('error', reject);
+  });
+                }
