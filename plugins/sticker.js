@@ -35,26 +35,26 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `「 Generador de Stickers 」
+    return conn.reply(m.chat, `━━━━━━━━━━━━━━
+\`🧩ꜱᴛɪᴄᴋᴇʀ-ᴍᴏᴅᴇ☄️\`
+┌──────────────
+│ 🖼 Envío: Imagen requerida
+│ 🧪 Tipo: Sticker personalizado
+│ ⚙ Opciones:
+│   ├─ -i ⟶ Ampliado
+│   ├─ -x ⟶ Acoplado
+│   ├─ -c ⟶ Circular
+│   ├─ -t ⟶ Triangular
+│   ├─ -r ⟶ Curvado
+│   ├─ -s ⟶ Estrella
+│   ├─ -d ⟶ Diamante
+│   ├─ -h ⟶ Hexágono
+│   ├─ -m ⟶ Espejo
+│   ├─ -p ⟶ Pentágono
+│   └─ -f ⟶ Flecha
+└──────────────
 
-Por favor, *envía una imagen* para crear tu sticker personalizado.
-
-▸ *Variantes disponibles* (solo imágenes):
-╭───「 Formas 」
-│ ✦ ${usedPrefix + command} -i » Sticker Ampliado
-│ ✦ ${usedPrefix + command} -x » Sticker Acoplado
-│ ✦ ${usedPrefix + command} -c » Sticker Circular
-│ ✦ ${usedPrefix + command} -t » Sticker Triangular
-│ ✦ ${usedPrefix + command} -r » Sticker Curvado
-│ ✦ ${usedPrefix + command} -s » Sticker Estrella
-│ ✦ ${usedPrefix + command} -d » Sticker Diamante
-│ ✦ ${usedPrefix + command} -h » Sticker Hexágono
-│ ✦ ${usedPrefix + command} -m » Sticker Espejo
-│ ✦ ${usedPrefix + command} -p » Sticker Pentágono
-│ ✦ ${usedPrefix + command} -f » Sticker Flecha
-╰────────────
-
-Puedes responder a una imagen con el comando.`, m);
+◈ Usa *${usedPrefix + command}* respondiendo a una imagen.`, m);
   }
 
   m.react('🧩');
