@@ -16,9 +16,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-d': 'diamond',
     '-h': 'hexagon',
     '-m': 'mirror',
-    '-l': 'heart',      // Nuevo: corazón
-    '-p': 'pentagon',   // Nuevo: pentágono
-    '-f': 'arrow'       // Nuevo: flecha
+    '-p': 'pentagon',
+    '-f': 'arrow'
   };
 
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
@@ -51,7 +50,6 @@ Por favor, *envía una imagen* para crear tu sticker personalizado.
 │ ✦ ${usedPrefix + command} -d » Sticker Diamante
 │ ✦ ${usedPrefix + command} -h » Sticker Hexágono
 │ ✦ ${usedPrefix + command} -m » Sticker Espejo
-│ ✦ ${usedPrefix + command} -l » Sticker Corazón
 │ ✦ ${usedPrefix + command} -p » Sticker Pentágono
 │ ✦ ${usedPrefix + command} -f » Sticker Flecha
 ╰────────────
@@ -136,19 +134,10 @@ function getSVGMask(shape, size) {
     case 'attach':
     case 'expand':
       return `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="black"/></svg>`;
-    case 'heart':
-      return `<svg width="${size}" height="${size}" viewBox="0 0 32 29.6">
-        <path transform="scale(${size / 32})" d="M23.6,0c-2.9,0-5.4,1.8-6.6,4.4C15.8,1.8,13.3,0,10.4,0C4.7,0,0,4.7,0,10.4
-        c0,6.6,6.4,10.2,16,19.2c9.6-9,16-12.6,16-19.2C32,4.7,27.3,0,21.6,0H23.6z" fill="black"/>
-      </svg>`;
     case 'pentagon':
-      return `<svg width="${size}" height="${size}">
-        <polygon points="${half},0 ${size},${quarter} ${(3 * quarter)},${size} ${quarter},${size} 0,${quarter}" fill="black"/>
-      </svg>`;
+      return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${quarter} ${(3 * quarter)},${size} ${quarter},${size} 0,${quarter}" fill="black"/></svg>`;
     case 'arrow':
-      return `<svg width="${size}" height="${size}">
-        <polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/>
-      </svg>`;
+      return `<svg width="${size}" height="${size}"><polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/></svg>`;
     default:
       throw new Error(`Forma no soportada: ${shape}`);
   }
