@@ -256,6 +256,6 @@ ${comandosNsfw}
   }
 }
 
-handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú']
+handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú', 'm']
 handler.group = true
 export default handler
