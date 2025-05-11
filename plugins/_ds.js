@@ -105,7 +105,6 @@ let handler = async (m, { conn }) => {
   const sessionPath = './Sessions/';
   let jadiEliminados = 0;
   let jadiCarpetasEliminadas = 0;
-  const activos = [];
 
   // Verifica sesiones de JadiBots
   const subDirs = fs.existsSync(jadiPath)
@@ -142,7 +141,6 @@ let handler = async (m, { conn }) => {
             resolved = true;
             clearTimeout(timeout);
             socky.ev.on("creds.update", saveCreds);
-            activos.push(socky.user.id.split(':')[0]);
             resolve(true);
           }
           if (connection === "close" && !resolved) {
@@ -190,17 +188,7 @@ let handler = async (m, { conn }) => {
 
   const sessionEliminados = await limpiarSessions();
 
-  const resumen = `
-✅ *Limpieza completada:*
-
-- *Sessions:* ${sessionEliminados} archivos borrados
-- *Carpetas JadiBots eliminadas:* ${jadiCarpetasEliminadas}
-
-🟢 *Subbots activos:*
-${activos.length ? activos.map(num => `- wa.me/${num}`).join('\n') : 'Ninguno'}
-`.trim();
-
-  conn.reply(m.chat, resumen, m);
+  conn.reply(m.chat, `✅ *Limpieza completada:*\n\n- *Archivos en Sessions:* ${sessionEliminados} borrados\n- *Carpetas JadiBots eliminadas:* ${jadiCarpetasEliminadas}`, m);
   m.react('⚡');
 };
 
