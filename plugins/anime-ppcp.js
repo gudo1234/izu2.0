@@ -11,5 +11,6 @@ let handler = async (m, { conn }) => {
 }
 
 handler.command = ['ppcp', 'ppcouple'];
+handler.group = true;
 
-export default handlerhandler.group = true;
+export default handler
