@@ -31,26 +31,26 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `━━━━━━━━━━━━━━
-> ${e} Responde a una imágen o video/gif para generar un sticker y agrega una de las siguientes opciones:
+    return conn.reply(m.chat, `${e} Responde a una imágen o video/gif para generar un sticker y agrega una de las siguientes opciones:
+
 ┌───────────
 │ 🖼 *Requiere:* Imagen o video corto
 │ 🧪 *Tipo:* Sticker personalizado
 │ ⚙ \`Formas disponibles:\`
-│   ● *Básicas:*
+│  ● *Básicas:*
 │ ├─ -c ⟶ Circular
 │ ├─ -t ⟶ Triangular
 │ ├─ -d ⟶ Diamante
 │ ├─ -h ⟶ Hexágono
 │ └─ -p ⟶ Pentágono
-│   ● *Decorativas:*
+│  ● *Decorativas:*
 │ ├─ -a ⟶ Corazón
 │ ├─ -b ⟶ Burbuja
 │ ├─ -l ⟶ Hoja
 │ ├─ -n ⟶ Luna
 │ ├─ -s ⟶ Estrella
 │ └─ -z ⟶ Rayo
-│   ● *Especiales:*
+│  ● *Especiales:*
 │ ├─ -r ⟶ Curvado (arco)
 │ ├─ -e ⟶ Esquinas redondeadas
 │ ├─ -m ⟶ Espejo
