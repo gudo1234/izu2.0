@@ -10,6 +10,12 @@ const handler = async (m, { conn }) => {
   try {
     const url = match[0];
     const result = await Starlights.tiktokdl(url);
+
+    if (!result || !result.dl_url) {
+      await m.react('❌');
+      return conn.reply(m.chat, '❌ No se pudo obtener el video de TikTok. Intenta con otro enlace.', m);
+    }
+
     const dl_url = result.dl_url;
 
     let txt = `╭───── • ─────╮\n`;
@@ -35,6 +41,7 @@ const handler = async (m, { conn }) => {
 
   } catch (err) {
     console.error(err);
+    await m.react('❌');
     await conn.sendMessage(m.chat, {
       text: `❌ Ocurrió un error al procesar el video.`
     }, { quoted: m });
@@ -42,6 +49,6 @@ const handler = async (m, { conn }) => {
 };
 
 handler.customPrefix = /(?:https?:\/\/)?(?:www\.)?(?:vt\.tiktok\.com|tiktok\.com)\/[^\s]+/i;
-handler.command = new RegExp // sin comandos explícitos
+handler.command = new RegExp; // sin comando
 handler.group = true;
 export default handler;
