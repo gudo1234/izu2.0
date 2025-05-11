@@ -34,9 +34,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     return conn.reply(m.chat, `━━━━━━━━━━━━━━
 > ${e} Responde a una imágen o video/gif para generar un sticker y agrega una de las siguientes opciones:
 ┌───────────
-│ 🖼 Requiere: Imagen o video corto
-│ 🧪 Tipo: Sticker personalizado
-│ ⚙ Formas disponibles:
+│ 🖼 *Requiere:* Imagen o video corto
+│ 🧪 *Tipo:* Sticker personalizado
+│ ⚙ \`Formas disponibles:\`
 │   ● *Básicas:*
 │ ├─ -c ⟶ Circular
 │ ├─ -t ⟶ Triangular
@@ -59,7 +59,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ └─ -i ⟶ Ampliado
 └───────────
 
-◈ Usa *${usedPrefix + command}* -a respondiendo a una imagen o video.`, m);
+◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`, m);
   }
 
   m.react('🧩');
