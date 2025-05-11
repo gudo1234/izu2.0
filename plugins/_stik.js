@@ -12,7 +12,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
   };
-
+  const thumbnail = await (await fetch(icono)).buffer()
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
@@ -99,7 +99,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             mediaType: 1,
             sourceUrl: redes,
             thumbnailUrl: redes,
-            thumbnai: icono
+            thumbnai: thumbnail
           }
         }
       });
@@ -128,7 +128,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             mediaType: 1,
             sourceUrl: redes,
             thumbnailUrl: redes,
-            thumbnai: icono
+            thumbnai: thumbnail
           }
         }
       });
