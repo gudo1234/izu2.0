@@ -12,7 +12,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
   };
-  const thumbnail = await (await fetch(icono)).buffer()
+  const thumbnail = await (await fetch(icono)).buffer();
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
@@ -28,7 +28,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `${e} Responde a una imágen o video/gif para generar un sticker o agrega una de las siguientes opciones:
+    return conn.reply(m.chat, `${e} Responde a una imagen o video/gif para generar un sticker o agrega una de las siguientes opciones:
 
 ┌───────────
 │ 🖼 Requiere: Imagen o video corto
@@ -95,11 +95,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           externalAdReply: {
             showAdAttribution: false,
             title: `${m.pushName}`,
-            body: textbot,
+            body: 'Stickers Personalizados',
             mediaType: 1,
             sourceUrl: redes,
-            thumbnailUrl: redes,
-            thumbnai: icono
+            thumbnail: thumbnail
           }
         }
       });
@@ -124,11 +123,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           externalAdReply: {
             showAdAttribution: false,
             title: `${m.pushName}`,
-            body: textbot,
+            body: 'Stickers Personalizados',
             mediaType: 1,
             sourceUrl: redes,
-            thumbnailUrl: redes,
-            thumbnai: icono
+            thumbnail: thumbnail
           }
         }
       });
@@ -185,4 +183,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-        }
+          }
