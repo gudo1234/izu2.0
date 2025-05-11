@@ -16,7 +16,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     // Especiales
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
   };
-let img = await (await fetch(`https://files.catbox.moe/nir33y.jpg`)).buffer()
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
@@ -63,7 +62,7 @@ let txt = `${e} Responde a una imágen o video/gif para generar un sticker y agr
 └───────────
 
 ◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`;
-  await conn.sendFile(m.chat, img, "Thumbnail.jpg", txt, m, null, rcanal)
+  await conn.sendFile(m.chat, 'https://files.catbox.moe/wg1vbo.jpg', "Thumbnail.jpg", txt, m, null, rcanal)
   }
 
   m.react('🧩');
