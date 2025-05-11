@@ -7,12 +7,12 @@ const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/
 
 const handler = async (m, { conn }) => {
   const match = m.text.match(ytRegex)
-  if (!match) return
+  if (!match) return m.reply("No se detectó un enlace válido de YouTube.")
 
   const videoId = match[1]
   const search = await yts({ videoId })
   const video = search?.videos?.[0]
-  if (!video) return
+  if (!video) return m.reply("No se encontró información del video.")
 
   const caption = `「✦」Descargando *<${video.title || 'Desconocido'}>*\n> ✦ Descripción » *${video.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(video.views) || 'Desconocido'}*\n> ⴵ Duración » *${video.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${video.ago || 'Desconocido'}*\n> ✦ Url » *${video.url}*\n
 *_Para seleccionar, responde a este mensaje:_*
@@ -88,8 +88,9 @@ handler.before = async (m, { conn }) => {
   }
 }
 
+// ¡ESTO ES CLAVE!
 handler.customPrefix = ytRegex
-handler.command = new RegExp // para no usar comandos
+handler.command = false
 handler.group = true
 export default handler
 
