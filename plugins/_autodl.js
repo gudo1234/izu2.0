@@ -41,8 +41,6 @@ export async function before(m, { conn }) {
       if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
       const json = await res.json();
 
-      console.log('Respuesta YouTube API:', JSON.stringify(json, null, 2)); // Para depurar
-
       const dl = json.data?.download || json.data?.dl || json.data?.downloadUrl || json.result?.url;
       const mime = json.data?.mime || json.result?.mimetype || undefined;
 
@@ -100,7 +98,7 @@ export async function before(m, { conn }) {
       }
       if (title) {
         let yt_play = await yts(title);
-        ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || yt_play;
+        ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || ytplay2;
         if (videoIdToFind) {
           videoId = videoIdToFind[1];
           ytplay2 = yt_play.all.find(v => v.videoId === videoId) || yt_play.videos.find(v => v.videoId === videoId) || ytplay2;
@@ -130,11 +128,8 @@ export async function before(m, { conn }) {
     await conn.reply(m.chat, caption, m, JT);
     return;
   }
-
-  // Puedes dejar los bloques TikTok, Instagram, Facebook, etc., igual que los tienes.
 }
 
-// Formatea vistas con notación abreviada
 function formatViews(views) {
   if (!views) return '0';
   const si = [
