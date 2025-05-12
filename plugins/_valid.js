@@ -16,12 +16,16 @@ export async function before(m) {
 
   if (!command || command === "bot") return;
 
-  if (validCommand(command, global.plugins)) {
-    let chat = global.db.data.chats[m.chat];
-    let user = global.db.data.users[m.sender];
+  const chat = global.db.data.chats[m.chat];
+  const user = global.db.data.users[m.sender];
 
+  if (validCommand(command, global.plugins)) {
     if (chat.isBanned) {
-      const avisoDesactivado = `${e} El bot *${botname}* está desactivado en este grupo.\n\n> ✦ Un *administrador* puede activarlo con el comando:\n> » *${usedPrefix}bot on*`;
+      const avisoDesactivado = `────⋆｡°✩ 𝙄𝙣𝙛𝙤 ✩°｡⋆────\n` +
+        `${e} El bot *${botname}* está desactivado en este grupo.\n\n` +
+        `> ✦ Un *administrador* puede activarlo con el comando:\n` +
+        `> » *${usedPrefix}bot on*\n` +
+        `────⋆｡°✩ 𝙄𝙣𝙛𝙤 ✩°｡⋆────`;
       await m.reply(avisoDesactivado);
       return;
     }
@@ -36,7 +40,7 @@ export async function before(m) {
       allCommands.push(...cmds);
     }
 
-    // Buscar los tres comandos más cercanos
+    // Buscar los dos comandos más cercanos
     let closestCommands = [];
     for (let cmd of allCommands) {
       let dist = levenshtein.get(command, cmd);
@@ -45,21 +49,22 @@ export async function before(m) {
       closestCommands.push({ cmd, similarity });
     }
 
-    // Ordenar los comandos por el porcentaje de coincidencia (de mayor a menor)
     closestCommands.sort((a, b) => b.similarity - a.similarity);
+    const topMatches = closestCommands.slice(0, 2);
 
-    // Seleccionar los tres comandos más cercanos
-    const topMatches = closestCommands.slice(0, 3);
+    const country = user.country || 'Tu país'; // Si no hay país definido, se muestra genérico
 
-    let replyMessage = `${e} El comando *${usedPrefix + command}* no existe.\n` +
+    let replyMessage = `────☁᪶̇✿ ᳟${country}᳟✿᪶☁────\n` +
+      `${e} El comando *${usedPrefix + command}* no existe.\n` +
       `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n` +
-      `*¿Quisiste decir?*`;
+      `*¿Quisiste decir?*\n`;
 
-    // Añadir los tres comandos más cercanos al mensaje de respuesta
     topMatches.forEach((match, index) => {
-      replyMessage += `\n> ${index + 1}. \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)`;
+      replyMessage += `> ${index + 1}. \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
     });
+
+    replyMessage += `────☁᪶̇✿ ᳟${country}᳟✿᪶☁────`;
 
     await m.reply(replyMessage);
   }
-}
+        }
