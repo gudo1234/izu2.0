@@ -28,6 +28,7 @@ async function obtenerInfo(link) {
         return res.data.result || res.data;
       }
     } catch (e) {
+      console.error(`Error en la API: ${e.message}`);
       continue;
     }
   }
@@ -62,7 +63,7 @@ async function handler(m, { conn, text }) {
 
     const info = await obtenerInfo(link);
     if (!info || (!info.audio?.url && !info.video?.url)) {
-      return m.reply('No se pudo obtener datos de descarga.');
+      return m.reply('No se pudo obtener los datos de descarga. Intenta con otro enlace.');
     }
 
     const detalles = `*Título:* ${video.title}
