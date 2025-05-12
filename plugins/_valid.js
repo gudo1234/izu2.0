@@ -66,9 +66,9 @@ export async function before(m) {
     const topMatches = closestCommands.slice(0, 2);
 
     // Mensaje de comando inválido con país y emoji
-    let replyMessage = `────☁᪶̇✿ ᳟${paisdata.emoji || '🌎'}᳟✿᪶☁────\n` +
+    let replyMessage = `───⋆｡°✩ 𝙄𝙣𝙛𝙤 ✩°｡⋆────\n` +
       `${e} El comando *${usedPrefix + command}* no existe.\n` +
-      `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
+      `> ${paisdata.emoji} Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
     if (topMatches.length > 0) {
       replyMessage += `*¿Quisiste decir?*\n`;
