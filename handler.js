@@ -554,11 +554,11 @@ if (!m.fromMe) return this.sendMessage(m.chat, { react: { text: emot, key: m.key
 function pickRandom(list) { return list[Math.floor(Math.random() * list.length)]}
 }/*}*/
 //🟢
-} catch (e) {
+} /*catch (e) {
             console.error(e);
         }
-    } // <-- Este cierre debe estar al FINAL del handler
-
+    }*/ // <-- Este cierre debe estar al FINAL del handler
+}
 //🟢
 
 global.dfail = (type, m, usedPrefix, command, conn) => {
