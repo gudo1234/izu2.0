@@ -1,4 +1,5 @@
 import levenshtein from 'fast-levenshtein';
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 export async function before(m) {
   if (!m.text || !global.prefix.test(m.text)) return;
@@ -40,31 +41,49 @@ export async function before(m) {
       allCommands.push(...cmds);
     }
 
-    // Buscar los dos comandos más cercanos
+    // Buscar los comandos más cercanos válidos
     let closestCommands = [];
     for (let cmd of allCommands) {
+      if (typeof cmd !== 'string') continue;
       let dist = levenshtein.get(command, cmd);
       const maxLength = Math.max(command.length, cmd.length);
+      if (maxLength === 0) continue;
       const similarity = Math.round((1 - dist / maxLength) * 100);
-      closestCommands.push({ cmd, similarity });
+      if (!isNaN(similarity) && similarity > 0) {
+        closestCommands.push({ cmd, similarity });
+      }
     }
 
     closestCommands.sort((a, b) => b.similarity - a.similarity);
     const topMatches = closestCommands.slice(0, 2);
 
-    const country = user.country || 'Tu país'; // Si no hay país definido, se muestra genérico
+    // Detectar país por número
+    let region = 'Tu país';
+    let flag = '';
 
-    let replyMessage = `────☁᪶̇✿ ᳟${country}᳟✿᪶☁────\n` +
-      `${e} El comando *${usedPrefix + command}* no existe.\n` +
-      `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n` +
-      `*¿Quisiste decir?*\n`;
+    try {
+      const phone = parsePhoneNumber(m.sender);
+      if (phone && phone.country) {
+        region = phone.country; // Código ISO como "MX", "CO", etc.
+        flag = String.fromCodePoint(...[...phone.country].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+      }
+    } catch (err) {
+      region = 'Tu país';
+    }
 
-    topMatches.forEach((match, index) => {
-      replyMessage += `> ${index + 1}. \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
-    });
+    let replyMessage = `────☁᪶̇✿ ᳟${flag || region}᳟✿᪶☁────\n` +
+      `🪐 El comando *${usedPrefix + command}* no existe.\n` +
+      `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
-    replyMessage += `────☁᪶̇✿ ᳟${country}᳟✿᪶☁────`;
+    if (topMatches.length > 0) {
+      replyMessage += `*¿Quisiste decir?*\n`;
+      topMatches.forEach((match) => {
+        replyMessage += `> \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
+      });
+    }
+
+    replyMessage += `────☁᪶̇✿ ᳟${flag || region}᳟✿᪶☁────`;
 
     await m.reply(replyMessage);
   }
-        }
+}
