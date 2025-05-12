@@ -2,7 +2,7 @@ import axios from 'axios';
 import fetch from 'node-fetch';
 import yts from 'yt-search'
 
-export async function before(m, { conn }) {
+export async function before(m, { conn, text }) {
   if (m.fromMe || m.isBot) return
   //if (!db.data.chats[m.chat].autodl && m.isGroup) return
   if (!m.text) return;
