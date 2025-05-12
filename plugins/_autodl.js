@@ -214,9 +214,8 @@ await conn.reply(m.chat, caption, m, JT)
 
 
 if (text && tempStorage.has(m.sender)) {
-  if (!m.quoted || !m.quoted.id) return;
-  // Puedes comentar esta línea si causa conflicto:
-  // if (conn.user.jid !== m.quoted.sender) return;
+  if (!m.quoted || !m.quoted.sender) return;
+  if (conn.user.jid !== m.quoted.sender) return;
 
   text = m.text.trim().toLowerCase();
   if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
@@ -341,7 +340,6 @@ if (text && tempStorage.has(m.sender)) {
     await conn.reply(m.chat, caption, m, JT);
   }
 }
-
 
 
   // === Spotify ===
