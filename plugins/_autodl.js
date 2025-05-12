@@ -288,9 +288,9 @@ if (/youtu\.be|youtube\.com/i.test(url)) {
 
   await conn.reply(m.chat, caption, m, JT);
 } else if (text && tempStorage.has(m.sender)) {
-  //if (!m.quoted || !m.quoted.sender) return;
+  if (!m.quoted || !m.quoted.sender) return;
   if (!m.quoted || m.quoted.key?.fromMe !== true) return;
-  if (conn.user.jid !== m.quoted.sender) return;
+ // if (conn.user.jid !== m.quoted.sender) return;
 
   text = m.text.trim().toLowerCase();
   if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
