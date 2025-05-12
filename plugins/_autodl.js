@@ -287,9 +287,11 @@ if (/youtu\.be|youtube\.com/i.test(url)) {
   setTimeout(() => tempStorage.delete(m.sender), 2 * 60 * 1000);
 
   await conn.reply(m.chat, caption, m, JT);
-} else if (tempStorage.has(m.sender)) {
-    if (!m.quoted || m.quoted.sender !== conn.user.jid) return;
-
+} else /*if (tempStorage.has(m.sender)) {
+    if (!m.quoted || m.quoted.sender !== conn.user.jid) return;*/
+if (!m.quoted || !m.quoted.sender) return
+  if (conn.user.jid !== m.quoted.sender) return 
+  
   text = m.text.trim().toLowerCase();
   if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
 
@@ -354,7 +356,7 @@ if (/youtu\.be|youtube\.com/i.test(url)) {
     }
     return m.reply('❌ No se pudo obtener el vídeo.');
   }
-}
+
 
 
 
