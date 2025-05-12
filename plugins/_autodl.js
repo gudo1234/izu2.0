@@ -213,7 +213,6 @@ await conn.reply(m.chat, caption, m, JT)
   const tempStorage = new Map(); // Mapa para almacenamiento temporal
 
 
-// Primero, detectar si el usuario respondió con el formato de audio/video/documento
 if (text && tempStorage.has(m.sender)) {
   if (!m.quoted || !m.quoted.id) return;
   // Puedes comentar esta línea si causa conflicto:
@@ -284,80 +283,63 @@ if (text && tempStorage.has(m.sender)) {
     return m.reply('❌ No se pudo obtener el vídeo.');
   }
 
-} else if (/youtu\.be|youtube\.com/i.test(url)) {
-  await m.react('🕓');
+} else if (/youtu\.?be|youtube\.com/i.test(text)) {
+  const urls = [...text.matchAll(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/\S+|youtu\.be\/[a-zA-Z0-9_-]{11})/gi)].map(v => v[0]);
+  if (!urls.length) return;
 
-  const youtubeRegexID = /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]{11})/;
-  let videoIdToFind = text.match(youtubeRegexID) || null;
+  for (const url of urls) {
+    await m.react('🕓');
 
-  let videoId;
-  let yt_play = await search(text);
-  let ytplay2 = await yts(videoIdToFind ? 'https://youtu.be/' + videoIdToFind[1] : text);
-
-  if (videoIdToFind) {
-    videoId = videoIdToFind[1];
-    ytplay2 = ytplay2.all.find(v => v.videoId === videoId) || ytplay2.videos.find(v => v.videoId === videoId);
-  }
-  ytplay2 = ytplay2?.all?.[0] || ytplay2?.videos?.[0] || ytplay2;
-
-  if (!ytplay2?.title) {
-    let title = null;
+    let ytplay2 = null;
     try {
-      let res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${text}`);
-      let data = await res.json();
-      title = data?.result?.metadata?.title;
+      const videoIdMatch = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
+      const videoId = videoIdMatch?.[1];
+      const result = await yts(videoId ? 'https://youtu.be/' + videoId : url);
+      ytplay2 = result?.all?.find(v => v.videoId === videoId) || result?.videos?.[0] || result?.all?.[0];
     } catch {}
-    if (!title) {
+
+    if (!ytplay2?.title) {
       try {
-        let res = await fetch(`https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(text)}&type=audio&quality=128kbps&apikey=GataDios`);
+        let res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`);
         let data = await res.json();
-        title = data?.title;
+        let title = data?.result?.metadata?.title;
+        if (title) {
+          const result = await yts(title);
+          ytplay2 = result?.all?.[0] || result?.videos?.[0];
+        }
       } catch {}
     }
-    if (!title) {
-      try {
-        let res = await fetch(`https://api.siputzx.my.id/api/d/ytmp3?url=${text}`);
-        let data = await res.json();
-        title = data?.data?.title;
-      } catch {}
-    }
-    if (title) {
-      yt_play = await yts(title);
-      ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || yt_play;
-      if (videoIdToFind) {
-        videoId = videoIdToFind[1];
-        ytplay2 = yt_play.all.find(v => v.videoId === videoId) || yt_play.videos.find(v => v.videoId === videoId) || ytplay2;
-      }
-    }
-  }
 
-  const caption = `「✦」Descargando *<${ytplay2?.title || 'Desconocido'}>*\n> ✦ Descripción » *${ytplay2?.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(ytplay2?.views) || 'Desconocido'}*\n> ⴵ Duración » *${ytplay2?.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2?.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2?.url.replace(/^https:\/\//, "")}*\n\n*_Para seleccionar, responde a este mensaje:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`.trim();
+    if (!ytplay2?.title) continue;
 
-  const thumb = (await conn.getFile(ytplay2.thumbnail))?.data;
-  const JT = {
-    contextInfo: {
-      externalAdReply: {
-        title: '✧ Youtube • Music ✧',
-        body: textbot,
-        mediaType: 1,
-        previewType: 0,
-        mediaUrl: ytplay2.url,
-        sourceUrl: ytplay2.url,
-        thumbnail: thumb,
-        renderLargerThumbnail: true,
+    const caption = `「✦」Descargando *<${ytplay2.title}>*\n> ✦ Descripción » *${ytplay2.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(ytplay2.views) || 'Desconocido'}*\n> ⴵ Duración » *${ytplay2.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2.url.replace(/^https:\/\//, "")}*\n\n*_Para seleccionar, responde a este mensaje:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`;
+
+    const thumb = (await conn.getFile(ytplay2.thumbnail))?.data;
+    const JT = {
+      contextInfo: {
+        externalAdReply: {
+          title: '✧ Youtube • Music ✧',
+          body: textbot,
+          mediaType: 1,
+          previewType: 0,
+          mediaUrl: ytplay2.url,
+          sourceUrl: ytplay2.url,
+          thumbnail: thumb,
+          renderLargerThumbnail: true,
+        },
       },
-    },
-  };
+    };
 
-  tempStorage.set(m.sender, {
-    url: ytplay2.url,
-    title: ytplay2.title,
-    resp: m
-  });
+    tempStorage.set(m.sender, {
+      url: ytplay2.url,
+      title: ytplay2.title,
+      resp: m
+    });
 
-  setTimeout(() => tempStorage.delete(m.sender), 2 * 60 * 1000);
+    setTimeout(() => tempStorage.delete(m.sender), 2 * 60 * 1000);
 
-  await conn.reply(m.chat, caption, m, JT);
+    await conn.reply(m.chat, caption, m, JT);
+  }
 }
 
 
@@ -432,5 +414,4 @@ function formatViews(views) {
     return `${(views / 1_000).toFixed(1)}k (${views.toLocaleString()})`
   }
   return views.toString()
-      }
-          
+}
