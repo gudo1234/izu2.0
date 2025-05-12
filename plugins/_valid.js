@@ -1,6 +1,10 @@
 import levenshtein from 'fast-levenshtein';
-import { parsePhoneNumber } from 'libphonenumber-js';
-
+import { getDevice } from "@whiskeysockets/baileys"
+import PhoneNumber from 'awesome-phonenumber'
+import moment from 'moment-timezone'
+import axios from 'axios'
+import fetch from 'node-fetch'
+import path from 'path'
 export async function before(m) {
   if (!m.text || !global.prefix.test(m.text)) return;
 
@@ -19,14 +23,17 @@ export async function before(m) {
 
   const chat = global.db.data.chats[m.chat];
   const user = global.db.data.users[m.sender];
-
+  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
+  let paisdata = delirius.data.result
+  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
+  
   if (validCommand(command, global.plugins)) {
     if (chat.isBanned) {
-      const avisoDesactivado = `────⋆｡°✩ 𝙄𝙣𝙛𝙤 ✩°｡⋆────\n` +
+      const avisoDesactivado = `────⋆｡°✩ ${paisdata.emoji} ✩°｡⋆────\n` +
         `${e} El bot *${botname}* está desactivado en este grupo.\n\n` +
         `> ✦ Un *administrador* puede activarlo con el comando:\n` +
         `> » *${usedPrefix}bot on*\n` +
-        `────⋆｡°✩ 𝙄𝙣𝙛𝙤 ✩°｡⋆────`;
+        `────⋆｡°✩  ✩°｡⋆────`;
       await m.reply(avisoDesactivado);
       return;
     }
@@ -71,7 +78,7 @@ export async function before(m) {
       region = 'Tu país';
     }
 
-    let replyMessage = `────☁᪶̇✿ ᳟${flag || region}᳟✿᪶☁────\n` +
+    let replyMessage = `────☁᪶̇✿ ᳟$}᳟✿᪶☁────\n` +
       `🪐 El comando *${usedPrefix + command}* no existe.\n` +
       `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
