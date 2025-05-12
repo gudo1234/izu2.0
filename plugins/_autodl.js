@@ -212,106 +212,64 @@ await conn.reply(m.chat, caption, m, JT)
   }*/
   const tempStorage = new Map(); // Mapa para almacenamiento temporal
 
-
-if (text && tempStorage.has(m.sender)) {
+handler.before = async (m, { conn }) => {
   if (!m.quoted || !m.quoted.sender) return;
   if (conn.user.jid !== m.quoted.sender) return;
 
-  text = m.text.trim().toLowerCase();
-  if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
+  let text = m.text?.trim();
+  const ytUrlRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+/i;
+  const urlMatch = ytUrlRegex.exec(text);
 
-  const data = tempStorage.get(m.sender);
-  if (!data || !data.url) return;
-
-  const audioOpts = { "a": "audio", "audio": "audio", "adoc": "document" };
-  const videoOpts = {
-    "v": { type: "video", caption: true },
-    "video": { type: "video", caption: true },
-    "vdoc": { type: "document", caption: false }
-  };
-
-  if (text in audioOpts) {
-    await conn.reply(m.chat, `*${audioOpts[text] === "document" ? "Enviando Documento de Audio..." : "Enviando Audio..."}*`, data.resp);
-
-    const apis = [
-      [`https://api.vreden.my.id/api/ytmp3?url=${data.url}`, res => res?.result?.download?.url, res => res?.result?.title],
-      [`https://api.neoxr.eu/api/youtube?url=${data.url}&type=audio&quality=128kbps&apikey=GataDios`, res => res?.data?.url, res => res?.title],
-      [`https://api.siputzx.my.id/api/d/ytmp3?url=${data.url}`, res => res?.data?.dl, res => res?.data?.title]
-    ];
-
-    for (const [api, getUrl, getTitle] of apis) {
-      try {
-        const res = await fetch(api).then(r => r.json());
-        const dl = getUrl(res);
-        if (dl) {
-          await conn.sendMessage(m.chat, {
-            [audioOpts[text]]: { url: dl },
-            fileName: `${getTitle(res) || data.title}.mp3`,
-            mimetype: 'audio/mpeg'
-          }, { quoted: data.resp });
-          tempStorage.delete(m.sender);
-          return m.reply(`> ✅ *Audio enviado.*`);
-        }
-      } catch {}
-    }
-    return m.reply('❌ No se pudo obtener el audio.');
-
-  } else if (text in videoOpts) {
-    await conn.reply(m.chat, `*${videoOpts[text].caption ? "Enviando Vídeo..." : "Enviando Documento de Vídeo..."}*`, data.resp);
-
-    const apis = [
-      [`https://api.neoxr.eu/api/youtube?url=${data.url}&type=video&quality=360p&apikey=GataDios`, res => res?.data?.url, res => res?.title],
-      [`https://api.siputzx.my.id/api/d/youtube?q=${data.title}`, res => res?.data?.video, res => res?.data?.title]
-    ];
-
-    for (const [api, getUrl, getTitle] of apis) {
-      try {
-        const res = await fetch(api).then(r => r.json());
-        const dl = getUrl(res);
-        if (dl) {
-          await conn.sendMessage(m.chat, {
-            [videoOpts[text].type]: { url: dl },
-            fileName: `${getTitle(res) || data.title}.mp4`,
-            mimetype: 'video/mp4'
-          }, { quoted: data.resp });
-          tempStorage.delete(m.sender);
-          return m.reply(`> ✅ *Vídeo enviado.*`);
-        }
-      } catch {}
-    }
-    return m.reply('❌ No se pudo obtener el vídeo.');
-  }
-
-} else if (/youtu\.?be|youtube\.com/i.test(text)) {
-  const urls = [...text.matchAll(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/\S+|youtu\.be\/[a-zA-Z0-9_-]{11})/gi)].map(v => v[0]);
-  if (!urls.length) return;
-
-  for (const url of urls) {
+  if (urlMatch) {
+    const url = urlMatch[0];
     await m.react('🕓');
 
-    let ytplay2 = null;
-    try {
-      const videoIdMatch = url.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([a-zA-Z0-9_-]{11})/);
-      const videoId = videoIdMatch?.[1];
-      const result = await yts(videoId ? 'https://youtu.be/' + videoId : url);
-      ytplay2 = result?.all?.find(v => v.videoId === videoId) || result?.videos?.[0] || result?.all?.[0];
-    } catch {}
+    const youtubeRegexID = /(?:youtu\.be\/|v=|\/embed\/)([a-zA-Z0-9_-]{11})/;
+    let videoIdToFind = url.match(youtubeRegexID);
+
+    let videoId;
+    let yt_play = await search(text);
+    let ytplay2 = await yts(videoIdToFind ? 'https://youtu.be/' + videoIdToFind[1] : text);
+
+    if (videoIdToFind) {
+      videoId = videoIdToFind[1];
+      ytplay2 = ytplay2.all.find(v => v.videoId === videoId) || ytplay2.videos.find(v => v.videoId === videoId);
+    }
+
+    ytplay2 = ytplay2?.all?.[0] || ytplay2?.videos?.[0] || ytplay2;
 
     if (!ytplay2?.title) {
+      let title = null;
       try {
         let res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`);
         let data = await res.json();
-        let title = data?.result?.metadata?.title;
-        if (title) {
-          const result = await yts(title);
-          ytplay2 = result?.all?.[0] || result?.videos?.[0];
-        }
+        title = data?.result?.metadata?.title;
       } catch {}
+      if (!title) {
+        try {
+          let res = await fetch(`https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(url)}&type=audio&quality=128kbps&apikey=GataDios`);
+          let data = await res.json();
+          title = data?.title;
+        } catch {}
+      }
+      if (!title) {
+        try {
+          let res = await fetch(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
+          let data = await res.json();
+          title = data?.data?.title;
+        } catch {}
+      }
+      if (title) {
+        yt_play = await yts(title);
+        ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || yt_play;
+        if (videoIdToFind) {
+          videoId = videoIdToFind[1];
+          ytplay2 = yt_play.all.find(v => v.videoId === videoId) || yt_play.videos.find(v => v.videoId === videoId) || ytplay2;
+        }
+      }
     }
 
-    if (!ytplay2?.title) continue;
-
-    const caption = `「✦」Descargando *<${ytplay2.title}>*\n> ✦ Descripción » *${ytplay2.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(ytplay2.views) || 'Desconocido'}*\n> ⴵ Duración » *${ytplay2.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2.url.replace(/^https:\/\//, "")}*\n\n*_Para seleccionar, responde a este mensaje:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`;
+    const caption = `「✦」Descargando *<${ytplay2?.title || 'Desconocido'}>*\n> ✦ Descripción » *${ytplay2?.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(ytplay2?.views) || 'Desconocido'}*\n> ⴵ Duración » *${ytplay2?.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2?.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2?.url.replace(/^https:\/\//, "")}*\n\n*_Para seleccionar, responde a este mensaje:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`.trim();
 
     const thumb = (await conn.getFile(ytplay2.thumbnail))?.data;
     const JT = {
@@ -338,8 +296,74 @@ if (text && tempStorage.has(m.sender)) {
     setTimeout(() => tempStorage.delete(m.sender), 2 * 60 * 1000);
 
     await conn.reply(m.chat, caption, m, JT);
+  } else if (text && tempStorage.has(m.sender)) {
+    text = m.text.trim().toLowerCase();
+    if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
+
+    const data = tempStorage.get(m.sender);
+    if (!data || !data.url) return;
+
+    const audioOpts = { "a": "audio", "audio": "audio", "adoc": "document" };
+    const videoOpts = {
+      "v": { type: "video", caption: true },
+      "video": { type: "video", caption: true },
+      "vdoc": { type: "document", caption: false }
+    };
+
+    if (text in audioOpts) {
+      await conn.reply(m.chat, `*${audioOpts[text] === "document" ? "Enviando Documento de Audio..." : "Enviando Audio..."}*`, data.resp);
+
+      const apis = [
+        [`https://api.vreden.my.id/api/ytmp3?url=${data.url}`, res => res?.result?.download?.url, res => res?.result?.title],
+        [`https://api.neoxr.eu/api/youtube?url=${data.url}&type=audio&quality=128kbps&apikey=GataDios`, res => res?.data?.url, res => res?.title],
+        [`https://api.siputzx.my.id/api/d/ytmp3?url=${data.url}`, res => res?.data?.dl, res => res?.data?.title]
+      ];
+
+      for (const [api, getUrl, getTitle] of apis) {
+        try {
+          const res = await fetch(api).then(r => r.json());
+          const dl = getUrl(res);
+          if (dl) {
+            await conn.sendMessage(m.chat, {
+              [audioOpts[text]]: { url: dl },
+              fileName: `${getTitle(res) || data.title}.mp3`,
+              mimetype: 'audio/mpeg'
+            }, { quoted: data.resp });
+            tempStorage.delete(m.sender);
+            return m.reply(`> ✅ *Audio enviado.*`);
+          }
+        } catch {}
+      }
+      return m.reply('❌ No se pudo obtener el audio.');
+
+    } else if (text in videoOpts) {
+      await conn.reply(m.chat, `*${videoOpts[text].caption ? "Enviando Vídeo..." : "Enviando Documento de Vídeo..."}*`, data.resp);
+
+      const apis = [
+        [`https://api.neoxr.eu/api/youtube?url=${data.url}&type=video&quality=360p&apikey=GataDios`, res => res?.data?.url, res => res?.title],
+        [`https://api.siputzx.my.id/api/d/youtube?q=${data.title}`, res => res?.data?.video, res => res?.data?.title]
+      ];
+
+      for (const [api, getUrl, getTitle] of apis) {
+        try {
+          const res = await fetch(api).then(r => r.json());
+          const dl = getUrl(res);
+          if (dl) {
+            await conn.sendMessage(m.chat, {
+              [videoOpts[text].type]: { url: dl },
+              fileName: `${getTitle(res) || data.title}.mp4`,
+              mimetype: 'video/mp4'
+            }, { quoted: data.resp });
+            tempStorage.delete(m.sender);
+            return m.reply(`> ✅ *Vídeo enviado.*`);
+          }
+        } catch {}
+      }
+      return m.reply('❌ No se pudo obtener el vídeo.');
+    }
   }
-}
+};
+
 
 
   // === Spotify ===
