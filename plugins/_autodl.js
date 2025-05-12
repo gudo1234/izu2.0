@@ -11,11 +11,12 @@ const APIS = [
 const sesionesYT = new Map();
 
 function esUrlDeYoutube(texto) {
-  return /(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]+/.test(texto);
+  const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+|\S+)|youtu\.be\/[\w\-]+)/;
+  return youtubeRegex.test(texto);
 }
 
 function extraerLink(texto) {
-  const match = texto.match(/(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]+/);
+  const match = texto.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+|\S+)|youtu\.be\/[\w\-]+)/);
   return match ? (match[0].startsWith('http') ? match[0] : 'https://' + match[0]) : null;
 }
 
@@ -84,7 +85,7 @@ _Responde con **audio** o **video** para recibir el archivo._`;
   }
 }
 
-handler.customPrefix = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]+$|^(audio|video)$/i;
+handler.customPrefix = /^(https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+|\S+)|youtu\.be\/[\w\-]+)/i;
 handler.command = new RegExp('');
 
 export default handler;
