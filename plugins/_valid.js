@@ -36,24 +36,30 @@ export async function before(m) {
       allCommands.push(...cmds);
     }
 
-    // Buscar el comando más cercano
-    let closest = '';
-    let shortest = Infinity;
+    // Buscar los tres comandos más cercanos
+    let closestCommands = [];
     for (let cmd of allCommands) {
       let dist = levenshtein.get(command, cmd);
-      if (dist < shortest) {
-        shortest = dist;
-        closest = cmd;
-      }
+      const maxLength = Math.max(command.length, cmd.length);
+      const similarity = Math.round((1 - dist / maxLength) * 100);
+      closestCommands.push({ cmd, similarity });
     }
 
-    const maxLength = Math.max(command.length, closest.length);
-    const similarity = Math.round((1 - shortest / maxLength) * 100);
+    // Ordenar los comandos por el porcentaje de coincidencia (de mayor a menor)
+    closestCommands.sort((a, b) => b.similarity - a.similarity);
 
-    await m.reply(
-      `${e} El comando *${usedPrefix + command}* no existe.\n` +
+    // Seleccionar los tres comandos más cercanos
+    const topMatches = closestCommands.slice(0, 3);
+
+    let replyMessage = `${e} El comando *${usedPrefix + command}* no existe.\n` +
       `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n` +
-      `*¿Quisiste decir?* ➤ \`${usedPrefix + closest}\` (${similarity}% de coincidencia)`
-    );
+      `*¿Quisiste decir?*`;
+
+    // Añadir los tres comandos más cercanos al mensaje de respuesta
+    topMatches.forEach((match, index) => {
+      replyMessage += `\n> ${index + 1}. \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)`;
+    });
+
+    await m.reply(replyMessage);
   }
 }
