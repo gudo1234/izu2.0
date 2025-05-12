@@ -212,7 +212,7 @@ await conn.reply(m.chat, caption, m, JT)
   }*/
   const tempStorage = new Map(); // Mapa para almacenamiento temporal
 
-handler.before = async (m, { conn }) => {
+// xd
   if (!m.quoted || !m.quoted.sender) return;
   if (conn.user.jid !== m.quoted.sender) return;
 
@@ -361,8 +361,7 @@ handler.before = async (m, { conn }) => {
       }
       return m.reply('❌ No se pudo obtener el vídeo.');
     }
-  }
-};
+  };
 
 
 
