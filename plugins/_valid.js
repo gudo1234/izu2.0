@@ -1,10 +1,11 @@
 import levenshtein from 'fast-levenshtein';
-import { getDevice } from "@whiskeysockets/baileys"
-import PhoneNumber from 'awesome-phonenumber'
-import moment from 'moment-timezone'
-import axios from 'axios'
-import fetch from 'node-fetch'
-import path from 'path'
+import { getDevice } from "@whiskeysockets/baileys";
+import PhoneNumber from 'awesome-phonenumber';
+import moment from 'moment-timezone';
+import axios from 'axios';
+import fetch from 'node-fetch';
+import path from 'path';
+
 export async function before(m) {
   if (!m.text || !global.prefix.test(m.text)) return;
 
@@ -23,14 +24,14 @@ export async function before(m) {
 
   const chat = global.db.data.chats[m.chat];
   const user = global.db.data.users[m.sender];
-  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-  let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
-  
+  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`);
+  let paisdata = delirius.data.result;
+  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido';
+
   if (validCommand(command, global.plugins)) {
     if (chat.isBanned) {
       const avisoDesactivado = `────⋆｡°✩ ${paisdata.emoji} ✩°｡⋆────\n` +
-        `${e} El bot *${botname}* está desactivado en este grupo.\n\n` +
+        `El bot *${botname}* está desactivado en este grupo.\n\n` +
         `> ✦ Un *administrador* puede activarlo con el comando:\n` +
         `> » *${usedPrefix}bot on*\n` +
         `────⋆｡°✩  ✩°｡⋆────`;
@@ -64,21 +65,8 @@ export async function before(m) {
     closestCommands.sort((a, b) => b.similarity - a.similarity);
     const topMatches = closestCommands.slice(0, 2);
 
-    // Detectar país por número
-    let region = 'Tu país';
-    let flag = '';
-
-    try {
-      const phone = parsePhoneNumber(m.sender);
-      if (phone && phone.country) {
-        region = phone.country; // Código ISO como "MX", "CO", etc.
-        flag = String.fromCodePoint(...[...phone.country].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
-      }
-    } catch (err) {
-      region = 'Tu país';
-    }
-
-    let replyMessage = `────☁᪶̇✿ ᳟$}᳟✿᪶☁────\n` +
+    // Mensaje de comando inválido con país y emoji
+    let replyMessage = `────☁᪶̇✿ ᳟${paisdata.emoji || '🌎'}᳟✿᪶☁────\n` +
       `🪐 El comando *${usedPrefix + command}* no existe.\n` +
       `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
@@ -89,7 +77,8 @@ export async function before(m) {
       });
     }
 
-    replyMessage += `────☁᪶̇✿ ᳟${flag || region}᳟✿᪶☁────`;
+    replyMessage += `\n────☁᪶̇✿ ᳟${paisdata.emoji || '🌎'}᳟✿᪶☁────\n`;
+    replyMessage += `> Código: *${paisdata.code || 'N/A'}*`;
 
     await m.reply(replyMessage);
   }
