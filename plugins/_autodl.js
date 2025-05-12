@@ -4,7 +4,7 @@ import yts from 'yt-search'
 
 export async function before(m, { conn }) {
   if (m.fromMe || m.isBot) return
-  if (!db.data.chats[m.chat].autodl && m.isGroup) return
+  //if (!db.data.chats[m.chat].autodl && m.isGroup) return
   if (!m.text) return;
   let text = m.text
   const url = m.text.trim();
