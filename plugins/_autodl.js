@@ -291,7 +291,12 @@ if (/youtu\.be|youtube\.com/i.test(url)) {
   //if (!m.quoted || !m.quoted.sender) return;
 //este  if (!m.quoted || m.quoted.key?.fromMe !== true) return;
  // if (conn.user.jid !== m.quoted.sender) return;
-if (!(m.quoted?.sender && m.quoted?.fromMe)) return;
+//if (!(m.quoted?.sender && m.quoted?.fromMe)) return;
+ if (!m.quoted?.fromMe) return;
+if (!/a(udio)?|v(ideo)?|adoc|vdoc/i.test(m.text)) return;
+
+const selectionMessage = m.quoted?.text || '';
+if (!/["']?a["']?\s+o\s+["']?audio["']?|["']?v["']?\s+o\s+["']?video["']?/i.test(selectionMessage)) return;
   text = m.text.trim().toLowerCase();
   if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
 
