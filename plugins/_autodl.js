@@ -292,11 +292,19 @@ if (/youtu\.be|youtube\.com/i.test(url)) {
 //este  if (!m.quoted || m.quoted.key?.fromMe !== true) return;
  // if (conn.user.jid !== m.quoted.sender) return;
 //if (!(m.quoted?.sender && m.quoted?.fromMe)) return;
- if (!m.quoted || !m.quoted.sender) return
-  if (conn.user.jid !== m.quoted.sender) return
+ if (!m.quoted || !m.quoted.fromMe) return;
 
-  const text = m.text.trim().toLowerCase()
-  if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return
+// Verificamos que el mensaje citado sea el menú de selección
+const quotedText = m.quoted?.text || '';
+const esMenuSeleccion = /["']?a["']?\s+o\s+["']?audio["']?.+["']?v["']?\s+o\s+["']?video["']?/i.test(quotedText);
+if (!esMenuSeleccion) return;
+
+// Verificamos que el texto enviado sea una opción válida
+const opcion = m.text?.trim().toLowerCase();
+if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(opcion)) return;
+
+// Si pasó todas las condiciones, ejecutar acción:
+conn.reply(m.chat, `Has elegido la opción: ${opcion}`, m);
   text = m.text.trim().toLowerCase();
   if (!['a', 'audio', 'v', 'video', 'adoc', 'vdoc'].includes(text)) return;
 
