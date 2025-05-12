@@ -8,7 +8,8 @@ let tempStorage = {}
 
 const handler = async (m, { conn }) => {
   // Regex para detectar URLs de YouTube
-  const ytRegexGlobal = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g
+  //const ytRegexGlobal = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g
+ const ytRegexGlobal = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[?&][^\s]*)?/g
   const matches = [...m.text.matchAll(ytRegexGlobal)]
 
   if (matches.length === 0) return // Si no hay coincidencias con YouTube, salimos
