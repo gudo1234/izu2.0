@@ -113,7 +113,7 @@ export async function before(m, { conn }) {
         let yt_play;
         try {
           yt_play = await yts(title);
-          ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || ytplay2;
+          ytplay2 = yt_play?.all?.[0] || ytplay2?.videos?.[0] || ytplay2;
           if (videoIdToFind) {
             videoId = videoIdToFind[1];
             ytplay2 = yt_play.all.find(v => v.videoId === videoId) || yt_play.videos.find(v => v.videoId === videoId) || ytplay2;
@@ -126,7 +126,7 @@ export async function before(m, { conn }) {
       }
     }
 
-    const caption = `「✦」Descargando *<${ytplay2?.title || 'Desconocido'}>*\n> ✦ Descripción » *${ytplay2?.description || 'Desconocido'}*\n> ✰ Vistas » *${formatViews(ytplay2?.views) || 'Desconocido'}*\n> ⴵ Duración » *${ytplay2?.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2?.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2?.url.replace(/^https:\/\//, "")}*\n\n*_Para seleccionar, responde a este mensaje con:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`.trim();
+    const caption = `「✦」Descargando *<${ytplay2?.title || 'Desconocido'}>*\n> ✦ Descripción » *${ytplay2?.description || 'Desconocido'}*\n> ✰ Vistas » *${ytplay2?.views ? formatViews(ytplay2?.views) : 'Desconocido'}*\n> ⴵ Duración » *${ytplay2?.timestamp || 'Desconocido'}*\n> ✐ Publicación » *${ytplay2?.ago || 'Desconocido'}*\n> ✦ Url » *${ytplay2?.url.replace(/^https:\/\//, "")}*\n\n*_Para seleccionar, responde a este mensaje con:_*\n> "a" o "audio" → *Audio*\n> "v" o "video" → *Video*\n> "adoc" → *Audio (doc)*\n> "vdoc" → *Video (doc)*`.trim();
 
     const thumb = (await conn.getFile(ytplay2.thumbnail))?.data;
     const JT = {
@@ -162,4 +162,4 @@ function formatViews(views) {
     if (views >= v) return (views / v).toFixed(1) + s;
   }
   return views.toString();
-        }
+}
