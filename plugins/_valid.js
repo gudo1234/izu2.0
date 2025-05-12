@@ -67,7 +67,7 @@ export async function before(m) {
 
     // Mensaje de comando inválido con país y emoji
     let replyMessage = `────☁᪶̇✿ ᳟${paisdata.emoji || '🌎'}᳟✿᪶☁────\n` +
-      `🪐 El comando *${usedPrefix + command}* no existe.\n` +
+      `${e} El comando *${usedPrefix + command}* no existe.\n` +
       `> 🧮 Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
     if (topMatches.length > 0) {
@@ -77,8 +77,7 @@ export async function before(m) {
       });
     }
 
-    replyMessage += `\n────☁᪶̇✿ ᳟${paisdata.emoji || '🌎'}᳟✿᪶☁────\n`;
-    replyMessage += `> Código: *${paisdata.code || 'N/A'}*`;
+    replyMessage += `\n────☁᪶̇✿ ᳟${paisdata.code || '🌎'}᳟✿᪶☁────\n`;
 
     await m.reply(replyMessage);
   }
