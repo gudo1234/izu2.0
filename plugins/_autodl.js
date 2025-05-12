@@ -55,7 +55,7 @@ export async function before(m, { conn }) {
       }
     } catch (e) {
       console.error('Error al procesar YouTube:', e);
-      m.reply('❌ Error al descargar. Asegúrate que el enlace sea válido.');
+      m.reply(`❌ Error al descargar: ${e.message}`);
     }
     return;
   }
@@ -67,7 +67,14 @@ export async function before(m, { conn }) {
     let videoIdToFind = text.match(youtubeRegexID);
     let videoId;
 
-    let ytplay2 = await yts(videoIdToFind ? 'https://youtu.be/' + videoIdToFind[1] : text);
+    let ytplay2;
+    try {
+      ytplay2 = await yts(videoIdToFind ? 'https://youtu.be/' + videoIdToFind[1] : text);
+    } catch (e) {
+      console.error('Error en yts búsqueda:', e);
+      m.reply(`❌ Error en la búsqueda de YouTube: ${e.message}`);
+      return;
+    }
 
     if (videoIdToFind) {
       videoId = videoIdToFind[1];
@@ -81,27 +88,40 @@ export async function before(m, { conn }) {
         const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${text}`);
         const data = await res.json();
         title = data?.result?.metadata?.title;
-      } catch {}
+      } catch (e) {
+        console.error('Error en la API Vreden:', e);
+      }
       if (!title) {
         try {
           const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(text)}&type=audio&quality=128kbps&apikey=GataDios`);
           const data = await res.json();
           title = data?.title;
-        } catch {}
+        } catch (e) {
+          console.error('Error en la API Neoxr:', e);
+        }
       }
       if (!title) {
         try {
           const res = await fetch(`https://api.siputzx.my.id/api/d/ytmp3?url=${text}`);
           const data = await res.json();
           title = data?.data?.title;
-        } catch {}
+        } catch (e) {
+          console.error('Error en la API Siputzx:', e);
+        }
       }
       if (title) {
-        let yt_play = await yts(title);
-        ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || ytplay2;
-        if (videoIdToFind) {
-          videoId = videoIdToFind[1];
-          ytplay2 = yt_play.all.find(v => v.videoId === videoId) || yt_play.videos.find(v => v.videoId === videoId) || ytplay2;
+        let yt_play;
+        try {
+          yt_play = await yts(title);
+          ytplay2 = yt_play?.all?.[0] || yt_play?.videos?.[0] || ytplay2;
+          if (videoIdToFind) {
+            videoId = videoIdToFind[1];
+            ytplay2 = yt_play.all.find(v => v.videoId === videoId) || yt_play.videos.find(v => v.videoId === videoId) || ytplay2;
+          }
+        } catch (e) {
+          console.error('Error en yts al buscar por título:', e);
+          m.reply(`❌ Error al buscar el video con el título: ${e.message}`);
+          return;
         }
       }
     }
@@ -130,6 +150,7 @@ export async function before(m, { conn }) {
   }
 }
 
+// Formatea vistas con notación abreviada
 function formatViews(views) {
   if (!views) return '0';
   const si = [
@@ -141,4 +162,4 @@ function formatViews(views) {
     if (views >= v) return (views / v).toFixed(1) + s;
   }
   return views.toString();
-      }
+        }
