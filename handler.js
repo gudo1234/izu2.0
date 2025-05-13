@@ -20,12 +20,10 @@ if (!chatUpdate)
 return
     this.pushMessage(chatUpdate.messages).catch(console.error)
 
-for (let m of chatUpdate.messages) {
+for (let m of chatUpdate.messages) 
   if (!m) return
 
   if (global.db.data == null) await global.loadDatabase()
-
-  try {
     m = smsg(this, m) || m
     if (!m) return
     m.exp = 0
@@ -41,11 +39,6 @@ for (let m of chatUpdate.messages) {
     if (!isNumber(user.diamond)) user.diamond = 3
     if (!isNumber(user.lastadventure)) user.lastadventure = 0
     if (!isNumber(user.lastclaim)) user.lastclaim = 0
-  } catch (e) {
-    console.error(e)
-  }
-}
-
 if (!isNumber(user.health))
 user.health = 100
 if (!isNumber(user.crime))
