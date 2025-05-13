@@ -19,18 +19,21 @@ this.uptime = this.uptime || Date.now()
 if (!chatUpdate)
 return
     this.pushMessage(chatUpdate.messages).catch(console.error)
+//let m = chatUpdate.messages[chatUpdate.messages.length - 1]
 for (let m of chatUpdate.messages)
-if (m) {
-  if (global.db.data == null)
-    await global.loadDatabase()
-  try {
-    m = smsg(this, m) || m
-    if (!m) continue
-    m.exp = 0
-    m.coin = false
-    try {
-      let user = global.db.data.users[m.sender]
-      if (typeof user !== 'object') continue
+if (!m)
+return;
+if (global.db.data == null)
+await global.loadDatabase()       
+try {
+m = smsg(this, m) || m
+if (!m)
+return
+m.exp = 0
+m.coin = false
+try {
+let user = global.db.data.users[m.sender]
+if (typeof user !== 'object')
   
 global.db.data.users[m.sender] = {}
 if (user) {
