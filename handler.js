@@ -14,27 +14,23 @@ resolve()
 }, ms))
 
 export async function handler(chatUpdate) {
-    this.msgqueque = this.msgqueque || [];
-    this.uptime = this.uptime || Date.now();
-    if (!chatUpdate) return;
-
-    this.pushMessage(chatUpdate.messages).catch(console.error);
-
-    for (let message of chatUpdate.messages) {
-        let m = message;
-        if (!m) continue;
-
-        if (global.db.data == null) await global.loadDatabase();
-
-        try {
-            m = smsg(this, m) || m;
-            if (!m) continue;
-
-            m.exp = 0;
-            m.coin = false;
-try {
-let user = global.db.data.users[m.sender]
-if (typeof user !== 'object')
+this.msgqueque = this.msgqueque || []
+this.uptime = this.uptime || Date.now()
+if (!chatUpdate)
+return
+    this.pushMessage(chatUpdate.messages).catch(console.error)
+for (let m of chatUpdate.messages)
+if (m) {
+  if (global.db.data == null)
+    await global.loadDatabase()
+  try {
+    m = smsg(this, m) || m
+    if (!m) continue
+    m.exp = 0
+    m.coin = false
+    try {
+      let user = global.db.data.users[m.sender]
+      if (typeof user !== 'object') continue
   
 global.db.data.users[m.sender] = {}
 if (user) {
@@ -186,10 +182,6 @@ if (!('delete' in chat))
 chat.delete = false
 if (!isNumber(chat.expired))
 chat.expired = 0
-if (!('antiLag' in chat))
-chat.antiLag = false
-if (!('per' in chat))
-chat.per = []
 } else
 global.db.data.chats[m.chat] = {
 isBanned: false,
@@ -209,8 +201,6 @@ antifake: false,
 reaction: false,
 nsfw: false,
 expired: 0, 
-antiLag: false,
-per: [],
 }
 var settings = global.db.data.settings[this.user.jid]
 if (typeof settings !== 'object') global.db.data.settings[this.user.jid] = {}
@@ -231,15 +221,6 @@ status: 0
 } catch (e) {
 console.error(e)
 }
-const mainBot = global.conn.user.jid
-const chat = global.db.data.chats[m.chat] || {}
-const isSubbs = chat.antiLag === true
-const allowedBots = chat.per || []
-if (!allowedBots.includes(mainBot)) allowedBots.push(mainBot)
-const isAllowed = allowedBots.includes(this.user.jid)
-if (isSubbs && !isAllowed) 
-return
-    
 if (opts['nyimak'])  return
 if (!m.fromMe && opts['self'])  return
 if (opts['swonly'] && m.chat !== 'status@broadcast')  return
@@ -254,13 +235,22 @@ const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.wh
 const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || _user.premium == true
 
 if (opts['queque'] && m.text && !(isMods || isPrems)) {
-let queque = this.msgqueque, time = 1000 * 5
+/*let queque = this.msgqueque, time = 1000 * 5
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
 setInterval(async function () {
 if (queque.indexOf(previousID) === -1) clearInterval(this)
 await delay(time)
-}, time)
+}, time)*/
+let queque = this.msgqueque
+const previousID = queque[queque.length - 1]
+queque.push(m.id || m.key.id)
+
+const interval = setInterval(() => {
+    if (queque.indexOf(previousID) === -1) {
+        clearInterval(interval)
+    }
+}, 0)
 }
 
 if (m.isBaileys) {
@@ -375,10 +365,10 @@ user.antispam++
 return
 }
 
-if (user.antispam2 && isROwner) return
+/*if (user.antispam2 && isROwner) return
 let time = global.db.data.users[m.sender].spam + 3000
 if (new Date - global.db.data.users[m.sender].spam < 3000) return console.log(`[ SPAM ]`) 
-global.db.data.users[m.sender].spam = new Date * 1
+global.db.data.users[m.sender].spam = new Date * 1*/
 
 if (m.chat in global.db.data.chats || m.sender in global.db.data.users) {
 let chat = global.db.data.chats[m.chat]
@@ -547,19 +537,12 @@ console.log(m, m.quoted, e)}
 let settingsREAD = global.db.data.settings[this.user.jid] || {}  
 if (opts['autoread']) await this.readMessages([m.key])
 
-if (db.data.chats[m.chat].reaction && m.text.match(/(ción|dad|aje|oso|izar|mente|pero|tion|age|ous|ate|and|but|ify|ai|yuki|a|s)/gi)) {
+if (db.data.chats[m.chat].reaction && m.text.match(/(f)/gi)) {
 let emot = pickRandom(["⚡"])
 if (!m.fromMe) return this.sendMessage(m.chat, { react: { text: emot, key: m.key }})
 }
 function pickRandom(list) { return list[Math.floor(Math.random() * list.length)]}
-}/*}*/
-//🟢
-} /*catch (e) {
-            console.error(e);
-        }
-    }*/ // <-- Este cierre debe estar al FINAL del handler
-}
-//🟢
+}}
 
 global.dfail = (type, m, usedPrefix, command, conn) => {
 
