@@ -14,7 +14,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   };
 
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
-  const selectedShape = shapeFlags[selectedFlag] || null;
+  const selectedShape = shapeFlags[selectedFlag];
 
   let q = m.quoted ? m.quoted : m;
   let mime = (q.msg || q).mimetype || q.mediaType || '';
@@ -34,9 +34,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   m.react('🧩');
 
   let stiker = false;
+
   try {
     if (selectedShape) {
-      // Lógica con forma
+      // Lógica personalizada con forma SVG
       let frameBuffer = mediaBuffer;
 
       if (/video|gif/.test(mime)) {
@@ -60,9 +61,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         .webp()
         .toBuffer();
 
-      stiker = await sticker(finalBuffer, false, `${m.pushName}`);
+      stiker = await sticker(finalBuffer, false, global.packname, global.author);
     } else if (args.length === 0) {
-      // Lógica básica si no hay banderas
+      // Lógica básica sin argumentos
       try {
         stiker = await sticker(mediaBuffer, false, global.packname, global.author);
       } catch (e) {
@@ -74,13 +75,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         stiker = await sticker(false, out, global.packname, global.author);
       }
     } else {
-      return conn.reply(m.chat, `⚠️ Usa correctamente el comando:
+      // Argumento inválido
+      return conn.reply(m.chat, `⚠️ Argumento no válido.
 
-◈ \`${usedPrefix + command}\` para sticker básico.
+Usa:
+• \`${usedPrefix + command}\` para crear un sticker normal
+• \`${usedPrefix + command} -a\` para crear un sticker con forma (corazón, círculo, estrella, etc.)
 
-◈ \`${usedPrefix + command} -a\` para sticker con forma (corazón, estrella, círculo, etc.)
-
-Es necesario usar una de las formas válidas si agregas un argumento.`, m);
+Formas válidas: ${Object.keys(shapeFlags).join(', ')}`, m);
     }
 
     if (stiker) {
@@ -88,15 +90,14 @@ Es necesario usar una de las formas válidas si agregas un argumento.`, m);
     }
   } catch (e) {
     console.error(e);
-    return conn.reply(m.chat, `${e} Hubo un error al crear el sticker.`, m);
+    return conn.reply(m.chat, `❌ Error al crear el sticker:\n${e}`, m);
   }
 };
 
 handler.command = ['st'];
-handler.group = true;
 export default handler;
 
-// Funciones auxiliares (igual que en tu código)
+// Funciones auxiliares
 async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
   const svgMask = getSVGMask(shape, size);
   return await sharp(imageBuffer)
@@ -108,7 +109,6 @@ async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
 }
 
 function getSVGMask(shape, size) {
-  // Igual que en tu código original
   const half = size / 2;
   const quarter = size / 4;
   const threeQuarter = 3 * quarter;
@@ -116,11 +116,26 @@ function getSVGMask(shape, size) {
 
   switch (shape) {
     case 'circle': return `<svg width="${size}" height="${size}"><circle cx="${half}" cy="${half}" r="${half}" fill="black"/></svg>`;
-    // ... demás formas igual
+    case 'triangle': return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${size} 0,${size}" fill="black"/></svg>`;
+    case 'diamond': return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${half} ${half},${size} 0,${half}" fill="black"/></svg>`;
+    case 'hexagon': return `<svg width="${size}" height="${size}"><polygon points="${quarter},0 ${threeQuarter},0 ${size},${half} ${threeQuarter},${size} ${quarter},${size} 0,${half}" fill="black"/></svg>`;
+    case 'pentagon': return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${size},${half} ${threeQuarter},${size} ${quarter},${size} 0,${half}" fill="black"/></svg>`;
+    case 'heart': return `<svg width="${size}" height="${size}"><path d="M ${half},${size} C ${half * 1.5},${threeQuarter} ${size},${quarter} ${half},${quarter} C 0,${quarter} ${half * 0.5},${threeQuarter} ${half},${size} Z" fill="black"/></svg>`;
+    case 'blob': return `<svg width="${size}" height="${size}"><path d="M ${half},0 C ${size},0 ${size},${size} ${half},${size} C 0,${size} 0,0 ${half},0 Z" fill="black"/></svg>`;
+    case 'leaf': return `<svg width="${size}" height="${size}"><path d="M ${half},0 C ${size},${quarter} ${threeQuarter},${size} ${half},${size} C ${quarter},${size} 0,${quarter} ${half},0 Z" fill="black"/></svg>`;
+    case 'moon': return `<svg width="${size}" height="${size}"><path d="M ${half},0 A ${half},${half} 0 1,0 ${half},${size} A ${quarter},${half} 0 1,1 ${half},0 Z" fill="black"/></svg>`;
+    case 'star': return `<svg width="${size}" height="${size}"><polygon points="${half},0 ${threeQuarter},${threeQuarter} 0,${quarter} ${size},${quarter} ${quarter},${threeQuarter}" fill="black"/></svg>`;
+    case 'zap': return `<svg width="${size}" height="${size}"><polygon points="${quarter},0 ${threeQuarter},${half} ${half},${half} ${threeQuarter},${size} ${quarter},${half} ${half},${half}" fill="black"/></svg>`;
+    case 'curve': return `<svg width="${size}" height="${size}"><path d="M0,${size} Q${half},${half} ${size},${size} V0 H0 Z" fill="black"/></svg>`;
+    case 'edges': return `<svg width="${size}" height="${size}"><path d="M0,0 L${size},${half} L0,${size} Z" fill="black"/></svg>`;
+    case 'mirror': return `<svg width="${size}" height="${size}"><path d="M0,0 L${half},${size} L${size},0 Z" fill="black"/></svg>`;
+    case 'arrow': return `<svg width="${size}" height="${size}"><path d="M${half},0 L${size},${half} L${half},${size} L${half},${threeQuarter} L0,${threeQuarter} L0,${quarter} L${half},${quarter} Z" fill="black"/></svg>`;
+    case 'attach': return `<svg width="${size}" height="${size}"><circle cx="${half}" cy="${half}" r="${half}" fill="black"/><rect x="${quarter}" y="${quarter}" width="${half}" height="${half}" fill="white"/></svg>`;
+    case 'expand': return `<svg width="${size}" height="${size}"><polygon points="0,0 ${quarter},0 ${quarter},${quarter} 0,${quarter}" fill="black"/><polygon points="${threeQuarter},0 ${size},0 ${size},${quarter} ${threeQuarter},${quarter}" fill="black"/><polygon points="0,${threeQuarter} ${quarter},${threeQuarter} ${quarter},${size} 0,${size}" fill="black"/><polygon points="${threeQuarter},${threeQuarter} ${size},${threeQuarter} ${size},${size} ${threeQuarter},${size}" fill="black"/></svg>`;
     default: throw new Error(`Forma no soportada: ${shape}`);
   }
 }
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-                                        }
+}
