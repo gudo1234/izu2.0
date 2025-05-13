@@ -19,36 +19,33 @@ this.uptime = this.uptime || Date.now()
 if (!chatUpdate)
 return
     this.pushMessage(chatUpdate.messages).catch(console.error)
-//let m = chatUpdate.messages[chatUpdate.messages.length - 1]
-for (let m of chatUpdate.messages)
-if (!m)
-return;
-if (global.db.data == null)
-await global.loadDatabase()       
-try {
-m = smsg(this, m) || m
-if (!m)
-return
-m.exp = 0
-m.coin = false
-try {
-let user = global.db.data.users[m.sender]
-if (typeof user !== 'object')
-  
-global.db.data.users[m.sender] = {}
-if (user) {
-if (!isNumber(user.exp))
-user.exp = 0
-if (!isNumber(user.coin))
-user.coin = 10
-if (!isNumber(user.joincount))
-user.joincount = 1
-if (!isNumber(user.diamond))
-user.diamond = 3
-if (!isNumber(user.lastadventure))
-user.lastadventure = 0
-if (!isNumber(user.lastclaim))
-user.lastclaim = 0
+
+for (let m of chatUpdate.messages) {
+  if (!m) return
+
+  if (global.db.data == null) await global.loadDatabase()
+
+  try {
+    m = smsg(this, m) || m
+    if (!m) return
+    m.exp = 0
+    m.coin = false
+
+    let user = global.db.data.users[m.sender]
+    if (typeof user !== 'object') global.db.data.users[m.sender] = {}
+
+    user = global.db.data.users[m.sender]
+    if (!isNumber(user.exp)) user.exp = 0
+    if (!isNumber(user.coin)) user.coin = 10
+    if (!isNumber(user.joincount)) user.joincount = 1
+    if (!isNumber(user.diamond)) user.diamond = 3
+    if (!isNumber(user.lastadventure)) user.lastadventure = 0
+    if (!isNumber(user.lastclaim)) user.lastclaim = 0
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 if (!isNumber(user.health))
 user.health = 100
 if (!isNumber(user.crime))
