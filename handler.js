@@ -244,6 +244,8 @@ setInterval(async function () {
 if (queque.indexOf(previousID) === -1) clearInterval(this)
 await delay(time)
 }, time)*/
+//mio🥵
+/*
 let queque = this.msgqueque
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
@@ -252,7 +254,27 @@ const interval = setInterval(() => {
     if (queque.indexOf(previousID) === -1) {
         clearInterval(interval)
     }
-}, 0)
+}, 0)*/
+//mio🥵
+let queue = this.msgqueque
+
+// Asegurar que sea un array
+if (!Array.isArray(queue)) this.msgqueque = queue = []
+
+// Esperar a que el mensaje anterior salga de la cola
+await new Promise(resolve => {
+  const check = () => {
+    if (!queue.length || queue[queue.length - 1] === m.id || queue.indexOf(previousID) === -1) {
+      return resolve()
+    }
+    setImmediate(check)
+  }
+  check()
+})
+
+// Agregar el nuevo mensaje a la cola
+queue.push(m.id || m.key.id)
+
 }
 
 if (m.isBaileys) {
