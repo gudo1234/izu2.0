@@ -14,8 +14,34 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
+
   if (!selectedShape) {
-    return conn.reply(m.chat, `Debes incluir una opción de forma como -a, -c, -h, etc.\n\nEjemplo:\n${usedPrefix + command} -a (respondiendo a una imagen o video)`, m);
+    return conn.reply(m.chat, `*Responde a una imagen o video/gif y usa una de estas variantes:*
+
+┌─ *🧪 Formas disponibles para stickers:*
+│ ● *Básicas:*
+│ ├─ .s -c ⟶ Circular
+│ ├─ .s -t ⟶ Triángulo
+│ ├─ .s -d ⟶ Diamante
+│ ├─ .s -h ⟶ Hexágono
+│ └─ .s -p ⟶ Pentágono
+│ ● *Decorativas:*
+│ ├─ .s -a ⟶ Corazón
+│ ├─ .s -b ⟶ Burbuja
+│ ├─ .s -l ⟶ Hoja
+│ ├─ .s -n ⟶ Luna
+│ ├─ .s -s ⟶ Estrella
+│ └─ .s -z ⟶ Rayo
+│ ● *Especiales:*
+│ ├─ .s -r ⟶ Curvado
+│ ├─ .s -e ⟶ Esquinas redondeadas
+│ ├─ .s -m ⟶ Espejo
+│ ├─ .s -f ⟶ Flecha
+│ ├─ .s -x ⟶ Completo (cuadro)
+│ └─ .s -i ⟶ Expandido
+└───────────────
+
+Ejemplo: *${usedPrefix}s -a*`, m);
   }
 
   let q = m.quoted ? m.quoted : m;
@@ -26,11 +52,11 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (/video/g.test(mime) && (q.msg || q).seconds > 8)
       return m.reply('¡El video no puede durar más de 8 segundos!');
     img = await q.download?.();
-  } else if (args[0] && isUrl(args[0])) {
-    img = await fetch(args[0]).then(res => res.buffer());
+  } else if (args[1] && isUrl(args[1])) {
+    img = await fetch(args[1]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `Responde a una imagen o video/gif para generar un sticker con forma.\n\nEjemplo:\n${usedPrefix + command} -a`, m);
+    return conn.reply(m.chat, 'Responde a una imagen o video para generar el sticker.', m);
   }
 
   m.react('🧩');
@@ -59,9 +85,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .webp()
       .toBuffer();
 
-    const stiker = await sticker(finalBuffer, false, `${m.pushName}`);
+    const stiker = await sticker(finalBuffer, false, m.pushName);
+
     if (stiker) {
-      const thumbnail = await (await fetch(icono)).buffer();
       return conn.sendFile(m.chat, stiker, 'sticker.webp', '', m, true, {
         contextInfo: {
           forwardingScore: 200,
@@ -69,27 +95,28 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
           externalAdReply: {
             showAdAttribution: false,
             title: `${m.pushName}`,
-            body: textbot,
+            body: 'Sticker personalizado',
             mediaType: 1,
             sourceUrl: redes,
-            thumbnail: thumbnail,
-            thumbnailUrl: redes
+            thumbnail: await (await fetch(icono)).buffer()
           }
         }
       });
     }
   } catch (e) {
     console.error(e);
-    return conn.reply(m.chat, `${e}\n\nPor favor, intenta nuevamente con una imagen o video válido.`, m);
+    return conn.reply(m.chat, 'Ocurrió un error al procesar el sticker.', m);
   }
 };
 
-// Solo activa el comando si contiene un guion (ej: -a, -c, etc.)
-handler.command = /^s\s+-.+/i;
 handler.group = true;
+handler.command = [
+  's -c', 's -t', 's -d', 's -h', 's -p',
+  's -a', 's -b', 's -l', 's -n', 's -s', 's -z',
+  's -r', 's -e', 's -m', 's -f', 's -x', 's -i'
+];
 export default handler;
 
-// Funciones auxiliares
 async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
   const svgMask = getSVGMask(shape, size);
   const maskedImage = await sharp(imageBuffer)
@@ -131,4 +158,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-      }
+}
