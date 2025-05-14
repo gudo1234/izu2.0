@@ -32,34 +32,36 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `${e} Responde a una imagen o video/gif para generar un sticker o agrega una opción de forma.
+    return conn.reply(m.chat, `${e} Responde a una imagen, video o GIF para crear un sticker. También puedes agregar una forma personalizada con una opción.
 
-┌───────────
-│ 🧪 Tipo: Sticker personalizado
+┌─ 🧪 Sticker personalizado
 │ ⚙ \`Formas disponibles:\`
-│  ● *Básicas:*
-│ ├─ -c ⟶ Circular
-│ ├─ -t ⟶ Triangular
-│ ├─ -d ⟶ Diamante
-│ ├─ -h ⟶ Hexágono
-│ └─ -p ⟶ Pentágono
-│  ● *Decorativas:*
-│ ├─ -a ⟶ Corazón
-│ ├─ -b ⟶ Burbuja
-│ ├─ -l ⟶ Hoja
-│ ├─ -n ⟶ Luna
-│ ├─ -s ⟶ Estrella
-│ └─ -z ⟶ Rayo
-│  ● *Especiales:*
-│ ├─ -r ⟶ Curvado
-│ ├─ -e ⟶ Esquinas redondeadas
-│ ├─ -m ⟶ Espejo
-│ ├─ -f ⟶ Flecha
-│ ├─ -x ⟶ Acoplado
-│ └─ -i ⟶ Ampliado
-└───────────
+│
+│ ● *Básicas*
+│ ├─ -c → Circular
+│ ├─ -t → Triangular
+│ ├─ -d → Diamante
+│ ├─ -h → Hexágono
+│ └─ -p → Pentágono
+│
+│ ● *Decorativas*
+│ ├─ -a → Corazón
+│ ├─ -b → Burbuja
+│ ├─ -l → Hoja
+│ ├─ -n → Luna
+│ ├─ -s → Estrella
+│ └─ -z → Rayo
+│
+│ ● *Especiales*
+│ ├─ -r → Curvado
+│ ├─ -e → Esquinas redondeadas
+│ ├─ -m → Espejo
+│ ├─ -f → Flecha
+│ ├─ -x → Acoplado
+│ └─ -i → Ampliado
+└──────────────
 
-◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`, m);
+◈ Ejemplo: responde a una imagen con: \`${usedPrefix + command} -a\``, m);
   }
 
   m.react('🧩');
