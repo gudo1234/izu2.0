@@ -34,8 +34,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   } else {
     return conn.reply(m.chat, `${e} Responde a una imagen, video o GIF para crear un sticker. También puedes agregar una forma personalizada con una opción.
 
-┌─ 🧪 Sticker personalizado
-│ ⚙ \`Formas disponibles:\`
+┌🎨 \`Formas disponibles:\`
 │
 │ ● *Básicas*
 │ ├─ -c → Circular
@@ -59,7 +58,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -f → Flecha
 │ ├─ -x → Acoplado
 │ └─ -i → Ampliado
-└──────────────
+└──────────
 
 ◈ Ejemplo: responde a una imagen con: \`${usedPrefix + command} -a\``, m);
   }
