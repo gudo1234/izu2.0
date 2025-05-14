@@ -66,7 +66,7 @@ export async function before(m) {
     const topMatches = closestCommands.slice(0, 2);
 
     // Mensaje de comando inválido con país y emoji
-    let replyMessage = `───⋆｡°✩ 𝙄𝙣𝙛𝙤 ✩°｡⋆────\n` +
+    let replyMessage = `───⋆───⋆───\n` +
       `_${e} El comando *${usedPrefix + command}* no existe._\n` +
       `> ${paisdata.emoji} Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
