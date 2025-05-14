@@ -77,7 +77,7 @@ export async function before(m) {
       });
     }
 
-    replyMessage += `────☁᪶̇✿ ᳟${paisdata.code || '🌎'}᳟✿᪶☁────`;
+    replyMessage += `──☁᪶̇✿ ᳟${paisdata.code || '🌎'}᳟✿᪶☁──`;
 
     await m.reply(replyMessage);
   }
