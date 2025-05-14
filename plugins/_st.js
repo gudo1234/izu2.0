@@ -4,19 +4,21 @@ import { spawn } from 'child_process';
 import { sticker } from '../lib/sticker.js';
 import uploadFile from '../lib/uploadFile.js';
 import uploadImage from '../lib/uploadImage.js';
-import { webp2png } from '../lib/webp2mp4.js';
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { conn, args }) => {
   const shapeFlags = {
     '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-h': 'hexagon', '-p': 'pentagon',
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
   };
-  const thumbnail = await (await fetch(icono)).buffer();
+
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
-  let q = m.quoted ? m.quoted : m;
+  // Si no se especifica una variante válida, no hacer nada
+  if (!selectedShape) return;
+
+  const q = m.quoted ? m.quoted : m;
   let mime = (q.msg || q).mimetype || q.mediaType || '';
   let img;
 
@@ -27,79 +29,35 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   } else if (args[0] && isUrl(args[0])) {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
-  } else {
-    return conn.reply(m.chat, `${e} Responde a una imagen o video/gif para generar un sticker o agrega una de las siguientes opciones:
-
-┌───────────
-│ 🧪 Tipo: Sticker personalizado
-│ ⚙ \`Formas disponibles:\`
-│  ● *Básicas:*
-│ ├─ -c ⟶ Circular
-│ ├─ -t ⟶ Triangular
-│ ├─ -d ⟶ Diamante
-│ ├─ -h ⟶ Hexágono
-│ └─ -p ⟶ Pentágono
-│  ● *Decorativas:*
-│ ├─ -a ⟶ Corazón
-│ ├─ -b ⟶ Burbuja
-│ ├─ -l ⟶ Hoja
-│ ├─ -n ⟶ Luna
-│ ├─ -s ⟶ Estrella
-│ └─ -z ⟶ Rayo
-│  ● *Especiales:*
-│ ├─ -r ⟶ Curvado
-│ ├─ -e ⟶ Esquinas redondeadas
-│ ├─ -m ⟶ Espejo
-│ ├─ -f ⟶ Flecha
-│ ├─ -x ⟶ Acoplado
-│ └─ -i ⟶ Ampliado
-└───────────
-
-◈ Usa \`${usedPrefix + command} -a\` respondiendo a una imagen o video.`, m);
-  }
+  } else return;
 
   m.react('🧩');
 
-  let stiker = false;
   try {
-    if (selectedShape && /image|webp|url|video|gif/.test(mime)) {
-      let frameBuffer = img;
+    let frameBuffer = img;
 
-      if (/video|gif/.test(mime)) {
-        const ffmpeg = spawn('ffmpeg', ['-i', 'pipe:0', '-vframes', '1', '-f', 'image2', '-']);
-        ffmpeg.stdin.write(img);
-        ffmpeg.stdin.end();
+    if (/video|gif/.test(mime)) {
+      const ffmpeg = spawn('ffmpeg', ['-i', 'pipe:0', '-vframes', '1', '-f', 'image2', '-']);
+      ffmpeg.stdin.write(img);
+      ffmpeg.stdin.end();
 
-        frameBuffer = await new Promise((resolve, reject) => {
-          const chunks = [];
-          ffmpeg.stdout.on('data', chunk => chunks.push(chunk));
-          ffmpeg.stderr.on('data', () => {});
-          ffmpeg.on('close', () => resolve(Buffer.concat(chunks)));
-          ffmpeg.on('error', reject);
-        });
-      }
-
-      const masked = await applyShapeMask(frameBuffer, selectedShape, 500);
-      const finalBuffer = await sharp(masked)
-        .ensureAlpha()
-        .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        .webp()
-        .toBuffer();
-
-      // Incluye el nombre del usuario en el packname
-      stiker = await sticker(finalBuffer, false, `${m.pushName}`);
-    } else {
-      try {
-        stiker = await sticker(img, false, `${m.pushName}`);
-      } catch (e) {
-        let out;
-        if (/webp/.test(mime)) out = await webp2png(img);
-        else if (/image|url/.test(mime)) out = await uploadImage(img);
-        else if (/video/.test(mime)) out = await uploadFile(img);
-        if (typeof out !== 'string') out = await uploadImage(img);
-        stiker = await sticker(false, out, `${m.pushName}`);
-      }
+      frameBuffer = await new Promise((resolve, reject) => {
+        const chunks = [];
+        ffmpeg.stdout.on('data', chunk => chunks.push(chunk));
+        ffmpeg.stderr.on('data', () => {});
+        ffmpeg.on('close', () => resolve(Buffer.concat(chunks)));
+        ffmpeg.on('error', reject);
+      });
     }
+
+    const masked = await applyShapeMask(frameBuffer, selectedShape, 500);
+    const finalBuffer = await sharp(masked)
+      .ensureAlpha()
+      .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .webp()
+      .toBuffer();
+
+    const stiker = await sticker(finalBuffer, false, `${m.pushName}`);
 
     if (stiker) {
       return conn.sendFile(m.chat, stiker, 'sticker.webp', '', m, true, {
@@ -112,7 +70,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             body: textbot,
             mediaType: 1,
             sourceUrl: redes,
-            thumbnail: thumbnail,
+            thumbnail: await (await fetch(icono)).buffer(),
             thumbnailUrl: redes
           }
         }
@@ -120,16 +78,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     }
   } catch (e) {
     console.error(e);
-    return conn.reply(m.chat, `${e} Por favor, envía una imagen o video para hacer un sticker.`, m);
+    return conn.reply(m.chat, `Error al generar el sticker.`, m);
   }
 };
 
 handler.group = true;
-handler.command = [
-  's -c', 's -t', 's -d', 's -h', 's -p',
-  's -a', 's -b', 's -l', 's -n', 's -s', 's -z',
-  's -r', 's -e', 's -m', 's -f', 's -x', 's -i'
-];
+handler.command = ['s']; // Solo acepta .s
 export default handler;
 
 // Funciones auxiliares
@@ -174,4 +128,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-}
+  }
