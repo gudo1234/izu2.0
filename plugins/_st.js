@@ -84,7 +84,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 };
 
 handler.group = true;
-handler.command = /^s\s+-(c|t|d|h|p|a|b|l|n|s|z|r|e|m|f|x|i)$/i;
+//handler.command = /^s\s+-(c|t|d|h|p|a|b|l|n|s|z|r|e|m|f|x|i)$/i;
+handler.command = ['s -c', 's -t', 's -d', 's -h', 's -p', 's -a', 's -b', 's -l', 's -n', 's -s', 's -z', 's -r', 's -e', 's -m', 's -f', 's -x', 's -i'];
 export default handler;
 
 // Funciones auxiliares
