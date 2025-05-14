@@ -60,7 +60,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ └─ -i → Ampliado
 └──────────
 
-◈ Ejemplo: responde a una imagen con: \`${usedPrefix + command} -a\``, m);
+◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
   }
 
   m.react('🧩');
