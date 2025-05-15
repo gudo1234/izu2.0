@@ -1,77 +1,78 @@
 import fetch from 'node-fetch';
-import axios from 'axios';
 import cheerio from 'cheerio';
 import Starlights from '@StarlightsTeam/Scraper';
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!global.db.data.chats[m.chat].nsfw && m.isGroup)
-    return conn.reply(m.chat, `🚩 El contenido *NSFW* está desactivado en este grupo.\n> Un administrador puede activarlo con el comando » *${usedPrefix}nsfw on*`, m);
-
-  if (!text) {
-    return conn.reply(m.chat, `🚩 Por favor, ingrese una búsqueda o enlace de Xvideos.\n\nEjemplo de búsqueda: *${usedPrefix + command} colegialas*\nEjemplo de descarga: *${usedPrefix + command} https://www.xvideos.com/video1234*`, m);
+const handler = async (m, { text, usedPrefix, command }) => {
+  if (!db.data.chats[m.chat].nsfw && m.isGroup) {
+    return conn.reply(m.chat, `${e} El contenido *NSFW* está desactivado en este grupo.\n> Un administrador puede activarlo con » *${usedPrefix}nsfw on*`, m);
   }
 
-  const user = global.db.data.users[m.sender];
-  const isUrl = /^https?:\/\/(?:www\.)?xvideos\.com\/video\d+/i.test(text);
+  if (!text) {
+    return conn.reply(m.chat, `${e} Por favor, ingresa una búsqueda para encontrar un video de *Xvideos*.\n\n> Ejemplo de uso: *${usedPrefix + command} colegiala latina*`, m);
+  }
+
+  if (/^https?:\/\/[^ ]+$/.test(text)) {
+    return conn.reply(m.chat, `${e} Solo se permite ingresar texto para realizar una búsqueda.\n\nSi deseas descargar directamente, usa el comando *${usedPrefix}xvideosdl* [URL]`, m);
+  }
 
   try {
     await m.react('🕒');
 
-    if (isUrl) {
-      // Descargar directamente desde enlace
-      const { title, dl_url } = await Starlights.xvideosdl(text);
-      await conn.sendFile(m.chat, dl_url, title + '.mp4', `*» Título:* ${title}`, m, false, {
-        asDocument: user.useDocument
-      });
-      await m.react('✅');
-    } else {
-      // Buscar en Xvideos
-      const results = await xvideosSearch(text);
-      if (!results.length) {
-        return conn.reply(m.chat, `❌ No se encontraron resultados para: *${text}*`, m);
-      }
+    const vids_ = {
+      from: m.sender,
+      urls: [],
+    };
 
-      let response = `🔎 *Resultados de búsqueda para:* *${text}*\n\n`;
-      results.slice(0, 5).forEach((vid, i) => {
-        response += `*${i + 1}.* ${vid.title}\n🕒 ${vid.duration} | ${vid.quality || 'Sin calidad'}\n🔗 ${vid.url}\n\n`;
-      });
-
-      response += `\n_Responde con el número del video o vuelve a escribir el enlace para descargarlo._`;
-      await conn.reply(m.chat, response.trim(), m);
-      await m.react('✅');
+    if (!global.videoListXXX) global.videoListXXX = [];
+    if (global.videoListXXX[0]?.from === m.sender) {
+      global.videoListXXX.splice(0, global.videoListXXX.length);
     }
+
+    const res = await xvideosSearch(text);
+    if (!res.length) {
+      return conn.reply(m.chat, `❌ No se encontraron resultados para: *${text}*`, m);
+    }
+
+    const firstVideoLink = res[0].url;
+    vids_.urls.push(firstVideoLink);
+
+    const { title, dl_url } = await Starlights.xvideosdl(firstVideoLink);
+
+    await m.react('✅');
+    await conn.sendFile(m.chat, dl_url, title + '.mp4', `\`Título:\` ${title}`, m);
+    global.videoListXXX.push(vids_);
   } catch (err) {
-    await m.react('❌');
-    console.error(err);
-    conn.reply(m.chat, `⚠️ Ocurrió un error:\n${err.message}`, m);
+    return conn.reply(m.chat, `⚠️ Ocurrió un error: ${err.message}`, m);
   }
 };
 
-handler.command = ['xvideos', 'xv', 'pornochido'];
+handler.command = ['xvideos', 'sexo2', 'pornoxv', 'porno2'];
 handler.group = true;
 
 export default handler;
 
 async function xvideosSearch(query) {
-  try {
-    const url = `https://www.xvideos.com/?k=${encodeURIComponent(query)}`;
-    const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
-    const results = [];
+  const url = `https://www.xvideos.com/?k=${encodeURIComponent(query)}`;
+  const res = await fetch(url);
+  const html = await res.text();
+  const $ = cheerio.load(html);
+  const results = [];
 
-    $("div.mozaique > div").each((_, el) => {
-      const title = $(el).find("p.title a").attr("title");
-      const videoUrl = "https://www.xvideos.com" + $(el).find("p.title a").attr("href");
-      const duration = $(el).find("span.duration").text().trim();
-      const quality = $(el).find("span.video-hd-mark").text().trim();
+  $('div.mozaique > div').each((_, el) => {
+    const title = $(el).find('p.title a').attr('title');
+    const href = $(el).find('p.title a').attr('href');
+    const duration = $(el).find('span.duration').text().trim();
+    const quality = $(el).find('span.video-hd-mark').text().trim();
 
-      if (title && videoUrl) {
-        results.push({ title, url: videoUrl, duration, quality });
-      }
-    });
+    if (title && href) {
+      results.push({
+        title,
+        url: 'https://www.xvideos.com' + href,
+        duration,
+        quality
+      });
+    }
+  });
 
-    return results;
-  } catch (err) {
-    throw new Error("No se pudo realizar la búsqueda.");
-  }
+  return results;
 }
