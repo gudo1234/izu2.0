@@ -21,7 +21,7 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     }
 };
 
-handler.command = ['xvideosdl', 'xvideos'];
+handler.command = ['xvideosdl'];
 handler.group = true;
 
 export default handler;
