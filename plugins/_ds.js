@@ -1,59 +1,55 @@
 import fs from 'fs';
-import path from 'path';
 
-let handler = async (m, { conn }) => {
-  const jadiPath = './JadiBots/';
-  const sessionPath = './Sessions/';
+const directoryPath = `./${jadi}/`;
+const sanSessionPath = `./${sessions}/`;
 
-  const countDeletedFiles = async (dirPath, isSubfolder = false) => {
-    let deletedCount = 0;
-    let foldersDeleted = 0;
+function cleanSubbotDirectories() {
+  fs.readdir(directoryPath, (err, subbotDirs) => {
+    if (err) return console.log('No se puede escanear el directorio: ' + err);
 
-    if (!fs.existsSync(dirPath)) return { deletedCount, foldersDeleted };
+    subbotDirs.forEach((subbotDir) => {
+      const subbotPath = `${directoryPath}${subbotDir}/`;
 
-    const items = await fs.promises.readdir(dirPath);
+      fs.readdir(subbotPath, (err, files) => {
+        if (err) return console.log('No se puede escanear el directorio: ' + err);
 
-    for (const item of items) {
-      const fullPath = path.join(dirPath, item);
-      const stats = await fs.promises.stat(fullPath);
+        files.forEach((file) => {
+          if (file !== 'creds.json') {
+            fs.unlink(`${subbotPath}${file}`, (err) => {
+              if (err && err.code !== 'ENOENT') {
+                console.log(`Error al eliminar JadiBot: ${file}: ` + err);
+              }
+            });
+          }
+        });
+      });
+    });
+  });
+}
 
-      if (isSubfolder && stats.isDirectory()) {
-        const files = await fs.promises.readdir(fullPath);
-        if (files.includes('creds.json')) continue;
+function cleanSessionFiles() {
+  fs.readdir(sanSessionPath, (err, files) => {
+    if (err) return console.log('No se puede escanear el directorio: ' + err);
 
-        for (const file of files) {
-          const filePath = path.join(fullPath, file);
-          try {
-            await fs.promises.unlink(filePath);
-            deletedCount++;
-          } catch {}
-        }
-
-        try {
-          await fs.promises.rmdir(fullPath);
-          foldersDeleted++;
-        } catch {}
-      } else if (!isSubfolder && stats.isFile() && item !== 'creds.json') {
-        try {
-          await fs.promises.unlink(fullPath);
-          deletedCount++;
-        } catch {}
+    files.forEach((file) => {
+      if (file !== 'creds.json') {
+        fs.unlink(`${sanSessionPath}${file}`, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.log(`Error al eliminar Session: ${file}: ` + err);
+          }
+        });
       }
-    }
+    });
+  });
+}
 
-    return { deletedCount, foldersDeleted };
-  };
-
-  // CORRECTO: tratar JadiBots como carpeta de subbots
-  const { deletedCount: jadiDeleted, foldersDeleted: jadiFolders } = await countDeletedFiles(jadiPath, true);
-  const { deletedCount: sessionDeleted, foldersDeleted: sessionFolders } = await countDeletedFiles(sessionPath);
-
-  const totalFolders = jadiFolders + sessionFolders;
-
-//  await conn.reply(m.chat, `*[Sessions]* ${sessionDeleted} archivos borrados\n*[JadiBots]* ${jadiDeleted} archivos borrados\n*[Carpetas eliminadas]* ${totalFolders}`, null);
-//  await m.react('⚡');
+const handler = async (m, { conn }) => {
+  cleanSubbotDirectories();
+  cleanSessionFiles();
+  m.reply('¡Sesiones limpiadas correctamente!');
 };
 
 handler.customPrefix = /😂|😁|🤣|😅|😆|😎|🤖|👾|❤️/;
 handler.command = new RegExp;
+
 export default handler;
