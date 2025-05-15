@@ -14,7 +14,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     if (!results || !results.length) return m.reply('❌ No se encontraron resultados.')
 
     let caption = `╭───── • ─────╮
-✩ \`Spotify Search \` ✩
+✩ \`Spotify Search\` ✩
 
 🔍 *Consulta:* ${text}
 🎧 *Resultados:* ${results.length}
