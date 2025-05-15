@@ -5,7 +5,7 @@ let tempSpotifyResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(' ')
-  if (!text) return m.reply(`✳️ Ingresa el título de una canción o artista en Spotify.\n\n*Ejemplo:* ${usedPrefix + command} The Weeknd`)
+  if (!text) return m.reply(`${e} Ingresa el título de una canción o artista en Spotify.\n\n*Ejemplo:* ${usedPrefix + command} The Weeknd`)
 
   await m.react('🕓')
 
