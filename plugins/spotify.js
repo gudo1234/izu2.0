@@ -7,7 +7,7 @@ import axios from "axios"
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 if (!text) return conn.reply(m.chat, `${emoji} Por favor proporciona el nombre de una canción o artista.`, m)
   try{
-    await m.react('⌛')
+    await m.react('🕒')
     let downTrack = await downloadTrack2(`${text}`)
     let urlspo=await spotifydl(downTrack.url)
     if (!urlspo.status) return await m.react('❌')
@@ -20,9 +20,11 @@ const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
     let txt = `╭───── • ─────╮
   𖤐 \`SPOTIFY EXTRACTOR\` 𖤐
 ╰───── • ─────╯
-✦ *Artista*: ${downTrack.artists}\n
-✦ *Título:* ${downTrack.title}\n
+
+✦ *Artista*: ${downTrack.artists}
+✦ *Título:* ${downTrack.title}
 ✦ *Duración:* ${downTrack.duration}
+
 ╭───── • ─────╮
 > 🔊 Enviando audio...
 ╰───── • ─────╯`
