@@ -87,8 +87,7 @@ handler.before = async (m, { conn }) => {
     const { title, artist, album, thumbnail, dl_url } = await Starlights.spotifydl(selected.url)
     const img = await (await fetch(thumbnail)).buffer()
     
-//conn.reply(m.chat, `Enviando ✑ *${title} de ${artist}* ${asDocument ? '_audio como documento_' : '_como audio_'}...`, quotedMsg)
-  conn.reply(m.chat, `Enviando ✑ *${results[i].title} de ${results[i].artist}* ${asDocument ? '_audio como documento_' : '_como audio_'}...`, quotedMsg)  
+conn.reply(m.chat, `Enviando ✑ *${title} de ${artist}* ${asDocument ? '_audio como documento_' : '_como audio_'}...`, quotedMsg)
     await conn.sendMessage(m.chat, {
       [asDocument ? 'document' : 'audio']: { url: dl_url },
       fileName: `${title}.mp3`,
