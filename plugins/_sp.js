@@ -25,7 +25,7 @@ ${e} Cada resultado tiene un número (#1, #2, #3...).
 Responde a este mensaje usando ese número para elegir qué descargar:
 
 ━━━━━━━━━━━━━
-✦ \`s 1\` o \`descargar 1\` → Audio  
+✦ \`a 1\` o \`audio 1\` → Audio  
 ✦ \`doc 1\` o \`documento 1\` → Audio como documento  
 ━━━━━━━━━━━━━`
 
@@ -71,7 +71,7 @@ handler.before = async (m, { conn }) => {
   const data = tempSpotifyResults[m.quoted.id]
   if (!data) return
 
-  const match = m.text.trim().toLowerCase().match(/^(s|descargar|doc|documento)\s*#?\s*(\d+)$/i)
+  const match = m.text.trim().toLowerCase().match(/^(a|audio|doc|documento)\s*#?\s*(\d+)$/i)
   if (!match) return
 
   const [__, type, number] = match
@@ -82,22 +82,12 @@ handler.before = async (m, { conn }) => {
   const quotedMsg = data._msg || m.quoted
   const asDocument = ['doc', 'documento'].includes(type)
 
-  await m.react('🎧')
-
+  await m.react('🕒')
   try {
     const { title, artist, album, thumbnail, dl_url } = await Starlights.spotifydl(selected.url)
     const img = await (await fetch(thumbnail)).buffer()
-
-    /*const info = `*乂  S P O T I F Y  -  D O W N L O A D*\n\n`
-      + `✦ *Título:* ${title}\n`
-      + `✦ *Álbum:* ${album}\n`
-      + `✦ *Artista:* ${artist}\n\n`
-      + `✦ Enviando ${asDocument ? 'audio como documento' : 'audio'}...`*/
+    
 conn.reply(m.chat, `Enviando ✑ *${title}* ${asDocument ? 'audio como documento' : 'audio'}...`, quotedMsg)
-    // Enviar imagen como respuesta al mensaje de búsqueda
-    //await conn.sendFile(m.chat, img, 'cover.jpg', info, quotedMsg)
-
-    // Enviar audio o documento como respuesta al mensaje del usuario
     await conn.sendMessage(m.chat, {
       [asDocument ? 'document' : 'audio']: { url: dl_url },
       fileName: `${title}.mp3`,
