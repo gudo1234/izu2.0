@@ -102,7 +102,7 @@ conn.reply(m.chat, `Enviando ✑ *${title} de ${artist}* ${asDocument ? '_audio 
   }
 }
 
-handler.command = ['spotifysearch', 'spsearch']
+handler.command = ['spotifysearch', 'spsearch', 'sps']
 handler.group = true
 
 export default handler
