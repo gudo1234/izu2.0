@@ -1,6 +1,7 @@
 import { 
   downloadTrack2,
 } from "@nechlophomeriaa/spotifydl"
+import fetch from 'node-fetch';
 import axios from "axios"
 
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
@@ -35,7 +36,7 @@ const formatos = [
       title: wm,
       body: textbot,
       thumbnailUrl: redes,
-      thumbnail: downTrack.imageUrl,
+      thumbnail: imBuffer,
       sourceUrl: redes,
       mediaType: 1,
       renderLargerThumbnail: true
@@ -56,7 +57,7 @@ const formatos = [
           title: wm,
           body: textbot,
           thumbnailUrl: redes,
-          thumbnail: downTrack.imageUrl,
+          thumbnail: imBuffer,
           sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true
@@ -81,7 +82,7 @@ const formatos = [
               title: wm,
               body: textbot,
               thumbnailUrl: redes,
-              thumbnail: downTrack.imageUrl,
+              thumbnail: imBuffer,
               sourceUrl: redes,
               mediaType: 1,
               showAdAttribution: true,
