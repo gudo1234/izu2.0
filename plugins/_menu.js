@@ -99,6 +99,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}apk *‹τ×τ›*
 │ ${e}${s}gitclone *‹υяʟ›*
 │ ${e}${s}porno *‹τ×τ›*
+│ ${e}${s}porno2 *‹τ×τ›*
 │ ${e}${s}xnxxdl *‹υяʟ›*
 │ ${e}${s}xvideosdl *‹υяʟ›*
 │ ${e}${s}imagen *‹τ×τ›*
