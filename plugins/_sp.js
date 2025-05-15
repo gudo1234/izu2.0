@@ -1,55 +1,86 @@
 import Starlights from '@StarlightsTeam/Scraper'
 import fetch from 'node-fetch'
 
-const resultadosSpotify = {}
+let tempSpotifyResults = {}
 
-let handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text) return conn.reply(m.chat, `✳️ Ingresa el título de un artista o canción de Spotify.`, m)
+let handler = async (m, { conn, command, args, usedPrefix }) => {
+  let text = args.join(' ')
+  if (!text) return m.reply(`✳️ Ingresa el título de una canción o artista en Spotify.\n\n*Ejemplo:* ${usedPrefix + command} The Weeknd`)
+
   await m.react('🕓')
 
   try {
     const res = await Starlights.spotifySearch(text)
-    if (!res || res.length === 0) return conn.reply(m.chat, `✖️ No se encontraron resultados.`, m)
+    if (!res || !res.length) return m.reply('❌ No se encontraron resultados.')
 
-    const img = await (await fetch(res[0].thumbnail)).buffer()
-    let txt = `*乂  S P O T I F Y  -  S E A R C H*\n\n`
+    let caption = `╭───── • ─────╮
+✩ \`Spotify Search\` ✩
+
+🔍 *Consulta:* ${text}
+🎧 *Resultados:* ${res.length}
+╰───── • ─────╯
+
+📌 *¿Cómo descargar?*
+✑ \`s 1\` o \`descargar 1\` → Audio normal  
+⁌ \`doc 1\` o \`documento 1\` → Audio como documento
+
+━━━━━━━━━━━━━`
+
     for (let i = 0; i < res.length; i++) {
-      txt += `*${i + 1}.* ${res[i].title}\n    ◦ Artista: ${res[i].artist}\n`
+      caption += `\n\n*#${i + 1}.* _${res[i].title}_
+👤 ${res[i].artist}
+🔗 ${res[i].url}`
     }
-    txt += `\nResponde con el número de la canción para descargar.`
-    await conn.sendFile(m.chat, img, 'spotify.jpg', txt, m)
 
-    // Guardamos los resultados asociados al mensaje para detectar la respuesta
-    resultadosSpotify[m.chat] = {
+    const thumb = await (await fetch(res[0].thumbnail)).buffer()
+
+    const sentMsg = await conn.sendMessage(m.chat, {
+      text: caption,
+      contextInfo: {
+        externalAdReply: {
+          title: 'Spotify Downloader',
+          body: 'Resultados encontrados',
+          thumbnail: thumb,
+          mediaType: 1,
+          renderLargerThumbnail: true,
+          sourceUrl: res[0].url
+        }
+      }
+    }, { quoted: m })
+
+    tempSpotifyResults[sentMsg.key.id] = {
       results: res,
-      timestamp: +new Date(),
-      quotedId: m.id,
-      sender: m.sender
+      _msg: sentMsg
     }
 
     await m.react('✅')
-  } catch (err) {
-    console.error(err)
+  } catch (e) {
+    console.error(e)
+    await m.reply(`❌ Error en la búsqueda:\n${e.message}`)
     await m.react('✖️')
   }
 }
 
-handler.customPrefix = /^[0-9]+$/
+// Detección de respuestas
 handler.before = async (m, { conn }) => {
-  const data = resultadosSpotify[m.chat]
+  if (!m.quoted || !m.quoted.id) return
+
+  const data = tempSpotifyResults[m.quoted.id]
   if (!data) return
-  if (m.quoted?.id !== data.quotedId) return
-  if (m.sender !== data.sender) return
 
-  const num = parseInt(m.text)
-  if (isNaN(num) || num < 1 || num > data.results.length) {
-    return conn.reply(m.chat, `✖️ Número inválido. Responde con un número entre 1 y ${data.results.length}.`, m)
-  }
+  const match = m.text.trim().toLowerCase().match(/^(s|descargar|d|doc|documento)\s*#?\s*(\d+)$/i)
+  if (!match) return
 
-  const selected = data.results[num - 1]
-  delete resultadosSpotify[m.chat]
+  const [__, type, numStr] = match
+  const index = parseInt(numStr) - 1
+  const selected = data.results[index]
+  if (!selected) return m.reply('❌ Número inválido.')
 
-  await m.react('🎶')
+  const quotedMsg = data._msg || m.quoted
+  const asDocument = ['doc', 'documento'].includes(type)
+
+  await m.react('🎧')
+
   try {
     const { title, artist, album, thumbnail, dl_url } = await Starlights.spotifydl(selected.url)
     const img = await (await fetch(thumbnail)).buffer()
@@ -58,20 +89,20 @@ handler.before = async (m, { conn }) => {
       + `    ✩  *Título* : ${title}\n`
       + `    ✩  *Álbum* : ${album}\n`
       + `    ✩  *Artista* : ${artist}\n\n`
-      + `*- ↻ Enviando audio...*`
+      + `*- Enviando audio...*`
 
     await conn.sendFile(m.chat, img, 'cover.jpg', info, m)
     await conn.sendMessage(m.chat, {
-      audio: { url: dl_url },
+      [asDocument ? 'document' : 'audio']: { url: dl_url },
       fileName: `${title}.mp3`,
-      mimetype: 'audio/mp4'
-    }, { quoted: m })
+      mimetype: 'audio/mpeg'
+    }, { quoted: quotedMsg })
 
     await m.react('✅')
-  } catch (err) {
-    console.error(err)
+  } catch (e) {
+    console.error(e)
+    await m.reply(`❌ Error al descargar:\n${e.message}`)
     await m.react('✖️')
-    conn.reply(m.chat, `✖️ Ocurrió un error al descargar la canción.`, m)
   }
 }
 
