@@ -50,8 +50,8 @@ let handler = async (m, { conn }) => {
 
   const totalFolders = jadiFolders + sessionFolders;
 
-  await conn.reply(m.chat, `*[Sessions]* ${sessionDeleted} archivos borrados\n*[JadiBots]* ${jadiDeleted} archivos borrados\n*[Carpetas eliminadas]* ${totalFolders}`, null);
-  await m.react('⚡');
+//  await conn.reply(m.chat, `*[Sessions]* ${sessionDeleted} archivos borrados\n*[JadiBots]* ${jadiDeleted} archivos borrados\n*[Carpetas eliminadas]* ${totalFolders}`, null);
+//  await m.react('⚡');
 };
 
 handler.customPrefix = /😂|😁|🤣|😅|😆|😎|🤖|👾|❤️/;
