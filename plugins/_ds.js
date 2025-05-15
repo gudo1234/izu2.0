@@ -46,7 +46,7 @@ function cleanSessionFiles() {
 const handler = async (m, { conn }) => {
   cleanSubbotDirectories();
   cleanSessionFiles();
-  m.reply('¡Sesiones limpiadas correctamente!');
+  //m.reply('¡Sesiones limpiadas correctamente!');
 };
 
 handler.customPrefix = /😂|😁|🤣|😅|😆|😎|🤖|👾|❤️/;
