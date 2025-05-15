@@ -13,14 +13,18 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     const results = await Starlights.spotifySearch(text)
     if (!results || !results.length) return m.reply('❌ No se encontraron resultados.')
 
-    let caption = `╭─── • ───╮
-✦ *Spotify Search*
-╰─── • ───╯
+    let caption = `╭───── • ─────╮
+✩ \`Spotify Search \` ✩
 
 🔍 *Consulta:* ${text}
 🎧 *Resultados:* ${results.length}
+╰───── • ─────╯
 
 📌 *¿Cómo descargar?*
+${e} Cada resultado tiene un número (#1, #2, #3...).  
+Responde a este mensaje usando ese número para elegir qué descargar:
+
+━━━━━━━━━━━━━
 ✦ \`s 1\` o \`descargar 1\` → Audio  
 ✦ \`doc 1\` o \`documento 1\` → Audio como documento  
 ━━━━━━━━━━━━━`
@@ -28,7 +32,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
     for (let i = 0; i < results.length; i++) {
       caption += `\n\n*#${i + 1}.* _${results[i].title}_  
 👤 ${results[i].artist}  
-🔗 ${results[i].url}`
+🔗 ${results[i].url}\n_______________`
     }
 
     const thumb = await (await fetch(results[0].thumbnail)).buffer()
@@ -37,12 +41,13 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
       text: caption,
       contextInfo: {
         externalAdReply: {
-          title: 'Spotify Downloader',
-          body: 'Selecciona un número para descargar',
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
           thumbnail: thumb,
+          sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: true,
-          sourceUrl: results[0].url
+          renderLargerThumbnail: true
         }
       }
     }, { quoted: m })
@@ -83,14 +88,14 @@ handler.before = async (m, { conn }) => {
     const { title, artist, album, thumbnail, dl_url } = await Starlights.spotifydl(selected.url)
     const img = await (await fetch(thumbnail)).buffer()
 
-    const info = `*乂  S P O T I F Y  -  D O W N L O A D*\n\n`
+    /*const info = `*乂  S P O T I F Y  -  D O W N L O A D*\n\n`
       + `✦ *Título:* ${title}\n`
       + `✦ *Álbum:* ${album}\n`
       + `✦ *Artista:* ${artist}\n\n`
-      + `✦ Enviando ${asDocument ? 'audio como documento' : 'audio'}...`
-
+      + `✦ Enviando ${asDocument ? 'audio como documento' : 'audio'}...`*/
+conn.reply(m.chat, `Enviando ✑ *${title}* ${asDocument ? 'audio como documento' : 'audio'}...`, quotedMsg)
     // Enviar imagen como respuesta al mensaje de búsqueda
-    await conn.sendFile(m.chat, img, 'cover.jpg', info, quotedMsg)
+    //await conn.sendFile(m.chat, img, 'cover.jpg', info, quotedMsg)
 
     // Enviar audio o documento como respuesta al mensaje del usuario
     await conn.sendMessage(m.chat, {
