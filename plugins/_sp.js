@@ -87,14 +87,17 @@ handler.before = async (m, { conn }) => {
       + `✦ *Título:* ${title}\n`
       + `✦ *Álbum:* ${album}\n`
       + `✦ *Artista:* ${artist}\n\n`
-      + `✦ Enviando audio...`
+      + `✦ Enviando ${asDocument ? 'audio como documento' : 'audio'}...`
 
+    // Enviar imagen como respuesta al mensaje de búsqueda
     await conn.sendFile(m.chat, img, 'cover.jpg', info, quotedMsg)
+
+    // Enviar audio o documento como respuesta al mensaje del usuario
     await conn.sendMessage(m.chat, {
       [asDocument ? 'document' : 'audio']: { url: dl_url },
       fileName: `${title}.mp3`,
       mimetype: 'audio/mpeg'
-    }, { quoted: quotedMsg })
+    }, { quoted: m })
 
     await m.react('✅')
   } catch (e) {
