@@ -104,7 +104,7 @@ handler.before = async (m, { conn }) => {
   }
 }
 
-handler.command = ['spotify', 'spotifysearch']
+handler.command = ['sp']
 handler.group = true
 
 export default handler
