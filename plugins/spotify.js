@@ -11,15 +11,88 @@ if (!text) return conn.reply(m.chat, `${emoji} Por favor proporciona el nombre d
     let urlspo=await spotifydl(downTrack.url)
     if (!urlspo.status) return await m.react('❌')
     urlspo=urlspo.download
-    let txt = `★━━━━━━━━━━━━━━━━━━━━★
-🎶 𝐒𝐩𝐨𝐭𝐢𝐟𝐲 𝐓𝐫𝐚𝐜𝐤 𝐃𝐨𝐰𝐥𝐨𝐚𝐝𝐞𝐫 🎶\n
-𝘼𝙧𝙩𝙞𝙨𝙩𝙖:${downTrack.artists}\n
-𝐓í𝐭𝐮𝐥𝐨:${downTrack.title}\n
-𝐃𝐮𝐫𝐚𝐜𝐢ó𝐧:${downTrack.duration}
-★━━━━━━━━━━━━━━━━━━━━★`
-  //await conn.sendMessage(m.chat, {image: {url: downTrack.imageUrl}, caption: `${caption2}`}, {quoted: m});
-    
-conn.sendFile(m.chat, downTrack.imageUrl, 'error.jpg', txt, m, null, rcanal)
+    const videoUrls = [
+  'https://files.catbox.moe/rdyj5q.mp4',
+  'https://files.catbox.moe/693ws4.mp4'
+]
+const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
+    let txt = `╭───── • ─────╮
+  𖤐 \`SPOTIFY EXTRACTOR\` 𖤐
+╰───── • ─────╯
+✦ *Artista*: ${downTrack.artists}\n
+✦ *Título:* ${downTrack.title}\n
+✦ *Duración:* ${downTrack.duration}
+╭───── • ─────╮
+> 🔊 Enviando audio...
+╰───── • ─────╯`
+const imBuffer = await getBuffer(downTrack.imageUrl);
+
+const formatos = [
+  async () => conn.sendMessage(m.chat, {
+  text: txt,
+  contextInfo: {
+    externalAdReply: {
+      title: wm,
+      body: textbot,
+      thumbnailUrl: redes,
+      thumbnail: downTrack.imageUrl,
+      sourceUrl: redes,
+      mediaType: 1,
+      renderLargerThumbnail: true
+    }
+  }
+}, { quoted: m }),
+
+  async () => conn.sendMessage(
+    m.chat,
+    {
+      video: { url: jpg },
+      gifPlayback: true,
+      caption: txt,
+      contextInfo: {
+        forwardingScore: 0,
+        isForwarded: true,
+        externalAdReply: {
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail: downTrack.imageUrl,
+          sourceUrl: redes,
+          mediaType: 1,
+          showAdAttribution: true
+        }
+      }
+    },
+    { quoted: m }
+  ),
+
+  async () => conn.sendMessage(m.chat, {
+      text: txt,
+      contextInfo: {
+          mentionedJid: [],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+              newsletterJid: channelRD.id,
+              newsletterName: channelRD.name,
+              serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+              title: wm,
+              body: textbot,
+              thumbnailUrl: redes,
+              thumbnail: downTrack.imageUrl,
+              sourceUrl: redes,
+              mediaType: 1,
+              showAdAttribution: true,
+              renderLargerThumbnail: true,
+          },
+      },
+  }, { quoted: m })
+];
+
+const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
+await randomFormato();
 
     await conn.sendMessage(m.chat, {audio: {url: urlspo}, fileName: `${downTrack.title}.mp3`, mimetype: 'audio/mpeg'}, {quoted: m});
     return await m.react('✅')
