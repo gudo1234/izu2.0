@@ -39,7 +39,11 @@ const handler = async (m, { text, usedPrefix, command }) => {
     const { title, dl_url } = await Starlights.xvideosdl(firstVideoLink);
 
     await m.react('✅');
-    await conn.sendFile(m.chat, dl_url, title + '.mp4', `\`Título:\` ${title}`, m);
+    await conn.sendFile(m.chat, dl_url, title + '.mp4', `╭───── • ─────╮
+  𖤐 \`XVIDEOS EXTRACTOR\` 𖤐
+╰───── • ─────╯
+
+✦ *Título:* ${title}`, m);
     global.videoListXXX.push(vids_);
   } catch (err) {
     return conn.reply(m.chat, `⚠️ Ocurrió un error: ${err.message}`, m);
