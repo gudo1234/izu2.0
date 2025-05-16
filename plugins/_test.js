@@ -2,9 +2,9 @@ import fetch from 'node-fetch';
 import cheerio from 'cheerio';
 
 const handler = async (m, { text, usedPrefix, command, conn }) => {
-  if (!db.data.chats[m.chat].nsfw && m.isGroup) {
+  /*if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     return conn.reply(m.chat, `❌ El contenido *NSFW* está desactivado en este grupo.\nActívalo con: *${usedPrefix}nsfw on*`, m);
-  }
+  }*/
 
   if (!text) {
     return conn.reply(m.chat, `❌ Ingresa una búsqueda para encontrar un video de *Xvideos*.\n\nEjemplo:\n*${usedPrefix + command} colegiala latina*`, m);
