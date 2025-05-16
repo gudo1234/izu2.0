@@ -1,6 +1,7 @@
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
+import PhoneNumber from 'awesome-phonenumber'
 
 function getRandom(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -10,6 +11,9 @@ function getRandom(list) {
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
+  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
+  let paisdata = delirius.data.result
+  let mundo = paisdata ? `${paisdata.emoji} *${paisdata.code}*` : 'Desconocido'
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
@@ -71,11 +75,20 @@ await conn.sendMessage(m.chat, { audio: { url: getRandom([vn, vn2, vn4, vn5, vn7
      seconds: 4556, ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
-  let wel = `°   /)🎩/)
-    (｡•ㅅ•｡)𖹭︩︪𝚆꯭᪶۫۫͝𝙴꯭᪶͡𝙻᪶۫۫͝𝙲꯭᪶֟፟፝͡𝙾᪶۫۫͝𝙼꯭᪶͡𝙴᪶𖹭︩︪*
-    ╭∪─∪─────────❤︎₊᪲
-¡Hola!🍷 *@${m.messageStubParameters[0].split`@`[0]}* buenos días/tardes/noches.\n🎉Bienvenido a *${groupMetadata.subject}*\n\n> 🐢Disfruta del grupo, diviértete, no olvides en leer las reglas...
-    ╰────────────❤︎₊᪲`
+  let wel = `*(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
+╭━━━━━━━━━━━❤︎₊᪲
+┃  ¡Hola *@${m.messageStubParameters[0].split\`@\`[0]}*! 
+┃  Bienvenido(a) a *${groupMetadata.subject}*!
+┃
+┃ ┌─❖─═࿐
+┃ │✨ Pasa un buen rato
+┃ │✨ Sé respetuoso
+┃ │✨ Lee las reglas
+┃ └─────────
+┃
+┃ (⁀ᗢ⁀)✧ ¡${mundo}!
+╰━━━━━━━━━━━❤︎₊᪲
+`;
  await conn.sendMessage(m.chat, {
         text: wel, 
         contextInfo: {
