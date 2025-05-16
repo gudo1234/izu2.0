@@ -1,10 +1,11 @@
 import fetch from 'node-fetch';
 import cheerio from 'cheerio';
+import Starlights from '@StarlightsTeam/Scraper';
 
 const handler = async (m, { text, usedPrefix, command, conn }) => {
-  /*if (!db.data.chats[m.chat].nsfw && m.isGroup) {
+  if (!db.data.chats[m.chat].nsfw && m.isGroup) {
     return conn.reply(m.chat, `❌ El contenido *NSFW* está desactivado en este grupo.\nActívalo con: *${usedPrefix}nsfw on*`, m);
-  }*/
+  }
 
   if (!text) {
     return conn.reply(m.chat, `❌ Ingresa una búsqueda para encontrar un video de *Xvideos*.\n\nEjemplo:\n*${usedPrefix + command} colegiala latina*`, m);
@@ -22,17 +23,25 @@ const handler = async (m, { text, usedPrefix, command, conn }) => {
       return conn.reply(m.chat, `❌ No se encontraron resultados para: *${text}*`, m);
     }
 
+    const usados = new Set();
     const mensajes = [];
 
     for (let i = 0; i < 3; i++) {
-      const video = resultados[Math.floor(Math.random() * resultados.length)];
+      let video;
+      do {
+        video = resultados[Math.floor(Math.random() * resultados.length)];
+      } while (usados.has(video.url));
+      usados.add(video.url);
+
       const { title, url, duration } = video;
-      const thumb = `https://img-l3.xvideos-cdn.com/videos/thumbs169/${url.split('/')[4]}.jpg`;
+
+      // Obtener el video mp4 con Starlights
+      const { dl_url } = await Starlights.xvideosdl(url);
 
       mensajes.push([
         `🔞 *${title}*\n⏱️ *Duración:* ${duration || 'Desconocida'}`,
         url,
-        thumb,
+        dl_url, // aquí se muestra el video directamente
         [],
         [],
         [
@@ -54,6 +63,7 @@ const handler = async (m, { text, usedPrefix, command, conn }) => {
 
 handler.command = ['xv'];
 handler.group = true;
+
 export default handler;
 
 async function xvideosSearch(query) {
@@ -78,4 +88,4 @@ async function xvideosSearch(query) {
   });
 
   return results;
-  }
+}
