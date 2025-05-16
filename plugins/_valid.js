@@ -26,7 +26,7 @@ export async function before(m) {
   const user = global.db.data.users[m.sender];
   let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`);
   let paisdata = delirius.data.result;
-  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido';
+  let mundo = paisdata ? `${paisdata.emoji}` : 'Desconocido';
 
   if (validCommand(command, global.plugins)) {
     if (chat.isBanned) {
@@ -77,7 +77,7 @@ export async function before(m) {
       });
     }
 
-    replyMessage += `──☁᪶̇✿ ᳟${paisdata.code || '🌎'}᳟✿᪶☁──`;
+    replyMessage += `───⋆───⋆───`;
 
     await m.reply(replyMessage);
   }
