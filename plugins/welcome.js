@@ -71,7 +71,7 @@ if (media === 'texto') {
 ┃  ¡Hola *@${m.messageStubParameters[0].split`@`[0]}*! 
 ┃  Bienvenido(a) a *${groupMetadata.subject}*!
 ┃
-┃ ┌─❖─═࿐
+┃ ┌─❖─═•
 ┃ │✨ _Pasa un buen rato_
 ┃ │✨ _Sé respetuoso_
 ┃ │✨ _Lee las reglas_
