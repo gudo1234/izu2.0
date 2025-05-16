@@ -1,7 +1,6 @@
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
-import PhoneNumber from 'awesome-phonenumber'
 
 function getRandom(list) {
   return list[Math.floor(Math.random() * list.length)];
@@ -11,11 +10,8 @@ function getRandom(list) {
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
-  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-  let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.emoji}` : 'Desconocido'
   let vn = './media/a.mp3'; //welcome bendicion
-let vn2 = './media/bien.mp3'; //welcome entra épica
+  let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
   let vn4 = './media/prueba3.mp3'; //welcome calamar
   let vn5 = './media/prueba4.mp3'; //welcome mortals
@@ -86,7 +82,7 @@ if (media === 'texto') {
 ┃ │✨ Lee las reglas
 ┃ └─────────
 ┃
-┃ (⁀ᗢ⁀)✧ ¡${mundo}!
+┃ (⁀ᗢ⁀)✧ ¡!
 ╰━━━━━━━━━━━❤︎₊᪲
 `;
  await conn.sendMessage(m.chat, {
