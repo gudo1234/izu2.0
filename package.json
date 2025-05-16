@@ -46,7 +46,7 @@
 "google-libphonenumber": "3.2.38",
 "axios": "^1.1.2",
 "acrcloud": "^1.4.0",
-"canvas": "^2.5.0",
+"canvas": "*",
 "form-data": "^4.0.0",
 "cfonts": "^3.3.0",
 "boxen": "^7.1.1",
