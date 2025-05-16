@@ -67,13 +67,13 @@ export async function before(m) {
 
     // Mensaje de comando inválido con país y emoji
     let replyMessage = `───⋆───⋆───\n` +
-      `${e} _El comando solicitado no existe en mi base de datos._\n` +
-      `> ${paisdata.emoji} Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
+      `${e} _El comando que ingresaste no se encuentra en mi base de datos._\n` +
+      `> ${paisdata.emoji} Usa *${usedPrefix}menu* para ver la lista completa de comandos disponibles.\n\n`;
 
     if (topMatches.length > 0) {
-      replyMessage += `*¿Tal vez quisiste decir?*\n`;
+      replyMessage += `*Comandos similares encontrados:*\n`;
       topMatches.forEach((match) => {
-        replyMessage += `\`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
+        replyMessage += `• \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
       });
     }
 
