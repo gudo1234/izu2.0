@@ -67,7 +67,7 @@ export async function before(m) {
 
     // Mensaje de comando inválido con país y emoji
     let replyMessage = `───⋆───⋆───\n` +
-      `_${e} El comando *${usedPrefix + command}* no existe._\n` +
+      `${e} _El comando solicitado no existe en mi base de datos._\n` +
       `> ${paisdata.emoji} Usa *${usedPrefix}menu* para ver los comandos disponibles.\n\n`;
 
     if (topMatches.length > 0) {
