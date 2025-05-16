@@ -13,7 +13,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
   //😍mi desmadre
   let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
   let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.emoji} *${paisdata.code}*` : 'Desconocido'
+  let mundo = paisdata ? `${paisdata.emoji}` : 'Desconocido'
   let vn = './media/a.mp3'; //welcome bendicion
 let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
