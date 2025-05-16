@@ -3,8 +3,8 @@ import cheerio from 'cheerio';
 import Starlights from '@StarlightsTeam/Scraper';
 
 const handler = async (m, { text, usedPrefix, command, conn }) => {
-  if (!db.data.chats[m.chat].nsfw && m.isGroup) {
-    return conn.reply(m.chat, `❌ El contenido *NSFW* está desactivado en este grupo.\nActívalo con: *${usedPrefix}nsfw on*`, m);
+  /*if (!db.data.chats[m.chat].nsfw && m.isGroup) {
+    return conn.reply(m.chat, `❌ El contenido *NSFW* está desactivado en este grupo.\nActívalo con: *${usedPrefix}nsfw on*`, m);*/
   }
 
   if (!text) {
