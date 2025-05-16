@@ -73,7 +73,7 @@ export async function before(m) {
     if (topMatches.length > 0) {
       replyMessage += `*Comandos similares encontrados:*\n`;
       topMatches.forEach((match) => {
-        replyMessage += `• \`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
+        replyMessage += `\`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
       });
     }
 
