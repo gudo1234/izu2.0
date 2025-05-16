@@ -12,7 +12,7 @@ const handler = async (m, { text, usedPrefix, command, conn }) => {
   }
 
   if (/^https?:\/\/[^ ]+$/.test(text)) {
-    return conn.reply(m.chat, `❌ Solo se permite texto para buscar.\n\nPara descargar por URL, usa:\n*${usedPrefix}xvideosdl* [URL]`, m);
+    return conn.reply(m.chat, `Solo se permite texto para buscar.\n\nPara descargar por URL, usa:\n*${usedPrefix}xvideosdl* [URL]`, m);
   }
 
   try {
@@ -20,7 +20,7 @@ const handler = async (m, { text, usedPrefix, command, conn }) => {
 
     const resultados = await xvideosSearch(text);
     if (!resultados.length) {
-      return conn.reply(m.chat, `❌ No se encontraron resultados para: *${text}*`, m);
+      return conn.reply(m.chat, `No se encontraron resultados para: *${text}*`, m);
     }
 
     const usados = new Set();
@@ -34,8 +34,6 @@ const handler = async (m, { text, usedPrefix, command, conn }) => {
       usados.add(video.url);
 
       const { title, url, duration } = video;
-
-      // Obtener el video mp4 con Starlights
       const { dl_url } = await Starlights.xvideosdl(url);
 
       mensajes.push([
