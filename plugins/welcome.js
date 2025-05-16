@@ -72,11 +72,10 @@ if (media === 'texto') {
 ┃  Bienvenido(a) a *${groupMetadata.subject}*!
 ┃
 ┃ ┌─❖─═࿐
-┃ │✨ Pasa un buen rato
-┃ │✨ Sé respetuoso
-┃ │✨ Lee las reglas
+┃ │✨ _Pasa un buen rato_
+┃ │✨ _Sé respetuoso_
+┃ │✨ _Lee las reglas_
 ┃ └─────────
-┃
 ╰━━━━━━━━━━━❤︎₊᪲`;
  await conn.sendMessage(m.chat, {
         text: wel, 
