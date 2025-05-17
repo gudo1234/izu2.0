@@ -1,3 +1,4 @@
+// ... encabezado del archivo sin cambios ...
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
@@ -139,9 +140,11 @@ async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
   return maskedImage;
 }
 
+// MODIFICADA: sin resize, mantiene proporciones originales
 async function createStickerFromBuffer(buffer) {
   return await sharp(buffer)
-    .webp()
+    .ensureAlpha()
+    .webp({ lossless: true })
     .toBuffer();
 }
 
