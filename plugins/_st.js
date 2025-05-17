@@ -2,10 +2,8 @@ import { sticker } from '../lib/sticker.js'
 import uploadFile from '../lib/uploadFile.js'
 import uploadImage from '../lib/uploadImage.js'
 import { webp2png } from '../lib/webp2mp4.js'
-import fetch from 'node-fetch';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-
 let stiker = false
 try {
 let q = m.quoted ? m.quoted : m
@@ -13,14 +11,13 @@ let mime = (q.msg || q).mimetype || q.mediaType || ''
 if (/webp|image|video/g.test(mime)) {
 if (/video/g.test(mime)) if ((q.msg || q).seconds > 8) return m.reply(`¡El video no puede durar mas de 8 segundos!`)
 let img = await q.download?.()
-const thumbnail = await (await fetch(icono)).buffer();
-if (!img) return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para hacer un sticker.`, m )
 
+if (!img) return conn.reply(m.chat, `${e} Responda a img, gif, video...`, m)
 
 let out
 m.react('🧩')
 try {
-stiker = await sticker(img, false, `${m.pushName}`)
+stiker = await sticker(img, false, `${name}`)
 } catch (e) {
 console.error(e)
 } finally {
@@ -29,10 +26,10 @@ if (/webp/g.test(mime)) out = await webp2png(img)
 else if (/image/g.test(mime)) out = await uploadImage(img)
 else if (/video/g.test(mime)) out = await uploadFile(img)
 if (typeof out !== 'string') out = await uploadImage(img)
-stiker = await sticker(false, out, `${m.pushName}`)
+stiker = await sticker(false, out, `${name}`)
 }}
 } else if (args[0]) {
-if (isUrl(args[0])) stiker = await sticker(false, args[0], `${m.pushName}`)
+if (isUrl(args[0])) stiker = await sticker(false, args[0], `${name}`)
 
 else return m.reply(`${e} El url es incorrecto`)
 
@@ -41,15 +38,14 @@ else return m.reply(`${e} El url es incorrecto`)
 console.error(e)
 if (!stiker) stiker = e
 } finally {
-if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: textbot, mediaType: 2, sourceUrl: redes, thumbnail, thumbnailUrl: redes}}}, { quoted: m })
+if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '',m, true, { contextInfo: { 'forwardingScore': 200, 'isForwarded': false, externalAdReply:{ showAdAttribution: false, title: `${m.pushName}`, body: wm, mediaType: 2, sourceUrl: redes, thumbnail: icons}}}, { quoted: m })
 
-else return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para hacer un sticker.`, m)
-
+else return conn.reply(m.chat, `${e} Responda a img, gif, video...`,m)
 
 
 }}
 
-//handler.group = true;
+handler.group = true;
 handler.command = ['st']
 
 export default handler
