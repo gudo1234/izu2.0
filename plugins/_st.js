@@ -17,6 +17,7 @@ if (/webp|image|video/g.test(mime)) {
 if (/video/g.test(mime)) if ((q.msg || q).seconds > 11) return m.reply('minimo 7 segundos')
 let img = await q.download?.()
 if (!img) throw `Responda a img o video`
+  m.react('⚡')
 let out
 try {
 stiker = await sticker(img, false, f, g)
