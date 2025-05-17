@@ -27,7 +27,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
-      .map(cmd => `│ ${e + s} ${usedPrefix}${cmd} ${emoji}`)
+      .map(cmd => `│ ${e + s} ${cmd} ${emoji}`)
       .sort()
       .join('\n') || '│ (No se encontraron comandos)'
   }
