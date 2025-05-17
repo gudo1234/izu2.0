@@ -48,7 +48,7 @@ else return conn.reply(m.chat, `${e} Por favor, envia una imagen o video para ha
 
 }}
 
-handler.group = true;
+//handler.group = true;
 handler.command = ['st']
 
 export default handler
