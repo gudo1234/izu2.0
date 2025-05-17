@@ -17,7 +17,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const thumbnail = await (await fetch(icono)).buffer()
 
-  const comandosPorCategoria = (categoria) => {
+  // Función que obtiene y formatea comandos con emoji
+  const comandosPorCategoria = (categoria, emoji) => {
     return Object.entries(global.plugins)
       .filter(([file, plugin]) => {
         let fileName = path.basename(file)
@@ -26,16 +27,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
-      .map(cmd => `│ ${e + s}${cmd} *‹›*`)
+      .map(cmd => `│ ${e + s} ${usedPrefix}${cmd} ${emoji}`)
       .sort()
       .join('\n') || '│ (No se encontraron comandos)'
   }
 
-  const comandosAnime = comandosPorCategoria('anime')
-  const comandosFun = comandosPorCategoria('fun')
-  const comandosNsfw = comandosPorCategoria('nsfw')
+  // Generamos las listas con sus emojis
+  const comandosAnime = comandosPorCategoria('anime', '*‹@υsєя›*')
+  const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
+  const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
 
-  let txt = `🗣️ _¡Hola!_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
+  let txt = `${e} _¡Hola!_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
 
 ━━━━━━━━━━━━━
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
@@ -185,7 +187,9 @@ ${comandosNsfw}
 │ ${e}${s}icon *‹rєρℓy›*
 │ ${e}${s}salir *‹›*
 └────────────`
+
   m.react('🏖️')
+
   if (media === 'grupo') {
     await conn.sendMessage(m.chat, {
       text: txt,
