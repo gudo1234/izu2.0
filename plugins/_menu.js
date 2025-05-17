@@ -127,6 +127,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}vcard #
 │ ${e}${s}whamusic ‹rєρℓy›
 │ ${e}${s}par ...
+│ ${e}${s}stickers *‹τ×τ›*
 └────────────
 
 \`✔sᴛɪᴄᴋᴇʀ - ᴍᴀᴋᴇʀ🧩\`
