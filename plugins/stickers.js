@@ -6,7 +6,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
     return conn.reply(
       m.chat,
-      `❌ Proporciona una búsqueda para enviar stickers de la web\n\n` +
+      `${e} Proporciona una búsqueda para enviar stickers de la web\n\n` +
       `*Ejemplo:* ${usedPrefix + command} gatos`,
       m
     )
