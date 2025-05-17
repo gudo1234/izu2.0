@@ -11,7 +11,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       m
     )
   }
-
+m.reply('🕒')
   // Busca imágenes
   const res = await googleImage(text)
   // Vamos a enviar 9 stickers (3x3)
