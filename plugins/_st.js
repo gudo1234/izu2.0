@@ -1,49 +1,67 @@
-import { sticker } from '../lib/sticker.js'
+import sharp from 'sharp'
+import { webp2png } from '../lib/webp2mp4.js'
 import uploadFile from '../lib/uploadFile.js'
 import uploadImage from '../lib/uploadImage.js'
-import { webp2png } from '../lib/webp2mp4.js'
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+
+let handler = async (m, { conn, args }) => {
   let stiker = false
-  let username = conn.getName(m.sender)
   try {
-  	
     let q = m.quoted ? m.quoted : m
     let mime = (q.msg || q).mimetype || q.mediaType || ''
     if (/webp|image|video/g.test(mime)) {
-      if (/video/g.test(mime)) if ((q.msg || q).seconds > 11) return m.reply('Máximo *10* segundos')
+      if (/video/.test(mime) && (q.msg || q).seconds > 11) return m.reply('Máximo *10* segundos')
       let img = await q.download?.()
-      if (!img) return conn.reply(m.chat, `🚩 Responda a una *Imagen* o *Vídeo.*`, m, rcanal)
-      let out
+      if (!img) return m.reply('🚩 Responda a una *Imagen* o *Vídeo.*')
+
       try {
-        stiker = await sticker(img, false, global.packname, global.author)
+        stiker = await createStickerFromBuffer(img)
       } catch (e) {
         console.error(e)
-      } finally {
-        if (!stiker) {
-          if (/webp/g.test(mime)) out = await webp2png(img)
-          else if (/image/g.test(mime)) out = await uploadImage(img)
-          else if (/video/g.test(mime)) out = await uploadFile(img)
-          if (typeof out !== 'string') out = await uploadImage(img)
-          stiker = await sticker(false, out, global.packname, global.author)
-        }
+      }
+
+      if (!stiker) {
+        let out
+        if (/webp/.test(mime)) out = await webp2png(img)
+        else if (/image/.test(mime)) out = await uploadImage(img)
+        else if (/video/.test(mime)) out = await uploadFile(img)
+        if (typeof out !== 'string') out = await uploadImage(img)
+        stiker = await createStickerFromURL(out)
       }
     } else if (args[0]) {
-      if (isUrl(args[0])) stiker = await sticker(false, args[0], global.packname, global.author)
-      else return m.reply('La *Url* es invalida')
+      if (isUrl(args[0])) stiker = await createStickerFromURL(args[0])
+      else return m.reply('La *URL* es inválida.')
     }
   } catch (e) {
     console.error(e)
     if (!stiker) stiker = e
   } finally {
     if (stiker) conn.sendFile(m.chat, stiker, 'sticker.webp', '', m)
-    else return conn.reply(m.chat, '🚩 Responda a una *Imagen* o *Vídeo.*', m, rcanal)
+    else return m.reply('🚩 Responda a una *Imagen* o *Vídeo.*')
   }
 }
 
-handler.command = ['st'] 
-
+handler.command = ['st']
 export default handler
 
+// Función que crea un sticker manteniendo proporciones desde un buffer
+async function createStickerFromBuffer(buffer) {
+  return await sharp(buffer)
+    .resize(512, 512, {
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    })
+    .webp()
+    .toBuffer()
+}
+
+// Función que descarga la imagen desde una URL y la convierte en sticker
+async function createStickerFromURL(url) {
+  const res = await fetch(url)
+  const buffer = await res.arrayBuffer()
+  return await createStickerFromBuffer(Buffer.from(buffer))
+}
+
+// Validación simple de URLs de imagen
 const isUrl = (text) => {
-  return text.match(new RegExp(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)(jpe?g|gif|png)/, 'gi'))
+  return text.match(/^https?:\/\/.*\.(jpg|jpeg|png|gif)$/i)
 }
