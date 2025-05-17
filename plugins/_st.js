@@ -32,7 +32,35 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `Responde a una *imagen, video o GIF* para crear sticker o usa \`${usedPrefix + command} -a\`, etc.`, m);
+    return conn.reply(m.chat, `${e} Responde a una *imagen, video o GIF* para crear un sticker. También puedes agregar una forma personalizada con una opción.
+
+┌🎨 \`Formas disponibles:\`
+│
+│ ● *Básicas*
+│ ├─ -c → Circular
+│ ├─ -t → Triangular
+│ ├─ -d → Diamante
+│ ├─ -h → Hexágono
+│ └─ -p → Pentágono
+│
+│ ● *Decorativas*
+│ ├─ -a → Corazón
+│ ├─ -b → Burbuja
+│ ├─ -l → Hoja
+│ ├─ -n → Luna
+│ ├─ -s → Estrella
+│ └─ -z → Rayo
+│
+│ ● *Especiales*
+│ ├─ -r → Curvado
+│ ├─ -e → Esquinas redondeadas
+│ ├─ -m → Espejo
+│ ├─ -f → Flecha
+│ ├─ -x → Acoplado
+│ └─ -i → Ampliado
+└──────────
+
+◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
   }
 
   m.react('🧩');
@@ -93,7 +121,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 };
 
 handler.group = true;
-handler.command = ['s','sticker','stiker'];
+handler.command = ['st'];
 export default handler;
 
 // ———————————————
