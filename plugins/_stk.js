@@ -19,7 +19,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const thumbnail = await (await fetch(icono)).buffer();
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
-  const cuadrado = args.includes('-q');
 
   let q = m.quoted ? m.quoted : m;
   let mime = (q.msg || q).mimetype || q.mediaType || '';
@@ -84,7 +83,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         });
 
         frameBuffer = await fs.readFile(tempOutputPath);
-
         await fs.unlink(tempInputPath).catch(() => {});
         await fs.unlink(tempOutputPath).catch(() => {});
       }
@@ -98,21 +96,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
       stiker = await sticker(finalBuffer, false, `${m.pushName}`);
     } else {
-      try {
-        const buffer = await sharp(img)
-          .resize(512, 512, { fit: cuadrado ? 'cover' : 'inside' })
-          .webp()
-          .toBuffer();
-
-        stiker = await sticker(buffer, false, `${m.pushName}`);
-      } catch (e) {
-        let out;
-        if (/webp/.test(mime)) out = await webp2png(img);
-        else if (/image|url/.test(mime)) out = await uploadImage(img);
-        else if (/video/.test(mime)) out = await uploadFile(img);
-        if (typeof out !== 'string') out = await uploadImage(img);
-        stiker = await sticker(false, out, `${m.pushName}`);
-      }
+      const webpBuffer = await createStickerFromBuffer(img);
+      stiker = await sticker(webpBuffer, false, `${m.pushName}`);
     }
 
     if (stiker) {
@@ -154,6 +139,12 @@ async function applyShapeMask(imageBuffer, shape = 'circle', size = 500) {
   return maskedImage;
 }
 
+async function createStickerFromBuffer(buffer) {
+  return await sharp(buffer)
+    .webp()
+    .toBuffer();
+}
+
 function getSVGMask(shape, size) {
   const half = size / 2;
   const quarter = size / 4;
@@ -184,4 +175,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-    }
+}
