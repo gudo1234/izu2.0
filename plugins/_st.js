@@ -144,7 +144,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 };
 
 handler.group = true;
-handler.command = ['st'];
+handler.command = ['s', 'sticker', 'stiker'];
 export default handler;
 
 // Funciones auxiliares
