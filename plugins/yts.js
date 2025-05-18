@@ -46,11 +46,11 @@ _______________`
       text: list,
       contextInfo: {
         externalAdReply: {
-          title: 'YouTube Extractor',
-          body: 'Resultados encontrados',
-          thumbnailUrl: videos[0].thumbnail,
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
           thumbnail: thumb,
-          sourceUrl: videos[0].url,
+          sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: true
         }
