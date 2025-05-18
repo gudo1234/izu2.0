@@ -60,8 +60,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -f → Flecha
 │ ├─ -x → Acoplado
 │ ├─ -i → Ampliado
-│ ├─ -vh → Voltear horizontal (arriba <-> abajo)
-│ └─ -vv → Voltear vertical (izquierda <-> derecha)
+│ ├─ -vh → Horizontal
+│ └─ -vv → Vertical
 └──────────
 
 ◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
