@@ -144,7 +144,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 };
 
 handler.group = true;
-handler.command = ['s'];
+handler.command = ['st'];
 export default handler;
 
 // Funciones auxiliares
