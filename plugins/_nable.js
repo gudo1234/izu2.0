@@ -22,7 +22,9 @@ nsfw
 modohorny
 detect
 antilink
-antifake`, m)
+antifake
+antibot
+antibot2`, m)
   }
 
   switch (type) {
