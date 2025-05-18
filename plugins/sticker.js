@@ -14,7 +14,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const shapeFlags = {
     '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-h': 'hexagon', '-p': 'pentagon',
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
-    '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand'
+    '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand',
+    '-vh': 'horizontal', '-vv': 'vertical'
   };
   const thumbnail = await (await fetch(icono)).buffer();
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
@@ -41,7 +42,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -t → Triangular
 │ ├─ -d → Diamante
 │ ├─ -h → Hexágono
-│ └─ -p → Pentágono
+│ ├─ -p → Pentágono
 │
 │ ● *Decorativas*
 │ ├─ -a → Corazón
@@ -57,7 +58,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -m → Espejo
 │ ├─ -f → Flecha
 │ ├─ -x → Acoplado
-│ └─ -i → Ampliado
+│ ├─ -i → Ampliado
+│ ├─ -vh → Horizontal
+│ └─ -vv → Vertical
 └──────────
 
 ◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
@@ -68,7 +71,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let stiker = false;
   try {
     if (selectedShape && /image|webp|url|video|gif/.test(mime)) {
-      // Aplica máscara SVG y redimensiona a 512×512
       let frameBuffer = img;
 
       if (/video|mp4|gif/.test(mime)) {
@@ -94,7 +96,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
       stiker = await sticker(finalBuffer, false, `${m.pushName}`);
     } else {
-      // Sin forma: preserva proporción original, max 512×512
       let frameBuffer = img;
 
       if (/video|mp4|gif/.test(mime)) {
@@ -182,6 +183,8 @@ function getSVGMask(shape, size) {
     case 'arrow': return `<svg width="${size}" height="${size}"><polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/></svg>`;
     case 'attach':
     case 'expand': return `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="black"/></svg>`;
+    case 'horizontal': return `<svg width="${size}" height="${size}"><rect x="0" y="${size / 4}" width="${size}" height="${size / 2}" fill="black"/></svg>`;
+    case 'vertical': return `<svg width="${size}" height="${size}"><rect x="${size / 4}" y="0" width="${size / 2}" height="${size}" fill="black"/></svg>`;
     default: throw new Error(`Forma no soportada: ${shape}`);
   }
 }
