@@ -1,34 +1,47 @@
 import fetch from 'node-fetch';
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+
+const handler = async (m, { conn, text }) => {
   if (!text) {
-    return conn.reply(m.chat, `Ingese una url de tiktok`, m);
+    return conn.reply(m.chat, '❀ Ingresa una URL de TikTok', m);
   }
-  const urlPattern = /^https?:\/\/(www\.)?tiktok\.com\/.+|https?:\/\/vm\.tiktok\.com\/.+/i;
+
+  // Expresión regular mejorada para detectar URLs de TikTok
+  const urlPattern = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i;
+
   if (!urlPattern.test(text)) {
-    return conn.reply(m.chat, `Url no válido para tiktok `, m);
+    return conn.reply(m.chat, '✗ La URL proporcionada no es válida para TikTok', m);
   }
- m.react('🕒');
+
+  m.react('🕒');
+
+  try {
     const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`;
     const res = await fetch(apiUrl);
+    
+    if (!res.ok) throw new Error('Fallo al obtener respuesta de la API.');
+
     const json = await res.json();
+
     if (!json.data || !json.data.media || !json.data.media.org) {
       throw new Error('La API no devolvió un video válido.');
     }
-    const videoData     = json.data;
-    const videoUrl      = videoData.media.org;
-    const videoTitle    = videoData.title      || 'Sin título';
-    const videoAuthor   = videoData.author?.nickname || 'Desconocido';
-    const videoDuration = videoData.duration   ? `${videoData.duration} segundos` : 'No especificado';
-    const videoLikes    = videoData.like       || 0;
-    const videoComments = videoData.comment    || 0;
-    let txt = `*Título:* ${videoTitle}
-*Autor:* ${videoAuthor}
-*Duración:* ${videoDuration}
-*Likes:* ${videoLikes}
-*Comentarios:* ${videoComments}`
-m.react('✅');
-await conn.sendFile(m.chat, videoUrl, 'tiktok.mp4', txt, m)
-}
 
-handler.command = ['leo'];
+    const video = json.data;
+    const txt = `*「✦」Título:* ${video.title || 'Sin título'}
+
+> *✦ Autor:* » ${video.author?.nickname || 'Desconocido'}
+> *ⴵ Duración:* » ${video.duration ? `${video.duration} segundos` : 'No especificado'}
+> *🜸 Likes:* » ${video.like || 0}
+> *✎ Comentarios:* » ${video.comment || 0}`;
+
+    m.react('✅');
+    await conn.sendFile(m.chat, video.media.org, 'tiktok.mp4', txt, m);
+  } catch (e) {
+    m.react('❌');
+    console.error(e);
+    return conn.reply(m.chat, 'Ocurrió un error al intentar descargar el video. Intenta nuevamente más tarde.', m);
+  }
+};
+
+handler.command = ['tt', 'tiktok'];
 export default handler;
