@@ -62,5 +62,5 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 };
 
 handler.command = ['leo'];
-handler.group = true;
+//handler.group = true;
 export default handler;
