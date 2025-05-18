@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { isUrl } from './utils'; // Asegúrate de tener una función isUrl en utils
+import fetch from 'node-fetch';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
@@ -7,7 +6,9 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     return conn.reply(m.chat, `⚠️ *Ejemplo de uso:*\n📌 ${example}`, m);
   }
 
-  if (!isUrl(text) || !text.includes('tiktok')) {
+  // Validar URL sencilla
+  const urlPattern = /^https?:\/\/(www\.)?tiktok\.com\/.+|https?:\/\/vm\.tiktok\.com\/.+/i;
+  if (!urlPattern.test(text)) {
     return conn.reply(m.chat, '❌ *Enlace de TikTok inválido.*', m);
   }
 
@@ -16,21 +17,22 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     await m.react('⏱️');
 
     // Llamada a la API de descarga de TikTok
-    const apiUrl = 'https://api.dorratz.com/v2/tiktok-dl';
-    const { data: resp } = await axios.get(apiUrl, { params: { url: text } });
+    const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`;
+    const res = await fetch(apiUrl);
+    const json = await res.json();
 
     // Validar respuesta
-    if (!resp.data || !resp.data.media) {
+    if (!json.data || !json.data.media || !json.data.media.org) {
       throw new Error('La API no devolvió un video válido.');
     }
 
-    const videoData     = resp.data;
+    const videoData     = json.data;
     const videoUrl      = videoData.media.org;
-    const videoTitle    = videoData.title        || 'Sin título';
-    const videoAuthor   = videoData.author.nickname || 'Desconocido';
-    const videoDuration = videoData.duration     ? `${videoData.duration} segundos` : 'No especificado';
-    const videoLikes    = videoData.like         || 0;
-    const videoComments = videoData.comment      || 0;
+    const videoTitle    = videoData.title      || 'Sin título';
+    const videoAuthor   = videoData.author?.nickname || 'Desconocido';
+    const videoDuration = videoData.duration   ? `${videoData.duration} segundos` : 'No especificado';
+    const videoLikes    = videoData.like       || 0;
+    const videoComments = videoData.comment    || 0;
 
     // Construir caption
     const caption = 
@@ -60,5 +62,5 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 };
 
 handler.command = ['leo'];
-//handler.group = true;
+handler.group = true;
 export default handler;
