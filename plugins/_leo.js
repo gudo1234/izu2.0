@@ -4,8 +4,6 @@ const handler = async (m, { conn, text }) => {
   if (!text) {
     return conn.reply(m.chat, '❀ Ingresa una URL de TikTok', m);
   }
-
-  // Expresión regular mejorada para detectar URLs de TikTok
   const urlPattern = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i;
 
   if (!urlPattern.test(text)) {
@@ -37,7 +35,6 @@ const handler = async (m, { conn, text }) => {
     m.react('✅');
     await conn.sendFile(m.chat, video.media.org, 'tiktok.mp4', txt, m);
   } catch (e) {
-    m.react('❌');
     console.error(e);
     return conn.reply(m.chat, 'Ocurrió un error al intentar descargar el video. Intenta nuevamente más tarde.', m);
   }
