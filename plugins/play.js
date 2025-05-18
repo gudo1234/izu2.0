@@ -7,7 +7,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
     return m.reply(`${e} Usa el comando correctamente:
 
-📌 Ejemplo de uso:
+🔎 _Ejemplo de uso:_
 *${usedPrefix + command}* diles
 *${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
   }
@@ -36,39 +36,55 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     let yt = await youtubedl(url).catch(() => youtubedlv2(url));
     let videoInfo = yt.video['360p'];
-    if (!videoInfo) {
-      return m.reply(`${e} *No se encontró una calidad compatible para el video.*`);
+    let audioInfo = yt.audio?.['128kbps'];
+    if (!videoInfo && !audioInfo) {
+      return m.reply(`${e} *No se encontró calidad compatible para audio o video.*`);
     }
 
-    const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
-    const sizeMB = fileSize / (1024 * 1024);
+    const { fileSizeH: sizeHumanReadable, fileSize } =
+      videoInfo || audioInfo || { fileSizeH: 'Desconocido', fileSize: 0 };
 
+    const sizeMB = fileSize / (1024 * 1024);
     if (sizeMB >= 700) {
       return m.reply(`${e} *El archivo es demasiado pesado (más de 700 MB). Se canceló la descarga.*`);
     }
 
     const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
+    const audioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
     const videoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
     const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
 
-    const isAudioDoc = docAudioCommands.includes(command);
-    const isVideo = videoCommands.includes(command);
-    const isVideoDoc = docVideoCommands.includes(command);
+    let isAudioDoc = docAudioCommands.includes(command);
+    let isAudio = audioCommands.includes(command);
+    let isVideo = videoCommands.includes(command);
+    let isVideoDoc = docVideoCommands.includes(command);
 
-const videoUrls = [
-  'https://files.catbox.moe/rdyj5q.mp4',
-  'https://files.catbox.moe/693ws4.mp4'
-]
-const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
-const im = await (await fetch(icono)).buffer()
-const en = `${
-  isAudioDoc ? '📂 Enviando audio como documento...' :
-  isVideo ? '🎞️ Enviando video...' :
-  isVideoDoc ? '📂 Enviando video como documento...' :
-  '🔊 Enviando audio...'
-}`;
+    // Forzar envío como documento si es demasiado pesado (>100 MB)
+    const isTooHeavy = sizeMB >= 100;
+    if (isVideo && isTooHeavy) {
+      isVideoDoc = true;
+      isVideo = false;
+    }
+    if (isAudio && isTooHeavy) {
+      isAudioDoc = true;
+      isAudio = false;
+    }
 
-const caption = `
+    const videoUrls = [
+      'https://files.catbox.moe/rdyj5q.mp4',
+      'https://files.catbox.moe/693ws4.mp4'
+    ];
+    const jpg = videoUrls[Math.floor(Math.random() * videoUrls.length)];
+    const im = await (await fetch(icono)).buffer();
+    const en = `${
+      isAudioDoc ? '📂 Enviando audio como documento...' :
+      isAudio ? '🔊 Enviando audio...' :
+      isVideo ? '🎞️ Enviando video...' :
+      isVideoDoc ? '📂 Enviando video como documento...' :
+      '⏳ Procesando...'
+    }`;
+
+    const caption = `
 ╭───── • ─────╮
   𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
 ╰───── • ─────╯
@@ -85,81 +101,82 @@ const caption = `
 ╰───── • ─────╯
 `.trim();
 
-const getBuffer = async (url) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Error al obtener buffer: ${res.statusText}`);
-  const arrayBuffer = await res.arrayBuffer();
-  return Buffer.from(arrayBuffer);
-};
+    const getBuffer = async (url) => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Error al obtener buffer: ${res.statusText}`);
+      const arrayBuffer = await res.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    };
 
-const imBuffer = await getBuffer(thumbnail);
+    const imBuffer = await getBuffer(thumbnail);
 
-const formatos = [
-  async () => conn.sendMessage(m.chat, {
-  text: caption,
-  contextInfo: {
-    externalAdReply: {
-      title: title,
-      body: en,
-      thumbnailUrl: redes,
-      thumbnail: imBuffer,
-      sourceUrl: redes,
-      mediaType: 1,
-      renderLargerThumbnail: true
-    }
-  }
-}, { quoted: m }),
-
-  async () => conn.sendMessage(
-    m.chat,
-    {
-      video: { url: jpg },
-      gifPlayback: true,
-      caption: caption,
-      contextInfo: {
-        forwardingScore: 0,
-        isForwarded: true,
-        externalAdReply: {
-          title: title,
-          body: en,
-          thumbnailUrl: redes,
-          thumbnail: imBuffer,
-          sourceUrl: redes,
-          mediaType: 1,
-          showAdAttribution: true
-        }
-      }
-    },
-    { quoted: m }
-  ),
-
-  async () => conn.sendMessage(m.chat, {
-      text: caption,
-      contextInfo: {
-          mentionedJid: [],
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-              newsletterJid: channelRD.id,
-              newsletterName: channelRD.name,
-              serverMessageId: -1,
-          },
-          forwardingScore: false,
+    const formatos = [
+      async () => conn.sendMessage(m.chat, {
+        text: caption,
+        contextInfo: {
           externalAdReply: {
+            title: title,
+            body: en,
+            thumbnailUrl: redes,
+            thumbnail: imBuffer,
+            sourceUrl: redes,
+            mediaType: 1,
+            renderLargerThumbnail: true
+          }
+        }
+      }, { quoted: m }),
+
+      async () => conn.sendMessage(
+        m.chat,
+        {
+          video: { url: jpg },
+          gifPlayback: true,
+          caption: caption,
+          contextInfo: {
+            forwardingScore: 0,
+            isForwarded: true,
+            externalAdReply: {
               title: title,
               body: en,
               thumbnailUrl: redes,
               thumbnail: imBuffer,
               sourceUrl: redes,
               mediaType: 1,
-              showAdAttribution: true,
-              renderLargerThumbnail: true,
-          },
-      },
-  }, { quoted: m })
-];
+              showAdAttribution: true
+            }
+          }
+        },
+        { quoted: m }
+      ),
 
-const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
-await randomFormato();
+      async () => conn.sendMessage(m.chat, {
+        text: caption,
+        contextInfo: {
+          mentionedJid: [],
+          isForwarded: true,
+          forwardedNewsletterMessageInfo: {
+            newsletterJid: channelRD.id,
+            newsletterName: channelRD.name,
+            serverMessageId: -1,
+          },
+          forwardingScore: false,
+          externalAdReply: {
+            title: title,
+            body: en,
+            thumbnailUrl: redes,
+            thumbnail: imBuffer,
+            sourceUrl: redes,
+            mediaType: 1,
+            showAdAttribution: true,
+            renderLargerThumbnail: true,
+          },
+        },
+      }, { quoted: m })
+    ];
+
+    const randomFormato = formatos[Math.floor(Math.random() * formatos.length)];
+    await randomFormato();
+
     let downloadUrl;
 
     try {
@@ -195,7 +212,7 @@ await randomFormato();
 
   } catch (err) {
     console.error('Error:', err);
-    return m.reply(`❗ Ocurrió un error inesperado al procesar el formato.`);
+    return m.reply(`${e} Ocurrió un error inesperado al procesar el formato.`);
   }
 };
 
