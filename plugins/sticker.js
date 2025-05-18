@@ -15,7 +15,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-h': 'hexagon', '-p': 'pentagon',
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand',
-    '-vh': 'flip-horizontal', '-vv': 'flip-vertical'
+    '-vh': 'flip-horizontal', '-v': 'flip-vertical'
   };
 
   const thumbnail = await (await fetch(icono)).buffer();
@@ -61,7 +61,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -x → Acoplado
 │ ├─ -i → Ampliado
 │ ├─ -vh → Horizontal
-│ └─ -vv → Vertical
+│ └─ -v → Vertical
 └──────────
 
 ◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
