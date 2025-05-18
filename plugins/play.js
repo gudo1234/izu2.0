@@ -23,7 +23,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     } else {
       const ytres = await yts(query);
       video = ytres.videos[0];
-      if (!video) return m.reply(`❌ *Video no encontrado.*`);
+      if (!video) return m.reply(`${e} *Video no encontrado.*`);
     }
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
@@ -75,13 +75,13 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       contextInfo: {
         externalAdReply: {
           title,
-          body: tooBig ? '📂 Enviando como documento por tamaño o duración...' :
+          body: tooBig ? '📂 Enviando documento por tamaño' :
                 isAudioDoc ? '📂 Enviando audio como documento...' :
                 isVideo ? '🎞️ Enviando video...' :
                 '🔊 Enviando audio...',
-          thumbnailUrl: thumbnail,
+          thumbnailUrl: redes,
           thumbnail: await (await fetch(thumbnail)).buffer(),
-          sourceUrl: url,
+          sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: true
         }
