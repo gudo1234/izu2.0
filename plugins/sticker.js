@@ -12,10 +12,10 @@ import { randomUUID } from 'crypto';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const shapeFlags = {
-    '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-h': 'hexagon', '-p': 'pentagon',
+    '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-g': 'hexagon', '-p': 'pentagon',
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand',
-    '-vh': 'flip-horizontal', '-v': 'flip-vertical'
+    '-h': 'flip-horizontal', '-v': 'flip-vertical'
   };
 
   const thumbnail = await (await fetch(icono)).buffer();
@@ -42,7 +42,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -c → Circular
 │ ├─ -t → Triangular
 │ ├─ -d → Diamante
-│ ├─ -h → Hexágono
+│ ├─ -g → Hexágono
 │ └─ -p → Pentágono
 │
 │ ● *Decorativas*
@@ -60,7 +60,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -f → Flecha
 │ ├─ -x → Acoplado
 │ ├─ -i → Ampliado
-│ ├─ -vh → Horizontal
+│ ├─ -h → Horizontal
 │ └─ -v → Vertical
 └──────────
 
