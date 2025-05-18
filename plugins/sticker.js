@@ -15,8 +15,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-c': 'circle', '-t': 'triangle', '-d': 'diamond', '-h': 'hexagon', '-p': 'pentagon',
     '-a': 'heart', '-b': 'blob', '-l': 'leaf', '-n': 'moon', '-s': 'star', '-z': 'zap',
     '-r': 'curve', '-e': 'edges', '-m': 'mirror', '-f': 'arrow', '-x': 'attach', '-i': 'expand',
-    '-vh': 'horizontal', '-vv': 'vertical'
+    '-vh': 'flip-horizontal', '-vv': 'flip-vertical'
   };
+
   const thumbnail = await (await fetch(icono)).buffer();
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
@@ -42,7 +43,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -t → Triangular
 │ ├─ -d → Diamante
 │ ├─ -h → Hexágono
-│ ├─ -p → Pentágono
+│ └─ -p → Pentágono
 │
 │ ● *Decorativas*
 │ ├─ -a → Corazón
@@ -59,8 +60,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ├─ -f → Flecha
 │ ├─ -x → Acoplado
 │ ├─ -i → Ampliado
-│ ├─ -vh → Horizontal
-│ └─ -vv → Vertical
+│ ├─ -vh → Voltear horizontal (arriba <-> abajo)
+│ └─ -vv → Voltear vertical (izquierda <-> derecha)
 └──────────
 
 ◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
@@ -70,56 +71,52 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   let stiker = false;
   try {
-    if (selectedShape && /image|webp|url|video|gif/.test(mime)) {
-      let frameBuffer = img;
+    let frameBuffer = img;
 
-      if (/video|mp4|gif/.test(mime)) {
-        const tempInputPath = path.join(tmpdir(), `${randomUUID()}.mp4`);
-        const tempOutputPath = path.join(tmpdir(), `${randomUUID()}.png`);
-        await fs.writeFile(tempInputPath, img);
-        await new Promise((resolve, reject) => {
-          const ffmpeg = spawn('ffmpeg', ['-y', '-i', tempInputPath, '-vf', 'scale=500:-1', '-vframes', '1', tempOutputPath]);
-          ffmpeg.on('close', resolve);
-          ffmpeg.on('error', reject);
-        });
-        frameBuffer = await fs.readFile(tempOutputPath);
-        await fs.unlink(tempInputPath).catch(() => {});
-        await fs.unlink(tempOutputPath).catch(() => {});
-      }
+    if (/video|mp4|gif/.test(mime)) {
+      const tempInputPath = path.join(tmpdir(), `${randomUUID()}.mp4`);
+      const tempOutputPath = path.join(tmpdir(), `${randomUUID()}.png`);
+      await fs.writeFile(tempInputPath, img);
+      await new Promise((resolve, reject) => {
+        const ffmpeg = spawn('ffmpeg', ['-y', '-i', tempInputPath, '-vf', 'scale=500:-1', '-vframes', '1', tempOutputPath]);
+        ffmpeg.on('close', resolve);
+        ffmpeg.on('error', reject);
+      });
+      frameBuffer = await fs.readFile(tempOutputPath);
+      await fs.unlink(tempInputPath).catch(() => {});
+      await fs.unlink(tempOutputPath).catch(() => {});
+    }
 
+    // Transformaciones según forma o flip
+    let processed;
+    if (selectedShape === 'flip-horizontal') {
+      processed = await sharp(frameBuffer)
+        .flip() // arriba <-> abajo
+        .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .webp()
+        .toBuffer();
+    } else if (selectedShape === 'flip-vertical') {
+      processed = await sharp(frameBuffer)
+        .flop() // izquierda <-> derecha
+        .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .webp()
+        .toBuffer();
+    } else if (selectedShape) {
       const masked = await applyShapeMask(frameBuffer, selectedShape, 500);
-      const finalBuffer = await sharp(masked)
+      processed = await sharp(masked)
         .ensureAlpha()
         .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
         .webp()
         .toBuffer();
-
-      stiker = await sticker(finalBuffer, false, `${m.pushName}`);
     } else {
-      let frameBuffer = img;
-
-      if (/video|mp4|gif/.test(mime)) {
-        const inPath = path.join(tmpdir(), `${randomUUID()}.mp4`);
-        const outPath = path.join(tmpdir(), `${randomUUID()}.png`);
-        await fs.writeFile(inPath, img);
-        await new Promise((res, rej) => {
-          const ff = spawn('ffmpeg', ['-y', '-i', inPath, '-vf', 'scale=500:-1', '-vframes', '1', outPath]);
-          ff.on('close', res);
-          ff.on('error', rej);
-        });
-        frameBuffer = await fs.readFile(outPath);
-        await fs.unlink(inPath).catch(()=>{});
-        await fs.unlink(outPath).catch(()=>{});
-      }
-
-      const normalized = await sharp(frameBuffer)
+      processed = await sharp(frameBuffer)
         .ensureAlpha()
         .resize(512, 512, { fit: 'inside', background: { r: 0, g: 0, b: 0, alpha: 0 } })
         .webp()
         .toBuffer();
-
-      stiker = await sticker(normalized, false, `${m.pushName}`);
     }
+
+    stiker = await sticker(processed, false, `${m.pushName}`);
 
     if (stiker) {
       return conn.sendFile(m.chat, stiker, 'sticker.webp', '', m, true, {
@@ -183,8 +180,6 @@ function getSVGMask(shape, size) {
     case 'arrow': return `<svg width="${size}" height="${size}"><polygon points="0,${half - 50} ${half},${half - 50} ${half},0 ${size},${half} ${half},${size} ${half},${half + 50} 0,${half + 50}" fill="black"/></svg>`;
     case 'attach':
     case 'expand': return `<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="black"/></svg>`;
-    case 'horizontal': return `<svg width="${size}" height="${size}"><rect x="0" y="${size / 4}" width="${size}" height="${size / 2}" fill="black"/></svg>`;
-    case 'vertical': return `<svg width="${size}" height="${size}"><rect x="${size / 4}" y="0" width="${size / 2}" height="${size}" fill="black"/></svg>`;
     default: throw new Error(`Forma no soportada: ${shape}`);
   }
 }
