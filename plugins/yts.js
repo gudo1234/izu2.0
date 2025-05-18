@@ -12,7 +12,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
   try {
     const search = await yts(text)
     const videos = search.videos.slice(0, 20)
-    if (!videos.length) return m.reply('❌ No se encontraron resultados.')
+    if (!videos.length) return m.reply(`${e} No se encontraron resultados.`)
 
     let list = `╭───── • ─────╮
 ✩ \`Youtube Search\` ✩
@@ -22,7 +22,7 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 ╰───── • ─────╯
 
 📌 *¿Cómo descargar?*  
-${e} Cada resultado tiene un número (#1, #2, #3...).  
+❖ Cada resultado tiene un número (#1, #2, #3...).  
 Responde a este mensaje usando ese número para elegir qué descargar:
 
 ━━━━━━━━━━━━━
@@ -46,18 +46,17 @@ _______________`
       text: list,
       contextInfo: {
         externalAdReply: {
-          title: wm,
-          body: textbot,
-          thumbnailUrl: redes,
+          title: 'YouTube Extractor',
+          body: 'Resultados encontrados',
+          thumbnailUrl: videos[0].thumbnail,
           thumbnail: thumb,
-          sourceUrl: redes,
+          sourceUrl: videos[0].url,
           mediaType: 1,
           renderLargerThumbnail: true
         }
       }
     }, { quoted: m })
 
-    // Guardar por ID del mensaje de resultados
     tempSearchResults[sentMsg.key.id] = {
       videos,
       _msg: sentMsg
@@ -91,6 +90,7 @@ handler.before = async (m, { conn }) => {
   const video = videos[index]
   const url = video.url
   const title = video.title
+  const durationSeconds = video.seconds
   const quotedMsg = data._msg || m.quoted
 
   let format = 'audio'
@@ -103,6 +103,9 @@ handler.before = async (m, { conn }) => {
     if (['video', 'v'].includes(type2)) format = 'video'
     if (['audio', 'a'].includes(type2)) format = 'audio'
   }
+
+  // Auto-enviar como documento si dura más de 10 minutos
+  if (!asDocument && durationSeconds > 600) asDocument = true
 
   try {
     await conn.sendMessage(m.chat, {
@@ -133,7 +136,7 @@ handler.before = async (m, { conn }) => {
 
   } catch (e) {
     console.error(e)
-    m.reply(`❌ Error en la descarga:\n${e.message}`)
+    m.reply(`${e} Error en la descarga:\n${e.message}`)
   }
 }
 
