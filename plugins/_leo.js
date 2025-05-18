@@ -43,5 +43,5 @@ const handler = async (m, { conn, text }) => {
   }
 };
 
-handler.command = ['tt', 'tiktok'];
+handler.command = ['leo'];
 export default handler;
