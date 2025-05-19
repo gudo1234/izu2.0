@@ -39,19 +39,27 @@ var handler = async (m, { conn, participants, usedPrefix, command }) => {
 
   // 5. Borrar el mensaje citado (si existía)
   if (m.quoted) {
-    try {
-      const deleteKey = {
-        remoteJid: m.chat,
-        id:        m.quoted.id || m.quoted.key.id,
-        fromMe:    m.quoted.key.fromMe || false,
-        ...(m.quoted.key.participant
-          ? { participant: m.quoted.key.participant }
-          : {})
-      }
-      await conn.sendMessage(m.chat, { delete: deleteKey })
-    } catch (err) {
-      console.error('No se pudo borrar el mensaje citado:', err)
-    }
+    // 5. Borrar el mensaje citado (o el mensaje original del comando, si no hay cita)
+try {
+  // ————————————————————————————————————
+  // Si el admin respondió a un mensaje  ➜  borra ese mensaje
+  // Si NO respondió, borra el *mensaje del comando* (.kick …)
+  // ————————————————————————————————————
+  const targetMsg   = m.quoted ? m.quoted : m            // mensaje a borrar
+  const deleteKey = {
+    remoteJid: m.chat,
+    id:        targetMsg.key.id,
+    fromMe:    targetMsg.key.fromMe || false,
+    // participant solo si el mensaje NO es del bot
+    ...(targetMsg.key.participant
+        ? { participant: targetMsg.key.participant }
+        : {})
+  }
+
+  await conn.sendMessage(m.chat, { delete: deleteKey })
+} catch (err) {
+  console.error('No se pudo borrar el mensaje:', err)
+}
   }
 }
 
