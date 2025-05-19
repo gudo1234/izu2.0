@@ -36,7 +36,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
     conn.reply(m.chat, '*Expulsión finalizada.*', m);
 };
 
-handler.command = ['kickall'];
+handler.command = ['kicknum'];
 handler.admin = true;
 handler.group = true;
 handler.botAdmin = true;
