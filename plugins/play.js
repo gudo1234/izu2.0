@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
-    return m.reply(` Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
+    return m.reply(`${e} Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
   }
 
   await m.react('🕒');
@@ -23,14 +23,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     } else {
       const ytres = await yts(query);
       video = ytres.videos[0];
-      if (!video) return m.reply(`❌ *Video no encontrado.*`);
+      if (!video) return m.reply(`${e} *Video no encontrado.*`);
     }
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
 
     let yt = await youtubedl(url).catch(() => youtubedlv2(url));
     let videoInfo = yt.video['360p'];
-    if (!videoInfo) return m.reply(`❌ *No se encontró una calidad compatible para el video.*`);
+    if (!videoInfo) return m.reply(`${e} *No se encontró una calidad compatible para el video.*`);
 
     const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
     const sizeMB = fileSize / (1024 * 1024);
@@ -84,7 +84,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ✦ *🔗 Link:* ${url}
 
 ╭───── • ─────╮
-> SIMPLE BOT - WHATSAPP
+> ${textbot}
 ╰───── • ─────╯
 `.trim();
 
@@ -118,11 +118,11 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           downloadUrl = api2.data.result.download.url;
         }
       } catch {
-        return m.reply(`❌ *Error al obtener el enlace de descarga.*`);
+        return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
       }
     }
 
-    if (!downloadUrl) return m.reply(`❌ *No se pudo procesar la descarga.*`);
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
@@ -135,7 +135,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
   } catch (err) {
     console.error('Error en línea:', err.stack || err);
-    return m.reply(`❌ Error inesperado: ${err.message || err}`);
+    return m.reply(`${e} Error inesperado: ${err.message || err}`);
   }
 };
 
