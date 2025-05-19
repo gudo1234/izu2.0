@@ -1,7 +1,5 @@
 var handler = async (m, { conn, participants, usedPrefix, command }) => {
-  // ———————————————————————————————————————
-  // 1. Validar que se mencionó o se respondió a alguien
-  // ———————————————————————————————————————
+  // 1. Validar mención o respuesta
   if (!m.mentionedJid?.[0] && !m.quoted) {
     return conn.reply(
       m.chat,
@@ -10,49 +8,47 @@ var handler = async (m, { conn, participants, usedPrefix, command }) => {
     )
   }
 
-  // ———————————————————————————————————————
-  // 2. Obtener el JID de la persona a expulsar
-  // ———————————————————————————————————————
+  // 2. JID a expulsar
   const user = m.mentionedJid?.[0] || m.quoted.sender
 
-  // Datos del grupo y propietarios
+  // Datos grupo / propietarios
   const groupInfo  = await conn.groupMetadata(m.chat)
   const ownerGroup = groupInfo.owner || m.chat.split`-`[0] + '@s.whatsapp.net'
   const ownerBot   = global.owner[0][0] + '@s.whatsapp.net'
 
-  // Lista de admins actuales
+  // Lista admins
   const admins = participants
-    .filter(p => p.admin)        // “admin” o “superadmin”
+    .filter(p => p.admin)
     .map(p => p.id)
 
-  // ———————————————————————————————————————
-  // 3. Bloqueos de seguridad
-  // ———————————————————————————————————————
+  // 3. Bloqueos de seguridad CON mensajes
   if (user === conn.user.jid)
     return conn.reply(m.chat, `${e} No puedo eliminar al bot (yo) del grupo`, m)
 
   if (user === ownerGroup)
-    return conn.reply(m.chat, `${e} No puedo eliminar al propietario del grupo`, m)
+    return conn.reply(m.chat, `${e} No puedo eliminar al *propietario del grupo*`, m)
 
   if (user === ownerBot)
-    return conn.reply(m.chat, `${e} No puedo eliminar al propietario del bot`, m)
+    return conn.reply(m.chat, `${e} No puedo eliminar al *propietario del bot*`, m)
 
   if (admins.includes(user))
-    return conn.reply(m.chat, `${e} No puedo eliminar a los administradores`, m)
+    return conn.reply(m.chat, `${e} No puedo eliminar a los *administradores*`, m)
 
-  // ———————————————————————————————————————
-  // 4. Expulsar al usuario
-  // ———————————————————————————————————————
+  // 4. Expulsar
   await conn.groupParticipantsUpdate(m.chat, [user], 'remove')
 
-  // ———————————————————————————————————————
-  // 5. Si el admin usó .kick respondiendo a un mensaje,
-  //    intentar borrarlo para todos (solo si el mensaje
-  //    fue enviado por el bot y dentro de la ventana de tiempo)
-  // ———————————————————————————————————————
+  // 5. Borrar el mensaje citado (si existía)
   if (m.quoted) {
     try {
-      await conn.sendMessage(m.chat, { delete: m.quoted.key })
+      const deleteKey = {
+        remoteJid: m.chat,
+        id:        m.quoted.id || m.quoted.key.id,
+        fromMe:    m.quoted.key.fromMe || false,
+        ...(m.quoted.key.participant
+          ? { participant: m.quoted.key.participant }
+          : {})
+      }
+      await conn.sendMessage(m.chat, { delete: deleteKey })
     } catch (err) {
       console.error('No se pudo borrar el mensaje citado:', err)
     }
@@ -60,8 +56,8 @@ var handler = async (m, { conn, participants, usedPrefix, command }) => {
 }
 
 handler.command = ['ban', 'kick', 'echar', 'hechar', 'b', 'bam']
-handler.admin    = true   // Solo admins del grupo
-handler.group    = true   // Solo grupos
-handler.botAdmin = true   // El bot debe ser admin
+handler.admin    = true
+handler.group    = true
+handler.botAdmin = true
 
 export default handler
