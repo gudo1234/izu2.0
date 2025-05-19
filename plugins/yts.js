@@ -104,34 +104,43 @@ handler.before = async (m, { conn }) => {
     if (['audio', 'a'].includes(type2)) format = 'audio'
   }
 
-  // Auto-enviar como documento si dura más de 10 minutos
-  if (!asDocument && durationSeconds > 600) asDocument = true
-
   try {
-    await conn.sendMessage(m.chat, {
-      text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : format}...`,
-    }, { quoted: quotedMsg })
-
-    const send = async (msgType, downloadUrl, fileName, mimetype) => {
-      await conn.sendMessage(m.chat, {
-        [msgType]: { url: downloadUrl },
-        fileName,
-        mimetype
-      }, { quoted: m })
-    }
-
+    // Checar tamaño del archivo
+    let sizeMB = 0
     if (format === 'audio') {
-      const res = await fetch(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
-      const json = await res.json()
-      const download = json?.result?.download?.url
+      const res = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
+      const download = res?.data?.result?.download?.url
+      const sizeBytes = res?.data?.result?.download?.size
       if (!download) throw new Error('No se pudo obtener el audio.')
-      await send(asDocument ? 'document' : 'audio', download, `${title}.mp3`, 'audio/mpeg')
+      sizeMB = parseFloat(sizeBytes || 0) / (1024 * 1024)
+      if (!asDocument && (sizeMB >= 100 || durationSeconds > 900)) asDocument = true
+
+      await conn.sendMessage(m.chat, {
+        text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : 'audio'}...`,
+      }, { quoted: quotedMsg })
+
+      await conn.sendMessage(m.chat, {
+        [asDocument ? 'document' : 'audio']: { url: download },
+        fileName: `${title}.mp3`,
+        mimetype: 'audio/mpeg'
+      }, { quoted: m })
     } else {
-      const res = await fetch(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
-      const json = await res.json()
-      const download = json?.data?.url
+      const res = await axios.get(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
+      const download = res?.data?.data?.url
+      const sizeBytes = res?.data?.data?.size
       if (!download) throw new Error('No se pudo obtener el video.')
-      await send(asDocument ? 'document' : 'video', download, `${title}.mp4`, 'video/mp4')
+      sizeMB = parseFloat(sizeBytes || 0) / (1024 * 1024)
+      if (!asDocument && (sizeMB >= 100 || durationSeconds > 900)) asDocument = true
+
+      await conn.sendMessage(m.chat, {
+        text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : 'video'}...`,
+      }, { quoted: quotedMsg })
+
+      await conn.sendMessage(m.chat, {
+        [asDocument ? 'document' : 'video']: { url: download },
+        fileName: `${title}.mp4`,
+        mimetype: 'video/mp4'
+      }, { quoted: m })
     }
 
   } catch (e) {
