@@ -1,7 +1,7 @@
 import Starlights from '@StarlightsTeam/Scraper';
 
 function normalizeTikTokUrl(text) {
-  const regex = /(https?:\/\/)?(www\.)?(vt\.)?tiktok\.com\/[^\s]+/i;
+  const regex = /(https?:\/\/)?(www\.)?(vm\.|vt\.|www\.)?tiktok\.com\/[^\s]+/i;
   const match = text.match(regex);
   if (match) {
     let url = match[0];
