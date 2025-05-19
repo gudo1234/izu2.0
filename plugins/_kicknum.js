@@ -1,6 +1,6 @@
 var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
     if (!args[0] || isNaN(args[0])) {
-        return conn.reply(m.chat, `*Ejemplo correcto:* ${usedPrefix + command} 212\n_Elimina a todos los usuarios que comienzan con ese código, excepto administradores._`, m);
+        return conn.reply(m.chat, `${e} *Ejemplo de uso:* ${usedPrefix + command} 212\n\n> Elimina a todos los usuarios que comienzan con ese código, excepto administradores.`, m);
     }
 
     const prefix = args[0];
