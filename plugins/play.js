@@ -38,19 +38,22 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     // Extraer minutos de duración (e.g. "20:14" => 20 minutos)
     const durationMin = timestamp ? parseInt(timestamp.split(':')[0]) : 0;
 
-    // Establece flags si se debe enviar como documento
     const tooBig = sizeMB >= 100 || durationMin >= 15;
 
+    const audioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
     const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
     const videoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
     const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
 
+    const isAudio = audioCommands.includes(command);
     const isAudioDoc = docAudioCommands.includes(command);
     const isVideo = videoCommands.includes(command);
     const isVideoDoc = docVideoCommands.includes(command);
 
-    // Si el formato supera límite, forzar envío como documento
-    const sendAsDocument = isAudioDoc || isVideoDoc || tooBig;
+    // Forzar modo documento si el archivo es demasiado grande
+    const sendAsDocument =
+      (isAudioDoc || (!isVideo && !isVideoDoc && tooBig)) ||
+      (isVideo && tooBig) || isVideoDoc;
 
     const caption = `
 ╭───── • ─────╮
@@ -69,14 +72,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ╰───── • ─────╯
 `.trim();
 
-    // Mostrar vista previa antes de enviar archivo
     await conn.sendMessage(m.chat, {
       text: caption,
       contextInfo: {
         externalAdReply: {
           title,
-          body: tooBig ? '📂 Enviando documento por tamaño' :
+          body: tooBig ? '📂 Enviando documento por tamaño...' :
                 isAudioDoc ? '📂 Enviando audio como documento...' :
+                isVideoDoc ? '📂 Enviando video como documento...' :
                 isVideo ? '🎞️ Enviando video...' :
                 '🔊 Enviando audio...',
           thumbnailUrl: redes,
