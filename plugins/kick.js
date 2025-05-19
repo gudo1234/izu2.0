@@ -5,7 +5,7 @@ var handler = async (m, { conn, participants, usedPrefix, command }) => {
   if (!m.mentionedJid?.[0] && !m.quoted) {
     return conn.reply(
       m.chat,
-      `${e} *Ejemplo:* ${usedPrefix + command} @usuario`,
+      `${e} *Ejemplo:* ${usedPrefix + command} @${prems}`,
       m
     )
   }
