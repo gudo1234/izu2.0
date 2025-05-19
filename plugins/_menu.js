@@ -59,6 +59,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 \`✡ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️\`
 ┌────────────
 │ ${e}${s}kick *‹@υsєя›*
+│ ${e}${s}kicknum *‹#?›*
 │ ${e}${s}link
 │ ${e}${s}admins *‹τ×τ›*
 │ ${e}${s}infogrupo
