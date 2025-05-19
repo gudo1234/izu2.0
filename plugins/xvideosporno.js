@@ -43,7 +43,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
   𖤐 \`XVIDEOS EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
-✦ *Título:* ${title}`, m);
+✦ *Título:* ${title}`, m, null, rcanal);
     global.videoListXXX.push(vids_);
   } catch (err) {
     return conn.reply(m.chat, `⚠️ Ocurrió un error: ${err.message}`, m);
