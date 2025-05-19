@@ -16,7 +16,7 @@ let handler = async (m, { conn, text, participants, command }) => {
   }
   const prefix = command ? `.${command}` : '.totag'
   return m.reply(
-    `*Uso correcto:*\n` +
+    `${e} *Uso correcto:*\n` +
     `» Responde a un mensaje con *${prefix}* para etiquetar a todos\n` +
     `» O escribe *${prefix} <tu texto>* para enviar un texto mencionando a todos`
   )
