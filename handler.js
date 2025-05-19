@@ -236,7 +236,7 @@ const isOwner = isROwner || m.fromMe
 const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
 const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || _user.premium == true
 
-if (opts['queque'] && m.text && !(isMods || isPrems)) {
+//if (opts['queque'] && m.text && !(isMods || isPrems)) {
 /*let queque = this.msgqueque, time = 1000 * 5
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
@@ -256,27 +256,14 @@ const interval = setInterval(() => {
     }
 }, 0)*/
 //mio🥵
-let queue = this.msgqueque
-
-// Asegurar que sea un array
-if (!Array.isArray(queue)) this.msgqueque = queue = []
-
-// Esperar a que el mensaje anterior salga de la cola
-await new Promise(resolve => {
-  const check = () => {
-    if (!queue.length || queue[queue.length - 1] === m.id || queue.indexOf(previousID) === -1) {
-      return resolve()
-    }
-    setImmediate(check)
+if (opts.queque && m.text && !(isMods || isPrems)) {
+  if (!registerMessage.call(this, m.id)) return;
+  try {
+  } finally {
+    cleanup.call(this, m.id);
   }
-  check()
-})
-
-// Agregar el nuevo mensaje a la cola
-queue.push(m.id || m.key.id)
-
-}
-
+                                  }
+//
 if (m.isBaileys) {
 return
 }
