@@ -51,7 +51,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
 }
 
 if (media === 'audio') {
-await conn.sendMessage(m.chat, { audio: { url: getRandom([vn, vn2, vn4, vn5, vn7]) }, 
+await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRandom()}, 
     contextInfo: { forwardedNewsletterMessageInfo: { 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
@@ -66,15 +66,15 @@ await conn.sendMessage(m.chat, { audio: { url: getRandom([vn, vn2, vn4, vn5, vn7
      seconds: 4556, ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
-  let wel = `*(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
+  let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
 ╭━━━━━━━━━━━❤︎₊᪲
 ┃  ¡Hola *@${m.messageStubParameters[0].split`@`[0]}*! 
 ┃  Bienvenido(a) a *${groupMetadata.subject}*!
 ┃
 ┃ ┌─❖─═•
-┃ │✨ _Pasa un buen rato_
-┃ │✨ _Sé respetuoso_
-┃ │✨ _Lee las reglas_
+┃ │➟ _Pasa un buen rato_
+┃ │✑ _Sé respetuoso_
+┃ │✬ _Lee las reglas_
 ┃ └─────────
 ╰━━━━━━━━━━━❤︎₊᪲`;
  await conn.sendMessage(m.chat, {
@@ -150,7 +150,7 @@ await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
 }
 
 if (media === 'audio') {
-await conn.sendMessage(m.chat, { audio: { url: getRandom([vn3, vn6]) }, 
+await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6].getRandom() }, 
     contextInfo: { forwardedNewsletterMessageInfo: { 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
