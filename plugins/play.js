@@ -34,26 +34,30 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
     const sizeMB = fileSize / (1024 * 1024);
-
-    // Extraer minutos de duración (e.g. "20:14" => 20 minutos)
     const durationMin = timestamp ? parseInt(timestamp.split(':')[0]) : 0;
 
-    const tooBig = sizeMB >= 100 || durationMin >= 15;
-
-    const audioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
     const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
-    const videoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
     const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
+    const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
+    const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
 
-    const isAudio = audioCommands.includes(command);
-    const isAudioDoc = docAudioCommands.includes(command);
-    const isVideo = videoCommands.includes(command);
-    const isVideoDoc = docVideoCommands.includes(command);
+    let sendAsDocument = false;
+    let isAudio = false;
+    let isVideo = false;
 
-    // Forzar modo documento si el archivo es demasiado grande
-    const sendAsDocument =
-      (isAudioDoc || (!isVideo && !isVideoDoc && tooBig)) ||
-      (isVideo && tooBig) || isVideoDoc;
+    if (docAudioCommands.includes(command)) {
+      isAudio = true;
+      sendAsDocument = true;
+    } else if (docVideoCommands.includes(command)) {
+      isVideo = true;
+      sendAsDocument = true;
+    } else if (normalAudioCommands.includes(command)) {
+      isAudio = true;
+      sendAsDocument = sizeMB >= 100 || durationMin >= 15;
+    } else if (normalVideoCommands.includes(command)) {
+      isVideo = true;
+      sendAsDocument = sizeMB >= 100 || durationMin >= 15;
+    }
 
     const caption = `
 ╭───── • ─────╮
@@ -68,7 +72,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ✦ *🔗 Link:* ${url}
 
 ╭───── • ─────╮
-> SIMPLE BOT - WHATSAPP
+> ${textbot}
 ╰───── • ─────╯
 `.trim();
 
@@ -77,11 +81,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       contextInfo: {
         externalAdReply: {
           title,
-          body: tooBig ? '📂 Enviando documento por tamaño...' :
-                isAudioDoc ? '📂 Enviando audio como documento...' :
-                isVideoDoc ? '📂 Enviando video como documento...' :
-                isVideo ? '🎞️ Enviando video...' :
-                '🔊 Enviando audio...',
+          body: sendAsDocument
+            ? (isAudio ? '📂 Enviando audio como documento...' : '📂 Enviando video como documento...')
+            : (isAudio ? '🔊 Enviando audio...' : '🎞️ Enviando video...'),
           thumbnailUrl: redes,
           thumbnail: await (await fetch(thumbnail)).buffer(),
           sourceUrl: redes,
@@ -91,7 +93,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }, { quoted: m });
 
-    // Obtener URL de descarga
     let downloadUrl;
     try {
       const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`);
@@ -112,9 +113,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
-      [sendAsDocument ? 'document' : (isVideo || isVideoDoc) ? 'video' : 'audio']: { url: downloadUrl },
-      mimetype: (isVideo || isVideoDoc) ? 'video/mp4' : 'audio/mpeg',
-      fileName: `${title}.${(isVideo || isVideoDoc) ? 'mp4' : 'mp3'}`
+      [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
+      mimetype: isVideo ? 'video/mp4' : 'audio/mpeg',
+      fileName: `${title}.${isVideo ? 'mp4' : 'mp3'}`
     };
 
     await conn.sendMessage(m.chat, sendPayload, { quoted: m });
