@@ -55,9 +55,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   } catch (err) {
     console.error(err);
-    await conn.sendMessage(m.chat, {
-      text: `${e} Ocurrió un error al procesar el video.`
-    }, { quoted: m });
+    m.reply(`${e} Errror al procesar el vídeo`)
   }
 };
 
