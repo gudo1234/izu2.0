@@ -46,5 +46,5 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 };
 
 handler.command = ['channelreac', 'chreact', 'rch']
-handler.group = true;
+//handler.group = true;
 export default handler;
