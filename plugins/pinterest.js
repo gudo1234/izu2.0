@@ -12,7 +12,7 @@ txt += `  ✩   *Calidad* : ${quality}\n`;
 txt += `  ✩   *Tamaño* : ${size}\n`;
 txt += `  ✩   *Duracion* : ${duration}\n`;
 txt += `  ✩   *Url* : ${url}\n\n`
-txt += `> *${wm}*`
+txt += `> *${textbot}*`
 
 
 //await conn.sendMessage(m.chat, { video: { url: dl_url }, caption: txt, mimetype: 'video/mp4', fileName:  `pinterest.mp4`}, {quoted: m })
@@ -20,6 +20,7 @@ await conn.sendFile(m.chat, dl_url, `thumbnail.mp4`, txt, m, null, rcanal)
 await m.react('✅');
 } catch {
 await m.react('✖️');
+  m.reply(`${e} Error al procesar el vide, asegurate de procesar una URL válida de pinterest.`)
 }
 };
 
