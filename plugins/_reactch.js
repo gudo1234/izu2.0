@@ -10,7 +10,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     return m.reply(`${e} Enlace no válido. Debe ser en formato:\nhttps://whatsapp.com/channel/ID_CANAL/ID_MENSAJE`);
   }
 
-  const [, channelId, messageId] = match;
+  const [channelId, messageId] = match;
   
   const styleMap = {
     a: '🅐', b: '🅑', c: '🅒', d: '🅓', e: '🅔', f: '🅕', g: '🅖',
