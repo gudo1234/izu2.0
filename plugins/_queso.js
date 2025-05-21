@@ -1,12 +1,8 @@
-let handler = async (m, { command }) => {
-  if (/^(que|q|ke|kee|quee|a|aa|aaa|ah|ha|haa|ahh|🫩)$/i.test(command)) {
-    let txt = `zo🧀`
-    m.reply(txt)
-  }
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+let txt = `zoo🧀`
+  await conn.sendMessage(m.chat, { text: txt }, { quoted: m})
 }
 
-handler.customPrefix = /^(que|q|ke|kee|quee|a|aa|aaa|ah|ha|haa|ahh|🫩)$/i
-handler.command = /^$/ // necesario para que funcione con customPrefix
-handler.nonPrefix = true
-
+handler.customPrefix = /^(Que|que|qe|ke|Qe|k|Ke|Kee|Quee)$/i
+handler.command = new RegExp
 export default handler
