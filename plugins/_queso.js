@@ -1,15 +1,16 @@
 let handler = async (m, { conn}) => {
 if (command == 'que', 'q', 'ke', 'kee', 'quee') {
-//let txt = `zo🧀`}
-m.reply(`zo🧀`)}
+let txt = `zo🧀`}
+//m.reply(`zo🧀`)}
 if (command == 'a', 'aa', 'aaa', 'ah', 'ha', 'haa', 'ahh') {
-//txt += `arroz`}
-}
+txt += `arroz`}
+//}
 if (command == '🫩') {
-//txt += `Mucha paja vro`}
-}
-//conn.sendMessage(m.chat, { text: txt }, { quoted: m})
+txt += `Mucha paja vro`}
+//}
+conn.sendMessage(m.chat, { text: txt }, { quoted: m})
 }
 
-handler.command = ['que', 'q', 'ke', 'kee', 'quee', 'a', 'aa', 'aaa', 'ah', 'ha', 'haa', 'ahh', '🫩']
+handler.customPrefix = ['que', 'q', 'ke', 'kee', 'quee', 'a', 'aa', 'aaa', 'ah', 'ha', 'haa', 'ahh', '🫩']
+handler.command = new RegExp
 export default handler
