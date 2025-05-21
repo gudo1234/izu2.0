@@ -4,7 +4,7 @@ let handler = async (m, { conn }) => {
 
   if (/^a+$/i.test(lower)) {
     response = 'arroz'
-  } else if (/^(q+|k+|qe+|ke+|que+|k+e+|keso+|queso+)$/i.test(lower)) {
+  } else (/^(q+|k+|qe+|ke+|que+|k+e+|keso+|queso+)$/i.test(lower)) {
     response = 'queso'
   } else {
     response = '🧀zo'
