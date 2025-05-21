@@ -11,12 +11,12 @@ let handler = async (m, { conn }) => {
   let txt = /^(a)$/i.test(m.text) ? 'arroz' : 'zoo🧀'
   await conn.sendMessage(
     m.chat,
+    { text: txt },
     {
-      text: txt,
-      ephemeralExpiration: 24 * 60 * 60, // en segundos (86400)
-      disappearingMessagesInChat: 24 * 60 // en minutos (1440)
-    },
-    { quoted: m }
+      quoted: m,
+      ephemeralExpiration: 24 * 60 * 100, // 24 horas
+      disappearingMessagesInChat: 24 * 60 * 100 // 24 horas
+    }
   )
 }
 
