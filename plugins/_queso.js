@@ -3,11 +3,9 @@ let handler = async (m, { conn }) => {
   if (/^e$/i.test(m.text)) {
     txt = 'eva'
   } else if (/^a$/i.test(m.text)) {
-    txt = 'arroz'
+    txt = 'rroz'
   } else if (/^(que|qe|ke|qe|k|ke|kee|quee)$/i.test(m.text)) {
-    txt = 'queso'
-  } else {
-    txt = 'zoo🧀' // mensaje por defecto
+    txt = 'zo🧀'
   }
 
   await conn.sendMessage(
