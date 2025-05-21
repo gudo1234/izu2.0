@@ -1,8 +1,8 @@
-let handler = async (m, { conn, text }) => {
-  const lower = text?.toLowerCase()?.trim()
+let handler = async (m, { conn }) => {
+  const lower = m.text?.toLowerCase()?.trim()
   let response
 
-  if (/^a+$/.test(lower)) {
+  if (/^a+$/i.test(lower)) {
     response = 'arroz'
   } else if (/^(q+|k+|qe+|ke+|que+|k+e+|keso+|queso+)$/i.test(lower)) {
     response = 'queso'
@@ -10,10 +10,9 @@ let handler = async (m, { conn, text }) => {
     response = '🧀zo'
   }
 
-  await conn.sendMessage(m.chat, { text: response }, { quoted: m})
+  await conn.sendMessage(m.chat, { text: response }, { quoted: m, ...rcanal })
 }
 
-// Se activa con mensajes que comienzan con cualquiera de estos patrones
 handler.customPrefix = /^(a+|que+|qe+|ke+|k+|q+)$/i
-handler.command = new RegExp // necesario para handlers con customPrefix
+handler.command = new RegExp // necesario aunque no se use directamente
 export default handler
