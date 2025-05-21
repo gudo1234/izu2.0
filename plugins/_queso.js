@@ -1,10 +1,13 @@
 let handler = async (m, { conn, text }) => {
-  const lower = text?.toLowerCase()
+  const lower = text?.toLowerCase()?.trim()
   let response
 
   if (lower === 'a') {
     response = 'arroz'
-  } else if (/^(q|k|qe+|ke+|que+|k+e+)$/i.test(lower)) {
+  } else if ([
+    'q', 'k', 'qe', 'ke', 'que', 'keso', 'queso',
+    'quee', 'kee', 'qe', 'queee', 'keee', 'kso', 'ksooo', 'ksooo'
+  ].includes(lower)) {
     response = 'queso'
   } else {
     response = '🧀zo'
