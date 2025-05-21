@@ -1,5 +1,5 @@
 let handler = async (m, { conn}) => {
-if (command == 'que', 'q', 'ke', 'kee', 'quee') {
+if (command == 'que') {
 let txt = `zo🧀`
 m.reply(`zo🧀`)}
 /*if (command == 'a', 'aa', 'aaa', 'ah', 'ha', 'haa', 'ahh') {
