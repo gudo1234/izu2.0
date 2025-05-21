@@ -5,11 +5,12 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
     return conn.reply(
       m.chat,
-      `${e} Proporciona una búsqueda para enviar imágenes de la web\n\n` +
+      `Proporciona una búsqueda para enviar imágenes de la web\n\n` +
       `*Ejemplo:* ${usedPrefix + command} carros`,
       m
     )
   }
+
   m.react('🕒')
   const res = await googleImage(text)
   const count = 9
@@ -20,10 +21,13 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     try {
       const url = links[i]
       const imgBuffer = await fetch(url).then(r => r.buffer())
-
+m.react('✅')
       await conn.sendMessage(
         m.chat,
-        { image: imgBuffer, caption: `Resultado ${i + 1} para: "${text}"` },
+        {
+          image: imgBuffer,
+          caption: i === 0 ? `9 Resultados para: "${text}"` : undefined
+        },
         { quoted: m }
       )
     } catch (err) {
