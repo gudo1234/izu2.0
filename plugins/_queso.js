@@ -8,7 +8,7 @@ txt += `arroz`}
 if (command == '🫩') {
 txt += `Mucha paja vro`}
 //}*/
-conn.sendMessage(m.chat, { text: txt }, { quoted: m})
+//conn.sendMessage(m.chat, { text: txt }, { quoted: m})
 }
 
 handler.customPrefix = /^(que|q|ke|kee|quee|a|aa|aaa|ah|ha|haa|ahh|🫩)$/i
