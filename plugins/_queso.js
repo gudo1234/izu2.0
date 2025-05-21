@@ -1,5 +1,15 @@
 let handler = async (m, { conn }) => {
-  let txt = /^(a)$/i.test(m.text) ? 'arroz' : 'zoo🧀'
+  let txt = ''
+  if (/^e$/i.test(m.text)) {
+    txt = 'eva'
+  } else if (/^a$/i.test(m.text)) {
+    txt = 'arroz'
+  } else if (/^(que|qe|ke|qe|k|ke|kee|quee)$/i.test(m.text)) {
+    txt = 'queso'
+  } else {
+    txt = 'zoo🧀' // mensaje por defecto
+  }
+
   await conn.sendMessage(
     m.chat,
     { text: txt },
@@ -11,6 +21,6 @@ let handler = async (m, { conn }) => {
   )
 }
 
-handler.customPrefix = /^(Que|que|qe|ke|Qe|k|Ke|Kee|Quee|a)$/i
+handler.customPrefix = /^(e|a|que|qe|ke|Qe|k|Ke|Kee|Quee)$/i
 handler.command = new RegExp
 export default handler
