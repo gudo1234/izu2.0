@@ -9,15 +9,10 @@ let handler = async (m, { conn }) => {
     ptt: true,
     mimetype: 'audio/mpeg',
     fileName: 'audio.mp3',
-    seconds: 9999,
-    contextInfo: {
-      forwardingScore: 999,
-      isForwarded: true
-    }
+    seconds: 9999
   }, {
     quoted: m,
-    ephemeralExpiration: 24 * 60 * 60, // 24 horas en segundos
-    disappearingMessagesInChat: 24 * 60 * 60
+    ephemeralExpiration: 24 * 60 * 60 // 24 horas en segundos
   })
 }
 
