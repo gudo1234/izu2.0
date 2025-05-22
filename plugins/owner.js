@@ -7,7 +7,6 @@ const emojis = ['🍎', '🍒', '🍉', '🍊', '🍋', '🍏', '🍌', '🍍', 
             await m.react(emojis[i]);
         }, i * 1000);
     }
-//const thumbnail = await (await fetch(icono)).buffer()
 conn.sendMessage(m.chat, {
   contacts: {
     contacts: [{
