@@ -1,24 +1,23 @@
-let handler = async (m, { conn, isOwner }) => {
-  // Verifica si el mensaje es una invitación enriquecida
-  if (!m.message?.groupInviteMessage) return;
+let linkRegex = /https:\/\/chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i;
 
-  // Solo si el mensaje lo manda el owner (puedes quitar esta condición si quieres que se una a cualquier invitación)
-  if (!isOwner) return;
+let handler = async (m, { conn, text, isOwner }) => {
+    if (!text) return m.reply(`${emoji} Debes enviar una invitacion para que *${botname}* se una al grupo.`);
 
-  let code = m.message.groupInviteMessage.inviteCode;
-  if (!code) return;
+    let [_, code] = text.match(linkRegex) || [];
 
-  // Intentar unirse al grupo
-  try {
-    await conn.groupAcceptInvite(code);
-    await m.reply('✅ Me he unido automáticamente al grupo.');
-  } catch (e) {
-    await m.reply('❌ No pude unirme al grupo.');
-  }
+    if (!code) return m.reply(`${emoji2} Enlace de invitación no válido.`);
+
+    if (isOwner) {
+        await conn.groupAcceptInvite(code)
+            .then(res => m.reply(`${emoji} Me he unido exitosamente al grupo.`))
+            .catch(err => m.reply(`${msm} Error al unirme al grupo.`));
+    } else {
+        let message = `${emoji} Invitación a un grupo:\n${text}\n\nPor: @${m.sender.split('@')[0]}`;
+        await conn.sendMessage(`${suittag}` + '@s.whatsapp.net', { text: message, mentions: [m.sender] }, { quoted: m });
+        m.reply(`${emoji} El link del grupo ha sido enviado a mi propietario, luego revivirá una respuesta`);
+    }
 };
 
-handler.customPrefix = /^/; // Para interceptar todos los mensajes
-handler.before = true;
-handler.group = false; // Solo en privado
-handler.private = true; // O puedes cambiar esto si deseas en grupo también
+handler.command = ['invite', 'join', 'entra', 'entrabot'];
+
 export default handler;
