@@ -4,7 +4,7 @@ let handler = async (m, { conn }) => {
     txt = 'eva'
   } else if (/^a$/i.test(m.text)) {
     txt = 'rroz'
-  } else if (/^(que|qe|ke|qe|k|ke|kee|quee)$/i.test(m.text)) {
+  } else if (/^(q|que|qe|ke|qe|k|ke|kee|quee)$/i.test(m.text)) {
     txt = 'zo🧀'
   }
 
@@ -19,6 +19,6 @@ let handler = async (m, { conn }) => {
   )
 }
 
-handler.customPrefix = /^(e|a|que|qe|ke|Qe|k|Ke|Kee|Quee)$/i
+handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee)$/i
 handler.command = new RegExp
 export default handler
