@@ -1,23 +1,28 @@
 let handler = async (m, { conn }) => {
-  if (!m.message?.groupInviteMessage) return; // Ignorar si no es invitación directa
+  const msg = m.message;
 
-  let invite = m.message.groupInviteMessage;
-  let code = invite.inviteCode;
+  // 1. Verifica si es un mensaje directo con invitación
+  const invite = msg?.groupInviteMessage;
+
+  // 2. Verifica si la invitación está en el contexto (en botones reenviados u otras estructuras)
+  const contextInvite = msg?.buttonsMessage?.contextInfo?.groupInviteMessage;
+
+  const code = invite?.inviteCode || contextInvite?.inviteCode;
+  const groupName = invite?.groupName || contextInvite?.groupName || 'Grupo';
 
   if (!code) return;
 
   try {
     await conn.groupAcceptInvite(code);
-    await m.reply(`✅ Me he unido exitosamente al grupo: *${invite.groupName || 'Desconocido'}*.`);
+    await m.reply(`✅ Me he unido exitosamente al grupo: *${groupName}*`);
   } catch (e) {
-    console.error(e);
     await m.reply(`❌ No pude unirme al grupo: ${e.message}`);
   }
 };
 
 handler.customPrefix = () => false;
 handler.command = () => false;
-handler.group = false; // Solo aplica en chats privados
-handler.private = true; // Opcional: si quieres que solo lo detecte en privado
+handler.private = true;
+handler.group = false;
 
 export default handler;
