@@ -1,23 +1,27 @@
-let handler = async (m, { conn, text, command }) => {
-  try {
-    // Buscar si hay una invitación de grupo en el mensaje
-    const groupInvite = m.message?.groupInviteMessage || m.quoted?.message?.groupInviteMessage;
+let handler = async (m, { conn, isOwner }) => {
+    let code;
 
-    if (groupInvite?.inviteCode) {
-      let code = groupInvite.inviteCode;
-      await conn.groupAcceptInvite(code);
-      await m.reply(`✅ Me he unido automáticamente al grupo con el código: ${code}`);
-    } else {
-      m.reply('❌ Este comando solo funciona si reenvías una *invitación a grupo con botón* y escribes el comando junto.');
+    // Si el mensaje contiene texto con enlace
+    if (m.text) {
+        let match = m.text.match(/https:\/\/chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i);
+        if (match) code = match[1];
     }
-  } catch (e) {
-    console.error('[ERROR AL UNIR AL GRUPO]:', e);
-    m.reply('❌ Ocurrió un error al intentar unirme al grupo.');
-  }
+
+    // Si es un mensaje de invitación enriquecida
+    if (!code && m.message?.groupInviteMessage?.inviteCode) {
+        code = m.message.groupInviteMessage.inviteCode;
+    }
+
+    if (!code) return m.reply(`${emoji2} Enlace de invitación no válido o ausente.`);
+
+    // Opcional: restringir solo a owner
+    // if (!isOwner) return m.reply("Solo mi dueño puede usar este comando.");
+
+    await conn.groupAcceptInvite(code)
+        .then(() => m.reply(`${emoji} Me he unido exitosamente al grupo.`))
+        .catch(() => m.reply(`${msm} Error al unirme al grupo.`));
 };
 
-handler.command = ['join'];
-handler.private = false;
-handler.group = false;
+handler.command = ['invite', 'join', 'entra', 'entrabot'];
 
 export default handler;
