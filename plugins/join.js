@@ -1,27 +1,24 @@
 let handler = async (m, { conn, isOwner }) => {
-    let code;
+  // Verifica si el mensaje es una invitación enriquecida
+  if (!m.message?.groupInviteMessage) return;
 
-    // Si el mensaje contiene texto con enlace
-    if (m.text) {
-        let match = m.text.match(/https:\/\/chat\.whatsapp\.com\/([0-9A-Za-z]{20,24})/i);
-        if (match) code = match[1];
-    }
+  // Solo si el mensaje lo manda el owner (puedes quitar esta condición si quieres que se una a cualquier invitación)
+  if (!isOwner) return;
 
-    // Si es un mensaje de invitación enriquecida
-    if (!code && m.message?.groupInviteMessage?.inviteCode) {
-        code = m.message.groupInviteMessage.inviteCode;
-    }
+  let code = m.message.groupInviteMessage.inviteCode;
+  if (!code) return;
 
-    if (!code) return m.reply(`${emoji2} Enlace de invitación no válido o ausente.`);
-
-    // Opcional: restringir solo a owner
-    // if (!isOwner) return m.reply("Solo mi dueño puede usar este comando.");
-
-    await conn.groupAcceptInvite(code)
-        .then(() => m.reply(`${emoji} Me he unido exitosamente al grupo.`))
-        .catch(() => m.reply(`${msm} Error al unirme al grupo.`));
+  // Intentar unirse al grupo
+  try {
+    await conn.groupAcceptInvite(code);
+    await m.reply('✅ Me he unido automáticamente al grupo.');
+  } catch (e) {
+    await m.reply('❌ No pude unirme al grupo.');
+  }
 };
 
-handler.command = ['invite', 'join', 'entra', 'entrabot'];
-
+handler.customPrefix = /^/; // Para interceptar todos los mensajes
+handler.before = true;
+handler.group = false; // Solo en privado
+handler.private = true; // O puedes cambiar esto si deseas en grupo también
 export default handler;
