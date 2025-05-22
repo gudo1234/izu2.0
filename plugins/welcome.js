@@ -24,6 +24,8 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let im = await (await fetch(`${pp}`)).buffer()
   let chat = global.db.data.chats[m.chat]
   let groupSize = participants.length
+  let isLid =  m.messageStubParameters[0].includes("@lid")
+  console.log(isLid)
   if (m.messageStubType == 27) {
     groupSize++;
   } else if (m.messageStubType == 28 || m.messageStubType == 32) {
