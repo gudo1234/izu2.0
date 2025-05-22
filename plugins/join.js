@@ -1,16 +1,10 @@
 let handler = async (m, { conn, text, command }) => {
   try {
-    // Solo proceder si el mensaje incluye un botón de invitación (stubType 29)
-    const stubType = m.messageStubType;
-    const stubParams = m.messageStubParameters;
+    // Buscar si hay una invitación de grupo en el mensaje
+    const groupInvite = m.message?.groupInviteMessage || m.quoted?.message?.groupInviteMessage;
 
-    if (stubType === 29 && stubParams?.[0]) {
-      let code = stubParams[0].split('/').pop();
-
-      if (!code || code.length < 20) {
-        return m.reply('❌ Código de invitación no válido.');
-      }
-
+    if (groupInvite?.inviteCode) {
+      let code = groupInvite.inviteCode;
       await conn.groupAcceptInvite(code);
       await m.reply(`✅ Me he unido automáticamente al grupo con el código: ${code}`);
     } else {
@@ -22,7 +16,6 @@ let handler = async (m, { conn, text, command }) => {
   }
 };
 
-// El bot responde a comandos como: .join, !join, etc.
 handler.command = ['join'];
 handler.private = false;
 handler.group = false;
