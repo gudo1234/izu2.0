@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 function handler(m) {
+const thumbnail = await (await fetch(icono)).buffer()
 const emojis = ['🍎', '🍒', '🍉', '🍊', '🍋', '🍏', '🍌', '🍍', '🍓', '🍇', '🍈', '🍒', '🍑', '🥭', '🍐', '🥥', '🍋‍🟩'];
     for (let i = 0; i < emojis.length; i++) {
         setTimeout(async () => {
@@ -21,7 +22,7 @@ conn.sendMessage(m.chat, {
 "title": 'No molestar, xD -_-',
 "body": wm,
 "thumbnailUrl": redes,
-"thumbnail": icono,
+"thumbnail": thumbnail,
 sourceUrl: redes
 }
 }
