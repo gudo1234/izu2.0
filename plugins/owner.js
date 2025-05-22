@@ -20,7 +20,7 @@ conn.sendMessage(m.chat, {
 "mediaType": 1,
 "title": 'No molestar, xD -_-',
 "body": wm,
-"thumbnailUrl": redes,
+//"thumbnailUrl": redes,
 "thumbnail": thumbnail,
 sourceUrl: redes
 }
