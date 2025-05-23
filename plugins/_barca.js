@@ -1,9 +1,11 @@
-import fetch from "node-fetch";
-import moment from "moment";
-import fs from "fs";
+import Parser from 'rss-parser';
+import moment from 'moment';
+import fs from 'fs';
 
-const CACHE_FILE = "./.last-news.json";
-const CONFIG_FILE = "./.noti-config.json";
+const parser = new Parser();
+const FEED_URL = 'https://www.marca.com/rss/futbol.html';
+const CACHE_FILE = './.last-news.json';
+const CONFIG_FILE = './.noti-config.json';
 
 let cache = {};
 let gruposActivos = {};
@@ -18,64 +20,44 @@ function saveConfig() {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(gruposActivos));
 }
 
-const temas = [
-  { tag: "Barcelona FC", nombre: "FC Barcelona" },
-  { tag: "Real Madrid", nombre: "Real Madrid" },
-  { tag: "Champions League", nombre: "Champions League" },
-  { tag: "Premier League", nombre: "Premier League" },
-  { tag: "La Liga", nombre: "La Liga" },
-  { tag: "Bundesliga", nombre: "Bundesliga" },
-  { tag: "Serie A", nombre: "Serie A Italiana" }
-];
-
-async function verificarNoticiaNueva(conn, chatId) {
-  const tema = temas[Math.floor(Math.random() * temas.length)];
-
+async function comprobarRSS(conn) {
   try {
-    const res = await fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(tema.tag)}&sortBy=publishedAt&language=es&apiKey=84baef01e6c640799202a741a11fdedf`);
-    const data = await res.json();
-    if (!data.articles || !data.articles.length) return;
+    const feed = await parser.parseURL(FEED_URL);
+    const latest = feed.items[0];
+    if (!latest || !latest.title) return;
+    if (cache.lastTitle === latest.title) return;
 
-    const article = data.articles[0];
-    if (!article.title) return;
-
-    if (cache[tema.tag] === article.title) return;
-
-    cache[tema.tag] = article.title;
+    cache.lastTitle = latest.title;
     saveCache();
 
-    const caption = `*• Nueva noticia de ${tema.nombre} •*\n
-*⤿ Título:* _${article.title}_
-*⤿ Fuente:* _${article.source?.name || "Desconocida"}_
-*⤿ Publicado:* _${moment(article.publishedAt).format("DD/MM/YYYY HH:mm")}_
-*⤿ URL:* ${article.url}\n\n`;
+    const caption = `*• Nueva noticia de fútbol •*\n
+*⤿ Título:* _${latest.title}_
+*⤿ Publicado:* _${moment(latest.pubDate).format("DD/MM/YYYY HH:mm")}_
+*⤿ URL:* ${latest.link}\n\n`;
 
-    let image;
-    if (article.urlToImage) {
-      const imgRes = await fetch(article.urlToImage);
-      if (imgRes.ok) image = await imgRes.buffer();
-    }
-    if (!image) {
-      image = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+    for (const chatId of Object.keys(gruposActivos)) {
+      await conn.sendMessage(chatId, { text: caption.trim() });
     }
 
-    await conn.sendMessage(chatId, {
-      image,
-      caption: caption.trim()
-    });
-
-  } catch (e) {
-    console.error(`[Error en ${tema.nombre}]`, e);
+  } catch (err) {
+    console.error('Error en RSS:', err);
   }
 }
 
-// Middleware: cada mensaje en grupo
+// Llamado cada 30 segundos si hay algún grupo activo
+setInterval(async () => {
+  if (Object.keys(gruposActivos).length > 0 && global.conn) {
+    comprobarRSS(global.conn);
+  }
+}, 30000);
+
 let handler = async (m, { conn, isGroup, command }) => {
   if (!isGroup) return;
 
   const chatId = m.chat;
   const texto = m.text?.trim().toLowerCase() || '';
   const estado = gruposActivos[chatId] ?? false;
+  global.conn = conn; // para que funcione en el setInterval
 
   if (command === 'noti') {
     if (texto === '.noti on') {
@@ -95,10 +77,6 @@ let handler = async (m, { conn, isGroup, command }) => {
     }
 
     return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.\nUsa *.noti on* o *.noti off* para cambiar el estado.`);
-  }
-
-  if (gruposActivos[chatId]) {
-    verificarNoticiaNueva(conn, chatId);
   }
 };
 
