@@ -60,7 +60,7 @@ let handler = async (m, { conn, command }) => {
 
   if (command === 'noti' || command === 'noti on') {
     rssActivado[id] = true;
-    return m.reply("Sistema RSS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).");
+    return m.reply("Sistema RS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).");
   }
 
   if (command === 'noti off') {
