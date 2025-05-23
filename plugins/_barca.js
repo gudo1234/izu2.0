@@ -9,6 +9,7 @@ const CONFIG_FILE = './.noti-config.json';
 
 let cache = {};
 let gruposActivos = {};
+let rssIniciado = false;
 
 try { cache = JSON.parse(fs.readFileSync(CACHE_FILE)); } catch { cache = {}; }
 try { gruposActivos = JSON.parse(fs.readFileSync(CONFIG_FILE)); } catch { gruposActivos = {}; }
@@ -20,7 +21,7 @@ function saveConfig() {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(gruposActivos));
 }
 
-async function verificarRSS(conn, chatId) {
+async function comprobarRSS(conn, chatId) {
   try {
     const feed = await parser.parseURL(FEED_URL);
     const latest = feed.items[0];
@@ -39,15 +40,17 @@ async function verificarRSS(conn, chatId) {
     await conn.sendMessage(chatId, { text: caption.trim() });
 
   } catch (err) {
-    console.error('Error al verificar RSS:', err);
+    console.error('Error en RSS:', err);
   }
 }
 
-let handler = async (m, { conn, command, args, isGroup }) => {
-  if (!isGroup) return;
+let handler = async (m, { conn, command, args }) => {
   const chatId = m.chat;
+  const isCmd = !!command;
 
-  // Comando .noti, .noti on, .noti off
+  if (!m.isGroup) return;
+
+  // Activación o desactivación por comando .noti
   if (command === 'noti') {
     const estado = gruposActivos[chatId] ?? false;
 
@@ -74,12 +77,20 @@ let handler = async (m, { conn, command, args, isGroup }) => {
     return m.reply('Usa `.noti`, `.noti on` o `.noti off`');
   }
 
-  // Comando .notici para verificar manualmente si hay nuevas noticias
+  // Activar lógica RSS por una sola vez con .notici
   if (command === 'notici') {
     if (!gruposActivos[chatId]) {
-      return m.reply('El sistema de noticias no está activado en este grupo. Usa `.noti on` para activarlo.');
+      return m.reply('El sistema de noticias no está activado en este grupo. Usa `.noti on` primero.');
     }
-    await verificarRSS(conn, chatId);
+
+    if (rssIniciado) return m.reply('El sistema de noticias por RSS ya está activo.');
+    rssIniciado = true;
+    return m.reply('Sistema de noticias por RSS *activado*. Se notificará automáticamente si hay novedades cuando se escriba en el grupo.');
+  }
+
+  // Si no es comando, verificar noticias si corresponde
+  if (!isCmd && rssIniciado && gruposActivos[chatId]) {
+    comprobarRSS(conn, chatId);
   }
 };
 
