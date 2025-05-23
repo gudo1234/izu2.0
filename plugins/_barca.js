@@ -2,29 +2,33 @@ import fetch from "node-fetch";
 import moment from "moment";
 import fs from "fs";
 
-const FILE = "./.last-news.json";
+const CACHE_FILE = "./.last-news.json";
+const CONFIG_FILE = "./.noti-config.json";
+
 let cache = {};
-try {
-  cache = JSON.parse(fs.readFileSync(FILE));
-} catch { cache = {}; }
+let gruposActivos = {};
+
+try { cache = JSON.parse(fs.readFileSync(CACHE_FILE)); } catch { cache = {}; }
+try { gruposActivos = JSON.parse(fs.readFileSync(CONFIG_FILE)); } catch { gruposActivos = {}; }
 
 function saveCache() {
-  fs.writeFileSync(FILE, JSON.stringify(cache));
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
+}
+function saveConfig() {
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(gruposActivos));
 }
 
-const chatObjetivo = "120363276692176560@g.us"; // Reemplaza por tu grupo
+const temas = [
+  { tag: "Barcelona FC", nombre: "FC Barcelona" },
+  { tag: "Real Madrid", nombre: "Real Madrid" },
+  { tag: "Champions League", nombre: "Champions League" },
+  { tag: "Premier League", nombre: "Premier League" },
+  { tag: "La Liga", nombre: "La Liga" },
+  { tag: "Bundesliga", nombre: "Bundesliga" },
+  { tag: "Serie A", nombre: "Serie A Italiana" }
+];
 
-async function enviarNoticia(conn, chatId) {
-  const temas = [
-    { tag: "Barcelona FC", nombre: "FC Barcelona" },
-    { tag: "Real Madrid", nombre: "Real Madrid" },
-    { tag: "Champions League", nombre: "Champions League" },
-    { tag: "Premier League", nombre: "Premier League" },
-    { tag: "La Liga", nombre: "La Liga" },
-    { tag: "Bundesliga", nombre: "Bundesliga" },
-    { tag: "Serie A", nombre: "Serie A Italiana" }
-  ];
-
+async function verificarNoticiaNueva(conn, chatId) {
   const tema = temas[Math.floor(Math.random() * temas.length)];
 
   try {
@@ -34,6 +38,8 @@ async function enviarNoticia(conn, chatId) {
 
     const article = data.articles[0];
     if (!article.title) return;
+
+    if (cache[tema.tag] === article.title) return;
 
     cache[tema.tag] = article.title;
     saveCache();
@@ -63,19 +69,30 @@ async function enviarNoticia(conn, chatId) {
   }
 }
 
-let iniciado = false;
+// Middleware: cada mensaje en grupo
+let handler = async (m, { conn, isGroup }) => {
+  if (!isGroup) return;
+  const chatId = m.chat;
 
-let handler = async (m, { conn }) => {
-  if (iniciado) return m.reply("Ya está activo el envío automático de noticias.");
-  iniciado = true;
-  m.reply("Sistema de noticias iniciado. Se enviará una cada 3 minutos.");
-
-  // Ejecutar cada 3 minutos
-  setInterval(() => {
-    enviarNoticia(conn, chatObjetivo);
-  }, 180000);
+  if (gruposActivos[chatId]) {
+    verificarNoticiaNueva(conn, chatId);
+  }
 };
 
-handler.command = ['notici'];
+// Comando: activar/desactivar noticias
+handler.before = async (m, { command, args, conn }) => {
+  const chatId = m.chat;
+  const isCmd = m.text?.startsWith('.');
+  if (!isCmd || !args || !['on', 'off'].includes(args[0])) return;
+
+  if (command === 'noti') {
+    const activar = args[0] === 'on';
+    gruposActivos[chatId] = activar;
+    saveConfig();
+    m.reply(`Noticias automáticas *${activar ? 'activadas' : 'desactivadas'}* para este grupo.`);
+  }
+};
+
+handler.command = ['noti']
 handler.group = true;
 export default handler;
