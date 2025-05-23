@@ -6,19 +6,15 @@ const FILE = "./.last-news.json";
 let cache = {};
 try {
   cache = JSON.parse(fs.readFileSync(FILE));
-} catch {
-  cache = {};
-}
+} catch { cache = {}; }
 
 function saveCache() {
   fs.writeFileSync(FILE, JSON.stringify(cache));
 }
 
-const GRUPO_OBJETIVO = '120363400305692681@g.us'; // ← Reemplaza por tu ID de grupo real
+const chatObjetivo = "120363276692176560@g.us"; // Reemplaza por tu grupo
 
-async function checkFutbolNews(conn, chatId) {
-  if (!chatId.endsWith("@g.us")) return;
-
+async function enviarNoticia(conn, chatId) {
   const temas = [
     { tag: "Barcelona FC", nombre: "FC Barcelona" },
     { tag: "Real Madrid", nombre: "Real Madrid" },
@@ -29,46 +25,57 @@ async function checkFutbolNews(conn, chatId) {
     { tag: "Serie A", nombre: "Serie A Italiana" }
   ];
 
-  for (let tema of temas) {
-    try {
-      const res = await fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(tema.tag)}&sortBy=publishedAt&language=es&apiKey=84baef01e6c640799202a741a11fdedf`);
-      const data = await res.json();
-      if (!data.articles || !data.articles.length) continue;
+  const tema = temas[Math.floor(Math.random() * temas.length)];
 
-      const article = data.articles[0];
-      // Comenta la línea de control de repetidos para pruebas:
-      if (!article.title /*|| article.title === cache[tema.tag]*/) continue;
+  try {
+    const res = await fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(tema.tag)}&sortBy=publishedAt&language=es&apiKey=84baef01e6c640799202a741a11fdedf`);
+    const data = await res.json();
+    if (!data.articles || !data.articles.length) return;
 
-      cache[tema.tag] = article.title;
-      saveCache();
+    const article = data.articles[0];
+    if (!article.title) return;
 
-      const caption = `*• Nueva noticia de ${tema.nombre} •*\n
+    cache[tema.tag] = article.title;
+    saveCache();
+
+    const caption = `*• Nueva noticia de ${tema.nombre} •*\n
 *⤿ Título:* _${article.title}_
 *⤿ Fuente:* _${article.source?.name || "Desconocida"}_
 *⤿ Publicado:* _${moment(article.publishedAt).format("DD/MM/YYYY HH:mm")}_
 *⤿ URL:* ${article.url}\n\n`;
 
-      let image;
-      if (article.urlToImage) {
-        const imgRes = await fetch(article.urlToImage);
-        if (imgRes.ok) image = await imgRes.buffer();
-      }
-      if (!image) {
-        image = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
-      }
-
-      await conn.sendMessage(chatId, {
-        image,
-        caption: caption.trim()
-      });
-
-    } catch (e) {
-      console.error(`[Error ${tema.nombre}]`, e);
+    let image;
+    if (article.urlToImage) {
+      const imgRes = await fetch(article.urlToImage);
+      if (imgRes.ok) image = await imgRes.buffer();
     }
+    if (!image) {
+      image = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+    }
+
+    await conn.sendMessage(chatId, {
+      image,
+      caption: caption.trim()
+    });
+
+  } catch (e) {
+    console.error(`[Error en ${tema.nombre}]`, e);
   }
 }
 
-// Ejecutar cada 3 minutos
-setInterval(() => {
-  checkFutbolNews(conn, GRUPO_OBJETIVO);
-}, 180000);
+let iniciado = false;
+
+let handler = async (m, { conn }) => {
+  if (iniciado) return m.reply("Ya está activo el envío automático de noticias.");
+  iniciado = true;
+  m.reply("Sistema de noticias iniciado. Se enviará una cada 3 minutos.");
+
+  // Ejecutar cada 3 minutos
+  setInterval(() => {
+    enviarNoticia(conn, chatObjetivo);
+  }, 180000);
+};
+
+handler.command = ['noticias'];
+handler.group = true;
+export default handler;
