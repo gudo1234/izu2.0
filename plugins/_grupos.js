@@ -5,7 +5,7 @@ let handler = async (m, { conn }) => {
   if (!groupsIn.length) return m.reply('El bot no está en ningún grupo.')
 
   const thumbnail = await (await fetch(icono)).buffer()
-  let texto = '*Lista de grupos donde está el bot:*\n\n'
+  let texto = `${e} _Lista de grupos donde está el bot:_\n\n`
   let mentions = []
   let count = 1
 
@@ -14,16 +14,16 @@ let handler = async (m, { conn }) => {
       const metadata = await conn.groupMetadata(id)
       const isBotAdmin = metadata.participants.find(p => p.id === conn.user.jid && p.admin)
       const admins = metadata.participants.filter(p => p.admin).map(p => p.id)
-      const adminTags = admins.map(jid => '@' + jid.split('@')[0]).join(', ')
+      const adminTags = admins.map(jid => '@' + jid.split('@')[0]).join('\n')
       const groupName = metadata.subject
 
-      texto += `*${count}. ${groupName}*\n`
-      texto += `› Estado del bot: ${isBotAdmin ? 'Administrador' : 'No administrador'}\n`
+      texto += `${count}. *${groupName}*\n`
+      texto += `Estado del bot: ${isBotAdmin ? 'Administrador' : 'No administrador'}\n`
 
       if (isBotAdmin) {
         const code = await conn.groupInviteCode(id)
-        texto += `› Link: https://chat.whatsapp.com/${code}\n`
-        texto += `› Admins: ${adminTags}\n`
+        texto += `*Link:* https://chat.whatsapp.com/${code}\n`
+        texto += `*Admins:* ${adminTags}\n`
         mentions.push(...admins)
       }
 
