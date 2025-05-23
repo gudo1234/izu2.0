@@ -3,98 +3,81 @@ import moment from 'moment';
 import fs from 'fs';
 
 const parser = new Parser();
-const FEED_URL = 'https://www.marca.com/rss/futbol.html';
-const CACHE_FILE = './.last-news.json';
-const CONFIG_FILE = './.noti-config.json';
-
+const FILE = './.last-news.json';
 let cache = {};
-let gruposActivos = {};
-let rssIniciado = false;
-
-try { cache = JSON.parse(fs.readFileSync(CACHE_FILE)); } catch { cache = {}; }
-try { gruposActivos = JSON.parse(fs.readFileSync(CONFIG_FILE)); } catch { gruposActivos = {}; }
+try {
+  cache = JSON.parse(fs.readFileSync(FILE));
+} catch { cache = {}; }
 
 function saveCache() {
-  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
-}
-function saveConfig() {
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(gruposActivos));
+  fs.writeFileSync(FILE, JSON.stringify(cache));
 }
 
-async function comprobarRSS(conn, chatId) {
+const chatObjetivo = "120363276692176560@g.us";
+const feedUrl = 'https://www.marca.com/rss/futbol.html'; // Feed RSS
+
+async function comprobarRSS(conn) {
   try {
-    const feed = await parser.parseURL(FEED_URL);
+    const feed = await parser.parseURL(feedUrl);
     const latest = feed.items[0];
-    if (!latest || !latest.title) return;
+    if (!latest || !latest.title || !latest.pubDate) return;
 
-    if (cache.lastTitle === latest.title) return;
+    const fechaPublicacion = moment(new Date(latest.pubDate));
+    const ahora = moment();
+    const diferenciaMinutos = ahora.diff(fechaPublicacion, 'minutes');
 
+    if (diferenciaMinutos > 30) return; // Ignorar noticias con más de 30 minutos
+
+    if (cache.lastTitle === latest.title) return; // Ya fue enviada
     cache.lastTitle = latest.title;
     saveCache();
 
     const caption = `*• Nueva noticia de fútbol •*\n
 *⤿ Título:* _${latest.title}_
-*⤿ Publicado:* _${moment(latest.pubDate).format("DD/MM/YYYY HH:mm")}_
+*⤿ Publicado:* _${fechaPublicacion.format("DD/MM/YYYY HH:mm")}_
 *⤿ URL:* ${latest.link}\n\n`;
 
-    await conn.sendMessage(chatId, { text: caption.trim() });
+    await conn.sendMessage(chatObjetivo, {
+      text: caption.trim()
+    });
 
   } catch (err) {
     console.error('Error en RSS:', err);
   }
 }
 
-let handler = async (m, { conn, command, args }) => {
-  const chatId = m.chat;
-  const isCmd = !!command;
+let rssActivado = {};
 
-  if (!m.isGroup) return;
+let handler = async (m, { conn }) => {
+  const id = m.chat;
+  if (!rssActivado[id]) return;
 
-  // Activación o desactivación por comando .noti
-  if (command === 'noti') {
-    const estado = gruposActivos[chatId] ?? false;
-
-    if (!args.length) {
-      return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.`);
-    }
-
-    if (args[0] === 'on') {
-      if (estado) return m.reply('El sistema de noticias ya está *activado*.');
-      gruposActivos[chatId] = true;
-      saveConfig();
-      await m.react('✅');
-      return m.reply('El sistema de noticias ha sido *activado* para este grupo.');
-    }
-
-    if (args[0] === 'off') {
-      if (!estado) return m.reply('El sistema de noticias ya está *desactivado*.');
-      delete gruposActivos[chatId];
-      saveConfig();
-      await m.react('❌');
-      return m.reply('El sistema de noticias ha sido *desactivado* para este grupo.');
-    }
-
-    return m.reply('Usa `.noti`, `.noti on` o `.noti off`');
-  }
-
-  // Activar lógica RSS por una sola vez con .notici
-  if (command === 'notici') {
-    if (!gruposActivos[chatId]) {
-      return m.reply('El sistema de noticias no está activado en este grupo. Usa `.noti on` primero.');
-    }
-
-    if (rssIniciado) return m.reply('El sistema de noticias por RSS ya está activo.');
-    rssIniciado = true;
-    return m.reply('Sistema de noticias por RSS *activado*. Se notificará automáticamente si hay novedades cuando se escriba en el grupo.');
-  }
-
-  // Si no es comando, verificar noticias si corresponde
-  if (!isCmd && rssIniciado && gruposActivos[chatId]) {
-    comprobarRSS(conn, chatId);
+  // Solo ejecutar si el mensaje proviene del grupo objetivo
+  if (id === chatObjetivo) {
+    comprobarRSS(conn);
   }
 };
 
-handler.command = ['noti', 'notici'];
+handler.command = ['noti', 'noti on', 'noti off'];
 handler.group = true;
+
+handler.before = async (m, { conn }) => {
+  const id = m.chat;
+  if (rssActivado[id] && id === chatObjetivo) {
+    comprobarRSS(conn);
+  }
+};
+
+handler.handle = async (m, { conn, command }) => {
+  const id = m.chat;
+  if (command === 'noti' || command === 'noti on') {
+    rssActivado[id] = true;
+    return m.reply("Sistema RSS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).");
+  }
+  if (command === 'noti off') {
+    rssActivado[id] = false;
+    return m.reply("Sistema RSS desactivado.");
+  }
+};
 
 export default handler;
