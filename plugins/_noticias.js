@@ -1,31 +1,40 @@
 import fetch from 'node-fetch'
 import cheerio from 'cheerio'
 
-let handler = async (m, { conn }) => {
-  const res = await fetch('https://nitter.net/FCBarcelona') // Twitter alternativo sin login
+const scrapeSection = async (url, selector, titleSelector, imgSelector) => {
+  const res = await fetch(url)
   const html = await res.text()
   const $ = cheerio.load(html)
+  const items = []
 
-  const tweets = []
-
-  $('.timeline-item').each((i, el) => {
-    if (i >= 3) return false // Solo los 3 más recientes
-    const content = $(el).find('.tweet-content').text().trim()
-    const link = 'https://twitter.com/FCBarcelona/status/' + $(el).find('a[href*="/status/"]').attr('href')?.split('/').pop()
-    const image = $(el).find('.attachment.image img').attr('src')
-    if (content && link) tweets.push({
-      content,
-      link,
-      image: image ? 'https://nitter.net' + image : null
-    })
+  $(selector).each((i, el) => {
+    if (i >= 3) return false
+    const title = $(el).find(titleSelector).text().trim()
+    const link = 'https://www.fcbarcelona.com' + $(el).find('a').attr('href')
+    const img = $(el).find(imgSelector).attr('data-src') || $(el).find(imgSelector).attr('src')
+    if (title && link && img) {
+      items.push({ title, link, image: img })
+    }
   })
 
-  if (!tweets.length) return m.reply('No se encontraron noticias recientes en el Twitter del Barça.')
+  return items
+}
 
-  for (let tweet of tweets) {
+let handler = async (m, { conn }) => {
+  const [photos, videos, news] = await Promise.all([
+    scrapeSection('https://www.fcbarcelona.com/en/football/first-team/photos', '.photo-card', '.photo-title', 'img'),
+    scrapeSection('https://www.fcbarcelona.com/en/football/first-team/videos', '.video-card', '.video-title', 'img'),
+    scrapeSection('https://www.fcbarcelona.com/en/football/first-team/news', '.featured-article', '.featured-article__title', 'img')
+  ])
+
+  const all = [...photos, ...videos, ...news]
+
+  if (!all.length) return m.reply('No se encontraron publicaciones recientes del Barça.')
+
+  for (let item of all) {
     await conn.sendMessage(m.chat, {
-      image: tweet.image ? { url: tweet.image } : null,
-      caption: `*${tweet.content}*\n\n${tweet.link}`
+      image: { url: item.image },
+      caption: `*${item.title}*\n\n${item.link}`
     }, { quoted: m })
   }
 }
