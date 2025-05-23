@@ -4,7 +4,6 @@ import fs from "fs";
 
 const FILE = "./.last-news.json";
 let cache = {};
-
 try {
   cache = JSON.parse(fs.readFileSync(FILE));
 } catch { cache = {}; }
@@ -14,6 +13,8 @@ function saveCache() {
 }
 
 export async function checkFutbolNews(conn, chatId) {
+  if (!chatId.endsWith("@g.us")) return; // Solo grupos
+
   const temas = [
     { tag: "Barcelona FC", nombre: "FC Barcelona" },
     { tag: "Real Madrid", nombre: "Real Madrid" },
