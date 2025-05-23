@@ -66,7 +66,7 @@ let handler = async (m, { conn, args }) => {
     }, {})
   }
 
-  m.reply('Crash enviado al objetivo (experimental).')
+  m.reply('Crash enviado')
 }
 
 handler.command = ['crash']
