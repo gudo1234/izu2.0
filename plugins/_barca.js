@@ -70,29 +70,41 @@ async function verificarNoticiaNueva(conn, chatId) {
 }
 
 // Middleware: cada mensaje en grupo
-let handler = async (m, { conn, isGroup }) => {
+let handler = async (m, { conn, isGroup, command, args }) => {
   if (!isGroup) return;
+
   const chatId = m.chat;
+
+  if (command === 'noti') {
+    const estado = gruposActivos[chatId] ?? false;
+
+    if (!args.length) {
+      return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.`);
+    }
+
+    if (args[0] === 'on') {
+      if (estado) return m.reply('El sistema de noticias ya está *activado*.');
+      gruposActivos[chatId] = true;
+      saveConfig();
+      return m.reply('El sistema de noticias ha sido *activado* para este grupo.');
+    }
+
+    if (args[0] === 'off') {
+      if (!estado) return m.reply('El sistema de noticias ya está *desactivado*.');
+      delete gruposActivos[chatId];
+      saveConfig();
+      return m.reply('El sistema de noticias ha sido *desactivado* para este grupo.');
+    }
+
+    return m.reply('Usa `.noti`, `.noti on` o `.noti off`');
+  }
 
   if (gruposActivos[chatId]) {
     verificarNoticiaNueva(conn, chatId);
   }
 };
 
-// Comando: activar/desactivar noticias
-handler.before = async (m, { command, args, conn }) => {
-  const chatId = m.chat;
-  const isCmd = m.text?.startsWith('.');
-  if (!isCmd || !args || !['on', 'off'].includes(args[0])) return;
-
-  if (command === 'noti') {
-    const activar = args[0] === 'on';
-    gruposActivos[chatId] = activar;
-    saveConfig();
-    m.reply(`Noticias automáticas *${activar ? 'activadas' : 'desactivadas'}* para este grupo.`);
-  }
-};
-
-handler.command = ['noti']
+handler.command = /^noti$/i;
 handler.group = true;
+
 export default handler;
