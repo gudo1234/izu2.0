@@ -21,7 +21,20 @@ let handler = async (m, { conn, args }) => {
 *⤿ URL:* ${art.url || "No disponible"}\n\n────────────\n\n`;
     }
 
-    const img = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+    // Intentar usar la imagen de la primera noticia
+    let img;
+    const imgURL = data.articles[0]?.urlToImage;
+    if (imgURL) {
+      const resImg = await fetch(imgURL);
+      if (resImg.ok) {
+        img = await resImg.buffer();
+      }
+    }
+
+    // Fallback a imagen por defecto si no hay imagen válida
+    if (!img) {
+      img = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+    }
 
     await conn.sendMessage(m.chat, {
       image: img,
