@@ -13,7 +13,7 @@ let handler = async (m, { conn, args }) => {
     const limit = Math.min(parseInt(args[0]) || 5, 10);
     const articles = data.articles.slice(0, limit);
 
-    let txt = `*• 🥗 Google News: El Mundo •*\n\n`;
+    let txt = `*• 📰 Google News: El Mundo •*\n\n`;
     for (let art of articles) {
       txt += `*⤿ Título:* _${art.title || "No disponible"}_
 *⤿ Descripción:* _${art.description || "No disponible"}_
@@ -48,5 +48,5 @@ let handler = async (m, { conn, args }) => {
   }
 };
 
-handler.command = ["googlenews", "noticias"];
+handler.command = ["googlenews", "noticias", "notícias"];
 export default handler;
