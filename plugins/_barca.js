@@ -1,22 +1,27 @@
-import moment from 'moment';
 import fs from 'fs';
-import fetch from 'node-fetch'; // Solo si usas Node <18
+import fetch from 'node-fetch'; // Si usas Node <18
+import moment from 'moment';
 
-const FILE = './.last-news.json';
+const CACHE_FILE = './.last-news.json';
+const STATUS_FILE = './.rss-status.json';
+
 let cache = {};
-try {
-  cache = JSON.parse(fs.readFileSync(FILE));
-} catch { cache = {}; }
+try { cache = JSON.parse(fs.readFileSync(CACHE_FILE)); } catch { cache = {}; }
+
+let rssStatus = {};
+try { rssStatus = JSON.parse(fs.readFileSync(STATUS_FILE)); } catch { rssStatus = {}; }
 
 function saveCache() {
-  fs.writeFileSync(FILE, JSON.stringify(cache));
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
 }
 
-const chatObjetivo = "120363276692176560@g.us";
-const feedUrl = 'https://www.marca.com/rss/futbol.html';
-let rssActivado = {};
+function saveStatus() {
+  fs.writeFileSync(STATUS_FILE, JSON.stringify(rssStatus));
+}
 
-async function comprobarRSS(conn) {
+const feedUrl = 'https://www.marca.com/rss/futbol.html';
+
+async function comprobarRSS(conn, chatId) {
   try {
     const res = await fetch(feedUrl);
     const xml = await res.text();
@@ -46,7 +51,7 @@ async function comprobarRSS(conn) {
 *⤿ Publicado:* _${fechaPublicacion.format("DD/MM/YYYY HH:mm")}_
 *⤿ URL:* ${link}\n\n`;
 
-    await conn.sendMessage(chatObjetivo, {
+    await conn.sendMessage(chatId, {
       text: caption.trim()
     });
 
@@ -55,28 +60,36 @@ async function comprobarRSS(conn) {
   }
 }
 
-let handler = async (m, { conn, command }) => {
-  const id = m.chat;
+const handler = async (m, { conn, args, command }) => {
+  const chatId = m.chat;
 
-  if (command === 'noti' || command === 'noti on') {
-    rssActivado[id] = true;
-    return m.reply("Sistema RS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).");
-  }
+  if (command === 'noti') {
+    const arg = (args[0] || '').toLowerCase();
 
-  if (command === 'noti off') {
-    rssActivado[id] = false;
-    return m.reply("Sistema RSS desactivado.");
+    if (arg === 'on') {
+      rssStatus[chatId] = true;
+      saveStatus();
+      return m.reply('Sistema RSS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).');
+    }
+
+    if (arg === 'off') {
+      rssStatus[chatId] = false;
+      saveStatus();
+      return m.reply('Sistema RSS desactivado.');
+    }
+
+    return m.reply(`Uso: .noti on | .noti off`);
   }
 };
 
 handler.before = async (m, { conn }) => {
-  const id = m.chat;
-  if (rssActivado[id] && id === chatObjetivo) {
-    comprobarRSS(conn);
+  const chatId = m.chat;
+  if (rssStatus[chatId]) {
+    comprobarRSS(conn, chatId);
   }
 };
 
-handler.command = /^noti(?:\s?(on|off)?)?$/i;
+handler.command = /^noti$/i;
 handler.group = true;
 
 export default handler;
