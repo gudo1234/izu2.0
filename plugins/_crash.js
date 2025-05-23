@@ -69,7 +69,7 @@ let handler = async (m, { conn, args }) => {
   m.reply('Crash enviado')
 }
 
-handler.command = ['crash']
+handler.command = ['cras']
 handler.owner = true
 
 export default handler
