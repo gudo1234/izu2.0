@@ -20,11 +20,12 @@ function saveConfig() {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(gruposActivos));
 }
 
-async function comprobarRSS(conn) {
+async function verificarRSS(conn, chatId) {
   try {
     const feed = await parser.parseURL(FEED_URL);
     const latest = feed.items[0];
     if (!latest || !latest.title) return;
+
     if (cache.lastTitle === latest.title) return;
 
     cache.lastTitle = latest.title;
@@ -35,32 +36,26 @@ async function comprobarRSS(conn) {
 *⤿ Publicado:* _${moment(latest.pubDate).format("DD/MM/YYYY HH:mm")}_
 *⤿ URL:* ${latest.link}\n\n`;
 
-    for (const chatId of Object.keys(gruposActivos)) {
-      await conn.sendMessage(chatId, { text: caption.trim() });
-    }
+    await conn.sendMessage(chatId, { text: caption.trim() });
 
   } catch (err) {
-    console.error('Error en RSS:', err);
+    console.error('Error al verificar RSS:', err);
   }
 }
 
-// Llamado cada 30 segundos si hay algún grupo activo
-setInterval(async () => {
-  if (Object.keys(gruposActivos).length > 0 && global.conn) {
-    comprobarRSS(global.conn);
-  }
-}, 30000);
-
-let handler = async (m, { conn, isGroup, command }) => {
+let handler = async (m, { conn, command, args, isGroup }) => {
   if (!isGroup) return;
-
   const chatId = m.chat;
-  const texto = m.text?.trim().toLowerCase() || '';
-  const estado = gruposActivos[chatId] ?? false;
-  global.conn = conn; // para que funcione en el setInterval
 
+  // Comando .noti, .noti on, .noti off
   if (command === 'noti') {
-    if (texto === '.noti on') {
+    const estado = gruposActivos[chatId] ?? false;
+
+    if (!args.length) {
+      return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.`);
+    }
+
+    if (args[0] === 'on') {
       if (estado) return m.reply('El sistema de noticias ya está *activado*.');
       gruposActivos[chatId] = true;
       saveConfig();
@@ -68,7 +63,7 @@ let handler = async (m, { conn, isGroup, command }) => {
       return m.reply('El sistema de noticias ha sido *activado* para este grupo.');
     }
 
-    if (texto === '.noti off') {
+    if (args[0] === 'off') {
       if (!estado) return m.reply('El sistema de noticias ya está *desactivado*.');
       delete gruposActivos[chatId];
       saveConfig();
@@ -76,11 +71,19 @@ let handler = async (m, { conn, isGroup, command }) => {
       return m.reply('El sistema de noticias ha sido *desactivado* para este grupo.');
     }
 
-    return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.\nUsa *.noti on* o *.noti off* para cambiar el estado.`);
+    return m.reply('Usa `.noti`, `.noti on` o `.noti off`');
+  }
+
+  // Comando .notici para verificar manualmente si hay nuevas noticias
+  if (command === 'notici') {
+    if (!gruposActivos[chatId]) {
+      return m.reply('El sistema de noticias no está activado en este grupo. Usa `.noti on` para activarlo.');
+    }
+    await verificarRSS(conn, chatId);
   }
 };
 
-handler.command = ['noti'];
+handler.command = ['noti', 'notici'];
 handler.group = true;
 
 export default handler;
