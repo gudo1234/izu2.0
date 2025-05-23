@@ -6,14 +6,18 @@ const FILE = "./.last-news.json";
 let cache = {};
 try {
   cache = JSON.parse(fs.readFileSync(FILE));
-} catch { cache = {}; }
+} catch {
+  cache = {};
+}
 
 function saveCache() {
   fs.writeFileSync(FILE, JSON.stringify(cache));
 }
 
-export async function checkFutbolNews(conn, chatId) {
-  if (!chatId.endsWith("@g.us")) return; // Solo grupos
+const GRUPO_OBJETIVO = '120363400305692681@g.us'; // ← Reemplaza por tu ID de grupo real
+
+async function checkFutbolNews(conn, chatId) {
+  if (!chatId.endsWith("@g.us")) return;
 
   const temas = [
     { tag: "Barcelona FC", nombre: "FC Barcelona" },
@@ -32,7 +36,8 @@ export async function checkFutbolNews(conn, chatId) {
       if (!data.articles || !data.articles.length) continue;
 
       const article = data.articles[0];
-      if (!article.title || article.title === cache[tema.tag]) continue;
+      // Comenta la línea de control de repetidos para pruebas:
+      if (!article.title /*|| article.title === cache[tema.tag]*/) continue;
 
       cache[tema.tag] = article.title;
       saveCache();
@@ -62,3 +67,8 @@ export async function checkFutbolNews(conn, chatId) {
     }
   }
 }
+
+// Ejecutar cada 3 minutos
+setInterval(() => {
+  checkFutbolNews(conn, GRUPO_OBJETIVO);
+}, 180000);
