@@ -70,19 +70,15 @@ async function verificarNoticiaNueva(conn, chatId) {
 }
 
 // Middleware: cada mensaje en grupo
-let handler = async (m, { conn, isGroup, command, args }) => {
+let handler = async (m, { conn, isGroup, command }) => {
   if (!isGroup) return;
 
   const chatId = m.chat;
+  const texto = m.text?.trim().toLowerCase() || '';
+  const estado = gruposActivos[chatId] ?? false;
 
   if (command === 'noti') {
-    const estado = gruposActivos[chatId] ?? false;
-
-    if (!args.length) {
-      return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.`);
-    }
-
-    if (args[0] === 'on') {
+    if (texto === '.noti on') {
       if (estado) return m.reply('El sistema de noticias ya está *activado*.');
       gruposActivos[chatId] = true;
       saveConfig();
@@ -90,7 +86,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
       return m.reply('El sistema de noticias ha sido *activado* para este grupo.');
     }
 
-    if (args[0] === 'off') {
+    if (texto === '.noti off') {
       if (!estado) return m.reply('El sistema de noticias ya está *desactivado*.');
       delete gruposActivos[chatId];
       saveConfig();
@@ -98,7 +94,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
       return m.reply('El sistema de noticias ha sido *desactivado* para este grupo.');
     }
 
-    return m.reply('Usa `.noti`, `.noti on` o `.noti off`');
+    return m.reply(`El sistema de noticias está actualmente *${estado ? 'ACTIVADO' : 'DESACTIVADO'}* en este grupo.\nUsa *.noti on* o *.noti off* para cambiar el estado.`);
   }
 
   if (gruposActivos[chatId]) {
@@ -106,7 +102,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
   }
 };
 
-handler.command = ['noti']
+handler.command = ['noti'];
 handler.group = true;
 
 export default handler;
