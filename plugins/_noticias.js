@@ -2,26 +2,30 @@ import fetch from 'node-fetch'
 import cheerio from 'cheerio'
 
 let handler = async (m, { conn }) => {
-  const res = await fetch('https://www.fcbarcelona.com/en/news')
+  const res = await fetch('https://nitter.net/FCBarcelona') // Twitter alternativo sin login
   const html = await res.text()
   const $ = cheerio.load(html)
 
-  const noticias = []
+  const tweets = []
 
-  $('.featured-article, .article').each((i, el) => {
-    if (i >= 5) return false // solo las 5 primeras
-    const title = $(el).find('h2, h3').text().trim()
-    const link = 'https://www.fcbarcelona.com' + ($(el).find('a').attr('href') || '')
-    const img = $(el).find('img').attr('src')?.startsWith('http') ? $(el).find('img').attr('src') : 'https://www.fcbarcelona.com' + $(el).find('img').attr('src')
-    if (title && link) noticias.push({ title, link, img })
+  $('.timeline-item').each((i, el) => {
+    if (i >= 3) return false // Solo los 3 más recientes
+    const content = $(el).find('.tweet-content').text().trim()
+    const link = 'https://twitter.com/FCBarcelona/status/' + $(el).find('a[href*="/status/"]').attr('href')?.split('/').pop()
+    const image = $(el).find('.attachment.image img').attr('src')
+    if (content && link) tweets.push({
+      content,
+      link,
+      image: image ? 'https://nitter.net' + image : null
+    })
   })
 
-  if (!noticias.length) return m.reply('No se encontraron noticias recientes.')
+  if (!tweets.length) return m.reply('No se encontraron noticias recientes en el Twitter del Barça.')
 
-  for (let noticia of noticias) {
+  for (let tweet of tweets) {
     await conn.sendMessage(m.chat, {
-      image: { url: noticia.img },
-      caption: `*${noticia.title}*\n${noticia.link}`,
+      image: tweet.image ? { url: tweet.image } : null,
+      caption: `*${tweet.content}*\n\n${tweet.link}`
     }, { quoted: m })
   }
 }
