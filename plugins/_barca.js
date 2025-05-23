@@ -46,7 +46,7 @@ async function comprobarRSS(conn, chatId) {
     cache.lastTitle = title;
     saveCache();
 
-    const caption = `*• Nueva noticia de fútbol •*\n
+    const caption = `*• 📰 Nueva noticia de fútbol •*\n
 *⤿ Título:* _${title}_
 *⤿ Publicado:* _${fechaPublicacion.format("DD/MM/YYYY HH:mm")}_
 *⤿ URL:* ${link}\n\n`;
