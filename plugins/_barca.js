@@ -76,6 +76,6 @@ let handler = async (m, { conn }) => {
   }, 180000);
 };
 
-handler.command = ['noticias'];
+handler.command = ['notici'];
 handler.group = true;
 export default handler;
