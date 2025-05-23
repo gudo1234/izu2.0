@@ -1,45 +1,63 @@
 import fetch from "node-fetch";
 import moment from "moment";
+import fs from "fs";
 
-let handler = async (m, { conn }) => {
-  try {
-    const res = await fetch("https://newsapi.org/v2/everything?q=Barcelona%20FC&sortBy=publishedAt&language=es&apiKey=84baef01e6c640799202a741a11fdedf");
-    const data = await res.json();
+const FILE = "./.last-news.json";
+let cache = {};
 
-    if (!data.articles || !data.articles.length) {
-      throw "No se encontró ninguna noticia reciente del FC Barcelona.";
-    }
+try {
+  cache = JSON.parse(fs.readFileSync(FILE));
+} catch { cache = {}; }
 
-    const article = data.articles[0];
+function saveCache() {
+  fs.writeFileSync(FILE, JSON.stringify(cache));
+}
 
-    const caption = `*• Última noticia del FC Barcelona •*\n
-*⤿ Título:* _${article.title || "No disponible"}_
+export async function checkFutbolNews(conn, chatId) {
+  const temas = [
+    { tag: "Barcelona FC", nombre: "FC Barcelona" },
+    { tag: "Real Madrid", nombre: "Real Madrid" },
+    { tag: "Champions League", nombre: "Champions League" },
+    { tag: "Premier League", nombre: "Premier League" },
+    { tag: "La Liga", nombre: "La Liga" },
+    { tag: "Bundesliga", nombre: "Bundesliga" },
+    { tag: "Serie A", nombre: "Serie A Italiana" }
+  ];
+
+  for (let tema of temas) {
+    try {
+      const res = await fetch(`https://newsapi.org/v2/everything?q=${encodeURIComponent(tema.tag)}&sortBy=publishedAt&language=es&apiKey=84baef01e6c640799202a741a11fdedf`);
+      const data = await res.json();
+      if (!data.articles || !data.articles.length) continue;
+
+      const article = data.articles[0];
+      if (!article.title || article.title === cache[tema.tag]) continue;
+
+      cache[tema.tag] = article.title;
+      saveCache();
+
+      const caption = `*• Nueva noticia de ${tema.nombre} •*\n
+*⤿ Título:* _${article.title}_
 *⤿ Fuente:* _${article.source?.name || "Desconocida"}_
 *⤿ Publicado:* _${moment(article.publishedAt).format("DD/MM/YYYY HH:mm")}_
-*⤿ URL:* ${article.url || "No disponible"}\n\n`;
+*⤿ URL:* ${article.url}\n\n`;
 
-    const imgUrl = article.urlToImage;
-    let image;
+      let image;
+      if (article.urlToImage) {
+        const imgRes = await fetch(article.urlToImage);
+        if (imgRes.ok) image = await imgRes.buffer();
+      }
+      if (!image) {
+        image = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+      }
 
-    if (imgUrl) {
-      const imgRes = await fetch(imgUrl);
-      if (!imgRes.ok) throw "No se pudo obtener la imagen de la noticia.";
-      image = await imgRes.buffer();
-    } else {
-      // Imagen por defecto si la noticia no tiene
-      image = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+      await conn.sendMessage(chatId, {
+        image,
+        caption: caption.trim()
+      });
+
+    } catch (e) {
+      console.error(`[Error ${tema.nombre}]`, e);
     }
-
-    await conn.sendMessage(m.chat, {
-      image,
-      caption: caption.trim()
-    }, { quoted: m });
-
-  } catch (e) {
-    console.error(e);
-    m.reply("Ocurrió un error al obtener la noticia del Barcelona. Intenta más tarde.");
   }
-};
-
-handler.command = ["barçanews", "noticiabarcelona", "barcelona"];
-export default handler;
+}
