@@ -10,8 +10,6 @@ async function handler(m, { conn }) {
       await m.react(emojis[i]);
     }, i * 1000);
   }
-
-  // Enviar contacto con vista enriquecida
   conn.sendMessage(m.chat, {
     contacts: {
       contacts: [{
@@ -33,9 +31,7 @@ async function handler(m, { conn }) {
   }, { quoted: m });
 }
 
-//handler.command = ['owner', 'dueño', 'desarrollador', 'creador', 'edar', 'zeus']
 handler.customPrefix = /^(zeus|edar|@50492280729|owner|dueño|creador)$/i;
-handler.command = ['owner', 'dueño', 'desarrollador', 'creador', 'edar', 'zeus']
-//handler.command = new RegExp;
+handler.command = new RegExp;
 
 export default handler;
