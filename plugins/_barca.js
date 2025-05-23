@@ -86,6 +86,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
       if (estado) return m.reply('El sistema de noticias ya está *activado*.');
       gruposActivos[chatId] = true;
       saveConfig();
+      await m.react('✅');
       return m.reply('El sistema de noticias ha sido *activado* para este grupo.');
     }
 
@@ -93,6 +94,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
       if (!estado) return m.reply('El sistema de noticias ya está *desactivado*.');
       delete gruposActivos[chatId];
       saveConfig();
+      await m.react('❌');
       return m.reply('El sistema de noticias ha sido *desactivado* para este grupo.');
     }
 
@@ -104,7 +106,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
   }
 };
 
-handler.command = ['noti']
+handler.command = /^noti$/i;
 handler.group = true;
 
 export default handler;
