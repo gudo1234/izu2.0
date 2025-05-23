@@ -33,7 +33,8 @@ async function handler(m, { conn }) {
   }, { quoted: m });
 }
 
-handler.customPrefix = /^(Edar|edar|@50492280729|.owner|owner|.dueño|dueño|.creador|creador)$/i;
+handler.command = ['owner', 'dueño', 'desarrollador', 'creador', 'edar', 'zeus']
+handler.customPrefix = /^(zeus|edar|@50492280729|owner|dueño|creador)$/i;
 handler.command = new RegExp;
 
 export default handler;
