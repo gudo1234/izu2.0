@@ -1,6 +1,6 @@
 import moment from 'moment';
 import fs from 'fs';
-import fetch from 'node-fetch'; // Asegúrate de tener node-fetch si usas Node <18
+import fetch from 'node-fetch'; // Solo si usas Node <18
 
 const FILE = './.last-news.json';
 let cache = {};
@@ -14,6 +14,7 @@ function saveCache() {
 
 const chatObjetivo = "120363276692176560@g.us";
 const feedUrl = 'https://www.marca.com/rss/futbol.html';
+let rssActivado = {};
 
 async function comprobarRSS(conn) {
   try {
@@ -34,8 +35,8 @@ async function comprobarRSS(conn) {
     const ahora = moment();
     const diferenciaMinutos = ahora.diff(fechaPublicacion, 'minutes');
 
-    if (diferenciaMinutos > 30) return; // Muy vieja
-    if (cache.lastTitle === title) return; // Ya enviada
+    if (diferenciaMinutos > 30) return;
+    if (cache.lastTitle === title) return;
 
     cache.lastTitle = title;
     saveCache();
@@ -54,12 +55,10 @@ async function comprobarRSS(conn) {
   }
 }
 
-let rssActivado = {};
-
 let handler = async (m, { conn, command }) => {
   const id = m.chat;
 
-  if (/^noti$|^noti on$/.test(command)) {
+  if (command === 'noti' || command === 'noti on') {
     rssActivado[id] = true;
     return m.reply("Sistema RSS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).");
   }
@@ -77,7 +76,7 @@ handler.before = async (m, { conn }) => {
   }
 };
 
-handler.command = ['noti', 'noti on', 'noti off'];
+handler.command = /^noti(?:\s?(on|off)?)?$/i;
 handler.group = true;
 
 export default handler;
