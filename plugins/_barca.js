@@ -104,7 +104,7 @@ let handler = async (m, { conn, isGroup, command, args }) => {
   }
 };
 
-handler.command = /^noti$/i;
+handler.command = ['noti']
 handler.group = true;
 
 export default handler;
