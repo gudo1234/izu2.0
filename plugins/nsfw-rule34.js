@@ -93,7 +93,7 @@ async function sendAlbumMessage(jid, medias, options = {}) {
 }
 
 const handler = async (m, { conn, text }) => {
-  if (!db.data.chats[m.chat].nsfw) return m.reply(` `${e} ¡Estos comandos están desactivados!\n> activalos con .nsfw on`);
+  if (!db.data.chats[m.chat].nsfw) return m.reply(`${e} ¡Estos comandos están desactivados!\n> activalos con .nsfw on`);
   if (!text) throw 'Por favor, proporciona un texto';
 
   try {
