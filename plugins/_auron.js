@@ -7,13 +7,18 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     let text = args.join(' ').trim();
     if (!text && m.quoted?.text) text = m.quoted.text.trim();
 
-    if (!text) {
+    // Validar si el texto existe
+    if (!text || typeof text !== 'string' || text.length === 0) {
       return m.reply(
         `*Uso correcto:* ${usedPrefix + command} Hola, soy Auron\n` +
         `O responde a un mensaje de texto con *${usedPrefix + command}*`
       );
     }
 
+    // Log para depurar
+    console.log('Texto para TTS:', text);
+
+    // Instanciar cliente FakeYou
     const fy = new fakeyou.Client({
       usernameOrEmail: 'elvergudoelvergudo041@gmail.com',
       password: 'platototo123',
@@ -24,7 +29,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     const modelToken = 'TM:jgv6d8br5jdr'; // Voz de AuronPlay
 
     const inference = await fy.makeTTS({
-      text,
+      text: text, // asegurar que esté bien definido
       modelToken,
     });
 
@@ -37,7 +42,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     fs.unlinkSync(filePath);
 
   } catch (e) {
-    console.error(e);
+    console.error('ERROR EN .auron:', e);
     m.reply(`*Ocurrió un error en .auron:*\n${e.name}: ${e.message}`);
   }
 };
