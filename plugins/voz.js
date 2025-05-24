@@ -72,11 +72,24 @@ const handler = async (m, {conn, args, usedPrefix, command}) => {
   let lang = args[0];
   let text = args.slice(1).join(' ');
 
-  if (args[0] === 'list' || args[0] === 'help') {
-    let listado = Object.entries(idiomasSoportados)
+  const mostrarAyuda = () => {
+    let lista = Object.entries(idiomasSoportados)
       .map(([codigo, nombre]) => `• \`${codigo}\` - ${nombre}`)
       .join('\n');
-    return m.reply(`${e} *Idiomas disponibles para TTS:*\n> Ejemplo de uso .tts ja <texto>\n\n${listado}`);
+    return m.reply(
+`${e} *Uso del comando:* 
+\`${usedPrefix + command} <idioma> <texto>\`
+
+*Ejemplo:* 
+\`${usedPrefix + command}\` es Hola soy Edi
+\`${usedPrefix + command}\` en Hello my friend
+
+*Idiomas disponibles:*\n\n${lista}`
+    );
+  };
+
+  if (!args[0] || args[0] === 'help' || args[0] === 'list') {
+    return mostrarAyuda();
   }
 
   if (!idiomasSoportados[lang]) {
@@ -85,9 +98,7 @@ const handler = async (m, {conn, args, usedPrefix, command}) => {
   }
 
   if (!text && m.quoted?.text) text = m.quoted.text;
-  if (!text) {
-    return m.reply(`${e} *Texto no encontrado*\n\nEjemplo:\n${usedPrefix + command} es Hola\n\n> Idiomas disponibles`);
-  }
+  if (!text) return mostrarAyuda();
 
   try {
     const res = await tts(text, lang);
