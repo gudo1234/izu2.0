@@ -26,6 +26,5 @@ const handler = async (m, { conn, args, usedPrefix }) => {
     }
 };
 handler.command = ['r34', 'rule34'];
-
-export default handler;
 handler.group = true;
+export default handler;
