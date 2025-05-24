@@ -4,7 +4,11 @@ import { join } from 'path';
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
-    const text = args.join(' ') || m.quoted?.text;
+    let text = args.join(' ').trim();
+    if (!text && m.quoted && m.quoted.text) {
+      text = m.quoted.text.trim();
+    }
+
     if (!text) {
       return m.reply(`*Uso correcto:* ${usedPrefix + command} Hola, soy Auron`);
     }
@@ -17,6 +21,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     await fy.start();
 
     const modelToken = 'TM:jgv6d8br5jdr'; // Voz de AuronPlay
+
     const inference = await fy.makeTTS({
       text,
       modelToken
