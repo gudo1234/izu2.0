@@ -11,6 +11,6 @@ let handler = async (m, { conn }) => {
   })
 }
 
-handler.customPrefix = /kikio/
+handler.customPrefix = /^(kikio|🌚)$/i
 handler.command = new RegExp
 export default handler
