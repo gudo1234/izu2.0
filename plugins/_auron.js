@@ -5,17 +5,18 @@ import { join } from 'path';
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     let text = args.join(' ').trim();
-    if (!text && m.quoted && m.quoted.text) {
-      text = m.quoted.text.trim();
-    }
+    if (!text && m.quoted?.text) text = m.quoted.text.trim();
 
     if (!text) {
-      return m.reply(`*Uso correcto:* ${usedPrefix + command} Hola, soy Auron`);
+      return m.reply(
+        `*Uso correcto:* ${usedPrefix + command} Hola, soy Auron\n` +
+        `O responde a un mensaje de texto con *${usedPrefix + command}*`
+      );
     }
 
     const fy = new fakeyou.Client({
       usernameOrEmail: 'elvergudoelvergudo041@gmail.com',
-      password: 'platototo123'
+      password: 'platototo123',
     });
 
     await fy.start();
@@ -24,12 +25,14 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const inference = await fy.makeTTS({
       text,
-      modelToken
+      modelToken,
     });
 
     const buffer = await inference.download();
+
     const filePath = join(global.__dirname(import.meta.url), '../tmp', `${Date.now()}.mp3`);
     fs.writeFileSync(filePath, buffer);
+
     await conn.sendFile(m.chat, filePath, 'auron.mp3', null, m, true);
     fs.unlinkSync(filePath);
 
