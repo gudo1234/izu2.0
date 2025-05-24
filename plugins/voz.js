@@ -86,7 +86,7 @@ const handler = async (m, {conn, args, usedPrefix, command}) => {
 
   if (!text && m.quoted?.text) text = m.quoted.text;
   if (!text) {
-    return m.reply(`${e} *Texto no encontrado*\n\nEjemplo:\n${usedPrefix + command} es Hola soy AuronPlay`);
+    return m.reply(`${e} *Texto no encontrado*\n\nEjemplo:\n${usedPrefix + command} es Hola\n\n> Idiomas disponibles:\n${listado}`);
   }
 
   try {
