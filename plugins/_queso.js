@@ -6,6 +6,8 @@ let handler = async (m, { conn }) => {
     txt = 'rroz'
   } else if (/^(q|que|qe|ke|qe|k|ke|kee|quee)$/i.test(m.text)) {
     txt = 'zo🧀'
+  } else if (/^(pe|p)$/i.test(m.text)) {
+    txt = 'ne'
   }
 
   await conn.sendMessage(
@@ -19,6 +21,6 @@ let handler = async (m, { conn }) => {
   )
 }
 
-handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee)$/i
+handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee|pe|p)$/i
 handler.command = new RegExp
 export default handler
