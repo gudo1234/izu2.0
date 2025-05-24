@@ -1,30 +1,64 @@
 import fetch from "node-fetch";
 import moment from "moment";
 
-const GRUPO_OBJETIVO = "120363276692176560@g.us"; // ID del grupo
-const KEYWORDS = ["barcelona", "real madrid", "champions", "la liga", "fútbol", "futbol", "liga", "ucl", "uefa", "madrid", "barça"];
+// Lista global para controlar en qué grupos está activado
+global.gruposNoti ||= {};
+global.lastNoti ||= {};
 
-let handler = async (m, { conn }) => {
+const KEYWORDS = ["barcelona", "real madrid", "champions", "la liga", "fútbol", "futbol", "ucl", "uefa", "madrid", "barça"];
+const IMAGE_DEFAULT = "https://telegra.ph/file/17d0f2946ff10fd130507.jpg";
+const API_KEY = "84baef01e6c640799202a741a11fdedf";
+
+let handler = async (m, { conn, args, command }) => {
+  const id = m.chat;
+
+  // Comando .noti on / .noti off
+  if (command === "noti") {
+    if (!id.endsWith("@g.us")) {
+      return m.reply("Este comando solo funciona en grupos.");
+    }
+
+    const estado = (args[0] || "").toLowerCase();
+    if (estado === "on") {
+      global.gruposNoti[id] = true;
+      m.reply("Activadas las noticias automáticas de fútbol para este grupo.");
+    } else if (estado === "off") {
+      delete global.gruposNoti[id];
+      m.reply("Desactivadas las noticias automáticas de fútbol para este grupo.");
+    } else {
+      const estadoActual = global.gruposNoti[id] ? "activadas" : "desactivadas";
+      m.reply(`Actualmente las noticias están *${estadoActual}* para este grupo.\nUsa *.noti on* o *.noti off*.`);
+    }
+    return;
+  }
+};
+
+handler.command = ["noti"];
+handler.before = async (m, { conn }) => {
+  const chatID = m.chat;
+
+  // Solo grupos activados
+  if (!global.gruposNoti[chatID]) return;
+  if (!m.text || !chatID.endsWith("@g.us")) return;
+
+  const now = Date.now();
+  if (global.lastNoti[chatID] && now - global.lastNoti[chatID] < 15 * 60 * 1000) return; // cada 15 min
+  global.lastNoti[chatID] = now;
+
   try {
-    if (m.chat !== GRUPO_OBJETIVO) return; // Ignora si no es el grupo objetivo
-    if (!m.text) return; // Solo reacciona a mensajes con texto
-
-    const res = await fetch("https://newsapi.org/v2/top-headlines?sources=el-mundo&apiKey=84baef01e6c640799202a741a11fdedf");
+    const res = await fetch(`https://newsapi.org/v2/top-headlines?sources=el-mundo&apiKey=${API_KEY}`);
     const data = await res.json();
 
-    if (!data.articles || !data.articles.length) return;
+    if (!data.articles?.length) return;
 
-    // Filtrar noticias de fútbol
     const filtered = data.articles.filter(article => {
       const text = `${article.title || ""} ${article.description || ""}`.toLowerCase();
-      return KEYWORDS.some(keyword => text.includes(keyword));
+      return KEYWORDS.some(k => text.includes(k));
     });
 
-    if (!filtered.length) return; // Si no hay noticias relevantes, no hacer nada
+    if (!filtered.length) return;
 
-    const limit = 3;
-    const articles = filtered.slice(0, limit);
-
+    const articles = filtered.slice(0, 3);
     let txt = `*• 📰 Noticias de Fútbol (El Mundo) •*\n\n`;
     for (let art of articles) {
       txt += `*⤿ Título:* _${art.title || "No disponible"}_
@@ -33,29 +67,26 @@ let handler = async (m, { conn }) => {
 *⤿ URL:* ${art.url || "No disponible"}\n\n────────────\n\n`;
     }
 
+    // Imagen
     let img;
     const imgURL = articles[0]?.urlToImage;
     if (imgURL) {
       const resImg = await fetch(imgURL);
-      if (resImg.ok) {
-        img = await resImg.buffer();
-      }
+      if (resImg.ok) img = await resImg.buffer();
     }
-
     if (!img) {
-      img = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+      img = await (await fetch(IMAGE_DEFAULT)).buffer();
     }
 
-    await conn.sendMessage(m.chat, {
+    await conn.sendMessage(chatID, {
       image: img,
       caption: txt.trim(),
       headerType: 4
     }, { quoted: m });
 
   } catch (e) {
-    console.error("[NOTICIAS AUTOMÁTICAS ERROR]", e);
+    console.error("[ERROR NOTICIAS AUTO]", e);
   }
 };
 
-handler.before = true;
 export default handler;
