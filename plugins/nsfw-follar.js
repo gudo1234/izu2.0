@@ -36,8 +36,8 @@ if (!db.data.chats[m.chat].nsfw && m.isGroup) {
         let pp4 = 'https://files.catbox.moe/ylfpb7.mp4';
         let pp5 = 'https://files.catbox.moe/kccjc7.mp4';
         let pp6 = 'https://files.catbox.moe/lt9e1u.mp4';
-        
-        const videos = [pp, pp2, pp3, pp4, pp5, pp6];
+        let pp7 = 'https://files.catbox.moe/uw63pw.mp4';
+        const videos = [pp, pp2, pp3, pp4, pp5, pp6, pp7];
         const video = videos[Math.floor(Math.random() * videos.length)];
 
         let mentions = [who];
