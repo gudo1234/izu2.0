@@ -10,15 +10,15 @@ const TMP = path.join(__dirname, '../tmp');
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   let text = args.join(' ').trim();
   if (!text && m.quoted?.text) text = m.quoted.text.trim();
-
   if (!text) return m.reply(`*Uso:* ${usedPrefix + command} Hola soy Auron`);
 
   const voice = 'auronplay';
   const username = 'Edar123';
-  const apiKey = '23d113424d81e3f92af9a55f7c929359'; // Reemplazalo por tu API Key real
+  const apiKey = '23d113424d81e3f92af9a55f7c929359';
 
   try {
-    const res = await fetch('https://api.uberduck.ai/speak-synchronous', {
+    // Paso 1: iniciar la síntesis
+    const start = await fetch('https://api.uberduck.ai/speak', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${Buffer.from(`${username}:${apiKey}`).toString('base64')}`,
@@ -27,17 +27,33 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
       },
       body: JSON.stringify({
         speech: text,
-        voice
+        voice: voice
       })
     });
 
-    const json = await res.json();
-    console.log('[Uberduck Response]', json); // DEBUG
+    const startJson = await start.json();
+    if (!startJson.uuid) throw new Error('No se recibió UUID');
 
-    if (!json?.success && json?.error) throw new Error(json.error);
-    if (!json?.audio_path) throw new Error('No se pudo obtener el audio');
+    // Paso 2: esperar a que esté listo
+    let audioUrl = null;
+    for (let i = 0; i < 15; i++) {
+      await new Promise(res => setTimeout(res, 2000)); // Espera 2s
+      const status = await fetch(`https://api.uberduck.ai/speak-status?uuid=${startJson.uuid}`, {
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`${username}:${apiKey}`).toString('base64')}`,
+          'Accept': 'application/json'
+        }
+      });
+      const statusJson = await status.json();
+      if (statusJson.path) {
+        audioUrl = statusJson.path;
+        break;
+      }
+    }
 
-    const audioUrl = json.audio_path;
+    if (!audioUrl) throw new Error('No se pudo obtener el audio');
+
+    // Paso 3: descargar audio
     const audioRes = await fetch(audioUrl);
     const audioBuffer = await audioRes.buffer();
 
