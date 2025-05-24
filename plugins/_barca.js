@@ -1,95 +1,61 @@
-import fs from 'fs';
-import fetch from 'node-fetch'; // Si usas Node <18
-import moment from 'moment';
+import fetch from "node-fetch";
+import moment from "moment";
 
-const CACHE_FILE = './.last-news.json';
-const STATUS_FILE = './.rss-status.json';
+const GRUPO_OBJETIVO = "120363276692176560@g.us"; // ID del grupo
+const KEYWORDS = ["barcelona", "real madrid", "champions", "la liga", "fútbol", "futbol", "liga", "ucl", "uefa", "madrid", "barça"];
 
-let cache = {};
-try { cache = JSON.parse(fs.readFileSync(CACHE_FILE)); } catch { cache = {}; }
-
-let rssStatus = {};
-try { rssStatus = JSON.parse(fs.readFileSync(STATUS_FILE)); } catch { rssStatus = {}; }
-
-function saveCache() {
-  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache));
-}
-
-function saveStatus() {
-  fs.writeFileSync(STATUS_FILE, JSON.stringify(rssStatus));
-}
-
-const feedUrl = 'https://www.marca.com/rss/futbol.html';
-
-async function comprobarRSS(conn, chatId) {
+let handler = async (m, { conn }) => {
   try {
-    const res = await fetch(feedUrl);
-    const xml = await res.text();
+    if (m.chat !== GRUPO_OBJETIVO) return; // Ignora si no es el grupo objetivo
+    if (!m.text) return; // Solo reacciona a mensajes con texto
 
-    const itemMatch = xml.match(/<item>[\s\S]*?<\/item>/);
-    if (!itemMatch) return;
+    const res = await fetch("https://newsapi.org/v2/top-headlines?sources=el-mundo&apiKey=84baef01e6c640799202a741a11fdedf");
+    const data = await res.json();
 
-    const item = itemMatch[0];
-    const title = (item.match(/<title><!CDATA(.*?)><\/title>/) || [])[1];
-    const link = (item.match(/<link>(.*?)<\/link>/) || [])[1];
-    const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1];
+    if (!data.articles || !data.articles.length) return;
 
-    if (!title || !link || !pubDate) return;
-
-    const fechaPublicacion = moment(new Date(pubDate));
-    const ahora = moment();
-    const diferenciaMinutos = ahora.diff(fechaPublicacion, 'minutes');
-
-    if (diferenciaMinutos > 30) return;
-    if (cache.lastTitle === title) return;
-
-    cache.lastTitle = title;
-    saveCache();
-
-    const caption = `*• 📰 Nueva noticia de fútbol •*\n
-*⤿ Título:* _${title}_
-*⤿ Publicado:* _${fechaPublicacion.format("DD/MM/YYYY HH:mm")}_
-*⤿ URL:* ${link}\n\n`;
-
-    await conn.sendMessage(chatId, {
-      text: caption.trim()
+    // Filtrar noticias de fútbol
+    const filtered = data.articles.filter(article => {
+      const text = `${article.title || ""} ${article.description || ""}`.toLowerCase();
+      return KEYWORDS.some(keyword => text.includes(keyword));
     });
 
-  } catch (err) {
-    console.error('Error al comprobar RSS:', err);
-  }
-}
+    if (!filtered.length) return; // Si no hay noticias relevantes, no hacer nada
 
-const handler = async (m, { conn, args, command }) => {
-  const chatId = m.chat;
+    const limit = 3;
+    const articles = filtered.slice(0, limit);
 
-  if (command === 'noti') {
-    const arg = (args[0] || '').toLowerCase();
-
-    if (arg === 'on') {
-      rssStatus[chatId] = true;
-      saveStatus();
-      return m.reply('Sistema RSS activado. Se notificará la próxima noticia nueva (menos de 30 minutos).');
+    let txt = `*• 📰 Noticias de Fútbol (El Mundo) •*\n\n`;
+    for (let art of articles) {
+      txt += `*⤿ Título:* _${art.title || "No disponible"}_
+*⤿ Descripción:* _${art.description || "No disponible"}_
+*⤿ Publicado:* _${moment(art.publishedAt).format("DD/MM/YYYY HH:mm")}_
+*⤿ URL:* ${art.url || "No disponible"}\n\n────────────\n\n`;
     }
 
-    if (arg === 'off') {
-      rssStatus[chatId] = false;
-      saveStatus();
-      return m.reply('Sistema RSS desactivado.');
+    let img;
+    const imgURL = articles[0]?.urlToImage;
+    if (imgURL) {
+      const resImg = await fetch(imgURL);
+      if (resImg.ok) {
+        img = await resImg.buffer();
+      }
     }
 
-    return m.reply(`Uso: .noti on | .noti off`);
+    if (!img) {
+      img = await (await fetch("https://telegra.ph/file/17d0f2946ff10fd130507.jpg")).buffer();
+    }
+
+    await conn.sendMessage(m.chat, {
+      image: img,
+      caption: txt.trim(),
+      headerType: 4
+    }, { quoted: m });
+
+  } catch (e) {
+    console.error("[NOTICIAS AUTOMÁTICAS ERROR]", e);
   }
 };
 
-handler.before = async (m, { conn }) => {
-  const chatId = m.chat;
-  if (rssStatus[chatId]) {
-    comprobarRSS(conn, chatId);
-  }
-};
-
-handler.command = /^noti$/i;
-handler.group = true;
-
+handler.before = true;
 export default handler;
