@@ -51,12 +51,12 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     if (!audioUrl) throw new Error('El audio no estuvo listo a tiempo');
 
-    // 3. Descargar y enviar
+    // 3. Descargar y enviar como nota de voz
     const audioBuffer = await fetch(audioUrl).then(res => res.buffer());
     const filePath = join(global.__dirname(import.meta.url), '../tmp', `${Date.now()}.mp3`);
     fs.writeFileSync(filePath, audioBuffer);
 
-    await conn.sendFile(m.chat, filePath, 'auron.mp3', null, m, true);
+    await conn.sendFile(m.chat, filePath, 'auron.mp3', null, m, true, { mimetype: 'audio/mp4', ptt: true });
     fs.unlinkSync(filePath);
   } catch (e) {
     console.error('ERROR EN .auron:', e);
