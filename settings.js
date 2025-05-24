@@ -16,7 +16,7 @@ global.botNumber = '' //Ejemplo: 573218138672
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
 global.owner = [
-  ['50492280729', 'ᯓ᮫݃͜ᮨ🍁ܾ݉ᢥ౽꯭ⲉυ꯭᥉′🦦ꪃꒉܻᵃₚͬ៰⍳', true],
+  ['50492280729', '―͟͞🍁͓̽𝆥⟅ₑᵤ⟆𝇃𝇄⳻݊͜⳺𝇄𝇃', true],
   ['524444444404']
 ];
 
@@ -42,10 +42,10 @@ global.yukiJadibts = true
 global.packname = '🤖⃧►iʑυвöτ◃2.0▹'
 global.botname = '🤖⃧►iʑυвöτ◃2.0▹'
 global.wm = '🤖⃧►iʑυвöτ◃2.0▹'
-global.author = 'ᯓ᮫݃͜ᮨ🍁ܾ݉ᢥ౽꯭ⲉυ꯭᥉′🦦ꪃꒉܻᵃₚͬ៰⍳'
-global.dev = 'ᯓ᮫݃͜ᮨ🍁ܾ݉ᢥ౽꯭ⲉυ꯭᥉′🦦ꪃꒉܻᵃₚͬ៰⍳'
+global.author = '―͟͞🍁͓̽𝆥⟅ₑᵤ⟆𝇃𝇄⳻݊͜⳺𝇄𝇃'
+global.dev = '―͟͞🍁͓̽𝆥⟅ₑᵤ⟆𝇃𝇄⳻݊͜⳺𝇄𝇃'
 global.textbot = 'sɪᴍᴘʟᴇ ʙᴏᴛ - ᴡʜᴀᴛsᴀᴘᴘ 2019-2025'
-global.etiqueta = 'ᯓ᮫݃͜ᮨ🍁ܾ݉ᢥ౽꯭ⲉυ꯭᥉′🦦ꪃꒉܻᵃₚͬ៰⍳'
+global.etiqueta = '―͟͞🍁͓̽𝆥⟅ₑᵤ⟆𝇃𝇄⳻݊͜⳺𝇄𝇃'
 global.e = '🪐'
 global.s = '⭒'
 
