@@ -15,23 +15,29 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const voice = 'auronplay';
   const username = 'Edar123';
-  const apiKey = '23d113424d81e3f92af9a55f7c929359...'; // recorta por seguridad
+  const apiKey = '23d113424d81e3f92af9a55f7c929359'; // Reemplazalo por tu API Key real
 
   try {
     const res = await fetch('https://api.uberduck.ai/speak-synchronous', {
       method: 'POST',
       headers: {
+        'Authorization': `Basic ${Buffer.from(`${username}:${apiKey}`).toString('base64')}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Basic ' + Buffer.from(`${username}:${apiKey}`).toString('base64')
+        'Accept': 'application/json'
       },
-      body: JSON.stringify({ speech: text, voice })
+      body: JSON.stringify({
+        speech: text,
+        voice
+      })
     });
 
     const json = await res.json();
-    const audioUrl = json?.audio_path;
-    if (!audioUrl) throw new Error('No se pudo obtener el audio');
+    console.log('[Uberduck Response]', json); // DEBUG
 
+    if (!json?.success && json?.error) throw new Error(json.error);
+    if (!json?.audio_path) throw new Error('No se pudo obtener el audio');
+
+    const audioUrl = json.audio_path;
     const audioRes = await fetch(audioUrl);
     const audioBuffer = await audioRes.buffer();
 
@@ -47,7 +53,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     fs.unlinkSync(file);
   } catch (e) {
-    console.error(e);
+    console.error('[ERROR EN .auron]', e);
     m.reply(`*Ocurrió un error en .auron:*\n${e.message}`);
   }
 };
