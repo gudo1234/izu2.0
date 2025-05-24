@@ -71,16 +71,17 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
 
 if (media === 'texto') {
   let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
-╭━━━━━━━━━━━❤︎₊᪲
-┃  ¡Hola *@${m.messageStubParameters[0].split`@`[0]}*! 
-┃  Bienvenido(a) a *${groupMetadata.subject}*!
+╭━━━━━━━━━━❤︎₊᪲
+┃ _¡Hola!_ *@${m.messageStubParameters[0].split`@`[0]}*
+┃ ⇝ Bıεŋvεŋıɖσ(a) a:
+┃ *${groupMetadata.subject}*
 ┃
-┃ ┌─❖─═•
-┃ │➟ _Pasa un buen rato_
-┃ │✑ _Sé respetuoso_
-┃ │✬ _Lee las reglas_
-┃ └─────────
-╰━━━━━━━━━━━❤︎₊᪲`;
+┃┌─❖─═•
+┃│➟ _Pasa un buen rato_
+┃│✑ _Sé respetuoso_
+┃│✬ _Lee las reglas_
+┃└─────────
+╰━━━━━━━━━━❤︎₊᪲`;
  await conn.sendMessage(m.chat, {
         text: wel, 
         contextInfo: {
