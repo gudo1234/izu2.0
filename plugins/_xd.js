@@ -20,6 +20,6 @@ let handler = async (m, { conn }) => {
   }
 }
 
-handler.customPrefix = /^xd+$/i
+handler.customPrefix = /xd/
 handler.command = new RegExp
 export default handler
