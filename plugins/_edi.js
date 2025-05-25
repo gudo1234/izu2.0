@@ -111,7 +111,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 
   // Imagen y bio
-  let img = await conn.profilePictureUrl(target, 'image').catch(_ => './src/avatar_contact.png')
+  let img = await conn.profilePictureUrl(target, 'image').catch(_ => icono )
   let bio = await conn.fetchStatus(target).catch(_ => null)
   let business = await conn.getBusinessProfile(target).catch(_ => null)
 
