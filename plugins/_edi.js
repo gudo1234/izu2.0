@@ -1,3 +1,4 @@
+import { getDevice } from "@whiskeysockets/baileys"
 import axios from 'axios';
 import PhoneNum from 'awesome-phonenumber';
 import moment from 'moment-timezone';
@@ -47,6 +48,7 @@ async function handler(m, { conn }) {
 *País:* ${countryName} ${emojiBandera}
 *Capital:* ${capital}
 *Fecha:* ${fechaLocal}
+*Sistema/Opr:* ${getDevice(m.key.id)}
   `.trim();
 
   m.reply(info);
