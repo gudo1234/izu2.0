@@ -1,4 +1,4 @@
-import { createCanvas } from 'canvas';
+/*import { createCanvas } from 'canvas';
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
@@ -163,4 +163,76 @@ function renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, cu
     ctx.fillText(i.toString(), x + 35, y + 35);
     x += 90;
   }
+}*/
+
+import { createCanvas } from 'canvas';
+import fs from 'fs';
+import path from 'path';
+import moment from 'moment-timezone';
+import axios from 'axios';
+import PhoneNum from 'awesome-phonenumber';
+
+const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
+
+function banderaEmoji(countryCode) {
+  if (!countryCode || countryCode.length !== 2) return '';
+  const codePoints = [...countryCode.toUpperCase()]
+    .map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
+  return String.fromCodePoint(...codePoints);
 }
+
+let handler = async (m, { conn }) => {
+  try {
+    // Extraer país y bandera del remitente
+    const number = m.sender.split('@')[0];
+    const pn = PhoneNum('+' + number);
+    const countryCode = pn.getRegionCode('international');
+    const country = regionNames.of(countryCode) || 'Desconocido';
+    const flag = banderaEmoji(countryCode);
+
+    let capital = 'Desconocida';
+    try {
+      const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+      capital = res.data[0]?.capital?.[0] || 'Desconocida';
+    } catch {}
+
+    const tz = 'America/Argentina/Buenos_Aires'; // Puedes ajustar a zona horaria dinámica si lo deseas
+    const today = moment().tz(tz);
+    const month = today.format('MMMM');
+    const year = today.format('YYYY');
+    const currentDay = today.date();
+    const startOfMonth = today.clone().startOf('month');
+    const daysInMonth = today.daysInMonth();
+    const startDay = startOfMonth.day();
+
+    const width = 800;
+    const height = 750;
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    const styles = [estiloDegradado, estiloOscuroNeon, estiloPastel, estiloGalaxia, estiloRetro];
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
+
+    // Dibujar fondo y calendario
+    await randomStyle(ctx, width, height, month, year, daysInMonth, startDay, currentDay);
+
+    // Dibujar país y bandera
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`País: ${country} ${flag}`, 40, height - 40);
+
+    const file = path.join('./tmp', `calendario-${Date.now()}.png`);
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(file, buffer);
+
+    await conn.sendFile(m.chat, fs.readFileSync(file), 'Calendario.png', `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*\nPaís detectado: ${country} ${flag}`, m);
+    fs.unlinkSync(file);
+
+  } catch (e) {
+    await m.reply(`❌ Error al generar el calendario:\n${e.message}`);
+  }
+};
+
+handler.command = ['calendario'];
+export default handler;
