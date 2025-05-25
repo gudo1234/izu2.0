@@ -79,27 +79,34 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
 
-  await conn.sendMessage(m.chat, {
+  /*await conn.sendMessage(m.chat, {
     image: { url: img },
     caption,
     mentions: [target]
-  }, { quoted: m })
-  /*await conn.sendMessage(m.chat, {
-    text: caption,
-    contextInfo: {
-      mentionedJid: [target],
-      externalAdReply: {
-        title: wm,
-        body: textbot,
-        thumbnail: img,
-        thumbnailUrl: redes,
-        mediaType: 1,
-        renderLargerThumbnail: true,
-        showAdAttribution: false,
-        sourceUrl: redes
-      }
-    }
   }, { quoted: m })*/
+  await conn.sendMessage(m.chat, {
+      text: caption,
+      contextInfo: {
+        mentionedJid: [target],
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: channelRD.id,
+          newsletterName: channelRD.name,
+          serverMessageId: -1,
+        },
+        forwardingScore: false,
+        externalAdReply: {
+          title: wm,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail: img,
+          sourceUrl: redes,
+          mediaType: 1,
+          showAdAttribution: true,
+          renderLargerThumbnail: true,
+        },
+      },
+    }, { quoted: m })
 }
 
 handler.command = ['wastalk', 'perfil', 'ava'];
