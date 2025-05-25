@@ -35,7 +35,7 @@ Ejemplo:
     '4': 4, 'moderno': 4,
   };
   const style = styleMap[styleInput.toLowerCase()];
-  if (!style) return m.reply(`❌ *Estilo no válido.* Usa 1, 2, 3, 4 o sus nombres.`);
+  if (!style) return m.reply(`${e} *Estilo no válido.* Usa 1, 2, 3, 4 o sus nombres.`);
 
   const emoji = emojiMap[style];
   const title = titleInput;
