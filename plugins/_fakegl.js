@@ -3,7 +3,7 @@ import fs from 'fs';
 
 let handler = async (m, { text, conn, command }) => {
   if (!text.includes(' ')) {
-    throw `*Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Alba es novia de Bruno`;
+    throw `${e} *Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Hola bebé`;
   }
 
   const [title, ...messageParts] = text.split(' ');
