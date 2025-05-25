@@ -74,15 +74,20 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints);
 }
 
-// Mapeo simple de código de área brasileño a zona horaria
-const brasilTimezonesMap = {
-  '11': 'America/Sao_Paulo',      // São Paulo
-  '61': 'America/Sao_Paulo',      // Brasilia (DF)
-  '67': 'America/Campo_Grande',   // Mato Grosso do Sul (ejemplo de tu número)
-  '71': 'America/Bahia',
-  '85': 'America/Fortaleza',
-  '91': 'America/Belem',
-  // Puedes agregar más códigos y zonas si quieres más precisión
+// Tabla de códigos DDD brasileños a zonas horarias
+const zonaBrasil = {
+  '67': 'America/Campo_Grande',     // Mato Grosso do Sul
+  '61': 'America/Sao_Paulo',        // Distrito Federal
+  '11': 'America/Sao_Paulo',        // São Paulo
+  '21': 'America/Sao_Paulo',        // Rio de Janeiro
+  '31': 'America/Sao_Paulo',        // Minas Gerais
+  '71': 'America/Bahia',            // Salvador
+  '91': 'America/Belem',            // Pará
+  '92': 'America/Manaus',           // Amazonas
+  '95': 'America/Boa_Vista',        // Roraima
+  '96': 'America/Macapa',           // Amapá
+  '98': 'America/Fortaleza'         // Maranhão (aprox)
+  // Puedes agregar más si necesitas precisión
 };
 
 async function handler(m, { conn }) {
@@ -104,27 +109,14 @@ async function handler(m, { conn }) {
     const data = res.data[0];
     capital = data.capital?.[0] || 'Desconocida';
 
-    // Obtener zonas horarias del número
-    let timezones = phoneInfo.getTimezones() || [];
-
-    // Si no hay zonas horarias detectadas, usar todas del país
-    if (timezones.length === 0) {
-      timezones = data.timezones || [];
-    }
-
-    // En caso de Brasil, intentar obtener la zona horaria por código de área
     let zonaHoraria = null;
-    if (countryCode === 'BR') {
-      // Extraer código de área: en Brasil usualmente primeros 2 o 3 dígitos (depende)
-      const codigoArea = number.substring(2, 4); // '+5567...' -> '67'
-      if (brasilTimezonesMap[codigoArea]) {
-        zonaHoraria = brasilTimezonesMap[codigoArea];
-      }
-    }
 
-    // Si no se asignó con el mapa, tomar la primera zona horaria disponible
-    if (!zonaHoraria) {
-      zonaHoraria = timezones.length > 0 ? timezones[0] : null;
+    if (countryCode === 'BR') {
+      const codigoDDD = number.slice(2, 4); // Por ejemplo: '67'
+      zonaHoraria = zonaBrasil[codigoDDD] || 'America/Sao_Paulo'; // fallback
+    } else {
+      const tzList = phoneInfo.getTimezones();
+      zonaHoraria = tzList?.[0] || data.timezones?.[0];
     }
 
     if (zonaHoraria) {
