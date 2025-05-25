@@ -25,7 +25,6 @@ async function handler(m, { conn }) {
   const emojiBandera = banderaEmoji(countryCode);
 
   let capital = 'Desconocida';
-  let horaLocal = 'No disponible';
   let fechaLocal = 'No disponible';
 
   try {
@@ -36,7 +35,6 @@ async function handler(m, { conn }) {
     const zonaHoraria = data.timezones?.[0];
     if (zonaHoraria) {
       const now = moment().tz(zonaHoraria);
-      horaLocal = now.format('hh:mm:ss A'); // Incluye segundos
       fechaLocal = now.format('dddd, D [de] MMMM [de] YYYY');
     }
   } catch (e) {
@@ -48,7 +46,6 @@ async function handler(m, { conn }) {
 *Número:* +${number}
 *País:* ${countryName} ${emojiBandera}
 *Capital:* ${capital}
-*Hora local:* ${horaLocal}
 *Fecha:* ${fechaLocal}
 `.trim();
 
