@@ -39,24 +39,10 @@ let handler = async (m, { conn }) => {
     fs.writeFileSync(file, buffer);
 
     try {
-      /*await conn.sendMessage(m.chat, {
+      await conn.sendMessage(m.chat, {
         image: fs.readFileSync(file),
         caption: `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`
-      }, { quoted: m });*/
-      await conn.sendMessage(m.chat, {
-      text: `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`,
-      contextInfo: {
-        externalAdReply: {
-          title: wm,
-          body: textbot,
-          thumbnailUrl: redes,
-          thumbnail: fs.readFileSync(file),
-          sourceUrl: redes,
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
-    }, { quoted: m })
+      }, { quoted: m });
     } finally {
       fs.unlinkSync(file);
     }
