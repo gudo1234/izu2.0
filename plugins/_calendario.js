@@ -14,53 +14,26 @@ let handler = async (m, { conn }) => {
     const daysInMonth = today.daysInMonth();
     const startDay = startOfMonth.day();
 
-    const width = 700;
-    const height = 600;
+    const width = 800;
+    const height = 700;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Fondo
-    ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(0, 0, width, height);
+    // Estilos disponibles
+    const styles = [
+      estiloDegradado,
+      estiloOscuroNeon,
+      estiloPastel,
+      estiloGalaxia,
+      estiloRetro
+    ];
 
-    // Título
-    ctx.fillStyle = '#333';
-    ctx.font = 'bold 32px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`, width / 2, 50);
+    // Elegir uno aleatoriamente
+    const randomStyle = styles[Math.floor(Math.random() * styles.length)];
 
-    // Días de la semana
-    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    ctx.font = 'bold 20px sans-serif';
-    days.forEach((d, i) => {
-      ctx.fillText(d, 100 + i * 80, 100);
-    });
+    // Dibujar estilo
+    await randomStyle(ctx, width, height, month, year, daysInMonth, startDay, currentDay);
 
-    // Días del mes
-    ctx.font = '20px sans-serif';
-    let x = 100 + startDay * 80;
-    let y = 140;
-    for (let i = 1; i <= daysInMonth; i++) {
-      if ((i + startDay - 1) % 7 === 0 && i !== 1) {
-        y += 50;
-        x = 100;
-      }
-
-      if (i === currentDay) {
-        ctx.fillStyle = '#ff5252';
-        ctx.beginPath();
-        ctx.arc(x - 10, y - 15, 20, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#fff';
-      } else {
-        ctx.fillStyle = '#000';
-      }
-
-      ctx.fillText(i.toString(), x, y);
-      x += 80;
-    }
-
-    // Guardar en archivo temporal
     const file = path.join('./tmp', `calendario-${Date.now()}.png`);
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(file, buffer);
@@ -68,7 +41,7 @@ let handler = async (m, { conn }) => {
     try {
       await conn.sendMessage(m.chat, {
         image: fs.readFileSync(file),
-        caption: `🗓 Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`
+        caption: `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`
       }, { quoted: m });
     } finally {
       fs.unlinkSync(file);
@@ -81,3 +54,116 @@ let handler = async (m, { conn }) => {
 
 handler.command = ['calendario'];
 export default handler;
+
+// === ESTILOS ===
+
+function estiloDegradado(ctx, width, height, month, year, daysInMonth, startDay, currentDay) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, '#4facfe');
+  gradient.addColorStop(1, '#00f2fe');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay);
+}
+
+function estiloOscuroNeon(ctx, width, height, month, year, daysInMonth, startDay, currentDay) {
+  ctx.fillStyle = '#111';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.shadowColor = '#0ff';
+  ctx.shadowBlur = 20;
+  ctx.fillStyle = '#0ff';
+  ctx.font = 'bold 40px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${month.toUpperCase()} ${year}`, width / 2, 70);
+  ctx.shadowBlur = 0;
+
+  renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay, '#0ff', '#333', '#fff');
+}
+
+function estiloPastel(ctx, width, height, month, year, daysInMonth, startDay, currentDay) {
+  ctx.fillStyle = '#ffe0f0';
+  ctx.fillRect(0, 0, width, height);
+
+  renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay, '#ff69b4', '#333', '#fff', '#ffb6c1');
+}
+
+function estiloGalaxia(ctx, width, height, month, year, daysInMonth, startDay, currentDay) {
+  ctx.fillStyle = '#0b0033';
+  ctx.fillRect(0, 0, width, height);
+
+  for (let i = 0; i < 100; i++) {
+    ctx.beginPath();
+    const x = Math.random() * width;
+    const y = Math.random() * height;
+    const r = Math.random() * 2 + 1;
+    ctx.arc(x, y, r, 0, 2 * Math.PI);
+    ctx.fillStyle = `rgba(255, 255, 255, ${Math.random()})`;
+    ctx.fill();
+  }
+
+  renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay, '#ffffff', '#ccc', '#222', '#ffffff55');
+}
+
+function estiloRetro(ctx, width, height, month, year, daysInMonth, startDay, currentDay) {
+  ctx.fillStyle = '#fef5c4';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = '#000';
+  for (let i = 0; i < height; i += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, i);
+    ctx.lineTo(width, i);
+    ctx.stroke();
+  }
+
+  renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay, '#333', '#000', '#fff', '#fff99f');
+}
+
+// === FUNCIÓN BASE PARA RENDER CALENDARIO ===
+function renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay, titleColor = '#fff', dayBoxColor = '#fff', textColor = '#000', highlightColor = '#ff4081') {
+  ctx.fillStyle = titleColor;
+  ctx.font = 'bold 36px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${month.charAt(0).toUpperCase() + month.slice(1)} ${year}`, width / 2, 70);
+
+  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  ctx.font = 'bold 22px sans-serif';
+  days.forEach((d, i) => {
+    ctx.fillStyle = dayBoxColor;
+    ctx.fillRect(80 + i * 90, 100, 70, 40);
+    ctx.fillStyle = textColor;
+    ctx.fillText(d, 115 + i * 90, 130);
+  });
+
+  ctx.font = '22px sans-serif';
+  let x = 80 + startDay * 90;
+  let y = 160;
+
+  for (let i = 1; i <= daysInMonth; i++) {
+    if ((i + startDay - 1) % 7 === 0 && i !== 1) {
+      y += 60;
+      x = 80;
+    }
+
+    if (i === currentDay) {
+      ctx.beginPath();
+      ctx.arc(x + 35, y + 25, 28, 0, Math.PI * 2);
+      ctx.fillStyle = highlightColor;
+      ctx.shadowColor = highlightColor;
+      ctx.shadowBlur = 15;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#fff';
+    } else {
+      ctx.fillStyle = dayBoxColor;
+      ctx.fillRect(x, y, 70, 50);
+      ctx.fillStyle = textColor;
+    }
+
+    ctx.textAlign = 'center';
+    ctx.fillText(i.toString(), x + 35, y + 35);
+    x += 90;
+  }
+}
