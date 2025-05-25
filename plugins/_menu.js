@@ -121,6 +121,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 \`✘ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮\`
 ┌────────────
+│ ${e}${s}calendario ‹›
 │ ${e}${s}toptt ‹rєρℓy›
 │ ${e}${s}tovid ‹rєρℓy›
 │ ${e}${s}tomp3 ‹rєρℓy›
