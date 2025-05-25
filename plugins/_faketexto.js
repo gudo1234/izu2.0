@@ -14,10 +14,10 @@ ${usedPrefix + command} 1 Hola ¿Todo bien?
 ${usedPrefix + command} moderno Buenas noches Dulces sueños
 
 *Estilos disponibles:*
-1 o blanco       – Estilo blanco simple
-2 o neon         – Estilo neón oscuro
-3 o romantico    – Estilo romántico pastel
-4 o moderno    – Estilo moderno degradado`
+\`1 o blanco\` – Estilo blanco simple
+\`2 o neon\` – Estilo neón oscuro
+\`3 o romantico\` – Estilo romántico pastel
+\`4 o moderno\` – Estilo moderno degradado`
   );
 
   const [styleInput, title, ...messageParts] = text.split(' ');
