@@ -78,22 +78,11 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Zona horaria:* ${business.business_hours?.timezone || '-'}\n`
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
-
   await conn.sendMessage(m.chat, {
-      text: caption,
-      contextInfo: {
-      mentionedJid: [target],
-        externalAdReply: {
-          title: wm,
-          body: textbot,
-          thumbnailUrl: redes,
-          thumbnail: img,
-          sourceUrl: redes,
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
-    }, { quoted: m })
+    image: { url: img },
+    caption,
+    mentions: [target]
+  }, { quoted: m })
 }
 
 handler.command = ['wastalk', 'perfil', 'ava'];
