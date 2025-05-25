@@ -65,16 +65,19 @@ async function handler(m, { conn }) {
     const data = res.data[0];
     capital = data.capital?.[0] || 'Desconocida';
 
-    const timezones = data.timezones?.[0]; // Ej: "UTC+01:00"
-    const zona = timezones || 'UTC';
+    const zonaHoraria = data.timezones?.[0]; // Ej: "Europe/Madrid"
+    if (zonaHoraria && !zonaHoraria.startsWith('UTC')) {
+      const fecha = new Date();
+      horaLocal = new Intl.DateTimeFormat('es-ES', {
+        timeZone: zonaHoraria,
+        timeStyle: 'short'
+      }).format(fecha);
 
-    const fecha = new Date().toLocaleString('es-ES', {
-      timeZone: zona,
-      dateStyle: 'full',
-      timeStyle: 'short'
-    });
-
-    [fechaLocal, horaLocal] = fecha.split(', ').slice(1); // Extrae fecha y hora
+      fechaLocal = new Intl.DateTimeFormat('es-ES', {
+        timeZone: zonaHoraria,
+        dateStyle: 'full'
+      }).format(fecha);
+    }
   } catch (e) {
     console.error('Error al obtener datos del país:', e);
   }
