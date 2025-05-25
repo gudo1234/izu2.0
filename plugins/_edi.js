@@ -36,6 +36,7 @@ export default handler;*/
 
 import axios from 'axios';
 import PhoneNum from 'awesome-phonenumber';
+import moment from 'moment-timezone';
 
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
 
@@ -65,18 +66,11 @@ async function handler(m, { conn }) {
     const data = res.data[0];
     capital = data.capital?.[0] || 'Desconocida';
 
-    const zonaHoraria = data.timezones?.[0]; // Ej: "Europe/Madrid"
-    if (zonaHoraria && !zonaHoraria.startsWith('UTC')) {
-      const fecha = new Date();
-      horaLocal = new Intl.DateTimeFormat('es-ES', {
-        timeZone: zonaHoraria,
-        timeStyle: 'short'
-      }).format(fecha);
-
-      fechaLocal = new Intl.DateTimeFormat('es-ES', {
-        timeZone: zonaHoraria,
-        dateStyle: 'full'
-      }).format(fecha);
+    const zonaHoraria = data.timezones?.[0]; // Ej: "Europe/Madrid" o "UTC+03:00"
+    if (zonaHoraria) {
+      const now = moment().tz(zonaHoraria);
+      horaLocal = now.format('HH:mm');
+      fechaLocal = now.format('dddd, D [de] MMMM [de] YYYY');
     }
   } catch (e) {
     console.error('Error al obtener datos del país:', e);
