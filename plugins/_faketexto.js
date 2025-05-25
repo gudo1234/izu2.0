@@ -21,9 +21,9 @@ Ejemplo:
 \`${usedPrefix + command}\` moderno Buenas noches Dulces sueños
 
 *Estilos disponibles:*
-\`1 o blanco\` – Estilo blanco simple
-\`2 o neon\` – Estilo neón oscuro
-\`3 o romantico\` – Estilo romántico pastel
+\`1 o blanco\` – Estilo blanco simple  
+\`2 o neon\` – Estilo neón oscuro  
+\`3 o romantico\` – Estilo romántico pastel  
 \`4 o moderno\` – Estilo noche con estrellas`
   );
 
@@ -44,16 +44,14 @@ Ejemplo:
     style = possibleStyle;
     title = words[1] || '';
     message = words.slice(2).join(' ');
-    if (!title || !message) return m.reply(`${e} *Falta el título o el mensaje.*`);
+    if (!title) return m.reply(`${e} *Falta el título.*`);
   } else {
-    // Si no se especifica estilo, se asume estilo 1
-    title = words[0];
-    message = words.slice(1).join(' ');
-    if (!title || !message) return m.reply(`${e} *Falta el título o el mensaje.*`);
+    // Si solo viene texto, es el título, sin mensaje ni estilo
+    title = words.join(' ');
+    message = ''; // mensaje vacío permitido
   }
 
   const emoji = emojiMap[style];
-
   const width = 512;
   const height = 512;
   const canvas = createCanvas(width, height);
@@ -105,7 +103,7 @@ Ejemplo:
 
       ctx.fillStyle = '#000000';
       ctx.font = '24px sans-serif';
-      ctx.fillText(message, width / 2, 280);
+      ctx.fillText(message || '', width / 2, 280);
     },
 
     2: () => {
@@ -117,7 +115,7 @@ Ejemplo:
       ctx.fillText(title, width / 2, 210);
       ctx.fillStyle = '#ffffff';
       ctx.font = '24px monospace';
-      ctx.fillText(message, width / 2, 290);
+      ctx.fillText(message || '', width / 2, 290);
     },
 
     3: () => {
@@ -129,7 +127,7 @@ Ejemplo:
       ctx.fillText(`${title} ❤️`, width / 2, 200);
       ctx.fillStyle = '#333333';
       ctx.font = '22px serif';
-      ctx.fillText(message, width / 2, 280);
+      ctx.fillText(message || '', width / 2, 280);
     },
 
     4: () => {
@@ -152,7 +150,7 @@ Ejemplo:
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText(`${title}`, width / 2, 200);
       ctx.font = '24px sans-serif';
-      ctx.fillText(message, width / 2, 280);
+      ctx.fillText(message || '', width / 2, 280);
     }
   };
 
@@ -165,7 +163,7 @@ Ejemplo:
   try {
     await conn.sendMessage(m.chat, {
       image: fs.readFileSync(file),
-      caption: `${emoji} \`Estilo ${style}\`\n*> ${title}* = ${message}`
+      caption: `${emoji} \`Estilo ${style}\`\n*> ${title}*${message ? ` = ${message}` : ''}`
     }, { quoted: m });
 
     await conn.sendMessage(m.chat, { react: { text: emoji, key: m.key } });
