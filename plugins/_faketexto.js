@@ -31,23 +31,21 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     '4': 4, 'moderno': 4,
   };
 
-  // Dividir texto en palabras
   const parts = text.trim().split(/\s+/);
 
   let style, title, message;
 
-  if (parts.length === 1) {
-    // Solo una palabra: la tomamos como título y estilo 1 automático
-    style = 1;
-    title = parts[0];
-    message = '';
-  } else {
-    // Múltiples palabras, el primero es estilo o nombre, segundo título, resto mensaje
-    const styleInput = parts[0].toLowerCase();
-    style = styleMap[styleInput];
-    if (!style) return m.reply(`⚠️ *Estilo no válido.* Usa 1, 2, 3, 4 o sus nombres.`);
+  // Verificamos si el primer texto es estilo válido
+  if (styleMap[parts[0].toLowerCase()]) {
+    style = styleMap[parts[0].toLowerCase()];
+    if (parts.length < 2) return m.reply(`⚠️ Debes indicar un título después del estilo.`);
     title = parts[1];
     message = parts.slice(2).join(' ');
+  } else {
+    // No es estilo válido, entonces asumimos estilo 1, primer palabra título y resto mensaje
+    style = 1;
+    title = parts[0];
+    message = parts.slice(1).join(' ');
   }
 
   const emoji = emojiMap[style];
@@ -157,12 +155,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
   };
 
-  // Si solo hay título y no mensaje, forzamos estilo 1 y ajustamos mensaje vacío
-  if (parts.length === 1) {
-    bgStyles[1]();
-  } else {
-    bgStyles[style]();
-  }
+  bgStyles[style]();
 
   const file = path.join('./tmp', `faketexto-${Date.now()}.png`);
   const buffer = canvas.toBuffer('image/png');
