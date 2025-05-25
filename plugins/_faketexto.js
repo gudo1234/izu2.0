@@ -27,19 +27,32 @@ Ejemplo:
 \`4 o moderno\` – Estilo noche con estrellas`
   );
 
-  const [styleInput, titleInput, ...messageParts] = text.split(' ');
+  const words = text.trim().split(/\s+/);
   const styleMap = {
     '1': 1, 'blanco': 1,
     '2': 2, 'neon': 2,
     '3': 3, 'romantico': 3,
     '4': 4, 'moderno': 4,
   };
-  const style = styleMap[styleInput.toLowerCase()];
-  if (!style) return m.reply(`${e} *Estilo no válido.* Usa 1, 2, 3, 4 o sus nombres.`);
+
+  let style = 1;
+  let title = '';
+  let message = '';
+
+  const possibleStyle = styleMap[words[0]?.toLowerCase()];
+  if (possibleStyle) {
+    style = possibleStyle;
+    title = words[1] || '';
+    message = words.slice(2).join(' ');
+    if (!title || !message) return m.reply(`${e} *Falta el título o el mensaje.*`);
+  } else {
+    // Si no se especifica estilo, se asume estilo 1
+    title = words[0];
+    message = words.slice(1).join(' ');
+    if (!title || !message) return m.reply(`${e} *Falta el título o el mensaje.*`);
+  }
 
   const emoji = emojiMap[style];
-  const title = titleInput;
-  const message = messageParts.join(' ');
 
   const width = 512;
   const height = 512;
@@ -74,7 +87,7 @@ Ejemplo:
   }
 
   const bgStyles = {
-    1: () => { // Blanco con degradado superior
+    1: () => {
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, width, height);
 
@@ -95,7 +108,7 @@ Ejemplo:
       ctx.fillText(message, width / 2, 280);
     },
 
-    2: () => { // Neón oscuro
+    2: () => {
       ctx.fillStyle = '#0f0f0f';
       ctx.fillRect(0, 0, width, height);
       drawCard(ctx, 50, 160, 412, 200, 30, '#1a1a1a', '#39ff14', true);
@@ -107,7 +120,7 @@ Ejemplo:
       ctx.fillText(message, width / 2, 290);
     },
 
-    3: () => { // Romántico pastel
+    3: () => {
       ctx.fillStyle = '#ffe0f0';
       ctx.fillRect(0, 0, width, height);
       drawCard(ctx, 56, 156, 400, 200, 24, '#fff0f8');
@@ -119,7 +132,7 @@ Ejemplo:
       ctx.fillText(message, width / 2, 280);
     },
 
-    4: () => { // Noche con estrellas
+    4: () => {
       ctx.fillStyle = '#0b0c2a';
       ctx.fillRect(0, 0, width, height);
 
