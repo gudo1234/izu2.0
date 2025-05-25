@@ -1,8 +1,9 @@
 import { createCanvas } from 'canvas';
 import fs from 'fs';
+import path from 'path';
 
 let handler = async (m, { text, conn, command }) => {
-  if (!text.includes(' ')) {
+  if (!text || !text.includes(' ')) {
     throw `*Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Alba es novia de Bruno`;
   }
 
@@ -14,11 +15,11 @@ let handler = async (m, { text, conn, command }) => {
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
-  // Fondo general gris claro
+  // Fondo general
   ctx.fillStyle = '#f5f5f5';
   ctx.fillRect(0, 0, width, height);
 
-  // Tarjeta blanca con bordes redondeados
+  // Tarjeta blanca
   const cardX = 56;
   const cardY = 156;
   const cardWidth = 400;
@@ -39,14 +40,14 @@ let handler = async (m, { text, conn, command }) => {
   ctx.fillStyle = '#ffffff';
   ctx.fill();
 
-  // Parte superior con degradado
+  // Degradado superior
   const gradient = ctx.createLinearGradient(0, cardY, 0, cardY + 80);
   gradient.addColorStop(0, '#ff007a');
   gradient.addColorStop(1, '#ff8a00');
   ctx.fillStyle = gradient;
   ctx.fillRect(cardX, cardY, cardWidth, 80);
 
-  // Título (nombre)
+  // Texto principal
   ctx.fillStyle = '#ffffff';
   ctx.font = 'bold 30px sans-serif';
   ctx.textAlign = 'center';
@@ -57,16 +58,18 @@ let handler = async (m, { text, conn, command }) => {
   ctx.font = 'bold 24px sans-serif';
   ctx.fillText(message, width / 2, cardY + 140);
 
+  const file = path.join('./tmp', `fakengl-${Date.now()}.png`);
   const buffer = canvas.toBuffer('image/png');
-  const file = `./tmp/fakengl-${Date.now()}.png`;
   fs.writeFileSync(file, buffer);
 
-  await conn.sendMessage(m.chat, {
-    image: fs.readFileSync(file),
-    caption: `${e} \`FakenGl\`\n> ${title} = ${message}`
-  }, { quoted: m });
-
-  fs.unlinkSync(file);
+  try {
+    await conn.sendMessage(m.chat, {
+      image: fs.readFileSync(file),
+      caption: `> *FakenGl*\n*${title}* = ${message}`
+    }, { quoted: m });
+  } finally {
+    fs.unlinkSync(file);
+  }
 };
 
 handler.command = ['fakengl'];
