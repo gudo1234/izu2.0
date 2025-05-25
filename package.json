@@ -47,7 +47,6 @@
 "axios": "^1.1.2",
 "acrcloud": "^1.4.0",
 "canvas": "*",
-"fakeyou.js": "*",
 "form-data": "^4.0.0",
 "cfonts": "^3.3.0",
 "boxen": "^7.1.1",
