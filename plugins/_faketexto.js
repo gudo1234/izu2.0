@@ -59,7 +59,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     ctx.fillStyle = fill;
     ctx.fill();
     if (stroke) {
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 6; // Borde más grueso para que destaque mejor
       ctx.strokeStyle = stroke;
       if (neon) {
         ctx.shadowColor = stroke;
@@ -71,22 +71,27 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   }
 
   const bgStyles = {
-    1: () => { // Blanco con degradado superior
-      ctx.fillStyle = '#ffffff';
+    1: () => { // Blanco con borde blanco más visible
+      // Fondo gris clarito para contraste
+      ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, width, height);
 
-      drawCard(ctx, 56, 156, 400, 200, 24, '#ffffff');
+      // Rectángulo blanco con borde blanco grueso
+      drawCard(ctx, 56, 156, 400, 200, 24, '#ffffff', '#ffffff');
 
+      // Gradiente encima (igual que antes)
       const grad = ctx.createLinearGradient(56, 156, 456, 156);
       grad.addColorStop(0, '#ff007f');
       grad.addColorStop(1, '#ff9900');
       ctx.fillStyle = grad;
       ctx.fillRect(56, 156, 400, 60);
 
+      // Título
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText(title, width / 2, 196);
 
+      // Mensaje
       ctx.fillStyle = '#000000';
       ctx.font = '24px sans-serif';
       ctx.fillText(message, width / 2, 280);
@@ -116,21 +121,24 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
       ctx.fillText(message, width / 2, 280);
     },
 
-    4: () => { // Noche con estrellas
-      ctx.fillStyle = '#0b0c2a';
+    4: () => { // Noche con estrellas más iluminada
+      ctx.fillStyle = '#1a1a4d'; // azul noche más brillante
       ctx.fillRect(0, 0, width, height);
 
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 120; i++) {
         const x = Math.random() * width;
         const y = Math.random() * height;
-        const radius = Math.random() * 1.8;
+        const radius = Math.random() * 2.5 + 0.5; // estrellas más grandes
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; // estrellas brillantes
+        ctx.shadowColor = 'white';
+        ctx.shadowBlur = 5;
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
 
-      drawCard(ctx, 56, 156, 400, 200, 20, 'rgba(255,255,255,0.1)', 'rgba(255,255,255,0.3)');
+      drawCard(ctx, 56, 156, 400, 200, 20, 'rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.5)');
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 30px sans-serif';
