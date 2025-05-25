@@ -162,6 +162,6 @@ Ejemplo:
   }
 };
 
-handler.command = ['faketexto'];
+handler.command = ['faketexto', 'fakengl'];
 handler.group = true;
 export default handler;
