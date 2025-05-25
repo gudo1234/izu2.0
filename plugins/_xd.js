@@ -4,7 +4,7 @@ function pickRandom(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
-let handler = async (m, { conn }) => {
+let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     let stikerxd = [
       'https://telegra.ph/file/e8be85aeb9a625f533a4a.png',
@@ -14,23 +14,20 @@ let handler = async (m, { conn }) => {
     ];
 
     let stikerUrl = pickRandom(stikerxd); 
+
     let stiker = await sticker(null, stikerUrl, global.packname, global.author); 
 
     if (stiker) {
-      await conn.sendMessage(m.chat, {
-        sticker: { url: stiker }
-      }, {
-        quoted: m
-      });
+      await conn.sendFile(m.chat, stiker, 'sticker.webp', '', m);
     } else {
-      throw new Error('Failed to create sticker');
+      throw new Error('Failed to create sticker'); 
     }
-  } catch (e) {
-    console.error(e);
+  } catch {
   }
 };
 
 handler.customPrefix = /^(🐢)$/i;
+
 handler.command = new RegExp;
 
 export default handler;
