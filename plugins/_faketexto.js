@@ -10,8 +10,8 @@ Usa el comando así:
 ${usedPrefix + command} <estilo> <Título> <Mensaje>
 
 Ejemplo:
-${usedPrefix + command} 1 Hola ¿Todo bien?
-${usedPrefix + command} moderno Buenas noches Dulces sueños
+\`${usedPrefix + command}\` 1 Hola ¿Todo bien?
+\`${usedPrefix + command}\` moderno Buenas noches Dulces sueños
 
 *Estilos disponibles:*
 \`1 o blanco\` – Estilo blanco simple
