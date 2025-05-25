@@ -46,9 +46,8 @@ Ejemplo:
     message = words.slice(2).join(' ');
     if (!title) return m.reply(`${e} *Falta el título.*`);
   } else {
-    // Si solo viene texto, es el título, sin mensaje ni estilo
     title = words.join(' ');
-    message = ''; // mensaje vacío permitido
+    message = '';
   }
 
   const emoji = emojiMap[style];
@@ -89,21 +88,25 @@ Ejemplo:
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, width, height);
 
-      drawCard(ctx, 56, 156, 400, 200, 24, '#ffffff');
+      const cardX = 56;
+      const cardY = 176; // bajado un poco
+      const cardW = 400;
+      const cardH = 220;
+      drawCard(ctx, cardX, cardY, cardW, cardH, 24, '#ffffff');
 
-      const grad = ctx.createLinearGradient(56, 156, 456, 156);
+      const grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY);
       grad.addColorStop(0, '#ff007f');
       grad.addColorStop(1, '#ff9900');
       ctx.fillStyle = grad;
-      ctx.fillRect(56, 156, 400, 60);
+      ctx.fillRect(cardX, cardY, cardW, 60);
 
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 30px sans-serif';
-      ctx.fillText(title, width / 2, 196);
+      ctx.fillText(title, width / 2, cardY + 38);
 
       ctx.fillStyle = '#000000';
       ctx.font = '24px sans-serif';
-      ctx.fillText(message || '', width / 2, 280);
+      if (message) ctx.fillText(message, width / 2, cardY + 140);
     },
 
     2: () => {
@@ -115,7 +118,7 @@ Ejemplo:
       ctx.fillText(title, width / 2, 210);
       ctx.fillStyle = '#ffffff';
       ctx.font = '24px monospace';
-      ctx.fillText(message || '', width / 2, 290);
+      if (message) ctx.fillText(message, width / 2, 290);
     },
 
     3: () => {
@@ -127,7 +130,7 @@ Ejemplo:
       ctx.fillText(`${title} ❤️`, width / 2, 200);
       ctx.fillStyle = '#333333';
       ctx.font = '22px serif';
-      ctx.fillText(message || '', width / 2, 280);
+      if (message) ctx.fillText(message, width / 2, 280);
     },
 
     4: () => {
@@ -145,12 +148,11 @@ Ejemplo:
       }
 
       drawCard(ctx, 56, 156, 400, 200, 20, 'rgba(255,255,255,0.1)', 'rgba(255,255,255,0.3)');
-
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText(`${title}`, width / 2, 200);
       ctx.font = '24px sans-serif';
-      ctx.fillText(message || '', width / 2, 280);
+      if (message) ctx.fillText(message, width / 2, 280);
     }
   };
 
