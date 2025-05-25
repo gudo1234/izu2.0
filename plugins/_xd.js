@@ -26,8 +26,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.customPrefix = /^(🐢)$/i;
-
+handler.customPrefix = /xd/
 handler.command = new RegExp;
-
 export default handler;
