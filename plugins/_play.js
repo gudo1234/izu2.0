@@ -1,75 +1,46 @@
-import fetch from 'node-fetch';
-import yts from 'yt-search';
 import axios from 'axios';
 
-const handler = async (m, { conn, text, command }) => {
-  if (!text) return m.reply(`*[❗] Usa el comando con el nombre o enlace de un video de YouTube.*`);
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) return m.reply(`*Uso incorrecto*\n\nEjemplo:\n${usedPrefix + command} https://youtu.be/dQw4w9WgXcQ`);
 
   await m.react('🕒');
 
   try {
-    let video;
-    const ytMatch = text.match(/(?:https?:\/\/)?(?:www\.)?(youtube\.com|youtu\.be)\/[^\s]+/);
-    if (ytMatch) {
-      const ytres = await yts({ videoId: ytMatch[0].split('v=')[1]?.substring(0, 11) });
-      video = ytres;
-    } else {
-      const ytres = await yts(text);
-      video = ytres.videos[0];
-      if (!video) return m.reply('*[❗] Video no encontrado.*');
+    // Llamada a la API de BK9
+    const res = await axios.get(`https://bk9.fun/download/ytmp3?url=${encodeURIComponent(text)}`);
+
+    if (!res.data?.status || !res.data?.result?.url) {
+      return m.reply('*[❗] Error al obtener el enlace de descarga desde la API BK9.*');
     }
 
-    const { title, thumbnail, timestamp, views, ago, url, author } = video;
+    const { title, thumbnail, url: downloadUrl } = res.data.result;
 
-    const infoMsg = `
-╭───── • ─────╮
-  𖤐 \`YOUTUBE MP3\` 𖤐
-╰───── • ─────╯
+    const caption = `
+🎵 *Título:* ${title}
+🔗 *Link:* ${text}
+    `.trim();
 
-✦ *📺 Canal:* ${author?.name || 'Desconocido'}
-✦ *⏱️ Duración:* ${timestamp || 'N/A'}
-✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
-✦ *📅 Publicado:* ${ago || 'N/A'}
-✦ *🔗 Link:* ${url}
-`.trim();
-
+    // Enviar mensaje con thumbnail y texto
     await conn.sendMessage(m.chat, {
-      text: infoMsg,
-      contextInfo: {
-        externalAdReply: {
-          title,
-          body: '🔊 Descargando audio...',
-          thumbnail: await (await fetch(thumbnail)).buffer(),
-          mediaType: 1,
-          renderLargerThumbnail: true,
-          sourceUrl: url
-        }
-      }
+      image: { url: thumbnail },
+      caption
     }, { quoted: m });
 
-    let downloadUrl;
-    try {
-      const apiRes = await axios.get(`https://bk9.fun/download/ytmp3?url=${encodeURIComponent(url)}`);
-      if (!apiRes.data?.status || !apiRes.data?.result?.url) return m.reply('*[❗] No se pudo obtener el enlace de descarga.*');
-      downloadUrl = apiRes.data.result.url;
-    } catch (e) {
-      console.error(e);
-      return m.reply('*[❗] Error al acceder a la API.*');
-    }
-
+    // Enviar el audio (mp3)
     await conn.sendMessage(m.chat, {
       audio: { url: downloadUrl },
       mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
+      fileName: `${title}.mp3`
     }, { quoted: m });
 
     await m.react('✅');
 
-  } catch (err) {
-    console.error(err);
-    return m.reply(`*[❗] Ocurrió un error inesperado:*\n${err.message || err}`);
+  } catch (e) {
+    console.error('Error al acceder a API BK9:', e.response?.data || e.message || e);
+    return m.reply('*[❗] Error al acceder a la API BK9.*');
   }
 };
 
 handler.command = ['o'];
+
 export default handler;
