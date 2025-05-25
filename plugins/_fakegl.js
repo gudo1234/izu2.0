@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 let handler = async (m, { text, conn, command }) => {
-  if (!text) return m.reply(`*Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Alba es novia de Bruno`)
+  if (!text) return m.reply(`${e} *Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Hola bebé`)
 
   const [title, ...messageParts] = text.split(' ');
   const message = messageParts.join(' ');
@@ -63,7 +63,7 @@ let handler = async (m, { text, conn, command }) => {
   try {
     await conn.sendMessage(m.chat, {
       image: fs.readFileSync(file),
-      caption: `> *FakenGl*\n*${title}* = ${message}`
+      caption: `${e} \`FakenGl\`\n*> ${title}* = ${message}`
     }, { quoted: m });
   } finally {
     fs.unlinkSync(file);
