@@ -24,19 +24,33 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     `4 o moderno – Estilo noche con estrellas`
   );
 
-  const [styleInput, titleInput, ...messageParts] = text.split(' ');
   const styleMap = {
     '1': 1, 'blanco': 1,
     '2': 2, 'neon': 2,
     '3': 3, 'romantico': 3,
     '4': 4, 'moderno': 4,
   };
-  const style = styleMap[styleInput.toLowerCase()];
-  if (!style) return m.reply(`⚠️ *Estilo no válido.* Usa 1, 2, 3, 4 o sus nombres.`);
+
+  // Dividir texto en palabras
+  const parts = text.trim().split(/\s+/);
+
+  let style, title, message;
+
+  if (parts.length === 1) {
+    // Solo una palabra: la tomamos como título y estilo 1 automático
+    style = 1;
+    title = parts[0];
+    message = '';
+  } else {
+    // Múltiples palabras, el primero es estilo o nombre, segundo título, resto mensaje
+    const styleInput = parts[0].toLowerCase();
+    style = styleMap[styleInput];
+    if (!style) return m.reply(`⚠️ *Estilo no válido.* Usa 1, 2, 3, 4 o sus nombres.`);
+    title = parts[1];
+    message = parts.slice(2).join(' ');
+  }
 
   const emoji = emojiMap[style];
-  const title = titleInput;
-  const message = messageParts.join(' ');
 
   const width = 512;
   const height = 512;
@@ -59,7 +73,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     ctx.fillStyle = fill;
     ctx.fill();
     if (stroke) {
-      ctx.lineWidth = 6; // Borde más grueso para que destaque mejor
+      ctx.lineWidth = 6;
       ctx.strokeStyle = stroke;
       if (neon) {
         ctx.shadowColor = stroke;
@@ -72,26 +86,21 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
 
   const bgStyles = {
     1: () => { // Blanco con borde blanco más visible
-      // Fondo gris clarito para contraste
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, width, height);
 
-      // Rectángulo blanco con borde blanco grueso
       drawCard(ctx, 56, 156, 400, 200, 24, '#ffffff', '#ffffff');
 
-      // Gradiente encima (igual que antes)
       const grad = ctx.createLinearGradient(56, 156, 456, 156);
       grad.addColorStop(0, '#ff007f');
       grad.addColorStop(1, '#ff9900');
       ctx.fillStyle = grad;
       ctx.fillRect(56, 156, 400, 60);
 
-      // Título
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 30px sans-serif';
       ctx.fillText(title, width / 2, 196);
 
-      // Mensaje
       ctx.fillStyle = '#000000';
       ctx.font = '24px sans-serif';
       ctx.fillText(message, width / 2, 280);
@@ -122,16 +131,16 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     },
 
     4: () => { // Noche con estrellas más iluminada
-      ctx.fillStyle = '#1a1a4d'; // azul noche más brillante
+      ctx.fillStyle = '#1a1a4d';
       ctx.fillRect(0, 0, width, height);
 
       for (let i = 0; i < 120; i++) {
         const x = Math.random() * width;
         const y = Math.random() * height;
-        const radius = Math.random() * 2.5 + 0.5; // estrellas más grandes
+        const radius = Math.random() * 2.5 + 0.5;
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'; // estrellas brillantes
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
         ctx.shadowColor = 'white';
         ctx.shadowBlur = 5;
         ctx.fill();
@@ -148,10 +157,13 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
   };
 
-  // Ejecutar el estilo elegido
-  bgStyles[style]();
+  // Si solo hay título y no mensaje, forzamos estilo 1 y ajustamos mensaje vacío
+  if (parts.length === 1) {
+    bgStyles[1]();
+  } else {
+    bgStyles[style]();
+  }
 
-  // Ruta del archivo temporal
   const file = path.join('./tmp', `faketexto-${Date.now()}.png`);
   const buffer = canvas.toBuffer('image/png');
   fs.writeFileSync(file, buffer);
