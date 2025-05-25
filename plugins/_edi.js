@@ -10,12 +10,10 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints);
 }
 
-async function handler(m, { conn, args }) {
-  const mention = m.mentionedJid?.[0] || m.quoted?.sender;
-  if (!mention) return m.reply('Etiqueta a alguien o responde a su mensaje.');
-
-  const number = mention.split('@')[0];
-  const name = await conn.getName(mention);
+async function handler(m, { conn }) {
+  const jid = m.sender;
+  const number = jid.split('@')[0];
+  const name = await conn.getName(jid);
 
   const phoneInfo = PhoneNum('+' + number);
   const countryCode = phoneInfo.getRegionCode('international');
