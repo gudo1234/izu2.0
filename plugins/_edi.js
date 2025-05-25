@@ -1,3 +1,4 @@
+import { getDevice } from "@whiskeysockets/baileys"
 import axios from 'axios';
 import PhoneNum from 'awesome-phonenumber';
 
@@ -24,6 +25,7 @@ async function handler(m, { conn }) {
 *Nombre:* ${name}
 *Número:* +${number}
 *País:* ${countryName} ${emojiBandera}
+*Sistema/Opr:* ${getDevice(m.key.id)}
 `.trim();
 
   m.reply(info);
