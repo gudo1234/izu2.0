@@ -172,6 +172,7 @@ import { createCanvas } from 'canvas';
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
+import axios from 'axios';
 
 let handler = async (m, { conn }) => {
   try {
@@ -205,12 +206,17 @@ let handler = async (m, { conn }) => {
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(file, buffer);
 
+    const thumbnailUrl = 'https://i.imgur.com/yXhblUW.jpeg'; // reemplaza con tu imagen
+
+    // Obtener thumbnail desde la URL remota
+    const thumbRes = await axios.get(thumbnailUrl, { responseType: 'arraybuffer' });
+    const thumbnailBuffer = Buffer.from(thumbRes.data);
+
     const rcanal = {
-      title: wm,
-      body: textbot,
-      sourceUrl: redes, // Reemplaza con tu enlace
-      thumbnail: icono,
-      thumbnailUrl: redes // Reemplaza con tu thumbnail remoto si quieres
+      title: 'Calendario del Mes',
+      body: 'Generado automáticamente por el bot',
+      sourceUrl: 'https://www.instagram.com/tu_canal/', // tu enlace real
+      thumbnail: thumbnailBuffer
     };
 
     try {
@@ -337,4 +343,4 @@ function renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, cu
     ctx.fillText(i.toString(), x + 35, y + 35);
     x += 90;
   }
-  }
+    }
