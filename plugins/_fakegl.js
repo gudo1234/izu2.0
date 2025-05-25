@@ -2,8 +2,8 @@ import { createCanvas } from 'canvas';
 import fs from 'fs';
 import path from 'path';
 
-let handler = async (m, { text, conn, command }) => {
-  if (!text) return m.reply(`${e} *Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Hola bebé`)
+let handler = async (m, { text, conn, command, usedPrefix }) => {
+  if (!text) return m.reply(`${e} *Formato incorrecto.*\nUsa:\n${usedPrefix + command} <Nombre> <Mensaje>\n\nEjemplo:\n${usedPrefix + command} Hola bebé`)
 
   const [title, ...messageParts] = text.split(' ');
   const message = messageParts.join(' ');
