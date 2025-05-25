@@ -37,6 +37,9 @@ export default handler;*/
 import axios from 'axios';
 import PhoneNum from 'awesome-phonenumber';
 import moment from 'moment-timezone';
+import 'moment/locale/es.js';
+
+moment.locale('es'); // Idioma español
 
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
 
@@ -66,10 +69,10 @@ async function handler(m, { conn }) {
     const data = res.data[0];
     capital = data.capital?.[0] || 'Desconocida';
 
-    const zonaHoraria = data.timezones?.[0]; // Ej: "Europe/Madrid" o "UTC+03:00"
+    const zonaHoraria = data.timezones?.[0]; // Ej: "America/Mexico_City"
     if (zonaHoraria) {
       const now = moment().tz(zonaHoraria);
-      horaLocal = now.format('HH:mm');
+      horaLocal = now.format('hh:mm A'); // Formato 12 horas con AM/PM
       fechaLocal = now.format('dddd, D [de] MMMM [de] YYYY');
     }
   } catch (e) {
