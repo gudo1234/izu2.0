@@ -3,9 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 let handler = async (m, { text, conn, command }) => {
-  if (!text || !text.includes(' ')) {
-    throw `*Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Alba es novia de Bruno`;
-  }
+  if (!text) return m.reply(`*Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Alba es novia de Bruno`)
 
   const [title, ...messageParts] = text.split(' ');
   const message = messageParts.join(' ');
