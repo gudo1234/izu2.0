@@ -94,19 +94,25 @@ Ejemplo:
       const cardH = 220;
       drawCard(ctx, cardX, cardY, cardW, cardH, 24, '#ffffff');
 
+      // Franja de color para título
+      const gradHeight = 60;
       const grad = ctx.createLinearGradient(cardX, cardY, cardX + cardW, cardY);
       grad.addColorStop(0, '#ff007f');
       grad.addColorStop(1, '#ff9900');
       ctx.fillStyle = grad;
-      ctx.fillRect(cardX, cardY, cardW, 60);
+      ctx.fillRect(cardX, cardY, cardW, gradHeight);
 
+      // Título
       ctx.fillStyle = '#ffffff';
       ctx.font = 'bold 30px sans-serif';
-      ctx.fillText(title, width / 2, cardY + 38);
+      ctx.fillText(title, width / 2, cardY + 40);
 
-      ctx.fillStyle = '#000000';
-      ctx.font = '24px sans-serif';
-      if (message) ctx.fillText(message, width / 2, cardY + 140);
+      // Mensaje (abajo del marco blanco)
+      if (message) {
+        ctx.fillStyle = '#000000';
+        ctx.font = '24px sans-serif';
+        ctx.fillText(message, width / 2, cardY + 140); // bien abajo dentro del marco blanco
+      }
     },
 
     2: () => {
