@@ -1,25 +1,36 @@
-import { sticker } from '../lib/sticker.js'
+import { sticker } from '../lib/sticker.js';
 
-let handler = async (m, { conn }) => {
-  // Lista de URLs de imágenes estilo "xd"
-  const urls = [
-    'https://i.imgur.com/FpH7P2K.png',
-    'https://i.imgur.com/Cn5QK0g.png',
-    'https://i.imgur.com/vZ8FVKO.png',
-    'https://i.imgur.com/GSPkQyz.png',
-    'https://i.imgur.com/Va6Wy8j.png'
-  ]
-
-  // Elegir una aleatoriamente
-  let url = urls[Math.floor(Math.random() * urls.length)]
-
-  // Generar el sticker
-  let stiker = await sticker(url, false, global.packname, global.author)
-  if (stiker) {
-    await conn.sendMessage(m.chat, { sticker: stiker }, { quoted: m })
-  }
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
 }
 
-handler.customPrefix = /xd|xdd|xddd/
-handler.command = new RegExp
-export default handler
+let handler = async (m, { conn }) => {
+  try {
+    let stikerxd = [
+      'https://telegra.ph/file/e8be85aeb9a625f533a4a.png',
+      'https://telegra.ph/file/913f5861cefbdde379921.jpg',
+      'https://telegra.ph/file/6b7b0dbf022ee46a44887.jpg',
+      'https://i.ibb.co/SK4Zqkt/file.webp'
+    ];
+
+    let stikerUrl = pickRandom(stikerxd); 
+    let stiker = await sticker(null, stikerUrl, global.packname, global.author); 
+
+    if (stiker) {
+      await conn.sendMessage(m.chat, {
+        sticker: { url: stiker }
+      }, {
+        quoted: m
+      });
+    } else {
+      throw new Error('Failed to create sticker');
+    }
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+handler.customPrefix = /^(🐢)$/i;
+handler.command = new RegExp;
+
+export default handler;
