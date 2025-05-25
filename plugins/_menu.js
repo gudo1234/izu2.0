@@ -142,6 +142,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}qc ‹τ×τ›
 │ ${e}${s}brat ‹τ×τ›
 │ ${e}${s}bratvid ‹τ×τ›
+│ ${e}${s}fakengl ‹style› ‹title› ‹msg›
 │ ${e}${s}wm ‹τ×τ›
 │ ${e}${s}take ‹τ×τ›
 │ ${e}${s}ttp ‹τ×τ›
