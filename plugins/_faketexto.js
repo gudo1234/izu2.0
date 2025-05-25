@@ -11,17 +11,17 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   };
 
   if (!text) return m.reply(
-    `⚠️ Formato incorrecto.\n\n` +
-    `Usa el comando así:\n` +
-    `${usedPrefix + command} <estilo> <Título> <Mensaje>\n\n` +
-    `Ejemplo:\n` +
-    `\`${usedPrefix + command} 1 Hola ¿Todo bien?\`\n` +
-    `\`${usedPrefix + command} moderno Buenas noches Dulces sueños\`\n\n` +
-    `Estilos disponibles:\n` +
-    `1 o blanco – Estilo blanco simple\n` +
-    `2 o neon – Estilo neón oscuro\n` +
-    `3 o romantico – Estilo romántico pastel\n` +
-    `4 o moderno – Estilo noche con estrellas`
+    `${e} *Formato incorrecto.*\n\n` +
+    `> Usa el comando así:\n` +
+    `👉🏻 ${usedPrefix + command} <estilo> <Título> <Mensaje>\n\n` +
+    `*Ejemplo:*\n` +
+    `\`${usedPrefix + command}\` 1 Hola ¿Todo bien?\n` +
+    `\`${usedPrefix + command}\` moderno Buenas noches Dulces sueños\n\n` +
+    `🎨 *Estilos disponibles:*\n` +
+    `1 o blanco – _Estilo blanco simple_\n` +
+    `2 o neon – _Estilo neón oscuro_\n` +
+    `3 o romantico – _Estilo romántico pastel_\n` +
+    `4 o moderno – _Estilo noche con estrellas_`
   );
 
   const styleMap = {
