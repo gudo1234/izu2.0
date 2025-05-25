@@ -17,6 +17,6 @@ let handler = async (m, { conn }) => {
   })
 }
 
-handler.customPrefix = /💔|😢|😭|😞|😔|😟|😫|😩|🥺|🙁|😣|😖|😿|🙁/
+handler.customPrefix = /💔|🥲|😢|😭|😞|😔|😟|😫|😩|🥺|🙁|😣|😖|😿|🙁/
 handler.command = new RegExp
 export default handler
