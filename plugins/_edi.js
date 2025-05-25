@@ -41,12 +41,23 @@ async function handler(m, { conn }) {
     console.error('Error al obtener datos del país:', e);
   }
 
+  const tipoLinea = phoneInfo.getType() || 'Desconocido';
+  const numeroInternacional = phoneInfo.getNumber('international') || '+' + number;
+  const numeroNacional = phoneInfo.getNumber('national') || number;
+  const codigoLlamada = phoneInfo.getCountryCode() || 'Desconocido';
+  const esValido = phoneInfo.isValid() ? 'Sí' : 'No';
+
   const info = `
 *Nombre:* ${name}
 *Número:* +${number}
+*Formato Internacional:* ${numeroInternacional}
+*Formato Nacional:* ${numeroNacional}
+*Código de llamada:* +${codigoLlamada}
+*Tipo de línea:* ${tipoLinea}
+*¿Número válido?:* ${esValido}
 *País:* ${countryName} ${emojiBandera}
 *Capital:* ${capital}
-*Fecha:* ${fechaLocal}
+*Fecha local:* ${fechaLocal}
 `.trim();
 
   m.reply(info);
