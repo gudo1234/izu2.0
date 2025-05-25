@@ -79,11 +79,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
 
-  /*await conn.sendMessage(m.chat, {
-    image: { url: img },
-    caption,
-    mentions: [target]
-  }, { quoted: m })*/
   await conn.sendMessage(m.chat, {
       text: caption,
       contextInfo: {
