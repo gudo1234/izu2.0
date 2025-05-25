@@ -1,9 +1,13 @@
 import fetch from 'node-fetch';
 
-let handler = async (m, { args, usedPrefix, command }) => {
-  if (!args[0]) throw `Usa el comando así:\n${usedPrefix + command} <enlace de YouTube>`;
+let handler = async (m, { text, usedPrefix, command }) => {
+  let url = text?.trim();
 
-  const url = args[0];
+  // Si no hay texto, intenta detectar si el mensaje es respuesta a otro con un link
+  if (!url && m.quoted?.text) url = m.quoted.text.trim();
+
+  if (!url) throw `Usa el comando así:\n${usedPrefix + command} <enlace de YouTube>\nO responde a un mensaje que contenga el enlace.`;
+
   if (!url.match(/(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i)) {
     throw 'Debes proporcionar un enlace válido de YouTube.';
   }
@@ -15,17 +19,13 @@ let handler = async (m, { args, usedPrefix, command }) => {
     let json = await res.json();
     if (!json.status || !json.result) throw 'No se pudo obtener el audio.';
 
-    let { title, thumb, url: downloadUrl, size } = json.result;
+    let { title, url: downloadUrl } = json.result;
 
     await conn.sendMessage(m.chat, {
-      image: { url: thumb },
-      caption: `*Título:* ${title}\n*Tamaño:* ${size}\n\nEnviando audio...`,
-    }, { quoted: m });
-
-    await conn.sendMessage(m.chat, {
-      document: { url: downloadUrl },
-      fileName: `${title}.mp3`,
+      audio: { url: downloadUrl },
       mimetype: 'audio/mpeg',
+      ptt: false,
+      fileName: `${title}.mp3`,
     }, { quoted: m });
 
   } catch (e) {
@@ -34,5 +34,7 @@ let handler = async (m, { args, usedPrefix, command }) => {
   }
 };
 
-handler.command = ['O']
+
+handler.command = ['o']
+
 export default handler;
