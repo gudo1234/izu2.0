@@ -1,45 +1,9 @@
-/*import { getDevice } from "@whiskeysockets/baileys"
-import axios from 'axios';
-import PhoneNum from 'awesome-phonenumber';
-
-const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
-
-function banderaEmoji(countryCode) {
-  if (!countryCode || countryCode.length !== 2) return '';
-  const codePoints = [...countryCode.toUpperCase()]
-    .map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
-  return String.fromCodePoint(...codePoints);
-}
-
-async function handler(m, { conn }) {
-  const jid = m.sender;
-  const number = jid.split('@')[0];
-  const name = await conn.getName(jid);
-
-  const phoneInfo = PhoneNum('+' + number);
-  const countryCode = phoneInfo.getRegionCode('international');
-  const countryName = regionNames.of(countryCode) || 'Desconocido';
-  const emojiBandera = banderaEmoji(countryCode);
-
-  const info = `
-*Nombre:* ${name}
-*Número:* +${number}
-*País:* ${countryName} ${emojiBandera}
-*Sistema/Opr:* ${getDevice(m.key.id)}
-`.trim();
-
-  m.reply(info);
-}
-
-handler.command = ['edi']
-export default handler;*/
-
 import axios from 'axios';
 import PhoneNum from 'awesome-phonenumber';
 import moment from 'moment-timezone';
 import 'moment/locale/es.js';
 
-moment.locale('es'); // Idioma español
+moment.locale('es');
 
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
 
@@ -69,10 +33,10 @@ async function handler(m, { conn }) {
     const data = res.data[0];
     capital = data.capital?.[0] || 'Desconocida';
 
-    const zonaHoraria = data.timezones?.[0]; // Ej: "America/Mexico_City"
+    const zonaHoraria = data.timezones?.[0];
     if (zonaHoraria) {
       const now = moment().tz(zonaHoraria);
-      horaLocal = now.format('hh:mm A'); // Formato 12 horas con AM/PM
+      horaLocal = now.format('hh:mm:ss A'); // Incluye segundos
       fechaLocal = now.format('dddd, D [de] MMMM [de] YYYY');
     }
   } catch (e) {
