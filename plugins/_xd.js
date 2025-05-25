@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+/*import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
 
 function pickRandom(list) {
@@ -30,4 +30,4 @@ const handler = async (m, { conn }) => {
 handler.customPrefix = /xd/
 handler.command = new RegExp
 
-export default handler
+export default handler*/
