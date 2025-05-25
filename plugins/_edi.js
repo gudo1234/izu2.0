@@ -79,12 +79,12 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
 
-  /*await conn.sendMessage(m.chat, {
+  await conn.sendMessage(m.chat, {
     image: { url: img },
     caption,
     mentions: [target]
-  }, { quoted: m })*/
-  await conn.sendMessage(m.chat, {
+  }, { quoted: m })
+  /*await conn.sendMessage(m.chat, {
     text: caption,
     contextInfo: {
       mentionedJid: [target],
@@ -99,7 +99,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         sourceUrl: redes
       }
     }
-  }, { quoted: m })
+  }, { quoted: m })*/
 }
 
 handler.command = ['wastalk', 'perfil', 'ava'];
