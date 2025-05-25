@@ -3,7 +3,7 @@ import fs from 'fs';
 
 let handler = async (m, { text, conn, command }) => {
   if (!text.includes(' ')) {
-    throw `${e} *Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Hola bebé`;
+    throw `*Formato incorrecto.*\nUsa:\n${command} <Nombre> <Mensaje>\n\nEjemplo:\n${command} Alba es novia de Bruno`;
   }
 
   const [title, ...messageParts] = text.split(' ');
@@ -63,7 +63,7 @@ let handler = async (m, { text, conn, command }) => {
 
   await conn.sendMessage(m.chat, {
     image: fs.readFileSync(file),
-    caption: `${e} \`FakeGl\`\n> ${title} = ${message}`
+    caption: `${e} \`FakenGl\`\n> ${title} = ${message}`
   }, { quoted: m });
 
   fs.unlinkSync(file);
