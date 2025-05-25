@@ -87,14 +87,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   await conn.sendMessage(m.chat, {
       text: caption,
       contextInfo: {
-        mentionedJid: [target],
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: channelRD.id,
-          newsletterName: channelRD.name,
-          serverMessageId: -1,
-        },
-        forwardingScore: false,
+      mentionedJid: [target],
         externalAdReply: {
           title: wm,
           body: textbot,
@@ -102,10 +95,9 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
           thumbnail: img,
           sourceUrl: redes,
           mediaType: 1,
-          showAdAttribution: true,
-          renderLargerThumbnail: true,
-        },
-      },
+          renderLargerThumbnail: true
+        }
+      }
     }, { quoted: m })
 }
 
