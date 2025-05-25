@@ -205,10 +205,28 @@ let handler = async (m, { conn }) => {
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(file, buffer);
 
+    // Puedes personalizar esta parte del contextInfo
+    const rcanal = {
+      showAdAttribution: true,
+      mediaType: 1,
+      mediaUrl: redes, // Reemplaza por tu link
+      title: wm,
+      body: textbot,
+      sourceUrl: redes, // Reemplaza por tu link
+      thumbnail: icono,
+      thumbnailUrl: redes
+    };
+
     try {
-      await conn.sendFile(m.chat, file, 'calendario.png',
+      await conn.sendFile(
+        m.chat,
+        file,
+        'calendario.png',
         `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`,
-        m, null, { contextInfo: { externalAdReply: rcanal } });
+        m,
+        null,
+        { contextInfo: { externalAdReply: rcanal } }
+      );
     } finally {
       fs.unlinkSync(file);
     }
@@ -220,6 +238,9 @@ let handler = async (m, { conn }) => {
 
 handler.command = ['calendario'];
 export default handler;
+
+// === ESTILOS ===
+// (Los estilos y renderCalendarioBase siguen sin cambios como en tu código original)
 
 // === ESTILOS ===
 
