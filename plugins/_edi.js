@@ -80,20 +80,26 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     participant: '0@s.whatsapp.net',
   };
 
-  let num = m.quoted?.sender || m.mentionedJid?.[0] || text;
-  if (!num) return conn.reply(m.chat, `*Ejemplo:* ${usedPrefix + command} @usuario`, m);
-  
-  num = num.replace(/\D/g, '') + '@s.whatsapp.net';
+  let targetJid = m.quoted?.sender || m.mentionedJid?.[0] || text?.replace(/\D/g, '') + '@s.whatsapp.net';
+  let isSelf = false;
 
-  const exists = (await conn.onWhatsApp(num))[0]?.exists;
+  if (!text && !m.quoted && !m.mentionedJid?.length) {
+    targetJid = m.sender;
+    isSelf = true;
+  }
+
+  if (!targetJid) return conn.reply(m.chat, `*Ejemplo:* ${usedPrefix + command} @usuario`, m);
+
+  const exists = (await conn.onWhatsApp(targetJid))[0]?.exists;
   if (!exists) throw 'Este número no está registrado en WhatsApp.';
 
-  const name = await conn.getName(num).catch(() => 'Desconocido');
-  const bio = await conn.fetchStatus(num).catch(() => null);
-  const business = await conn.getBusinessProfile(num).catch(() => null);
-  const img = await conn.profilePictureUrl(num, 'image').catch(() => './src/avatar_contact.png');
-  
-  const format = PhoneNum(`+${num.split('@')[0]}`);
+  const name = await conn.getName(targetJid).catch(() => 'Desconocido');
+  const bio = await conn.fetchStatus(targetJid).catch(() => null);
+  const business = await conn.getBusinessProfile(targetJid).catch(() => null);
+  const img = await conn.profilePictureUrl(targetJid, 'image').catch(() => './src/avatar_contact.png');
+
+  const numStr = targetJid.split('@')[0];
+  const format = PhoneNum(`+${numStr}`);
   const regionCode = format.getRegionCode('international');
   const countryName = regionNames.of(regionCode) || 'Desconocido';
   const emoji = banderaEmoji(regionCode);
@@ -117,8 +123,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
 *Nombre:* ${name}
 *Número:* ${format.getNumber('international')}
-*Enlace:* wa.me/${num.split('@')[0]}
-*Tag:* @${num.split('@')[0]}
+*Enlace:* wa.me/${numStr}
+${!isSelf ? `*Tag:* @${numStr}` : ''}
 *País:* ${countryName} ${emoji}
 *Capital:* ${capital}
 *Hora local:* ${fechaLocal}
@@ -136,10 +142,12 @@ ${business ? `*— Cuenta de WhatsApp Business —*
 ` : '*Cuenta de WhatsApp normal*'}
 `.trim();
 
-  await conn.sendMessage(m.chat, { image: { url: img }, caption: info, mentions: [num] }, { quoted: fkontak });
+  await conn.sendMessage(m.chat, {
+    image: { url: img },
+    caption: info,
+    ...(isSelf ? {} : { mentions: [targetJid] })
+  }, { quoted: m});
 };
 
 handler.command = ['edi'];
-handler.group = true;
-
 export default handler;
