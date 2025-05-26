@@ -1,141 +1,23 @@
-/*import axios from 'axios'
-import fetch from 'node-fetch'
-import { googleImage } from '@bochilteam/scraper'
-import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
-import yts from 'yt-search'
-
-let handler = async (m, { conn, usedPrefix, command, text }) => {
-  const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
-  const username = `${conn.getName(m.sender)}`
-  const basePrompt = `Tu nombre es izuBot (IA creada por ${author}). Te comportas como una inteligencia artificial profesional, amigable y servicial. Eres clara, directa y útil. Te expresas con respeto y precisión. No usas bromas ni exageraciones, y siempre estás orientada a resolver la necesidad del usuario de forma efectiva.`
-
-  if (isQuotedImage) {
-    const q = m.quoted
-    const img = await q.download?.()
-    if (!img) return conn.reply(m.chat, 'Error: No se pudo descargar la imagen.', m)
-    const content = 'Describe detalladamente el contenido de esta imagen.'
-    try {
-      const imageAnalysis = await fetchImageBuffer(content, img)
-      const query = 'Describe la imagen y explica qué se observa y cómo actúan las personas o elementos.'
-      const prompt = `${basePrompt}. La imagen a analizar es: ${imageAnalysis.result}`
-      const description = await luminsesi(query, username, prompt)
-      await conn.reply(m.chat, description, m)
-    } catch (error) {
-      console.error('Error al analizar la imagen:', error)
-      await conn.reply(m.chat, 'Error al analizar la imagen.', m)
-    }
-  } else {
-    if (!text) return conn.reply(m.chat, `*Ingrese su petición*\nEjemplo de uso: ${usedPrefix + command} ¿Qué es un bot?`, m)
-    await m.react('💬')
-
-    // Si el texto contiene una solicitud de imagen
-    if (/imagen|dibuja|genera una imagen|muestra una foto/i.test(text)) {
-      try {
-        const res = await googleImage(text)
-        const image = res.getRandom()
-        await conn.sendFile(m.chat, image, 'imagen.jpg', `Aquí tienes la imagen solicitada: "${text}"`, m)
-      } catch (e) {
-        console.error(e)
-        await conn.reply(m.chat, 'No se pudo obtener una imagen.', m)
-      }
-      return
-    }
-
-    // Si el texto contiene una solicitud musical
-    if (/música|audio|canción|reproduce/i.test(text)) {
-      try {
-        const search = await yts(text)
-        const vid = search.videos[0]
-        const url = vid.url
-        const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`)
-        const title = vid.title
-        const audio = api1?.data?.result?.audio
-
-        if (!audio?.url) throw 'No se pudo obtener el audio'
-
-        await conn.sendMessage(m.chat, {
-          document: { url: audio.url },
-          fileName: title + '.mp3',
-          mimetype: 'audio/mpeg'
-        }, { quoted: m })
-      } catch (e) {
-        console.error(e)
-        await conn.reply(m.chat, 'No se pudo enviar la música solicitada.', m)
-      }
-      return
-    }
-
-    // Caso general de pregunta a la IA
-    try {
-      const query = text
-      const prompt = `${basePrompt}. Responde lo siguiente: ${query}`
-      const response = await luminsesi(query, username, prompt)
-      await conn.reply(m.chat, response, m)
-    } catch (error) {
-      console.error('Error al obtener la respuesta:', error)
-      await conn.reply(m.chat, 'Error: intenta más tarde.', m)
-    }
-  }
-}
-
-handler.command = ['meta']
-handler.group = true
-
-export default handler
-
-// Análisis de imagen
-async function fetchImageBuffer(content, imageBuffer) {
-  try {
-    const response = await axios.post('https://Luminai.my.id', {
-      content,
-      imageBuffer
-    }, {
-      headers: { 'Content-Type': 'application/json' }
-    })
-    return response.data
-  } catch (error) {
-    console.error('Error:', error)
-    throw error
-  }
-}
-
-// Lógica de IA
-async function luminsesi(q, username, logic) {
-  try {
-    const response = await axios.post("https://Luminai.my.id", {
-      content: q,
-      user: username,
-      prompt: logic,
-      webSearchMode: false
-    })
-    return response.data.result
-  } catch (error) {
-    console.error('Error al obtener:', error)
-    throw error
-  }
-          }*/
-
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { googleImage } from '@bochilteam/scraper'
-import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
+import { googleImage, youtubedl, youtubedlv2 } from '@bochilteam/scraper'
 import yts from 'yt-search'
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
   const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
   const username = `${conn.getName(m.sender)}`
-  const basePrompt = `Tu nombre es izuBot (IA creada por ${author}). Te comportas como una inteligencia artificial profesional, amigable y servicial. Te expresas con claridad y precisión. Tu objetivo es ayudar al usuario con lo que solicita.`
+  const basePrompt = `Tu nombre es izuBot. Eres una inteligencia artificial profesional, confiable y útil, enfocada en ayudar con información precisa, búsqueda de contenido, generación de imágenes o música. Siempre respondes con claridad, empatía y sin exageraciones ni referencias absurdas. Lenguaje: Español claro, formal pero cercano.`
 
+  // Análisis de imagen citada
   if (isQuotedImage) {
     const q = m.quoted
     const img = await q.download?.()
     if (!img) return conn.reply(m.chat, 'Error: No se pudo descargar la imagen.', m)
-    const content = 'Describe detalladamente el contenido de esta imagen.'
+    const content = 'Describe el contenido de esta imagen.'
     try {
       const imageAnalysis = await fetchImageBuffer(content, img)
-      const query = 'Describe la imagen y explica qué se observa y cómo actúan las personas o elementos.'
-      const prompt = `${basePrompt}. La imagen a analizar es: ${imageAnalysis.result}`
-      const description = await luminsesi(query, username, prompt)
+      const prompt = `${basePrompt}. La imagen que se analiza es: ${imageAnalysis.result}`
+      const description = await luminsesi(content, username, prompt)
       await conn.reply(m.chat, description, m)
     } catch (error) {
       console.error('Error al analizar la imagen:', error)
@@ -144,70 +26,101 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     return
   }
 
-  if (!text) return conn.reply(m.chat, `*Ingrese su petición*\nEjemplo de uso: ${usedPrefix + command} ¿Qué es un bot?`, m)
+  if (!text) return conn.reply(m.chat, `Ingrese su petición.\nEjemplo: ${usedPrefix + command} ¿Qué es un bot?`, m)
   await m.react('💬')
 
-  // Clasificar intención con la IA
-  const clasificacionPrompt = `${basePrompt}. Analiza esta petición del usuario: "${text}"\n\nResponde únicamente con una de las siguientes opciones según lo que el usuario está solicitando:\n- imagen\n- música\n- otro\n\nNo expliques nada. Solo responde con una de esas tres palabras.`
-  let tipoPeticion
-  try {
-    tipoPeticion = await luminsesi(text, username, clasificacionPrompt)
-    tipoPeticion = tipoPeticion.trim().toLowerCase()
-  } catch (e) {
-    console.error('Error al clasificar intención:', e)
-    tipoPeticion = 'otro'
-  }
+  // Detección contextual de pedido musical
+  const musicKeywords = /(pon(?:me)?|reproduce|descarga|quiero|busca).{0,10}(canción|tema|música|audio|link)?/i
+  const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
 
-  if (tipoPeticion === 'imagen') {
+  if (musicKeywords.test(text) || ytRegex.test(text)) {
     try {
-      const res = await googleImage(text)
-      const image = res.getRandom()
-      await conn.sendFile(m.chat, image, 'imagen.jpg', `Aquí tienes la imagen solicitada: "${text}"`, m)
-    } catch (e) {
-      console.error(e)
-      await conn.reply(m.chat, 'No se pudo obtener una imagen.', m)
+      await m.react('🎵')
+      const query = text
+      const ytMatch = query.match(ytRegex)
+
+      let video
+      if (ytMatch) {
+        const videoId = ytMatch[1]
+        const ytres = await yts({ videoId })
+        video = ytres
+      } else {
+        const ytres = await yts(query)
+        video = ytres.videos[0]
+        if (!video) return m.reply('No se encontró la canción.')
+      }
+
+      const { title, timestamp, url } = video
+
+      let yt = await youtubedl(url).catch(() => youtubedlv2(url))
+      let audio = yt.audio?.['128kbps']
+      if (!audio) return m.reply('No se encontró el audio compatible.')
+
+      const { fileSizeH: sizeText, fileSize } = audio
+      const sizeMB = fileSize / (1024 * 1024)
+
+      // Calcular duración
+      let durationMin = 0
+      if (timestamp) {
+        const parts = timestamp.split(':').map(Number)
+        if (parts.length === 3) durationMin = parts[0] * 60 + parts[1] + parts[2] / 60
+        else if (parts.length === 2) durationMin = parts[0] + parts[1] / 60
+        else if (parts.length === 1) durationMin = parts[0]
+      }
+
+      // Obtener link de descarga
+      let downloadUrl
+      try {
+        const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`)
+        if (api1.data?.data?.dl) {
+          downloadUrl = api1.data.data.dl
+        } else throw new Error()
+      } catch {
+        try {
+          const api2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`)
+          if (api2.data?.result?.download?.url) {
+            downloadUrl = api2.data.result.download.url
+          }
+        } catch {
+          return m.reply('Error al obtener el enlace de descarga.')
+        }
+      }
+
+      if (!downloadUrl) return m.reply('No se pudo procesar la descarga.')
+
+      const sendAsDocument = sizeMB >= 100 || durationMin >= 15
+      const payload = {
+        [sendAsDocument ? 'document' : 'audio']: { url: downloadUrl },
+        mimetype: 'audio/mpeg',
+        fileName: `${title}.mp3`
+      }
+
+      await conn.sendMessage(m.chat, payload, { quoted: m })
+      await m.react('✅')
+    } catch (err) {
+      console.error(err)
+      return m.reply('Error al procesar la música.')
     }
     return
   }
 
-  if (tipoPeticion === 'música') {
-    try {
-      const search = await yts(text)
-      const vid = search.videos[0]
-      const url = vid.url
-      const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`)
-      const title = vid.title
-      const audio = api1?.data?.result?.audio
-
-      if (!audio?.url) throw 'No se pudo obtener el audio'
-
-      await conn.sendMessage(m.chat, {
-        document: { url: audio.url },
-        fileName: title + '.mp3',
-        mimetype: 'audio/mpeg'
-      }, { quoted: m })
-    } catch (e) {
-      console.error(e)
-      await conn.reply(m.chat, 'No se pudo enviar la música solicitada.', m)
-    }
-    return
-  }
-
-  // Respuesta general si no es imagen ni música
+  // Generación de texto normal
   try {
     const prompt = `${basePrompt}. Responde lo siguiente: ${text}`
     const response = await luminsesi(text, username, prompt)
     await conn.reply(m.chat, response, m)
   } catch (error) {
-    console.error('Error al obtener la respuesta:', error)
-    await conn.reply(m.chat, 'Error: intenta más tarde.', m)
+    console.error('Error IA:', error)
+    await conn.reply(m.chat, 'Ocurrió un error. Intenta nuevamente más tarde.', m)
   }
 }
 
-handler.command = ['meta']
+handler.command = ['meta', 'bot']
 handler.group = true
 
 export default handler
+
+// --- funciones auxiliares ---
 
 async function fetchImageBuffer(content, imageBuffer) {
   try {
@@ -219,7 +132,7 @@ async function fetchImageBuffer(content, imageBuffer) {
     })
     return response.data
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error al analizar imagen:', error)
     throw error
   }
 }
@@ -234,7 +147,7 @@ async function luminsesi(q, username, logic) {
     })
     return response.data.result
   } catch (error) {
-    console.error('Error al obtener:', error)
+    console.error('Error Luminai:', error)
     throw error
   }
-      }
+}
