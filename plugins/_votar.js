@@ -1,45 +1,51 @@
-let handler = async (m, { conn, args, command }) => {
-  if (!m.quoted || m.quoted?.mtype !== 'pollCreationMessage') {
-    return m.reply('✳️ Responde a una encuesta con el comando.\nEjemplo: *.votar 100|Edar*');
+let handler = async (m, { conn, args }) => {
+  // Verifica que estés respondiendo a un mensaje
+  if (!m.quoted) {
+    return m.reply('✳️ Responde a una *encuesta* con el comando.\nEjemplo: *.votar 100|Edar*');
   }
 
-  // Verificamos formato
+  // Detectar encuesta correctamente
+  let poll = m.quoted?.msg?.pollCreationMessage;
+  if (!poll) {
+    return m.reply('✳️ El mensaje al que respondes no es una encuesta válida.');
+  }
+
+  // Separar entrada
   let input = args.join(" ").split("|");
   let cantidad = parseInt(input[0]);
-  let opcionBuscada = input[1]?.toLowerCase();
+  let textoOpcion = input[1]?.toLowerCase()?.trim();
 
-  if (isNaN(cantidad) || cantidad <= 0 || !opcionBuscada) {
-    return m.reply('✳️ Formato incorrecto. Usa: *.votar <cantidad>|<nombre de la opción>*');
+  if (isNaN(cantidad) || cantidad <= 0 || !textoOpcion) {
+    return m.reply('✳️ Formato incorrecto.\nUsa: *.votar <cantidad>|<parte del nombre de la opción>*');
   }
 
-  // Extraer opciones de la encuesta
-  let opciones = m.quoted.msg.options || [];
-  let opcion = opciones.find(o => o.option.toLowerCase().includes(opcionBuscada));
+  // Buscar opción coincidente
+  let opciones = poll.options || [];
+  let opcion = opciones.find(o => o.option.toLowerCase().includes(textoOpcion));
 
   if (!opcion) {
-    return m.reply(`❌ No se encontró una opción que coincida con: *${opcionBuscada}*`);
+    return m.reply(`❌ No se encontró una opción que coincida con: *${textoOpcion}*`);
   }
 
-  let resultadosFalsos = opciones.map(o => {
+  // Generar votos falsos simulados
+  let resultados = opciones.map(o => {
     return {
       name: o.option,
-      count: o.option === opcion.option ? cantidad : (o.voters?.length || 0),
-      voters: o.option === opcion.option
-        ? Array.from({ length: cantidad }, (_, i) => `Usuario Fake ${i + 1}`)
-        : o.voters || []
+      count: o.option === opcion.option ? cantidad : 0
     };
   });
 
-  let resultadoTexto = `🗳 *Resultados Falsos de la Encuesta*\n\n`;
-  for (let r of resultadosFalsos) {
-    resultadoTexto += `▪️ *${r.name}*: ${r.count} votos\n`;
+  // Armar mensaje de resultado
+  let texto = `🗳 *Resultados Simulados:*\n\n`;
+  for (let r of resultados) {
+    texto += `▪️ *${r.name}*: ${r.count} votos\n`;
   }
 
-  return m.reply(resultadoTexto.trim());
+  return m.reply(texto.trim());
 };
 
 handler.command = ['votar'];
 handler.group = true;
-handler.admin = true; // Opcional, para que solo admins puedan usarlo
+handler.admin = true; // Opcional: solo admins
 
 export default handler;
