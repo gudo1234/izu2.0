@@ -1,40 +1,77 @@
 import fetch from 'node-fetch';
-import { downloadMediaMessage } from '@whiskeysockets/baileys';
+import yts from 'yt-search';
+import axios from 'axios';
 
-const handler = async (m, { args, conn, usedPrefix, command }) => {
-  let url = args[0];
-  if (!url || !url.match(/(youtu\.be|youtube\.com)/gi)) {
-    return m.reply(`*Ejemplo de uso:*\n${usedPrefix + command} https://youtube.com/watch?v=VSL5F43qgng`);
+const handler = async (m, { conn, text, usedPrefix, command, args }) => {
+  if (!text) {
+    return m.reply(`*Ejemplo de uso:*\n${usedPrefix + command} diles\n${usedPrefix + command} https://youtube.com/watch?v=VSL5F43qgng`);
   }
+
+  await m.react('🔎');
+
+  const query = args.join(' ');
+  const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const ytMatch = query.match(ytRegex);
+
+  let video;
+  if (ytMatch) {
+    const res = await yts({ videoId: ytMatch[1] });
+    video = res;
+  } else {
+    const res = await yts(query);
+    video = res.videos[0];
+    if (!video) return m.reply('❌ Video no encontrado.');
+  }
+
+  const { title, url, timestamp, views, ago, author, thumbnail } = video;
+
+  const apiKey = 'mOpoAHjJ';
+  const apiUrl = `https://api.botcahx.eu.org/api/dowloader/yt?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
+  let data;
 
   try {
-    let apikey = 'mOpoAHjJ';
-    let api = `https://api.botcahx.eu.org/api/dowloader/yt?url=${encodeURIComponent(url)}&apikey=${apikey}`;
-
-    let res = await fetch(api);
-    let json = await res.json();
-
-    if (!json || !json.result || !json.result.audio) {
-      return m.reply('No se pudo obtener el audio.');
-    }
-
-    const { title, thumb, audio, size } = json.result;
-
-    await conn.sendMessage(m.chat, {
-      image: { url: thumb },
-      caption: `*Título:* ${title}\n*Tamaño:* ${size}`,
-    }, { quoted: m });
-
-    await conn.sendMessage(m.chat, {
-      audio: { url: audio },
-      mimetype: 'audio/mp4'
-    }, { quoted: m });
-
+    const res = await axios.get(apiUrl);
+    data = res.data?.result;
   } catch (e) {
     console.error(e);
-    m.reply('Ocurrió un error al procesar tu solicitud.');
+    return m.reply('❌ Error al obtener información desde la API.');
   }
+
+  const caption = `
+╭───────⊷
+├ *Título:* ${title}
+├ *Duración:* ${timestamp || 'N/A'}
+├ *Vistas:* ${views?.toLocaleString() || 'N/A'}
+├ *Publicado:* ${ago || 'N/A'}
+├ *Canal:* ${author?.name || 'N/A'}
+╰───────⊷
+`.trim();
+
+  await conn.sendMessage(m.chat, {
+    image: { url: thumbnail },
+    caption,
+    contextInfo: {
+      externalAdReply: {
+        title,
+        body: 'Enviando audio...',
+        thumbnailUrl: thumbnail,
+        sourceUrl: url,
+        mediaType: 1,
+        renderLargerThumbnail: true
+      }
+    }
+  }, { quoted: m });
+
+  await conn.sendMessage(m.chat, {
+    audio: { url: data.audio },
+    mimetype: 'audio/mpeg',
+    fileName: `${title}.mp3`
+  }, { quoted: m });
+
+  await m.react('✅');
 };
 
-handler.command = ['music']
+handler.command = ['music'];
+handler.group = false;
+
 export default handler;
