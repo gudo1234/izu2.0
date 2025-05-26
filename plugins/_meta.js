@@ -108,7 +108,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     try {
       const res = await googleImage(text)
       const img = res.getRandom()
-      await conn.sendFile(m.chat, img, 'imagen.jpg', `Aquí tienes la imagen para: ${text}`, m)
+      await conn.sendFile(m.chat, img, 'imagen.jpg', `Aquí tienes la imagen`, m)
       await m.react('✅')
     } catch (e) {
       console.error(e)
