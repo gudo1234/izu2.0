@@ -1,22 +1,18 @@
-const handler = async (m, { conn, args, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`Ejemplo:\n${usedPrefix + command} @user Hola | ¿Cómo estás?`);
+const handler = async (m, { conn, text }) => {
+  if (!text) return m.reply(`Ejemplo:\n.bio @user Hola | ¿Cómo estás?`);
 
-  const [targetRaw, ...rest] = text.trim().split(/\s+/);
-  let message = rest.join(' ').trim();
-  if (!message) return m.reply(`Falta el texto. Ejemplo:\n${usedPrefix + command} @user Hola | ¿Cómo estás?`);
-  const cleanNumber = targetRaw
-    .replace(/[^0-9@]/g, '')
-    .replace(/^@/, '');
+  const [rawTarget, ...rest] = text.trim().split(/\s+/);
+  const message = rest.join(' ').trim();
+  if (!message) return m.reply(`Falta el texto. Ejemplo:\n.bio @user Hola | ¿Cómo estás?`);
 
-  let jid;
-  if (/^\d{7,15}$/.test(cleanNumber)) {
-    jid = cleanNumber + '@s.whatsapp.net';
-  } else if (/^\d{7,15}@s\.whatsapp\.net$/.test(cleanNumber)) {
-    jid = cleanNumber;
-  } else {
-    return m.reply('Formato inválido. Usa una mención @user o número válido.');
-  }
+  // Limpiar el número
+  let clean = rawTarget.replace(/[^0-9]/g, ''); // Quita todo menos números
 
+  if (clean.length < 7 || clean.length > 15) return m.reply('Número inválido o mal formateado.');
+
+  const jid = clean + '@s.whatsapp.net';
+
+  // Separar mensajes si hay "|"
   const [msg1, msg2] = message.split('|').map(v => v.trim()).filter(Boolean);
 
   try {
@@ -29,7 +25,7 @@ const handler = async (m, { conn, args, text, usedPrefix, command }) => {
   }
 };
 
-handler.command = ['bio']
+handler.command = ['bio'];
 handler.owner = true;
 
 export default handler;
