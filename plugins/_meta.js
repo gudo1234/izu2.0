@@ -59,7 +59,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
       const { title, timestamp, url } = video
 
       // Mensaje inmediato al usuario
-      await m.reply(`Enviando *${title}*\n🕒 ${timestamp}`)
+      await m.reply(`_Enviando_ *${title}*\n🕒 *Time:* ${timestamp}`)
 
       let yt = await youtubedl(url).catch(() => youtubedlv2(url))
       let audio = yt.audio?.['128kbps']
