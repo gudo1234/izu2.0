@@ -1,26 +1,28 @@
-const handler = async (m, { text, command, conn }) => {
-  if (!text.includes('|')) {
-    return m.reply(`Formato incorrecto.\nUsa:\n.${command} Pregunta | Opción 1 | Opción 2 ...`);
-  }
+let handler = async (m, { conn, text, args, participants, usedPrefix, command }) => {	
+    let a = []
+    let b = text.split('|')
 
-  const partes = text.split('|').map(p => p.trim()).filter(p => p);
-  const pregunta = partes.shift();
-  const opciones = partes;
+    if (!b[0]) return conn.reply(m.chat, `${e} *Crea una encuesta.*\n*ejemplo:* ${usedPrefix + command} Motivo de Encuesta|texto1|texto2|texto3....`, m) 
+    if (!b[1]) return conn.reply(m.chat, `${e} _Use de la siguiente forma utilizando_ *" | "* \n*Ejemplo:* ${usedPrefix + command} Motivo de Encuesta|texto1|texto2|texto3....`, m)
+    if (b.length > 13) return conn.reply(m.chat, `${e} Lo máximo que debes poner es un total de *13* opciones.`, m)
 
-  if (opciones.length < 2) {
-    return m.reply('Debes incluir al menos dos opciones para la encuesta.');
-  }
-
-  // Enviar encuesta
-  await conn.sendMessage(m.chat, {
-    poll: {
-      name: pregunta,
-      values: opciones
+    for (let c = 1; c < b.length; c++) { 
+        a.push([b[c]]) 
     }
-  }, { quoted: m });
-};
+    
+    let texto = `📊 *Encuesta creada por:* ${conn.getName(m.sender)}\n*${text.split('|')[0]}*`
 
-handler.command = ['poll', 'encuesta']
-handler.group = true;
+    let mentions = participants.map(u => u.id).filter(v => v !== conn.user.jid)
+    const poll = {
+        name: [b[0]],
+        selectableCount: 1,
+        values: a,
+        mentions: mentions,
+        remoteJid: m.chat
+    }  
 
-export default handler;
+    return await conn.sendPoll(m.chat, texto, a, { poll })
+}
+
+handler.command = ['poll', 'encuesta', 'crearencuesta', 'startpoll', 'encuestas', 'polls'] 
+export default handler
