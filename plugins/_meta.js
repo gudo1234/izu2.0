@@ -1,4 +1,4 @@
-import axios from 'axios'
+/*import axios from 'axios'
 import fetch from 'node-fetch'
 import { googleImage } from '@bochilteam/scraper'
 import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
@@ -113,4 +113,128 @@ async function luminsesi(q, username, logic) {
     console.error('Error al obtener:', error)
     throw error
   }
-          }
+          }*/
+
+import axios from 'axios'
+import fetch from 'node-fetch'
+import { googleImage } from '@bochilteam/scraper'
+import { youtubedl, youtubedlv2 } from '@bochilteam/scraper'
+import yts from 'yt-search'
+
+let handler = async (m, { conn, usedPrefix, command, text }) => {
+  const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
+  const username = `${conn.getName(m.sender)}`
+  const basePrompt = `Tu nombre es izuBot (IA creada por ${author}). Te comportas como una inteligencia artificial profesional, amigable y servicial. Te expresas con claridad y precisión. Tu objetivo es ayudar al usuario con lo que solicita.`
+
+  if (isQuotedImage) {
+    const q = m.quoted
+    const img = await q.download?.()
+    if (!img) return conn.reply(m.chat, 'Error: No se pudo descargar la imagen.', m)
+    const content = 'Describe detalladamente el contenido de esta imagen.'
+    try {
+      const imageAnalysis = await fetchImageBuffer(content, img)
+      const query = 'Describe la imagen y explica qué se observa y cómo actúan las personas o elementos.'
+      const prompt = `${basePrompt}. La imagen a analizar es: ${imageAnalysis.result}`
+      const description = await luminsesi(query, username, prompt)
+      await conn.reply(m.chat, description, m)
+    } catch (error) {
+      console.error('Error al analizar la imagen:', error)
+      await conn.reply(m.chat, 'Error al analizar la imagen.', m)
+    }
+    return
+  }
+
+  if (!text) return conn.reply(m.chat, `*Ingrese su petición*\nEjemplo de uso: ${usedPrefix + command} ¿Qué es un bot?`, m)
+  await m.react('💬')
+
+  // Clasificar intención con la IA
+  const clasificacionPrompt = `${basePrompt}. Analiza esta petición del usuario: "${text}"\n\nResponde únicamente con una de las siguientes opciones según lo que el usuario está solicitando:\n- imagen\n- música\n- otro\n\nNo expliques nada. Solo responde con una de esas tres palabras.`
+  let tipoPeticion
+  try {
+    tipoPeticion = await luminsesi(text, username, clasificacionPrompt)
+    tipoPeticion = tipoPeticion.trim().toLowerCase()
+  } catch (e) {
+    console.error('Error al clasificar intención:', e)
+    tipoPeticion = 'otro'
+  }
+
+  if (tipoPeticion === 'imagen') {
+    try {
+      const res = await googleImage(text)
+      const image = res.getRandom()
+      await conn.sendFile(m.chat, image, 'imagen.jpg', `Aquí tienes la imagen solicitada: "${text}"`, m)
+    } catch (e) {
+      console.error(e)
+      await conn.reply(m.chat, 'No se pudo obtener una imagen.', m)
+    }
+    return
+  }
+
+  if (tipoPeticion === 'música') {
+    try {
+      const search = await yts(text)
+      const vid = search.videos[0]
+      const url = vid.url
+      const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`)
+      const title = vid.title
+      const audio = api1?.data?.result?.audio
+
+      if (!audio?.url) throw 'No se pudo obtener el audio'
+
+      await conn.sendMessage(m.chat, {
+        document: { url: audio.url },
+        fileName: title + '.mp3',
+        mimetype: 'audio/mpeg'
+      }, { quoted: m })
+    } catch (e) {
+      console.error(e)
+      await conn.reply(m.chat, 'No se pudo enviar la música solicitada.', m)
+    }
+    return
+  }
+
+  // Respuesta general si no es imagen ni música
+  try {
+    const prompt = `${basePrompt}. Responde lo siguiente: ${text}`
+    const response = await luminsesi(text, username, prompt)
+    await conn.reply(m.chat, response, m)
+  } catch (error) {
+    console.error('Error al obtener la respuesta:', error)
+    await conn.reply(m.chat, 'Error: intenta más tarde.', m)
+  }
+}
+
+handler.command = ['meta']
+handler.group = true
+
+export default handler
+
+async function fetchImageBuffer(content, imageBuffer) {
+  try {
+    const response = await axios.post('https://Luminai.my.id', {
+      content,
+      imageBuffer
+    }, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+    return response.data
+  } catch (error) {
+    console.error('Error:', error)
+    throw error
+  }
+}
+
+async function luminsesi(q, username, logic) {
+  try {
+    const response = await axios.post("https://Luminai.my.id", {
+      content: q,
+      user: username,
+      prompt: logic,
+      webSearchMode: false
+    })
+    return response.data.result
+  } catch (error) {
+    console.error('Error al obtener:', error)
+    throw error
+  }
+      }
