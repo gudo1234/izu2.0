@@ -18,23 +18,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     '-h': 'flip-horizontal', '-v': 'flip-vertical'
   };
 
-  const thumbnail = await (await fetch(icono)).buffer();
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
-  let q = m.quoted ? m.quoted : m;
-  let mime = (q.msg || q).mimetype || q.mediaType || '';
-  let img;
-
-  if (/webp|image|video|gif/g.test(mime)) {
-    if (/video/g.test(mime) && (q.msg || q).seconds > 8)
-      return m.reply('¡El video no puede durar más de 8 segundos!');
-    img = await q.download?.();
-  } else if (args[0] && isUrl(args[0])) {
-    img = await fetch(args[0]).then(res => res.buffer());
-    mime = 'image/url';
-  } else {
-    return conn.reply(m.chat, `${e} _Responde a una *imagen, video o GIF* para crear un sticker. También puedes agregar una forma personalizada con una opción._
+  // Si no hay archivo ni URL válida, responder de inmediato con la lista de formas
+  if (!m.quoted && !isUrl(args[0])) {
+    return m.reply(`${e} _Responde a una *imagen, video o GIF* para crear un sticker. También puedes agregar una forma personalizada con una opción._
 
 ┌🎨 \`Formas disponibles:\`
 │
@@ -64,10 +53,27 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ └─ -v → Vertical
 └──────────
 
-◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
+◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``);
   }
 
   m.react('🧩');
+
+  const thumbnail = await (await fetch(icono)).buffer();
+
+  let q = m.quoted ? m.quoted : m;
+  let mime = (q.msg || q).mimetype || q.mediaType || '';
+  let img;
+
+  if (/webp|image|video|gif/g.test(mime)) {
+    if (/video/g.test(mime) && (q.msg || q).seconds > 8)
+      return m.reply('¡El video no puede durar más de 8 segundos!');
+    img = await q.download?.();
+  } else if (args[0] && isUrl(args[0])) {
+    img = await fetch(args[0]).then(res => res.buffer());
+    mime = 'image/url';
+  } else {
+    return; // Ya se respondió arriba, no repetir
+  }
 
   let stiker = false;
   try {
@@ -87,17 +93,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       await fs.unlink(tempOutputPath).catch(() => {});
     }
 
-    // Transformaciones según forma o flip
     let processed;
     if (selectedShape === 'flip-horizontal') {
       processed = await sharp(frameBuffer)
-        .flip() // arriba <-> abajo
+        .flip()
         .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
         .webp()
         .toBuffer();
     } else if (selectedShape === 'flip-vertical') {
       processed = await sharp(frameBuffer)
-        .flop() // izquierda <-> derecha
+        .flop()
         .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
         .webp()
         .toBuffer();
