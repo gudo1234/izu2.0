@@ -1,18 +1,26 @@
-let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  if (!args[0]) {
-    throw `⚠️️ *_Ingrese un texto para iniciar la encuesta._*\n\n📌 Ejemplo:\n*${usedPrefix + command}* opción1|opción2|opción3`
-  }
-
+const handler = async (m, { text, command, conn }) => {
   if (!text.includes('|')) {
-    throw `⚠️️ Separe las opciones con *|*\n\n📌 Ejemplo:\n*${usedPrefix + command}* opción1|opción2|opción3`
+    return m.reply(`Formato incorrecto.\nUsa:\n.${command} Pregunta | Opción 1 | Opción 2 ...`);
   }
 
-  let opciones = text.split('|').map(opcion => [opcion.trim()])
+  const partes = text.split('|').map(p => p.trim()).filter(p => p);
+  const pregunta = partes.shift();
+  const opciones = partes;
 
-  return conn.sendPoll(m.chat, `Encuesta:`, opciones, m)
-}
+  if (opciones.length < 2) {
+    return m.reply('Debes incluir al menos dos opciones para la encuesta.');
+  }
+
+  // Enviar encuesta
+  await conn.sendMessage(m.chat, {
+    poll: {
+      name: pregunta,
+      values: opciones
+    }
+  }, { quoted: m });
+};
 
 handler.command = ['poll', 'encuesta']
-handler.group = true
+handler.group = true;
 
-export default handler
+export default handler;
