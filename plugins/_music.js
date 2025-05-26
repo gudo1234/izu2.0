@@ -71,10 +71,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.command = handler.help = ['play', 'song', 'ds'];
-handler.tags = ['downloader'];
-handler.exp = 0;
-handler.limit = true;
-handler.premium = false;
+handler.command = ['music', 'song'];
+handler.group = true;
 
 export default handler;
