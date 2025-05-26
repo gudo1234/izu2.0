@@ -48,7 +48,7 @@ await conn.reply(m.chat, response, m, fake)
 console.error('🚩 Error al obtener la respuesta:', error)
 await conn.reply(m.chat, 'Error: intenta más tarde.', m, fake)}}}
 
-handler.command = ['ia', 'chatgpt', 'bot', 'gpt', 'gemini']
+handler.command = ['ia', 'chatgpt', 'gpt', 'gemini']
 handler.group = true;
 
 export default handler
