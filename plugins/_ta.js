@@ -3,20 +3,22 @@ let handler = async (m, { conn, text, participants, command }) => {
     .map(u => u.id)
     .filter(v => v !== conn.user.jid)
 
-  // Si el mensaje es respuesta a una encuesta u otro tipo de mensaje
   if (m.quoted) {
     let quotedMsg = m.quoted
     let isPoll = quotedMsg?.msg?.pollCreationMessage || quotedMsg?.msg?.pollUpdateMessage
 
-    if (isPoll || quotedMsg.fakeObj) {
-      return conn.sendMessage(m.chat, {
-        forward: quotedMsg.fakeObj || quotedMsg,
-        mentions: users
-      })
-    }
+    // Primero reenviamos el mensaje (incluso si es encuesta)
+    await conn.sendMessage(m.chat, {
+      forward: quotedMsg.fakeObj || quotedMsg,
+    })
+
+    // Luego mandamos la mención aparte
+    return conn.sendMessage(m.chat, {
+      text: `👥`, // Puedes personalizar esto
+      mentions: users
+    })
   }
 
-  // Si solo hay texto
   if (text?.trim()) {
     return conn.sendMessage(m.chat, {
       text,
