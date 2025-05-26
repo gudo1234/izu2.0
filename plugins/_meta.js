@@ -99,8 +99,6 @@ const handler = async (m, { conn, args, usedPrefix, command, text }) => {
 };
 
 handler.command = ['meta'];
-handler.help = ['meta'].map(v => v + ' <texto>');
-handler.tags = ['ai'];
 handler.group = true;
 
 export default handler;
