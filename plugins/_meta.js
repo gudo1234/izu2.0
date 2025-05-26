@@ -29,16 +29,21 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
   if (!text) return conn.reply(m.chat, `Ingrese su petición.\nEjemplo: ${usedPrefix + command} ¿Qué es un bot?`, m)
   await m.react('💬')
 
-  // Detección contextual de pedido musical
-  const musicKeywords = /(pon(?:me)?|reproduce|descarga|quiero|busca).{0,10}(canción|tema|música|audio|link)?/i
-  const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  // Detección semántica con IA
+  let intencion
+  try {
+    intencion = await detectarIntencion(text, username)
+  } catch (e) {
+    console.error('Error detectando intención:', e)
+    intencion = 'otro'
+  }
 
-  if (musicKeywords.test(text) || ytRegex.test(text)) {
+  // Petición de música
+  if (intencion === 'musica') {
     try {
       await m.react('🎵')
       const query = text
-      const ytMatch = query.match(ytRegex)
-
+      const ytMatch = query.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
       let video
       if (ytMatch) {
         const videoId = ytMatch[1]
@@ -51,15 +56,12 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
       }
 
       const { title, timestamp, url } = video
-
       let yt = await youtubedl(url).catch(() => youtubedlv2(url))
       let audio = yt.audio?.['128kbps']
       if (!audio) return m.reply('No se encontró el audio compatible.')
-
       const { fileSizeH: sizeText, fileSize } = audio
       const sizeMB = fileSize / (1024 * 1024)
 
-      // Calcular duración
       let durationMin = 0
       if (timestamp) {
         const parts = timestamp.split(':').map(Number)
@@ -68,19 +70,15 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         else if (parts.length === 1) durationMin = parts[0]
       }
 
-      // Obtener link de descarga
       let downloadUrl
       try {
         const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`)
-        if (api1.data?.data?.dl) {
-          downloadUrl = api1.data.data.dl
-        } else throw new Error()
+        if (api1.data?.data?.dl) downloadUrl = api1.data.data.dl
+        else throw new Error()
       } catch {
         try {
           const api2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`)
-          if (api2.data?.result?.download?.url) {
-            downloadUrl = api2.data.result.download.url
-          }
+          if (api2.data?.result?.download?.url) downloadUrl = api2.data.result.download.url
         } catch {
           return m.reply('Error al obtener el enlace de descarga.')
         }
@@ -104,7 +102,22 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
     return
   }
 
-  // Generación de texto normal
+  // Petición de imagen
+  if (intencion === 'imagen') {
+    await m.react('🖼️')
+    try {
+      const res = await googleImage(text)
+      const img = res.getRandom()
+      await conn.sendFile(m.chat, img, 'imagen.jpg', `Aquí tienes la imagen para: ${text}`, m)
+      await m.react('✅')
+    } catch (e) {
+      console.error(e)
+      return m.reply('No se pudo obtener una imagen.')
+    }
+    return
+  }
+
+  // Respuesta normal
   try {
     const prompt = `${basePrompt}. Responde lo siguiente: ${text}`
     const response = await luminsesi(text, username, prompt)
@@ -150,4 +163,18 @@ async function luminsesi(q, username, logic) {
     console.error('Error Luminai:', error)
     throw error
   }
+}
+
+// Nueva función para detección de intención
+async function detectarIntencion(text, username) {
+  const prompt = `
+Eres una IA que clasifica peticiones. Dada la siguiente entrada, responde solo una palabra indicando la intención:
+- "musica" si es una petición de canción, música, audio o similar.
+- "imagen" si es una petición de imagen, ilustración o contenido visual.
+- "otro" si no corresponde a ninguna de las anteriores.
+
+Petición: "${text}"
+Respuesta:`.trim()
+  const result = await luminsesi(text, username, prompt)
+  return result.toLowerCase()
 }
