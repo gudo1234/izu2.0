@@ -92,7 +92,7 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
         mimetype: 'audio/mpeg',
         fileName: `${title}.mp3`
       }
-
+m.reply(`Enviando *${title}*`)
       await conn.sendMessage(m.chat, payload, { quoted: m })
       await m.react('✅')
     } catch (err) {
