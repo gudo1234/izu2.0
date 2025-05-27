@@ -32,7 +32,7 @@ const handler = async (m, { text, conn, args }) => {
   let video = data.url;
   try {
     //await conn.sendMessage(m.chat, { video: { url: video }, caption: `${emoji} Aqui tienes ฅ^•ﻌ•^ฅ.`, fileName: 'fb.mp4', mimetype: 'video/mp4' }, { quoted: m })
-  await conn.sendFile(m.chat, video, `thumbnail.mp4`, `${m.pushName}`, m, null, rcanal)
+  await conn.sendFile(m.chat, video, `thumbnail.mp4`, `> ${textbot}`, m, null, rcanal)
   
     await m.react(done);
   } catch (e) {
