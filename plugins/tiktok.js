@@ -63,11 +63,12 @@ handler.group = true;
 export default handler;*/
 
 import Starlights from '@StarlightsTeam/Scraper';
-import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
+import { spawn } from 'child_process';
+import fetch from 'node-fetch';
 
 function normalizeTikTokUrl(text) {
   const regex = /(https?:\/\/)?(www\.)?(vm\.|vt\.|www\.)?tiktok\.com\/[^\s]+/i;
@@ -82,6 +83,12 @@ function normalizeTikTokUrl(text) {
   return null;
 }
 
+async function downloadFile(url, dest) {
+  const res = await fetch(url);
+  const buffer = await res.arrayBuffer();
+  fs.writeFileSync(dest, Buffer.from(buffer));
+}
+
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
     return conn.reply(m.chat, `✧ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola\n*${usedPrefix + command}* https://vt.tiktok.com/ZShhtdsRh/`, m);
@@ -91,7 +98,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   try {
     let result;
-    let url = normalizeTikTokUrl(text);
+    const url = normalizeTikTokUrl(text);
 
     if (url) {
       result = await Starlights.tiktokdl(url);
@@ -101,8 +108,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     const {
       dl_url,
-      images = [],
       music,
+      images = [],
       title,
       author,
       duration,
@@ -111,81 +118,74 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       comment,
       share,
       published,
-      downloads
+      downloads,
+      type = 'video' // asume 'video' si no viene definido
     } = result;
 
-    let txt = `╭───── • ─────╮\n`;
-    txt += `  𖤐 \`TIKTOK EXTRACTOR\` 𖤐\n`;
-    txt += `╰───── • ─────╯\n\n`;
-    txt += `✦ *Título* : ${title}\n`;
-    txt += `✦ *Autor* : ${author}\n`;
-    txt += `✦ *Duración* : ${duration} segundos\n`;
-    txt += `✦ *Vistas* : ${views}\n`;
-    txt += `✦ *Likes* : ${likes}\n`;
-    txt += `✦ *Comentarios* : ${comment}\n`;
-    txt += `✦ *Compartidos* : ${share}\n`;
-    txt += `✦ *Publicado* : ${published}\n`;
-    txt += `✦ *Descargas* : ${downloads}\n\n`;
-    txt += `╭───── • ─────╮\n`;
-    txt += `> *${global.textbot || 'Bot'}*\n`;
-    txt += `╰───── • ─────╯\n`;
+    const caption = `╭───── • ─────╮
+  𖤐 \`TIKTOK EXTRACTOR\` 𖤐
+╰───── • ─────╯
 
-    // Si es publicación de imágenes
-    if (images.length > 0 && music) {
-      const tempDir = path.join(tmpdir(), randomUUID());
-      fs.mkdirSync(tempDir);
+✦ *Título* : ${title}
+✦ *Autor* : ${author}
+✦ *Duración* : ${duration}s
+✦ *Vistas* : ${views}
+✦ *Likes* : ${likes}
+✦ *Comentarios* : ${comment}
+✦ *Compartidos* : ${share}
+✦ *Publicado* : ${published}
+✦ *Descargas* : ${downloads}
 
-      const imagePaths = [];
+> *${global.textbot || 'Bot'}*`;
+
+    if (type === 'image' && images.length && music) {
+      // Crear video desde imágenes + audio
+      const temp = path.join(tmpdir(), randomUUID());
+      fs.mkdirSync(temp);
+      const imgPaths = [];
+
       for (let i = 0; i < images.length; i++) {
-        const imgUrl = images[i];
-        const imgPath = path.join(tempDir, `img${i}.jpg`);
-        const res = await (await fetch(imgUrl)).arrayBuffer();
-        fs.writeFileSync(imgPath, Buffer.from(res));
-        imagePaths.push(imgPath);
+        const imgPath = path.join(temp, `img${i}.jpg`);
+        await downloadFile(images[i], imgPath);
+        imgPaths.push(imgPath);
       }
 
-      const audioPath = path.join(tempDir, 'audio.mp3');
-      const audioRes = await (await fetch(music)).arrayBuffer();
-      fs.writeFileSync(audioPath, Buffer.from(audioRes));
+      const audioPath = path.join(temp, 'audio.mp3');
+      await downloadFile(music, audioPath);
 
-      const outputPath = path.join(tempDir, 'output.mp4');
+      const listFile = path.join(temp, 'list.txt');
+      const imageDuration = 3; // segundos por imagen
+      fs.writeFileSync(listFile, imgPaths.map(f => `file '${f}'\nduration ${imageDuration}`).join('\n') + `\nfile '${imgPaths[imgPaths.length - 1]}'`);
 
-      const inputArgs = [];
-      const filterInputs = [];
-      for (let i = 0; i < imagePaths.length; i++) {
-        inputArgs.push('-loop', '1', '-t', '3', '-i', imagePaths[i]);
-        filterInputs.push(`[${i}:v]`);
-      }
-
-      const ffmpegArgs = [
-        ...inputArgs,
-        '-i', audioPath,
-        '-filter_complex',
-        `${filterInputs.join('')}concat=n=${imagePaths.length}:v=1:a=0,format=yuv420p[v]`,
-        '-map', '[v]',
-        '-map', `${imagePaths.length}:a`,
-        '-shortest',
-        outputPath
-      ];
+      const videoPath = path.join(temp, 'output.mp4');
 
       await new Promise((resolve, reject) => {
-        const ffmpeg = spawn('ffmpeg', ffmpegArgs);
-        ffmpeg.on('close', code => code === 0 ? resolve() : reject(`FFmpeg exited with code ${code}`));
+        const ffmpeg = spawn('ffmpeg', [
+          '-f', 'concat',
+          '-safe', '0',
+          '-i', listFile,
+          '-i', audioPath,
+          '-shortest',
+          '-vf', "scale=720:1280,format=yuv420p",
+          '-preset', 'ultrafast',
+          videoPath
+        ]);
+
+        ffmpeg.stderr.on('data', data => console.error(data.toString()));
+        ffmpeg.on('exit', code => code === 0 ? resolve() : reject(`FFmpeg exit code ${code}`));
       });
 
-      await m.react('✅');
-      await conn.sendFile(m.chat, outputPath, 'tiktok.mp4', txt, m);
-
-      fs.rmSync(tempDir, { recursive: true, force: true });
+      await conn.sendFile(m.chat, videoPath, 'tiktok.mp4', caption, m);
+      fs.rmSync(temp, { recursive: true, force: true });
     } else {
-      // Video normal
-      await m.react('✅');
-      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
+      // Enviar video directamente
+      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', caption, m);
     }
 
+    await m.react('✅');
   } catch (err) {
     console.error(err);
-    await m.reply('Ocurrió un error al procesar el contenido de TikTok.');
+    await m.reply('Ocurrió un error procesando el TikTok. Puede que el enlace sea inválido o que TikTok haya cambiado su estructura.');
   }
 };
 
