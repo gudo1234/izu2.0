@@ -68,7 +68,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   );
 };
 
-handler.command = ['ban', 'kick', 'echar', 'hechar', 'b', 'bam']
+handler.command = ['ban', 'kick', 'echar', 'hechar', 'b', 'bam', 'kicknum']
 handler.admin = true;
 handler.group = true;
 handler.botAdmin = true;
