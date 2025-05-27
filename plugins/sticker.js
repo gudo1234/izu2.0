@@ -77,19 +77,19 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       await fs.writeFile(tempInputPath, img);
       await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', [
-          '-y',
-          '-i', tempInputPath,
-          '-vf', 'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,fps=15',
-          '-loop', '0',
-          '-ss', '0',
-          '-t', '8',
-          '-an',
-          '-vsync', '0',
-          '-s', '512:512',
-          '-preset', 'default',
-          '-f', 'webp',
-          tempOutputPath
-        ]);
+  '-y',
+  '-i', tempInputPath,
+  '-vf', 'scale=512:512:force_original_aspect_ratio=decrease,fps=15',
+  '-loop', '0',
+  '-ss', '0',
+  '-t', '8',
+  '-an',
+  '-vsync', '0',
+  // '-s', '512:512', // Elimina esta línea
+  '-preset', 'default',
+  '-f', 'webp',
+  tempOutputPath
+]);
         ffmpeg.on('close', resolve);
         ffmpeg.on('error', reject);
       });
