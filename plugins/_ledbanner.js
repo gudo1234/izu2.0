@@ -3,7 +3,6 @@ import path from 'path';
 import { createCanvas, registerFont } from 'canvas';
 import { spawn } from 'child_process';
 
-// Si deseas usar una fuente personalizada, registra aquí:
 // registerFont('./fonts/tu-fuente.ttf', { family: 'TuFuente' });
 
 let handler = async (m, { conn, text, command, usedPrefix }) => {
@@ -17,7 +16,6 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
   const gifPath = './tmp_ledbanner.gif';
   const scrollSpeed = 8;
 
-  // Preparar carpeta temporal
   if (!fs.existsSync(frameDir)) fs.mkdirSync(frameDir);
 
   const canvas = createCanvas(width, height);
@@ -28,18 +26,20 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
   for (let i = 0; i < frameCount; i++) {
     // Fondo negro
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, width, height);
 
-    // Texto estilo LED
+    // Configurar fuente y estilo
     ctx.font = `bold ${fontSize}px monospace`;
-    ctx.fillStyle = '#39ff14';
-    ctx.shadowColor = '#39ff14';
-    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#CD7F32'; // Color bronco
+    ctx.shadowColor = '#CD7F32';
+    ctx.shadowBlur = 5;
 
+    // Posición del texto
     const x = width - (i * scrollSpeed) % (textWidth + width);
     const y = height / 2 + fontSize / 3;
 
+    // Dibujar texto
     ctx.fillText(text, x, y);
 
     const buffer = canvas.toBuffer('image/png');
@@ -47,7 +47,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
     fs.writeFileSync(frameFile, buffer);
   }
 
-  // Convertir a GIF con ffmpeg
+  // Crear GIF con ffmpeg
   await new Promise((resolve, reject) => {
     const args = [
       '-y',
@@ -63,15 +63,14 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
     ffmpeg.on('close', (code) => code === 0 ? resolve() : reject(new Error('ffmpeg failed')));
   });
 
-  // Enviar como video tipo gif
+  // Enviar el GIF
   await conn.sendMessage(m.chat, {
     video: fs.readFileSync(gifPath),
     gifPlayback: true,
-    caption: `🟢 *LED Banner*\n${text}`,
+    caption: `🟤 *LED Banner*\n${text}`,
     mentions: [m.sender]
   }, { quoted: m });
 
-  // Limpiar
   fs.rmSync(frameDir, { recursive: true, force: true });
   fs.unlinkSync(gifPath);
 };
