@@ -51,7 +51,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
     return conn.reply(m.chat, '*Expulsión finalizada.*', m);
   }
 
-  return conn.reply(m.chat, `${e} *Ejemplo de uso:* ${usedPrefix + command} @usuario o ${usedPrefix + command} 212`, m);
+  return conn.reply(m.chat, `${e} *Ejemplos de uso:* _Para expulsar a un usuario usa:_ \`${usedPrefix + command}\` @${prems}\n> Para expulsar a todos los usuarios cuyo número comienza con un prefijo específico, utiliza: ${usedPrefix + command} <prefijo>\n*Ejemplo:* \`${usedPrefix + command}\` 212 _(esto expulsará a todos los usuarios cuyo número comience con +212)_`, m);
 };
 
 //handler.command = ['kick', 'ban', 'echar', 'hechar', 'b', 'bam'];
