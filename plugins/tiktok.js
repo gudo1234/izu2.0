@@ -68,7 +68,6 @@ import fs from 'fs';
 import path from 'path';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
-import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 
 function normalizeTikTokUrl(text) {
   const regex = /(https?:\/\/)?(www\.)?(vm\.|vt\.|www\.)?tiktok\.com\/[^\s]+/i;
@@ -100,31 +99,45 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       result = await Starlights.tiktokvid(text);
     }
 
+    const {
+      dl_url,
+      images = [],
+      music,
+      title,
+      author,
+      duration,
+      views,
+      likes,
+      comment,
+      share,
+      published,
+      downloads
+    } = result;
+
     let txt = `╭───── • ─────╮\n`;
     txt += `  𖤐 \`TIKTOK EXTRACTOR\` 𖤐\n`;
     txt += `╰───── • ─────╯\n\n`;
-    txt += `✦ *Título* : ${result.title}\n`;
-    txt += `✦ *Autor* : ${result.author}\n`;
-    txt += `✦ *Duración* : ${result.duration} segundos\n`;
-    txt += `✦ *Vistas* : ${result.views}\n`;
-    txt += `✦ *Likes* : ${result.likes}\n`;
-    txt += `✦ *Comentarios* : ${result.comment || result.comments_count}\n`;
-    txt += `✦ *Compartidos* : ${result.share || result.share_count}\n`;
-    txt += `✦ *Publicado* : ${result.published}\n`;
-    txt += `✦ *Descargas* : ${result.downloads || result.download_count}\n\n`;
+    txt += `✦ *Título* : ${title}\n`;
+    txt += `✦ *Autor* : ${author}\n`;
+    txt += `✦ *Duración* : ${duration} segundos\n`;
+    txt += `✦ *Vistas* : ${views}\n`;
+    txt += `✦ *Likes* : ${likes}\n`;
+    txt += `✦ *Comentarios* : ${comment}\n`;
+    txt += `✦ *Compartidos* : ${share}\n`;
+    txt += `✦ *Publicado* : ${published}\n`;
+    txt += `✦ *Descargas* : ${downloads}\n\n`;
     txt += `╭───── • ─────╮\n`;
     txt += `> *${global.textbot || 'Bot'}*\n`;
     txt += `╰───── • ─────╯\n`;
 
-    if (result.images && result.images.length > 0 && result.music) {
-      // Caso: Carrusel de imágenes con audio
+    // Si es publicación de imágenes
+    if (images.length > 0 && music) {
       const tempDir = path.join(tmpdir(), randomUUID());
       fs.mkdirSync(tempDir);
 
       const imagePaths = [];
-
-      for (let i = 0; i < result.images.length; i++) {
-        const imgUrl = result.images[i];
+      for (let i = 0; i < images.length; i++) {
+        const imgUrl = images[i];
         const imgPath = path.join(tempDir, `img${i}.jpg`);
         const res = await (await fetch(imgUrl)).arrayBuffer();
         fs.writeFileSync(imgPath, Buffer.from(res));
@@ -132,17 +145,23 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       }
 
       const audioPath = path.join(tempDir, 'audio.mp3');
-      const audioRes = await (await fetch(result.music)).arrayBuffer();
+      const audioRes = await (await fetch(music)).arrayBuffer();
       fs.writeFileSync(audioPath, Buffer.from(audioRes));
 
       const outputPath = path.join(tempDir, 'output.mp4');
 
+      const inputArgs = [];
+      const filterInputs = [];
+      for (let i = 0; i < imagePaths.length; i++) {
+        inputArgs.push('-loop', '1', '-t', '3', '-i', imagePaths[i]);
+        filterInputs.push(`[${i}:v]`);
+      }
+
       const ffmpegArgs = [
-        '-r', '1/3', // muestra cada imagen durante 3 segundos
-        ...imagePaths.flatMap(p => ['-loop', '1', '-t', '3', '-i', p]),
+        ...inputArgs,
         '-i', audioPath,
         '-filter_complex',
-        `[0:v][1:v][2:v]concat=n=${imagePaths.length}:v=1:a=0,format=yuv420p[v]`,
+        `${filterInputs.join('')}concat=n=${imagePaths.length}:v=1:a=0,format=yuv420p[v]`,
         '-map', '[v]',
         '-map', `${imagePaths.length}:a`,
         '-shortest',
@@ -151,18 +170,19 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
       await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', ffmpegArgs);
-        ffmpeg.on('exit', (code) => code === 0 ? resolve() : reject(new Error(`FFmpeg exited with code ${code}`)));
+        ffmpeg.on('close', code => code === 0 ? resolve() : reject(`FFmpeg exited with code ${code}`));
       });
 
       await m.react('✅');
-      await conn.sendFile(m.chat, outputPath, 'tiktok.mp4', txt, m, null, rcanal);
+      await conn.sendFile(m.chat, outputPath, 'tiktok.mp4', txt, m);
 
       fs.rmSync(tempDir, { recursive: true, force: true });
     } else {
-      // Caso: Video tradicional
+      // Video normal
       await m.react('✅');
-      await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', txt, m, null, rcanal);
+      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
     }
+
   } catch (err) {
     console.error(err);
     await m.reply('Ocurrió un error al procesar el contenido de TikTok.');
