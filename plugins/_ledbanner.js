@@ -52,9 +52,5 @@ let handler = async (m, { text, conn }) => {
 }
 
 handler.command = ['ledbanner']
-handler.help = ['ledbanner <texto>']
-handler.tags = ['fun']
-handler.group = false
-handler.register = true
-
+handler.group = true;
 export default handler
