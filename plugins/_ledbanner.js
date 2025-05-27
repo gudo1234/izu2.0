@@ -25,21 +25,19 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
   const textWidth = ctx.measureText(text).width;
 
   for (let i = 0; i < frameCount; i++) {
-    // Fondo negro
-    ctx.fillStyle = '#000000';
+    // Fondo blanco
+    ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, width, height);
 
-    // Configurar fuente y estilo
+    // Configurar fuente en negro sin sombra
     ctx.font = `bold ${fontSize}px monospace`;
-    ctx.fillStyle = '#CD7F32'; // Color bronco
-    ctx.shadowColor = '#CD7F32';
-    ctx.shadowBlur = 5;
+    ctx.fillStyle = '#000000';
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
 
-    // Posición del texto
     const x = width - (i * scrollSpeed) % (textWidth + width);
     const y = height / 2 + fontSize / 3;
 
-    // Dibujar texto
     ctx.fillText(text, x, y);
 
     const buffer = canvas.toBuffer('image/png');
@@ -63,11 +61,10 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
     ffmpeg.on('close', (code) => code === 0 ? resolve() : reject(new Error('ffmpeg failed')));
   });
 
-  // Enviar el GIF
   await conn.sendMessage(m.chat, {
     video: fs.readFileSync(gifPath),
     gifPlayback: true,
-    caption: `🟤 *LED Banner*\n${text}`,
+    caption: `⬜ *LED Banner*\n${text}`,
     mentions: [m.sender]
   }, { quoted: m });
 
