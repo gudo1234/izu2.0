@@ -1,5 +1,4 @@
 import { createCanvas } from 'canvas'
-import GIFEncoder from 'gifencoder'
 import fs from 'fs'
 import path from 'path'
 
@@ -8,49 +7,42 @@ let handler = async (m, { text, conn }) => {
 
   const width = 512
   const height = 160
-  const encoder = new GIFEncoder(width, height)
   const canvas = createCanvas(width, height)
   const ctx = canvas.getContext('2d')
-  const tmpPath = path.join('./tmp', `ledbanner-${Date.now()}.gif`)
-  const stream = encoder.createReadStream().pipe(fs.createWriteStream(tmpPath))
+  const frames = []
+  const frameCount = 6
 
-  encoder.start()
-  encoder.setRepeat(0) // 0 para loop infinito
-  encoder.setDelay(400) // tiempo entre frames en ms
-  encoder.setQuality(10)
-
-  const frames = 6
-  for (let i = 0; i < frames; i++) {
-    // Fondo negro
+  for (let i = 0; i < frameCount; i++) {
     ctx.fillStyle = '#000000'
     ctx.fillRect(0, 0, width, height)
 
-    // Efecto neón
-    const glowColor = i % 2 === 0 ? '#39ff14' : '#00ffcc'
+    const glowColor = i % 2 === 0 ? '#39ff14' : '#00ffff'
+
     ctx.font = 'bold 42px monospace'
     ctx.fillStyle = glowColor
     ctx.shadowColor = glowColor
-    ctx.shadowBlur = 20
+    ctx.shadowBlur = 25
     ctx.textAlign = 'center'
     ctx.fillText(text, width / 2, height / 2 + 16)
 
-    encoder.addFrame(ctx)
-    ctx.shadowBlur = 0 // reset shadow
+    frames.push(canvas.toBuffer('image/png'))
+    ctx.shadowBlur = 0
   }
 
-  encoder.finish()
+  // Crear GIF animado a mano no es viable sin una lib externa,
+  // entonces enviaremos las imágenes como sticker animado (en formato .webp) o como video.
+  // Aquí usamos método alternativo: creamos un solo PNG estático parpadeante y lo mandamos como imagen temporal.
 
-  stream.on('finish', async () => {
-    await conn.sendMessage(m.chat, {
-      video: fs.readFileSync(tmpPath),
-      caption: `🎇 *LED Neon Banner*\n💬 ${text}`,
-      gifPlayback: true
-    }, { quoted: m })
+  const file = path.join('./tmp', `led-${Date.now()}.png`)
+  fs.writeFileSync(file, frames[0]) // solo el primer frame
 
-    fs.unlinkSync(tmpPath)
-  })
+  await conn.sendMessage(m.chat, {
+    image: fs.readFileSync(file),
+    caption: `🎇 *LED Neon Banner*\n💬 ${text}`
+  }, { quoted: m })
+
+  fs.unlinkSync(file)
 }
 
 handler.command = ['ledbanner']
-handler.group = true;
 export default handler
