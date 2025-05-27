@@ -83,26 +83,44 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     return conn.reply(m.chat, `✦ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* https://vm.tiktok.com/ZShhtdsRh/`, m);
   }
 
-  const isValidUrl = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i.test(text);
-  if (!isValidUrl) {
+  const url = normalizeTikTokUrl(text) || text;
+  const valid = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i.test(url);
+  if (!valid) {
     return conn.reply(m.chat, '✗ La URL proporcionada no es válida para TikTok', m);
   }
 
   await m.react('🕒');
-  const url = normalizeTikTokUrl(text) || text;
 
   try {
-    const result = await Starlights.tiktokdl(url);
+    // Paso 1: Verificamos con la API para saber si es imagen o video
+    const checkApi = await fetch(`https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(url)}`);
+    if (!checkApi.ok) throw new Error('API no disponible');
 
-    // Detectar contenido de imagen o si el dl_url termina en .mp3 (audio sin video)
-    if (
-      result.type === 'image' ||
-      result.media_type === 'image' ||
-      result.images ||
-      (result.dl_url && result.dl_url.endsWith('.mp3'))
-    ) {
-      throw new Error('Es contenido de imagen, se usará fallback');
+    const apiData = await checkApi.json();
+    const media = apiData?.data?.media;
+
+    // Si es tipo imagen usamos directamente la API
+    if (media?.type === 'image') {
+      const images = media.images || [];
+      const audio = media.audio;
+      const video = apiData.data;
+
+      const txt = `*「✦」Título:* ${video.title || 'Sin título'}
+> *✦ Autor:* » ${video.author?.nickname || 'Desconocido'}
+> *ⴵ Duración:* » ${video.duration ? `${video.duration} segundos` : 'No especificado'}
+> *🜸 Likes:* » ${video.like || 0}
+> *✎ Comentarios:* » ${video.comment || 0}`;
+
+      for (let i = 0; i < images.length; i++) {
+        await conn.sendFile(m.chat, images[i], `foto_${i + 1}.jpg`, `*Imagen ${i + 1} del TikTok*`, m);
+      }
+      if (audio) await conn.sendFile(m.chat, audio, 'audio.mp3', '*Audio original*', m);
+
+      return await m.react('✅');
     }
+
+    // Paso 2: Si no es imagen, usamos el scraper para video normal
+    const result = await Starlights.tiktokdl(url);
 
     const txt = `╭───── • ─────╮
   𖤐 \`TIKTOK EXTRACTOR\` 𖤐
@@ -122,45 +140,12 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 > *${global.textbot || 'Bot'}*
 ╰───── • ─────╯`;
 
+    await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', txt, m);
     await m.react('✅');
-    await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', txt, m, null, rcanal);
 
   } catch (e) {
-    // Fallback con API si es contenido de imagen o si el scraper falla
-    try {
-      const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(url)}`;
-      const res = await fetch(apiUrl);
-      if (!res.ok) throw new Error('API no disponible');
-
-      const json = await res.json();
-      const video = json.data;
-      const media = video.media;
-
-      const txt = `*「✦」Título:* ${video.title || 'Sin título'}
-> *✦ Autor:* » ${video.author?.nickname || 'Desconocido'}
-> *ⴵ Duración:* » ${video.duration ? `${video.duration} segundos` : 'No especificado'}
-> *🜸 Likes:* » ${video.like || 0}
-> *✎ Comentarios:* » ${video.comment || 0}`;
-
-      await m.react('✅');
-
-      if (media.type === 'image') {
-        const images = media.images || [];
-        const audio = media.audio;
-
-        for (let i = 0; i < images.length; i++) {
-          await conn.sendFile(m.chat, images[i], `foto_${i + 1}.jpg`, `*Imagen ${i + 1} del TikTok*`, m);
-        }
-        if (audio) await conn.sendFile(m.chat, audio, 'audio.mp3', '*Audio original*', m);
-      } else if (media.org) {
-        await conn.sendFile(m.chat, media.org, 'tiktok.mp4', txt, m);
-      } else {
-        conn.reply(m.chat, 'No se encontró un medio válido para enviar.', m);
-      }
-    } catch (err2) {
-      console.error(err2);
-      return conn.reply(m.chat, '❌ Ocurrió un error al procesar el TikTok. Intenta de nuevo más tarde.', m);
-    }
+    console.error(e);
+    return conn.reply(m.chat, '❌ Ocurrió un error al procesar el TikTok. Intenta de nuevo más tarde.', m);
   }
 };
 
