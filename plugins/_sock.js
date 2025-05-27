@@ -13,14 +13,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const rtx = `Con otro celular o en la PC escanea este QR para convertirte en un *Sub-Bot* Temporal.\n\n\`1\`Haga clic en los tres puntos en la esquina superior derecha\n\n\`2\`Toque dispositivos vinculados\n\n\`3\`Escanee este codigo QR para iniciar sesion con el bot\n\n✧ ¡Este código QR expira en 45 segundos!.`;
-const rtx2 = `Usa este Código para convertirte en un *Sub-Bot* Temporal.\n\n\`1\` » Haga clic en los tres puntos en la esquina superior derecha\n\n\`2\` » Toque dispositivos vinculados\n\n\`3\` » Selecciona Vincular con el número de teléfono\n\n\`4\` » Escriba el Código para iniciar sesion con el bot\n\n✧ No es recomendable usar tu cuenta principal.`;
+const rtx2 = `Usa este Código para convertirte en un *Sub-Bot* Temporal.\n\n\`1\` » Haga clic en los tres puntos en la esquina superior derecha\n\n\`2\` » Toque dispositivos vinculados\n\n\`3\` » Selecciona Vincular con el número de teléfono\n\n\`4\` » Escriba el Código para iniciar sesión con el bot\n\n✧ No es recomendable usar tu cuenta principal.`;
 
-if (!global.conns) global.conns = [];
+if (!global.conns) global.conns = new Map();
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!globalThis.db.data.settings[conn.user.jid].jadibotmd) 
+  if (!globalThis.db.data.settings[conn.user.jid].jadibotmd)
     return m.reply(`Comando desactivado temporalmente.`);
-  
+
   let cooldown = 120000;
   let lastSubs = global.db.data.users[m.sender].Subs || 0;
   if (Date.now() - lastSubs < cooldown) {
@@ -28,8 +28,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     return conn.reply(m.chat, `Debes esperar ${msToTime(waitTime)} para volver a vincular un *Sub-Bot.*`, m);
   }
 
-  let activeSubBots = global.conns.filter(c => c.user && c.ws.socket && c.ws.socket.readyState !== ws.CLOSED);
-  if (activeSubBots.length >= 20) 
+  if (global.conns.size >= 20)
     return m.reply(`No se han encontrado espacios para *Sub-Bots* disponibles.`);
 
   let who = m.mentionedJid?.[0] || (m.fromMe ? conn.user.jid : m.sender);
@@ -121,15 +120,16 @@ export async function yukiJadiBot(options) {
         try {
           if (fromCommand && m?.chat)
             await conn.sendMessage(`${path.basename(pathYukiJadiBot)}@s.whatsapp.net`, {
-              text: '*SESIÓN PENDIENTE*\n\n> *INTENTÉ NUEVAMENTE VOLVER A SER SUB-BOT*'
+              text: '*SESIÓN PENDIENTE*\n\n> *INTENTA NUEVAMENTE VOLVER A SER SUB-BOT*'
             }, { quoted: m });
         } catch { }
         fs.rmdirSync(pathYukiJadiBot, { recursive: true });
+        global.conns.delete(m.sender);
       }
     }
   });
 
-  global.conns.push(sock);
+  global.conns.set(m.sender, sock);
 }
 
 function msToTime(duration) {
@@ -137,4 +137,4 @@ function msToTime(duration) {
   let minutes = Math.floor((duration / (1000 * 60)) % 60);
   let hours = Math.floor(duration / (1000 * 60 * 60));
   return (hours ? hours + "h " : "") + (minutes ? minutes + "m " : "") + (seconds ? seconds + "s" : "");
-          }
+}
