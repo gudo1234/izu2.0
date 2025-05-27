@@ -1,41 +1,46 @@
 import fs from 'fs';
 import path from 'path';
-import { createCanvas } from 'canvas';
+import { createCanvas, registerFont } from 'canvas';
 import { spawn } from 'child_process';
+
+// Si deseas usar una fuente personalizada, registra aquí:
+// registerFont('./fonts/tu-fuente.ttf', { family: 'TuFuente' });
 
 let handler = async (m, { conn, text, command, usedPrefix }) => {
   if (!text) return m.reply(`⚠️ *Uso correcto:* ${usedPrefix + command} <texto>`);
 
   const width = 512;
   const height = 128;
+  const fontSize = 40;
+  const frameCount = 30;
+  const frameDir = './tmp_ledframes';
+  const gifPath = './tmp_ledbanner.gif';
+  const scrollSpeed = 8;
+
+  // Preparar carpeta temporal
+  if (!fs.existsSync(frameDir)) fs.mkdirSync(frameDir);
+
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
 
-  const fontSize = 48;
-  const font = 'bold ' + fontSize + 'px monospace';
-  const frameCount = 30;
-  const frameDir = './tmp_led';
-  const gifPath = './tmp_ledbanner.gif';
-
-  // Crear carpeta temporal
-  if (!fs.existsSync(frameDir)) fs.mkdirSync(frameDir);
-
-  // Medir texto
-  ctx.font = font;
+  ctx.font = `bold ${fontSize}px monospace`;
   const textWidth = ctx.measureText(text).width;
 
-  // Crear los frames
   for (let i = 0; i < frameCount; i++) {
+    // Fondo negro
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 
-    ctx.font = font;
+    // Texto estilo LED
+    ctx.font = `bold ${fontSize}px monospace`;
+    ctx.fillStyle = '#39ff14';
     ctx.shadowColor = '#39ff14';
     ctx.shadowBlur = 10;
-    ctx.fillStyle = '#39ff14';
 
-    const offset = (i * 10) % (width + textWidth);
-    ctx.fillText(text, width - offset, height / 1.5);
+    const x = width - (i * scrollSpeed) % (textWidth + width);
+    const y = height / 2 + fontSize / 3;
+
+    ctx.fillText(text, x, y);
 
     const buffer = canvas.toBuffer('image/png');
     const frameFile = path.join(frameDir, `frame${String(i).padStart(3, '0')}.png`);
@@ -50,15 +55,15 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
       '-i', path.join(frameDir, 'frame%03d.png'),
       '-vf', 'scale=512:-1:flags=lanczos',
       '-loop', '0',
+      '-pix_fmt', 'yuv420p',
       gifPath
     ];
     const ffmpeg = spawn('ffmpeg', args);
-
     ffmpeg.stderr.on('data', (data) => console.log('ffmpeg:', data.toString()));
-    ffmpeg.on('close', (code) => code === 0 ? resolve() : reject(new Error('ffmpeg error')));
+    ffmpeg.on('close', (code) => code === 0 ? resolve() : reject(new Error('ffmpeg failed')));
   });
 
-  // Enviar el GIF
+  // Enviar como video tipo gif
   await conn.sendMessage(m.chat, {
     video: fs.readFileSync(gifPath),
     gifPlayback: true,
@@ -72,5 +77,4 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 };
 
 handler.command = ['ledbanner'];
-handler.group = true;
 export default handler;
