@@ -4,8 +4,6 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   const ownerBot = `${global.owner[0][0]}@s.whatsapp.net`;
   const admins = participants.filter(p => p.admin).map(p => p.id);
 
-  const e = '⚠️';
-
   // Si hay menciones o mensaje citado
   if ((m.mentionedJid && m.mentionedJid.length) || m.quoted) {
     const user = m.mentionedJid[0] || m.quoted.sender;
@@ -51,7 +49,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
     return conn.reply(m.chat, '*Expulsión finalizada.*', m);
   }
 
-  return conn.reply(m.chat, `${e} *Ejemplos de uso:* _Para expulsar a un usuario usa:_ \`${usedPrefix + command}\` @${prems}\n> Para expulsar a todos los usuarios cuyo número comienza con un prefijo específico, utiliza: ${usedPrefix + command} <prefijo>\n*Ejemplo:* \`${usedPrefix + command}\` 212 _(esto expulsará a todos los usuarios cuyo número comience con +212)_`, m);
+  return conn.reply(m.chat, `${e} *Ejemplos de uso:* _Para expulsar a un usuario usa:_ \`${usedPrefix + command}\` @${prems}\n> Para expulsar a todos los usuarios cuyo número comienza con un prefijo específico, utiliza: ${usedPrefix + command} <prefijo>\n\n*Ejemplo:* \`${usedPrefix + command}\` 212 _(esto expulsará a todos los usuarios cuyo número comience con +212)_`, m);
 };
 
 //handler.command = ['kick', 'ban', 'echar', 'hechar', 'b', 'bam'];
