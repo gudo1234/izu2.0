@@ -1,38 +1,32 @@
-import { googleImage } from '@bochilteam/scraper';
-import { Sticker } from 'wa-sticker-formatter';
-import fetch from 'node-fetch';
+import fetch from 'node-fetch'
+import googleImage from '@bochilteam/scraper'
+import { sticker } from '../lib/sticker.js'
 
-const handler = async (m, { conn, text, command }) => {
-  if (!text) throw `Ejemplo de uso: .${command} gatos`;
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) throw `Ejemplo: ${usedPrefix + command} gatos`
+  m.reply(`Buscando imágenes sobre: *${text}*...`)
+  
+  try {
+    const res = await googleImage(text)
+    const results = res.getRandom().slice(0, 5) // puedes cambiar el número de stickers
+    m.reply(`Enviando paquete de stickers de *"${text}"*...`)
 
-  m.reply(`Buscando imágenes sobre: *${text}*...`);
+    for (let i = 0; i < results.length; i++) {
+      const img = await (await fetch(results[i])).buffer()
+      const stickerBuffer = await sticker(img, false, {
+        packname: `IzuBot`,
+        author: `by @follen.dev`
+      })
 
-  const resultados = await googleImage(text);
-  const imágenes = resultados.getRandom().slice(0, 10); // Puedes cambiar a 30 si quieres más stickers
-
-  for (let i = 0; i < imágenes.length; i++) {
-    try {
-      const res = await fetch(imágenes[i]);
-      const buffer = await res.buffer();
-
-      const sticker = new Sticker(buffer, {
-        pack: `Pack: ${text}`,
-        author: 'IzuBot',
-        type: 'full',
-        categories: ['🐾'], // Emojis del pack
-        quality: 70,
-      });
-
-      const stickerBuffer = await sticker.toBuffer();
-      await conn.sendMessage(m.chat, { sticker: stickerBuffer }, { quoted: m });
-
-    } catch (e) {
-      console.error(`Error con la imagen ${i + 1}:`, e);
+      if (stickerBuffer) {
+        await conn.sendMessage(m.chat, { sticker: stickerBuffer }, { quoted: m })
+      }
     }
+  } catch (e) {
+    console.error(e)
+    throw 'Ocurrió un error al generar el paquete de stickers.'
   }
-
-  m.reply(`*Paquete de stickers "${text}" enviado.*`);
-};
+}
 
 handler.command = ['packstickers', 'pack']
 handler.group = true;
