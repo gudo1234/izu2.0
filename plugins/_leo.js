@@ -41,7 +41,7 @@ const handler = async (m, { conn, text }) => {
 };
 
 handler.command = ['leo'];
-export default handler;*/
+export default handler;
 
 import fetch from 'node-fetch';
 
@@ -108,4 +108,89 @@ const handler = async (m, { conn, text }) => {
 };
 
 handler.command = ['leo'];
+export default handler;*/
+
+import fs from 'fs';
+import axios from 'axios';
+import { spawn } from 'child_process';
+
+async function descargarArchivo(url, path) {
+  const res = await axios.get(url, { responseType: 'stream' });
+  return new Promise((resolve, reject) => {
+    const stream = fs.createWriteStream(path);
+    res.data.pipe(stream);
+    stream.on('finish', () => resolve(path));
+    stream.on('error', reject);
+  });
+}
+
+async function combinarImagenYAudio(imagen, audio, salida) {
+  return new Promise((resolve, reject) => {
+    const ffmpeg = spawn('ffmpeg', [
+      '-y',
+      '-loop', '1',
+      '-i', imagen,
+      '-i', audio,
+      '-shortest',
+      '-vf', 'scale=720:1280,format=yuv420p',
+      '-c:v', 'libx264',
+      '-preset', 'veryfast',
+      '-crf', '23',
+      '-c:a', 'aac',
+      '-b:a', '192k',
+      '-movflags', '+faststart',
+      salida
+    ]);
+
+    ffmpeg.on('close', code => {
+      if (code === 0) resolve(salida);
+      else reject(new Error('Error al crear el video'));
+    });
+  });
+}
+
+const handler = async (m, { conn, args, usedPrefix, command }) => {
+  const url = args[0];
+  if (!url || !url.includes('tiktok.com')) throw `Ejemplo: *${usedPrefix + command} https://vm.tiktok.com/ZMS6FA1qf/*`;
+
+  try {
+    const res = await fetch(`https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(url)}`);
+    const json = await res.json();
+
+    const media = json?.data?.media || {};
+    const videoUrl = media.video;
+    const audioUrl = media.audio;
+    const images = media.images;
+
+    const tmp = './tmp';
+    if (!fs.existsSync(tmp)) fs.mkdirSync(tmp);
+
+    if (videoUrl) {
+      const videoPath = `${tmp}/video.mp4`;
+      await descargarArchivo(videoUrl, videoPath);
+      await conn.sendFile(m.chat, videoPath, 'tiktok.mp4', `Video descargado desde TikTok`, m);
+      fs.unlinkSync(videoPath);
+    } else if (images?.length && audioUrl) {
+      const imgPath = `${tmp}/img.jpg`;
+      const audioPath = `${tmp}/audio.mp3`;
+      const outPath = `${tmp}/output.mp4`;
+
+      await descargarArchivo(images[0], imgPath);
+      await descargarArchivo(audioUrl, audioPath);
+      await combinarImagenYAudio(imgPath, audioPath, outPath);
+
+      await conn.sendFile(m.chat, outPath, 'tiktok.mp4', `Video generado con imagen y audio`, m);
+
+      [imgPath, audioPath, outPath].forEach(f => fs.existsSync(f) && fs.unlinkSync(f));
+    } else {
+      throw 'No se encontró ni video ni imagen/audio válidos.';
+    }
+
+  } catch (e) {
+    console.error(e);
+    throw 'Error al procesar el TikTok. Asegúrate de que el enlace sea válido y no esté caído.';
+  }
+};
+
+handler.command = ['leo']
 export default handler;
