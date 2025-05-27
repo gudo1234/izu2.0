@@ -146,11 +146,12 @@ const handler = async (m, { conn, text }) => {
       const audio = media.audio;
 
       if (images.length === 1 && audio) {
+        if (!fs.existsSync('./tmp')) fs.mkdirSync('./tmp');
+
         const imgPath = path.join('./tmp', `img_${Date.now()}.jpg`);
         const audioPath = path.join('./tmp', `audio_${Date.now()}.mp3`);
         const outputPath = path.join('./tmp', `output_${Date.now()}.mp4`);
 
-        // Descargar imagen y audio
         const imgRes = await fetch(images[0]);
         fs.writeFileSync(imgPath, Buffer.from(await imgRes.arrayBuffer()));
 
@@ -173,7 +174,7 @@ const handler = async (m, { conn, text }) => {
 
           ffmpeg.on('close', (code) => {
             if (code === 0) resolve();
-            else reject(new Error('FFmpeg falló'));
+            else reject(new Error('FFmpeg falló al generar el video.'));
           });
         });
 
@@ -198,8 +199,8 @@ const handler = async (m, { conn, text }) => {
     }
 
   } catch (e) {
-    console.error(e);
-    return conn.reply(m.chat, 'Ocurrió un error al intentar procesar el TikTok. Intenta nuevamente más tarde.', m);
+    console.error('[ERROR TikTok]:', e);
+    return conn.reply(m.chat, `⚠️ Error: ${e.message || e}`, m);
   }
 };
 
