@@ -46,10 +46,14 @@ export default handler;*/
 import fetch from 'node-fetch';
 
 const handler = async (m, { conn, text }) => {
-  if (!text) return conn.reply(m.chat, '❀ Ingresa una URL de TikTok', m);
+  if (!text) {
+    return conn.reply(m.chat, '❀ Ingresa una URL de TikTok', m);
+  }
 
   const urlPattern = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i;
-  if (!urlPattern.test(text)) return conn.reply(m.chat, '✗ La URL proporcionada no es válida para TikTok', m);
+  if (!urlPattern.test(text)) {
+    return conn.reply(m.chat, '✗ La URL proporcionada no es válida para TikTok', m);
+  }
 
   m.react('🕒');
 
@@ -61,34 +65,45 @@ const handler = async (m, { conn, text }) => {
     const json = await res.json();
     const video = json.data;
 
-    if (!video || !video.media) throw new Error('La API no devolvió datos válidos.');
+    if (!video || !video.media) throw new Error('Contenido no válido o incompleto.');
 
-    const txt = `*「✦」Título:* ${video.title || 'Sin título'}\n\n` +
-                `> *✦ Autor:* » ${video.author?.nickname || 'Desconocido'}\n` +
-                `> *ⴵ Duración:* » ${video.duration ? `${video.duration} segundos` : 'No especificado'}\n` +
-                `> *🜸 Likes:* » ${video.like || 0}\n` +
-                `> *✎ Comentarios:* » ${video.comment || 0}`;
+    const txt = `*「✦」Título:* ${video.title || 'Sin título'}
+
+> *✦ Autor:* » ${video.author?.nickname || 'Desconocido'}
+> *ⴵ Duración:* » ${video.duration ? `${video.duration} segundos` : 'No especificado'}
+> *🜸 Likes:* » ${video.like || 0}
+> *✎ Comentarios:* » ${video.comment || 0}`;
 
     m.react('✅');
 
-    if (video.type === 'image' && video.image.length === 1) {
-      // Imagen única con audio
-      await conn.sendFile(m.chat, video.image[0], 'photo.jpg', txt, m);
-      if (video.audio) await conn.sendFile(m.chat, video.audio, 'audio.mp3', '', m);
-    } else if (video.type === 'image' && video.image.length > 1) {
-      // Carrusel de imágenes con audio aparte
-      for (const img of video.image) {
-        await conn.sendFile(m.chat, img, 'photo.jpg', '', m);
+    const media = video.media;
+    if (media.type === 'image') {
+      const images = media.images || [];
+      const audio = media.audio;
+
+      if (images.length === 1) {
+        // Solo una imagen: enviar con audio
+        await conn.sendFile(m.chat, images[0], 'foto.jpg', '*Foto del TikTok*', m);
+        if (audio) await conn.sendFile(m.chat, audio, 'audio.mp3', '*Audio original*', m);
+      } else if (images.length > 1) {
+        // Varias imágenes
+        for (let i = 0; i < images.length; i++) {
+          await conn.sendFile(m.chat, images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m);
+        }
+        if (audio) await conn.sendFile(m.chat, audio, 'audio.mp3', '*Audio original*', m);
+      } else {
+        conn.reply(m.chat, 'No se encontraron imágenes en este TikTok.', m);
       }
-      if (video.audio) await conn.sendFile(m.chat, video.audio, 'audio.mp3', txt, m);
-    } else {
+    } else if (media.org) {
       // Video normal
-      await conn.sendFile(m.chat, video.media.org, 'tiktok.mp4', txt, m);
+      await conn.sendFile(m.chat, media.org, 'tiktok.mp4', txt, m);
+    } else {
+      throw new Error('No se encontró un medio válido para enviar.');
     }
 
   } catch (e) {
     console.error(e);
-    conn.reply(m.chat, 'Ocurrió un error al intentar descargar el contenido. Intenta nuevamente más tarde.', m);
+    return conn.reply(m.chat, 'Ocurrió un error al intentar procesar el TikTok. Intenta nuevamente más tarde.', m);
   }
 };
 
