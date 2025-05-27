@@ -1,48 +1,76 @@
-import { createCanvas } from 'canvas'
-import fs from 'fs'
-import path from 'path'
+import fs from 'fs';
+import path from 'path';
+import { createCanvas } from 'canvas';
+import { spawn } from 'child_process';
 
-let handler = async (m, { text, conn }) => {
-  if (!text) return m.reply('⚠️ Ingresa un texto para mostrar en el banner.\n\n*Ejemplo:* `.ledbanner Hola mundo`')
+let handler = async (m, { conn, text, command, usedPrefix }) => {
+  if (!text) return m.reply(`⚠️ *Uso correcto:* ${usedPrefix + command} <texto>`);
 
-  const width = 512
-  const height = 160
-  const canvas = createCanvas(width, height)
-  const ctx = canvas.getContext('2d')
-  const frames = []
-  const frameCount = 6
+  const width = 512;
+  const height = 128;
+  const canvas = createCanvas(width, height);
+  const ctx = canvas.getContext('2d');
 
+  const fontSize = 48;
+  const font = 'bold ' + fontSize + 'px monospace';
+  const frameCount = 30;
+  const frameDir = './tmp_led';
+  const gifPath = './tmp_ledbanner.gif';
+
+  // Crear carpeta temporal
+  if (!fs.existsSync(frameDir)) fs.mkdirSync(frameDir);
+
+  // Medir texto
+  ctx.font = font;
+  const textWidth = ctx.measureText(text).width;
+
+  // Crear los frames
   for (let i = 0; i < frameCount; i++) {
-    ctx.fillStyle = '#000000'
-    ctx.fillRect(0, 0, width, height)
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, width, height);
 
-    const glowColor = i % 2 === 0 ? '#39ff14' : '#00ffff'
+    ctx.font = font;
+    ctx.shadowColor = '#39ff14';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#39ff14';
 
-    ctx.font = 'bold 42px monospace'
-    ctx.fillStyle = glowColor
-    ctx.shadowColor = glowColor
-    ctx.shadowBlur = 25
-    ctx.textAlign = 'center'
-    ctx.fillText(text, width / 2, height / 2 + 16)
+    const offset = (i * 10) % (width + textWidth);
+    ctx.fillText(text, width - offset, height / 1.5);
 
-    frames.push(canvas.toBuffer('image/png'))
-    ctx.shadowBlur = 0
+    const buffer = canvas.toBuffer('image/png');
+    const frameFile = path.join(frameDir, `frame${String(i).padStart(3, '0')}.png`);
+    fs.writeFileSync(frameFile, buffer);
   }
 
-  // Crear GIF animado a mano no es viable sin una lib externa,
-  // entonces enviaremos las imágenes como sticker animado (en formato .webp) o como video.
-  // Aquí usamos método alternativo: creamos un solo PNG estático parpadeante y lo mandamos como imagen temporal.
+  // Convertir a GIF con ffmpeg
+  await new Promise((resolve, reject) => {
+    const args = [
+      '-y',
+      '-framerate', '10',
+      '-i', path.join(frameDir, 'frame%03d.png'),
+      '-vf', 'scale=512:-1:flags=lanczos',
+      '-loop', '0',
+      gifPath
+    ];
+    const ffmpeg = spawn('ffmpeg', args);
 
-  const file = path.join('./tmp', `led-${Date.now()}.png`)
-  fs.writeFileSync(file, frames[0]) // solo el primer frame
+    ffmpeg.stderr.on('data', (data) => console.log('ffmpeg:', data.toString()));
+    ffmpeg.on('close', (code) => code === 0 ? resolve() : reject(new Error('ffmpeg error')));
+  });
 
+  // Enviar el GIF
   await conn.sendMessage(m.chat, {
-    image: fs.readFileSync(file),
-    caption: `🎇 *LED Neon Banner*\n💬 ${text}`
-  }, { quoted: m })
+    video: fs.readFileSync(gifPath),
+    gifPlayback: true,
+    caption: `🟢 *LED Banner*\n${text}`,
+    mentions: [m.sender]
+  }, { quoted: m });
 
-  fs.unlinkSync(file)
-}
+  // Limpiar
+  fs.rmSync(frameDir, { recursive: true, force: true });
+  fs.unlinkSync(gifPath);
+};
 
-handler.command = ['ledbanner']
-export default handler
+handler.command = ['ledbanner'];
+handler.group = true;
+export default handler;
