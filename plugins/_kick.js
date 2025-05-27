@@ -59,7 +59,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
 
   // Mensaje de ayuda con mención real
   return conn.reply(m.chat, `${e} *Ejemplos de uso:*\n` +
-    `- _Para expulsar a un usuario mencionado:_ \`*${usedPrefix + command}\` @${randomUser.split('@')[0]}*\n` +
+    `- _Para expulsar a un usuario mencionado:_ \`${usedPrefix + command}\` @${randomUser.split('@')[0]}\n` +
     `- _Para expulsar a todos los usuarios cuyo número comienza con un prefijo específico:_ *${usedPrefix + command} <prefijo>*\n\n` +
     `*Ejemplo:* \`${usedPrefix + command}\` 212 (esto expulsará a todos los usuarios cuyo número comience con +212)`,
     m, {
