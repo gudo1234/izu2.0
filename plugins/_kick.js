@@ -47,7 +47,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
     if (targets.length === 0)
       return conn.reply(m.chat, `${e} *No se encontró ningún miembro con el prefijo* ${prefix} *que pueda ser expulsado.*`, m);
 
-    conn.reply(m.chat, `*Expulsando a ${targets.length} usuario(s) con el prefijo ${prefix}, uno cada 3 segundos...*`, m);
+    conn.reply(m.chat, `*Expulsando a ${targets.length} usuario(s) con el prefijo ${prefix}*`, m);
 
     for (let id of targets) {
       await conn.groupParticipantsUpdate(m.chat, [id], 'remove');
@@ -68,7 +68,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   );
 };
 
-handler.command = ['kio'];
+handler.command = ['ban', 'kick', 'echar', 'hechar', 'b', 'bam']
 handler.admin = true;
 handler.group = true;
 handler.botAdmin = true;
