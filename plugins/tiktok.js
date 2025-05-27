@@ -89,14 +89,20 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 
   await m.react('🕒');
-
   const url = normalizeTikTokUrl(text) || text;
 
   try {
     const result = await Starlights.tiktokdl(url);
 
-    // Verifica si hay imágenes (fallback necesario)
-    if (result.media_type === 'image' || result.type === 'image' || result.images) throw new Error('Contenido de imagen detectado');
+    // Detectar contenido de imagen o si el dl_url termina en .mp3 (audio sin video)
+    if (
+      result.type === 'image' ||
+      result.media_type === 'image' ||
+      result.images ||
+      (result.dl_url && result.dl_url.endsWith('.mp3'))
+    ) {
+      throw new Error('Es contenido de imagen, se usará fallback');
+    }
 
     const txt = `╭───── • ─────╮
   𖤐 \`TIKTOK EXTRACTOR\` 𖤐
@@ -120,7 +126,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', txt, m, null, rcanal);
 
   } catch (e) {
-    // Fallback con API en caso de error o imágenes
+    // Fallback con API si es contenido de imagen o si el scraper falla
     try {
       const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(url)}`;
       const res = await fetch(apiUrl);
