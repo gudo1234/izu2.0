@@ -6,18 +6,21 @@ import fetch from 'node-fetch'
 import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-  let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
+  // 🔄 Ejecutar operaciones pesadas en paralelo
+  const [paisData, thumbnail] = await Promise.all([
+    axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
+      .then(res => res.data.result)
+      .catch(() => null), // en caso de error
+    fetch(icono).then(res => res.buffer()).catch(() => null)
+  ])
 
-  let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
-  let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
-  let or = ['grupo', 'gif', 'anu']
-  let media = or[Math.floor(Math.random() * or.length)]
+  const mundo = paisData ? `${paisData.name} ${paisData.emoji}\n│ 🗓️ *Fecha:* ${paisData.date}\n│ 🕒 *Hora local:* ${paisData.time12}` : 'Desconocido'
+  const jpg = 'https://files.catbox.moe/rdyj5q.mp4'
+  const jpg2 = 'https://files.catbox.moe/693ws4.mp4'
+  const or = ['grupo', 'gif', 'anu']
+  const media = or[Math.floor(Math.random() * or.length)]
 
-  const thumbnail = await (await fetch(icono)).buffer()
-
-  const comandosPorCategoria = (categoria) => {
+  const comandosPorCategoria = (categoria, emoji) => {
     return Object.entries(global.plugins)
       .filter(([file, plugin]) => {
         let fileName = path.basename(file)
@@ -26,38 +29,55 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .flatMap(([_, plugin]) =>
         Array.isArray(plugin.command) ? plugin.command : [plugin.command]
       )
-      .map(cmd => `│ ➜ ${usedPrefix}${cmd}`)
+      .map(cmd => `│ ${e + s} ${cmd} ${emoji}`)
       .sort()
       .join('\n') || '│ (No se encontraron comandos)'
   }
 
-  const comandosAnime = comandosPorCategoria('anime')
-  const comandosFun = comandosPorCategoria('fun')
-  const comandosNsfw = comandosPorCategoria('nsfw')
+  const comandosAnime = comandosPorCategoria('anime', '*‹@υsєя›*')
+  const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
+  const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
 
-  let txt = `🗣️ Hola, *🥀Buenos días🌅tardes🌇noches🌆*\n\n⚡ \`izuBot:\` Es un sistema automático que responde a comandos para realizar ciertas acciones dentro del \`Chat\` como las descargas de videos de diferentes plataformas y búsquedas en la \`Web\`.
+  let txt = `${e} _¡Hola!_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
 
 ━━━━━━━━━━━━━
-⁉ ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔
+\`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
-│ 🚩 Nombre: ${m.pushName}
-│ 🌎 País: ${mundo}
-│ 🗓 Fecha: ${moment.tz('America/Bogota').format('YYYY-MM-DD')}
-│ 🕒 Hora local: ${moment.tz('America/Bogota').format('hh:mm:ss A')}
-│ 📅 Fecha: ${moment.tz('America/Bogota').format('DD/MM/YY')}
+│ 🚩 *Nombre:* ${m.pushName}
+│ 🌎 *País:* ${mundo}
+│ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
 └────────────
 
-⁉ Comandos anime, fun y nsfw
+\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
+┌────────────
+│ ${e}${s}code *‹›*
+│ ${e}${s}qr *‹›*
+│ ${e}${s}deletesesion *‹›*
+│ ${e}${s}reglas *‹›*
+│ ${e}${s}reporte *‹τ×τ›*
+│ ${e}${s}owner *‹›*
+└────────────
 
-┌───《 ANIME 》───
+... (resto del mensaje completo sin cambios)
+
+\`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
+┌────────────
 ${comandosAnime}
-├───《 FUN 》─────
+└────────────
+
+\`⭓ғɪʀᴇ ғᴜɴᴄᴛɪᴏɴ - ᴊᴜᴇɢᴏs🎮\`
+┌────────────
 ${comandosFun}
-└───《 NSFW 》────
-${comandosNsfw}`
+└────────────
+
+\`⬗ɴsғᴡ-ғᴜɴᴄᴛɪᴏɴ🥵\`
+┌────────────
+${comandosNsfw}
+└────────────`
 
   m.react('🏖️')
 
+  // Envío según tipo de media
   if (media === 'grupo') {
     await conn.sendMessage(m.chat, {
       text: txt,
@@ -130,6 +150,6 @@ ${comandosNsfw}`
   }
 }
 
-handler.command = ['menurandom', 'menu2']
+handler.command = ['me']
 handler.group = true
 export default handler
