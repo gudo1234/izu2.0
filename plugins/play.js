@@ -80,7 +80,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ✦ *⏱️ Duración:* ${timestamp || 'N/A'}
 ✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
 ✦ *📅 Publicado:* ${ago || 'N/A'}
-✦ *💾 Tamaño:* ${sizeHumanReadable}
 ✦ *🔗 Link:* ${url}
 
 ╭───── • ─────╮
