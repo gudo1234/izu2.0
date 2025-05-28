@@ -43,7 +43,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
 │ 🚩 *Nombre:* ${m.pushName}
-│ 🌎 *País:* ${mundo} || 'Desconocido'
+│ 🌎 *País:* ${mundo}
 │ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
 └────────────
 
