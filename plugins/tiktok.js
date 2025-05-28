@@ -86,10 +86,10 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react('🕒');
 
   try {
-    // PRIMER INTENTO: API
     let result, dl_url;
     const isUrl = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i.test(text);
 
+    // PRIMER INTENTO: API
     if (isUrl) {
       const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`;
       const res = await fetch(apiUrl);
@@ -147,7 +147,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 ✦ *Descargas* : ${result.downloads || '-'}
 
 ╭───── • ─────╮
-> *${global.textbot || 'Bot'}*
+> *${textbot}*
 ╰───── • ─────╯`;
 
     await m.react('✅');
@@ -155,11 +155,11 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     // ENVÍO DE ARCHIVO SEGÚN TIPO
     if (result.type === 'image' && result.images?.length > 0) {
       for (let i = 0; i < result.images.length; i++) {
-        await conn.sendFile(m.chat, result.images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m);
+        await conn.sendFile(m.chat, result.images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m, null, rcanal);
       }
-      if (result.audio) await conn.sendFile(m.chat, result.audio, 'audio.mp3', '*Audio original*', m);
+      if (result.audio) await conn.sendFile(m.chat, result.audio, 'audio.mp3', '*Audio original*', m, null, rcanal);
     } else {
-      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
+      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m, null, rcanal);
     }
 
   } catch (err) {
