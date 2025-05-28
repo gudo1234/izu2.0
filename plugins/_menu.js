@@ -6,18 +6,19 @@ import fetch from 'node-fetch'
 import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-  let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
+  const [paisData, thumbnail] = await Promise.all([
+    axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
+      .then(res => res.data.result)
+      .catch(() => null),
+    fetch(icono).then(res => res.buffer()).catch(() => null)
+  ])
 
-  let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
-  let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
-  let or = ['grupo', 'gif', 'anu']
-  let media = or[Math.floor(Math.random() * or.length)]
+  const mundo = paisData ? `${paisData.name} ${paisData.emoji}\n│ 🗓️ *Fecha:* ${paisData.date}\n│ 🕒 *Hora local:* ${paisData.time12}` : 'Desconocido'
+  const jpg = 'https://files.catbox.moe/rdyj5q.mp4'
+  const jpg2 = 'https://files.catbox.moe/693ws4.mp4'
+  const or = ['grupo', 'gif', 'anu']
+  const media = or[Math.floor(Math.random() * or.length)]
 
-  const thumbnail = await (await fetch(icono)).buffer()
-
-  // Función que obtiene y formatea comandos con emoji
   const comandosPorCategoria = (categoria, emoji) => {
     return Object.entries(global.plugins)
       .filter(([file, plugin]) => {
@@ -32,7 +33,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .join('\n') || '│ (No se encontraron comandos)'
   }
 
-  // Generamos las listas con sus emojis
   const comandosAnime = comandosPorCategoria('anime', '*‹@υsєя›*')
   const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
   const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
@@ -192,9 +192,7 @@ ${comandosNsfw}
 │ ${e}${s}icon *‹rєρℓy›*
 │ ${e}${s}salir *‹›*
 └────────────`
-
   m.react('🏖️')
-
   if (media === 'grupo') {
     await conn.sendMessage(m.chat, {
       text: txt,
@@ -267,6 +265,6 @@ ${comandosNsfw}
   }
 }
 
-handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú', 'm']
+handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú', 'm', 'me']
 handler.group = true
 export default handler
