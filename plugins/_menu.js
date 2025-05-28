@@ -6,9 +6,17 @@ import fetch from 'node-fetch'
 import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-  let paisdata = delirius.data.result
-  let mundo = paisdata ? `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}` : 'Desconocido'
+  let mundo = 'Desconocido'
+  try {
+    let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
+    let paisdata = delirius.data.result
+    if (paisdata) {
+      mundo = `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}`
+    }
+  } catch (err) {
+    console.error('[ERROR EN API DELIRIUS]', err)
+    mundo = 'Desconocido'
+  }
 
   let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
   let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
@@ -17,7 +25,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   const thumbnail = await (await fetch(icono)).buffer()
 
-  // Función que obtiene y formatea comandos con emoji
   const comandosPorCategoria = (categoria, emoji) => {
     return Object.entries(global.plugins)
       .filter(([file, plugin]) => {
@@ -32,7 +39,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       .join('\n') || '│ (No se encontraron comandos)'
   }
 
-  // Generamos las listas con sus emojis
   const comandosAnime = comandosPorCategoria('anime', '*‹@υsєя›*')
   const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
   const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
