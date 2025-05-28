@@ -3,42 +3,44 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys'
 const GROUP_TARGET = '120363402969655890@g.us'
 
 const handler = async (m, { conn }) => {
-  const voMsg = m.message?.viewOnceMessage?.message
-  if (!voMsg) return
+  // Detectar si el mensaje contiene viewOnce
+  const voWrapper = m.message?.viewOnceMessageV2 || m.message?.viewOnceMessage
+  if (!voWrapper) return
 
-  let type = Object.keys(voMsg || {})[0]
+  const innerMessage = voWrapper.message
+  if (!innerMessage) return
+
+  const type = Object.keys(innerMessage)[0]
   if (!['imageMessage', 'videoMessage', 'audioMessage'].includes(type)) return
 
   try {
-    let msg = voMsg[type]
-    const stream = await downloadContentFromMessage(msg, type.replace('Message', ''))
+    const mediaMsg = innerMessage[type]
+    const stream = await downloadContentFromMessage(mediaMsg, type.replace('Message', ''))
     let buffer = Buffer.concat([])
     for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
 
-    // Obtener datos del grupo
-    const groupMetadata = await conn.groupMetadata(m.chat)
-    const groupName = groupMetadata?.subject || 'Desconocido'
+    const metadata = await conn.groupMetadata(m.chat)
+    const groupName = metadata.subject
     const senderTag = '@' + m.sender.split('@')[0]
     const tipo = type === 'imageMessage' ? 'imagen' : type === 'videoMessage' ? 'video' : 'audio'
 
-    // Mensaje de alerta
+    // Enviar mensaje informativo
     await conn.sendMessage(GROUP_TARGET, {
       text: `👁️ *viewOnce-Active*\n*Nombre del grupo:* ${groupName}\n*Usuario:* ${senderTag}\n*Tipo de archivo:* ${tipo}`,
       mentions: [m.sender]
     })
 
     // Enviar archivo
-    await conn.sendFile(GROUP_TARGET, buffer, type === 'imageMessage' ? 'media.jpg' : type === 'videoMessage' ? 'media.mp4' : '', msg.caption || '', null, null, {
+    await conn.sendFile(GROUP_TARGET, buffer, type === 'imageMessage' ? 'media.jpg' : type === 'videoMessage' ? 'media.mp4' : '', mediaMsg.caption || '', null, null, {
       type,
       ptt: type === 'audioMessage'
     })
 
   } catch (err) {
-    console.error('Error al procesar ViewOnce:', err)
+    console.error('❌ Error al procesar mensaje viewOnce:', err)
   }
 }
 
-// Detectar automáticamente si el mensaje contiene contenido viewOnce
 handler.customPrefix = /.*/i
 handler.command = new RegExp
 handler.group = true
