@@ -150,6 +150,6 @@ ${comandosNsfw}
   }
 }
 
-handler.command = ['me']
+handler.command = ['me', 'men']
 handler.group = true
 export default handler
