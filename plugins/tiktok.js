@@ -80,72 +80,91 @@ function normalizeTikTokUrl(text) {
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    return conn.reply(m.chat, `✦ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* https://vm.tiktok.com/ZShhtdsRh/`, m);
-  }
-
-  const url = normalizeTikTokUrl(text) || text;
-  const valid = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i.test(url);
-  if (!valid) {
-    return conn.reply(m.chat, '✗ La URL proporcionada no es válida para TikTok', m);
+    return conn.reply(m.chat, `✎ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola\n*${usedPrefix + command}* https://vt.tiktok.com/ZShhtdsRh/`, m);
   }
 
   await m.react('🕒');
 
   try {
-    // Paso 1: Verificamos con la API para saber si es imagen o video
-    const checkApi = await fetch(`https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(url)}`);
-    if (!checkApi.ok) throw new Error('API no disponible');
+    // PRIMER INTENTO: API
+    let result, dl_url;
+    const isUrl = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i.test(text);
 
-    const apiData = await checkApi.json();
-    const media = apiData?.data?.media;
+    if (isUrl) {
+      const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`;
+      const res = await fetch(apiUrl);
+      const json = res.ok && await res.json();
+      const video = json?.data;
 
-    // Si es tipo imagen usamos directamente la API
-    if (media?.type === 'image') {
-      const images = media.images || [];
-      const audio = media.audio;
-      const video = apiData.data;
-
-      const txt = `*「✦」Título:* ${video.title || 'Sin título'}
-> *✦ Autor:* » ${video.author?.nickname || 'Desconocido'}
-> *ⴵ Duración:* » ${video.duration ? `${video.duration} segundos` : 'No especificado'}
-> *🜸 Likes:* » ${video.like || 0}
-> *✎ Comentarios:* » ${video.comment || 0}`;
-
-      for (let i = 0; i < images.length; i++) {
-        await conn.sendFile(m.chat, images[i], `foto_${i + 1}.jpg`, `*Imagen ${i + 1} del TikTok*`, m);
+      if (video?.media?.org || video?.media?.images?.length > 0) {
+        result = {
+          title: video.title || 'Sin título',
+          author: video.author?.nickname || 'Desconocido',
+          duration: video.duration || 'No especificado',
+          views: video.play || 0,
+          likes: video.like || 0,
+          comment: video.comment || 0,
+          share: video.share || 0,
+          published: video.created || 'Desconocido',
+          downloads: video.download || 0,
+          dl_url: video.media.org || video.media.images?.[0] || null,
+          type: video.media.type,
+          images: video.media.images,
+          audio: video.media.audio,
+          isFromApi: true
+        };
+        dl_url = result.dl_url;
       }
-      if (audio) await conn.sendFile(m.chat, audio, 'audio.mp3', '*Audio original*', m);
-
-      return await m.react('✅');
     }
 
-    // Paso 2: Si no es imagen, usamos el scraper para video normal
-    const result = await Starlights.tiktokdl(url);
+    // SEGUNDO INTENTO: SCRAPER
+    if (!result) {
+      const url = normalizeTikTokUrl(text);
+      const scrape = url ? await Starlights.tiktokdl(url) : await Starlights.tiktokvid(text);
 
-    const txt = `╭───── • ─────╮
+      result = {
+        ...scrape,
+        dl_url: scrape.dl_url,
+        type: 'video',
+        isFromApi: false
+      };
+      dl_url = result.dl_url;
+    }
+
+    // TEXTO FORMATEADO
+    let txt = `╭───── • ─────╮
   𖤐 \`TIKTOK EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
-✦ *Título:* ${result.title}
-✦ *Autor:* ${result.author}
-✦ *Duración:* ${result.duration} segundos
-✦ *Vistas:* ${result.views}
-✦ *Likes:* ${result.likes}
-✦ *Comentarios:* ${result.comment || result.comments_count}
-✦ *Compartidos:* ${result.share || result.share_count}
-✦ *Publicado:* ${result.published}
-✦ *Descargas:* ${result.downloads || result.download_count}
+✦ *Título* : ${result.title}
+✦ *Autor* : ${result.author}
+✦ *Duración* : ${result.duration} segundos
+✦ *Vistas* : ${result.views || '-'}
+✦ *Likes* : ${result.likes || '-'}
+✦ *Comentarios* : ${result.comment || '-'}
+✦ *Compartidos* : ${result.share || '-'}
+✦ *Publicado* : ${result.published || '-'}
+✦ *Descargas* : ${result.downloads || '-'}
 
 ╭───── • ─────╮
 > *${global.textbot || 'Bot'}*
 ╰───── • ─────╯`;
 
-    await conn.sendFile(m.chat, result.dl_url, 'tiktok.mp4', txt, m);
     await m.react('✅');
 
-  } catch (e) {
-    console.error(e);
-    return conn.reply(m.chat, '❌ Ocurrió un error al procesar el TikTok. Intenta de nuevo más tarde.', m);
+    // ENVÍO DE ARCHIVO SEGÚN TIPO
+    if (result.type === 'image' && result.images?.length > 0) {
+      for (let i = 0; i < result.images.length; i++) {
+        await conn.sendFile(m.chat, result.images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m);
+      }
+      if (result.audio) await conn.sendFile(m.chat, result.audio, 'audio.mp3', '*Audio original*', m);
+    } else {
+      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
+    }
+
+  } catch (err) {
+    console.error('[ERROR TOTAL]', err);
+    conn.reply(m.chat, '✗ No se pudo descargar el TikTok. Verifica el enlace o intenta con otra búsqueda.', m);
   }
 };
 
