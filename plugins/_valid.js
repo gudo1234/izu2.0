@@ -2,9 +2,16 @@ import levenshtein from 'fast-levenshtein';
 import { getDevice } from "@whiskeysockets/baileys";
 import PhoneNumber from 'awesome-phonenumber';
 import moment from 'moment-timezone';
-import axios from 'axios';
-import fetch from 'node-fetch';
 import path from 'path';
+
+const regionNames = new Intl.DisplayNames(['es'], { type: 'region' });
+
+function banderaEmoji(countryCode) {
+  if (!countryCode || countryCode.length !== 2) return '';
+  const codePoints = [...countryCode.toUpperCase()]
+    .map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
+  return String.fromCodePoint(...codePoints);
+}
 
 export async function before(m) {
   if (!m.text || !global.prefix.test(m.text)) return;
@@ -24,13 +31,15 @@ export async function before(m) {
 
   const chat = global.db.data.chats[m.chat];
   const user = global.db.data.users[m.sender];
-  let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`);
-  let paisdata = delirius.data.result;
-  let mundo = paisdata ? `${paisdata.emoji}` : 'Desconocido';
+
+  const number = m.sender.replace('@s.whatsapp.net', '');
+  const phoneInfo = PhoneNumber('+' + number);
+  const countryCode = phoneInfo.getRegionCode('international');
+  const mundo = banderaEmoji(countryCode) || '🌐';
 
   if (validCommand(command, global.plugins)) {
     if (chat.isBanned) {
-      const avisoDesactivado = `────⋆｡°✩ ${paisdata.emoji} ✩°｡⋆────\n` +
+      const avisoDesactivado = `────⋆｡°✩ ${mundo} ✩°｡⋆────\n` +
         `El bot *${botname}* está desactivado en este grupo.\n\n` +
         `> ✦ Un *administrador* puede activarlo con el comando:\n` +
         `> » *${usedPrefix}bot on*\n` +
@@ -41,15 +50,12 @@ export async function before(m) {
 
     user.commands = (user.commands || 0) + 1;
   } else {
-    // Obtener lista de comandos válidos
     let allCommands = [];
     for (let plugin of Object.values(global.plugins)) {
       if (!plugin.command) continue;
       const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command];
       allCommands.push(...cmds);
     }
-
-    // Buscar los comandos más cercanos válidos
     let closestCommands = [];
     for (let cmd of allCommands) {
       if (typeof cmd !== 'string') continue;
@@ -65,10 +71,8 @@ export async function before(m) {
     closestCommands.sort((a, b) => b.similarity - a.similarity);
     const topMatches = closestCommands.slice(0, 2);
 
-    // Mensaje de comando inválido con país y emoji
-    let replyMessage = `───⋆───⋆───\n` +
-      `${e} _El comando que ingresaste no se encuentra en mi base de datos._\n` +
-      `> ${paisdata.emoji} Usa *${usedPrefix}menu* para ver la lista completa de comandos disponibles.\n\n`;
+    let replyMessage = `${e} _El comando que ingresaste no se encuentra en mi base de datos._\n` +
+      `> ${mundo} Usa *${usedPrefix}menu* para ver la lista completa de comandos disponibles.\n\n`;
 
     if (topMatches.length > 0) {
       replyMessage += `*Comandos similares encontrados:*\n`;
@@ -76,9 +80,6 @@ export async function before(m) {
         replyMessage += `\`${usedPrefix + match.cmd}\` (${match.similarity}% de coincidencia)\n`;
       });
     }
-
-    replyMessage += `───⋆───⋆───`;
-
     await m.reply(replyMessage);
   }
 }
