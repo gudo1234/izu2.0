@@ -121,7 +121,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}spotify *‹τ×τ›*
 │ ${e}${s}spotifydl *‹υяʟ›*
 │ ${e}${s}mega *‹υяʟ›*
-│ ${e}${s}gdrive *‹υяʟ›*
 │ ${e}${s}terabox *‹υяʟ›*
 └────────────
 
