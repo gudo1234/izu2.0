@@ -236,7 +236,7 @@ const isOwner = isROwner || m.fromMe
 const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
 const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || _user.premium == true
 
-//if (opts['queque'] && m.text && !(isMods || isPrems)) {
+if (opts['queque'] && m.text && !(isMods || isPrems)) {
 /*let queque = this.msgqueque, time = 1000 * 5
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
@@ -245,7 +245,7 @@ if (queque.indexOf(previousID) === -1) clearInterval(this)
 await delay(time)
 }, time)*/
 //mio🥵
-/*
+
 let queque = this.msgqueque
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
@@ -254,15 +254,8 @@ const interval = setInterval(() => {
     if (queque.indexOf(previousID) === -1) {
         clearInterval(interval)
     }
-}, 0)*/
+}, 0)
 //mio🥵
-if (opts.queque && m.text && !(isMods || isPrems)) {
-  if (!registerMessage.call(this, m.id)) return;
-  try {
-  } finally {
-    cleanup.call(this, m.id);
-  }
-                                  }
 //
 if (m.isBaileys) {
 return
