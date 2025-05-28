@@ -254,7 +254,7 @@ const interval = setInterval(() => {
     if (queque.indexOf(previousID) === -1) {
         clearInterval(interval)
     }
-}, 0)
+}, 0)}
 //mio🥵
 //
 if (m.isBaileys) {
