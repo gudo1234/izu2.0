@@ -22,16 +22,14 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         videos = list;
         break;
       }
-    } catch (e) {}
+    } catch {}
   }
 
   if (!videos.length) return m.reply('❌ No se encontraron videos en la playlist.');
 
-  m.reply(`🎧 Se encontraron ${videos.length} canciones en la playlist. Enviando audios...`);
-
   for (const video of videos) {
     try {
-      const { title, url, duration, thumbnail } = video;
+      const { title, url, duration } = video;
 
       const audioApis = [
         `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`,
@@ -61,25 +59,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         } catch {}
       }
 
-      if (!dl || !dl.url) {
-        await m.reply(`⚠️ No se pudo descargar: *${title}*`);
-        continue;
-      }
-
-      const msgText = `🎶 *${title}*\n⏱️ ${duration || dl.duration || 'Desconocido'}\n🔗 ${url}`;
-      await conn.sendMessage(m.chat, {
-        text: msgText,
-        contextInfo: {
-          externalAdReply: {
-            title,
-            body: '🎧 Descargando audio...',
-            thumbnailUrl: thumbnail,
-            mediaType: 1,
-            sourceUrl: url,
-            renderLargerThumbnail: true
-          }
-        }
-      }, { quoted: m });
+      if (!dl || !dl.url) continue;
 
       const durMin = parseFloat((dl.duration || '0:0').split(':')[0]) || 0;
       const isDoc = durMin >= 15;
@@ -92,10 +72,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       }, { quoted: m });
 
       await new Promise(r => setTimeout(r, 3000));
-    } catch (err) {
-      console.error('[ERROR audio]', err.message);
-      await m.reply(`❌ Error con: *${video.title}*`);
-    }
+    } catch {}
   }
 
   await m.react('✅');
