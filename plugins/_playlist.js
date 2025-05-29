@@ -1,87 +1,79 @@
 import fetch from 'node-fetch';
+import yts from 'yt-search';
 import axios from 'axios';
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+const handler = async (m, { conn, text, args, usedPrefix, command }) => {
   if (!text || !text.includes('list=')) {
-    return m.reply(`📄 Uso correcto:\n${usedPrefix + command} <enlace de playlist>\n\nEjemplo:\n${usedPrefix + command} https://youtube.com/playlist?list=...`);
+    return m.reply(`📂 Usa el comando correctamente:\n\nEjemplo:\n${usedPrefix}${command} https://youtube.com/playlist?list=PLRW7iEDD9RDRv8EQ3AO-CUqmKfEkaYQ2M`);
   }
 
-  await m.reply('🔍 Obteniendo enlaces de la playlist...');
+  await m.react('🕒');
 
   try {
-    const res = await fetch(text);
-    const html = await res.text();
+    const res = await yts({ query: text, pages: 1 });
+    const videos = res.videos.filter(v => v.url.includes('watch'));
 
-    const jsonData = html.split('var ytInitialData = ')[1]?.split(';</script>')[0];
-    if (!jsonData) return m.reply('❌ No se pudo extraer la información de la playlist.');
+    if (!videos.length) return m.reply('❌ No se encontraron videos en la playlist.');
 
-    const data = JSON.parse(jsonData);
+    m.reply(`🎧 Se encontraron ${videos.length} canciones. Enviando audios uno por uno...`);
 
-    const videos = [];
-    const items = data?.contents?.twoColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer?.content
-      ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.playlistVideoListRenderer?.contents;
-
-    if (!items || !Array.isArray(items)) return m.reply('❌ No se encontraron videos en la playlist.');
-
-    for (const item of items) {
-      const videoId = item.playlistVideoRenderer?.videoId;
-      if (videoId) {
-        videos.push(`https://www.youtube.com/watch?v=${videoId}`);
-      }
-    }
-
-    const uniqueUrls = [...new Set(videos)];
-    if (!uniqueUrls.length) return m.reply('❌ No se encontraron videos en la playlist.');
-
-    await m.reply(`🎶 Se encontraron *${uniqueUrls.length}* canciones. Enviando audios...`);
-
-    for (const url of uniqueUrls) {
+    for (const video of videos) {
       try {
-        let info, title = 'audio', durationMin = 0;
+        const { title, url, timestamp, thumbnail } = video;
 
-        // Intentar primero con siputzx
-        try {
-          const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
-          if (api1.data?.data?.dl) {
-            title = api1.data.data.title || title;
-            durationMin = (api1.data.data.duration || 0) / 60;
-            var downloadUrl = api1.data.data.dl;
-          } else throw new Error();
-        } catch {
-          const api2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
-          if (api2.data?.result?.download?.url) {
-            title = api2.data.result.title || title;
-            durationMin = (api2.data.result.duration || 0) / 60;
-            var downloadUrl = api2.data.result.download.url;
-          } else {
-            await m.reply(`❌ No se pudo descargar: ${url}`);
-            continue;
-          }
+        const apis = [
+          `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`,
+          `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`
+        ];
+
+        let dlLink = null;
+        for (const api of apis) {
+          try {
+            const r = await axios.get(api);
+            dlLink = r.data?.data?.dl || r.data?.result?.download?.url;
+            if (dlLink) break;
+          } catch {}
         }
 
-        const sendAsDoc = durationMin >= 15;
+        if (!dlLink) {
+          await m.reply(`⚠️ Error al procesar: *${title}*`);
+          continue;
+        }
 
+        const msgText = `🎶 *${title}*\n⏱️ ${timestamp || 'Desconocido'}\n🔗 ${url}`;
         await conn.sendMessage(m.chat, {
-          [sendAsDoc ? 'document' : 'audio']: { url: downloadUrl },
-          mimetype: 'audio/mpeg',
-          fileName: `${title}.mp3`,
-          ptt: false
+          text: msgText,
+          contextInfo: {
+            externalAdReply: {
+              title,
+              body: '🎧 Descargando audio...',
+              thumbnailUrl: thumbnail,
+              mediaType: 1,
+              sourceUrl: url,
+              renderLargerThumbnail: true
+            }
+          }
         }, { quoted: m });
 
-        await new Promise(r => setTimeout(r, 1500)); // Espera entre audios
+        await conn.sendMessage(m.chat, {
+          audio: { url: dlLink },
+          fileName: `${title}.mp3`,
+          mimetype: 'audio/mpeg'
+        }, { quoted: m });
+
+        await new Promise(r => setTimeout(r, 3000)); // pausa entre envíos
       } catch (err) {
-        console.error(err);
-        await m.reply(`⚠️ Error al procesar un audio:\n${err.message}`);
+        console.error('[ERROR audio]', err.message);
+        await m.reply(`❌ Error al enviar *${video.title}*`);
       }
     }
 
-    await m.reply('✅ ¡Playlist enviada con éxito!');
+    await m.react('✅');
   } catch (err) {
-    console.error(err);
-    m.reply(`❌ Ocurrió un error al procesar la playlist:\n${err.message}`);
+    console.error('Error en playlist:', err.stack || err);
+    return m.reply(`❌ Error inesperado: ${err.message || err}`);
   }
 };
 
 handler.command = ['playlist'];
-handler.group = true;
 export default handler;
