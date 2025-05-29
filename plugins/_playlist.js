@@ -11,14 +11,18 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   let playlistInfo;
   try {
     playlistInfo = await yts({ listId: text.split('list=')[1].split('&')[0] });
+    console.log('Playlist info:', playlistInfo);
   } catch (err) {
+    console.log('Error obteniendo playlist:', err);
     return m.reply('❌ Error al obtener la playlist: ' + err.message);
   }
 
   const videos = playlistInfo?.videos || [];
-  if (videos.length === 0) return m.reply('❌ No se encontraron videos en la playlist.');
+  if (videos.length === 0) {
+    console.log('No se encontraron videos en la playlist');
+    return m.reply('❌ No se encontraron videos en la playlist.');
+  }
 
-  // Limitar a los primeros 10 para evitar saturar
   const maxVideos = 10;
   const videosToProcess = videos.slice(0, maxVideos);
 
@@ -31,7 +35,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
       console.log(`Procesando video: ${title} - ${videoUrl}`);
 
-      // APIs para obtener audio
       const apis = [
         `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(videoUrl)}`,
         `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`
@@ -41,13 +44,20 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
       for (const api of apis) {
         try {
+          console.log(`Probando API: ${api}`);
           const res = await axios.get(api);
+          console.log(`Respuesta API:`, res.data);
+
           if (res.data?.data?.dl) {
             downloadUrl = res.data.data.dl;
+            console.log(`URL de descarga encontrada (siputzx): ${downloadUrl}`);
             break;
           } else if (res.data?.result?.download?.url) {
             downloadUrl = res.data.result.download.url;
+            console.log(`URL de descarga encontrada (vreden): ${downloadUrl}`);
             break;
+          } else {
+            console.log('No se encontró URL válida en esta API');
           }
         } catch (e) {
           console.log(`Error con API ${api}: ${e.message}`);
@@ -56,7 +66,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
       if (!downloadUrl) {
         console.log(`No se encontró URL de descarga para: ${title}`);
-        continue; // salta a siguiente video
+        continue;
       }
 
       await conn.sendMessage(m.chat, {
@@ -66,9 +76,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       }, { quoted: m });
 
       sentCount++;
-      // Pausa 3s para evitar bloqueo
       await new Promise(r => setTimeout(r, 3000));
-
     } catch (e) {
       console.log(`Error enviando audio: ${e.message}`);
     }
