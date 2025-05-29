@@ -37,23 +37,23 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     for (const url of uniqueUrls) {
       try {
-        const info = await axios.get(`https://yt.elchicodev.com/api/info?url=${url}`);
-        const { title, duration } = info.data || {};
-        const durationMin = (duration || 0) / 60;
+        let info, title = 'audio', durationMin = 0;
 
-        let downloadUrl;
+        // Intentar primero con siputzx
         try {
           const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
           if (api1.data?.data?.dl) {
-            downloadUrl = api1.data.data.dl;
+            title = api1.data.data.title || title;
+            durationMin = (api1.data.data.duration || 0) / 60;
+            var downloadUrl = api1.data.data.dl;
           } else throw new Error();
         } catch {
-          try {
-            const api2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
-            if (api2.data?.result?.download?.url) {
-              downloadUrl = api2.data.result.download.url;
-            }
-          } catch {
+          const api2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
+          if (api2.data?.result?.download?.url) {
+            title = api2.data.result.title || title;
+            durationMin = (api2.data.result.duration || 0) / 60;
+            var downloadUrl = api2.data.result.download.url;
+          } else {
             await m.reply(`❌ No se pudo descargar: ${url}`);
             continue;
           }
@@ -64,15 +64,14 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         await conn.sendMessage(m.chat, {
           [sendAsDoc ? 'document' : 'audio']: { url: downloadUrl },
           mimetype: 'audio/mpeg',
-          fileName: `${title || 'audio'}.mp3`,
+          fileName: `${title}.mp3`,
           ptt: false
         }, { quoted: m });
 
-        await new Promise(r => setTimeout(r, 1500)); // Espera entre envíos
-
+        await new Promise(r => setTimeout(r, 1500)); // Espera entre audios
       } catch (err) {
         console.error(err);
-        await m.reply(`⚠️ Error al procesar un audio: ${err.message}`);
+        await m.reply(`⚠️ Error al procesar un audio:\n${err.message}`);
       }
     }
 
