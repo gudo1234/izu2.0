@@ -1,7 +1,5 @@
 import { downloadContentFromMessage } from '@whiskeysockets/baileys'
 
-const GROUP_TARGET = '120363402969655890@g.us'
-
 export async function before(m, { conn }) {
   if (!m.message || !m.isGroup) return true
 
@@ -19,7 +17,7 @@ export async function before(m, { conn }) {
     let buffer = Buffer.concat([])
     for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
 
-    await conn.sendFile(GROUP_TARGET, buffer,
+    await conn.sendFile(m.chat, buffer,
       type === 'imageMessage' ? 'media.jpg' :
       type === 'videoMessage' ? 'media.mp4' : '',
       media.caption || '', null, null, {
