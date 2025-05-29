@@ -1,26 +1,34 @@
-import ytpl from 'ytpl';
-import axios from 'axios';
 import fetch from 'node-fetch';
+import axios from 'axios';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text || !text.includes('youtube.com/playlist')) {
+  if (!text || !text.includes('list=')) {
     return m.reply(`📄 Uso correcto:\n${usedPrefix + command} <enlace de playlist>\n\nEjemplo:\n${usedPrefix + command} https://youtube.com/playlist?list=...`);
   }
 
   await m.reply('🔄 Obteniendo lista de canciones, espera un momento...');
 
   try {
-    const playlist = await ytpl(text, { pages: 1 });
-    if (!playlist.items.length) return m.reply('❌ No se encontraron canciones en la playlist.');
+    const res = await fetch(text);
+    const html = await res.text();
 
-    await m.reply(`🎧 Se encontraron *${playlist.items.length}* canciones. Enviando audios...`);
+    const regex = /"videoId":"(.*?)"/g;
+    const videoIds = [...new Set([...html.matchAll(regex)].map(v => v[1]))];
 
-    for (const video of playlist.items) {
+    if (!videoIds.length) return m.reply('❌ No se encontraron canciones en la playlist.');
+
+    await m.reply(`🎧 Se encontraron *${videoIds.length}* canciones. Enviando audios...`);
+
+    for (const videoId of videoIds) {
+      const url = 'https://youtu.be/' + videoId;
+
       try {
-        const { title, url, durationSec } = video;
-        const durationMin = durationSec / 60;
+        // Obtener info y duración
+        const info = await axios.get(`https://yt.elchicodev.com/api/info?url=${url}`);
+        const { title, duration } = info.data || {};
+        const durationMin = (duration || 0) / 60;
 
-        // Obtener enlace de descarga (puedes adaptar a tu lógica externa)
+        // Obtener enlace de descarga
         let downloadUrl;
         try {
           const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
@@ -34,13 +42,13 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
               downloadUrl = api2.data.result.download.url;
             }
           } catch {
-            await m.reply(`❌ No se pudo descargar: ${title}`);
+            await m.reply(`❌ No se pudo descargar: ${url}`);
             continue;
           }
         }
 
         if (!downloadUrl) {
-          await m.reply(`❌ No se encontró enlace para: ${title}`);
+          await m.reply(`❌ No se encontró enlace para: ${url}`);
           continue;
         }
 
@@ -49,15 +57,15 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         await conn.sendMessage(m.chat, {
           [sendAsDoc ? 'document' : 'audio']: { url: downloadUrl },
           mimetype: 'audio/mpeg',
-          fileName: `${title}.mp3`,
+          fileName: `${title || 'audio'}.mp3`,
           ptt: false
         }, { quoted: m });
 
-        await new Promise(r => setTimeout(r, 1500)); // Espera breve entre envíos
+        await new Promise(r => setTimeout(r, 1500)); // Espera breve entre audios
 
-      } catch (e) {
-        console.error('Error procesando canción:', e);
-        await m.reply(`❌ Error con una canción: ${e.message}`);
+      } catch (err) {
+        console.error(err);
+        await m.reply(`⚠️ Error al procesar un audio: ${err.message}`);
       }
     }
 
