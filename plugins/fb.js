@@ -49,15 +49,13 @@ const handler = async (m, { text, conn, args }) => {
 
   const video = data.url
   try {
-    /*await conn.sendFile(m.chat, video, 'facebook.mp4', '🎬 Video de Facebook', m, null, {
-      asDocument: false*/
     await conn.sendFile(m.chat, video, `thumbnail.mp4`, `${e} _Video de facebook_`, m, null, rcanal)
     })
-    await m.react('✅') // done
+    await m.react('✅')
   } catch (e) {
     console.error(e)
-    await m.react('❌') // error
-    return conn.reply(m.chat, '❌ Error al enviar el video. Asegúrate de que sea público.', m)
+    await m.react('❌')
+    return conn.reply(m.chat, `${e} Error al enviar el video. Asegúrate de que sea público.`, m)
   }
 }
 
