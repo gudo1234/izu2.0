@@ -1,39 +1,37 @@
 import { downloadContentFromMessage } from '@whiskeysockets/baileys'
 
-export async function before(m, { conn }) {
-  if (!m.message || !m.isGroup) return true
+let handler = m => m
 
-  const viewOnce = m.message?.viewOnceMessage || m.message?.viewOnceMessageV2
-  if (!viewOnce?.message) return true
+handler.all = async function (m, { conn }) {
+  if (!m.isGroup) return
 
-  const content = viewOnce.message
-  const type = Object.keys(content)[0]
-  const allowedTypes = ['imageMessage', 'videoMessage', 'audioMessage']
-  if (!allowedTypes.includes(type)) return true
+  const vo = m.message?.viewOnceMessage || m.message?.viewOnceMessageV2
+  if (!vo?.message) return
+
+  const msg = vo.message
+  const type = Object.keys(msg)[0]
+
+  if (!['imageMessage', 'videoMessage'].includes(type)) return
 
   try {
-    await m.react('🕒') // Reacción de espera
+    let media = msg[type]
+    let mime = media?.mimetype || ''
 
-    const media = content[type]
-    const stream = await downloadContentFromMessage(media, type.replace('Message', ''))
+    let stream = await downloadContentFromMessage(media, type.replace('Message', ''))
     let buffer = Buffer.concat([])
-    for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
+    for await (let chunk of stream) buffer = Buffer.concat([buffer, chunk])
 
     await conn.sendFile(m.chat, buffer,
-      type === 'imageMessage' ? 'media.jpg' :
-      type === 'videoMessage' ? 'media.mp4' : '',
-      media.caption || '', null, null, {
-        type,
-        ptt: type === 'audioMessage'
+      type === 'imageMessage' ? 'foto.jpg' : 'video.mp4',
+      media.caption || '', m, null, {
+        asDocument: false,
+        mimetype: mime
       })
 
-    await m.react('✅') // Reacción de éxito
-
-  } catch (err) {
-    console.error('[❌ Error en viewOnce auto]', err)
-    await m.react('❌')
-    await conn.reply(m.chat, `❌ Error al procesar viewOnce:\n${err.message}`, m)
+  } catch (e) {
+    console.error('[❌ ERROR ViewOnce Auto]', e)
+    await conn.reply(m.chat, `❌ Error al ver viewOnce:\n${e.message}`, m)
   }
-
-  return true
 }
+
+export default handler
