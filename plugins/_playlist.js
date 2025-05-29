@@ -6,29 +6,29 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     return m.reply(`📄 Uso correcto:\n${usedPrefix + command} <enlace de playlist>\n\nEjemplo:\n${usedPrefix + command} https://youtube.com/playlist?list=...`);
   }
 
-  await m.reply('🔄 Obteniendo lista de canciones, espera un momento...');
+  await m.reply('🔍 Obteniendo enlaces de la playlist...');
 
   try {
     const res = await fetch(text);
     const html = await res.text();
 
-    const regex = /"videoId":"(.*?)"/g;
-    const videoIds = [...new Set([...html.matchAll(regex)].map(v => v[1]))];
+    const videoUrlRegex = /\/watch\?v=([a-zA-Z0-9_-]{11})&list=([a-zA-Z0-9_-]+)/g;
+    const matches = [...html.matchAll(videoUrlRegex)];
 
-    if (!videoIds.length) return m.reply('❌ No se encontraron canciones en la playlist.');
+    const urls = [...new Set(matches.map(match => 'https://www.youtube.com/watch?v=' + match[1]))];
 
-    await m.reply(`🎧 Se encontraron *${videoIds.length}* canciones. Enviando audios...`);
+    if (!urls.length) return m.reply('❌ No se encontraron videos en la playlist.');
 
-    for (const videoId of videoIds) {
-      const url = 'https://youtu.be/' + videoId;
+    await m.reply(`🎶 Se encontraron *${urls.length}* canciones. Enviando audios...`);
 
+    for (const url of urls) {
       try {
-        // Obtener info y duración
+        // Obtener info del video
         const info = await axios.get(`https://yt.elchicodev.com/api/info?url=${url}`);
         const { title, duration } = info.data || {};
         const durationMin = (duration || 0) / 60;
 
-        // Obtener enlace de descarga
+        // Obtener URL de descarga
         let downloadUrl;
         try {
           const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
@@ -47,11 +47,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
           }
         }
 
-        if (!downloadUrl) {
-          await m.reply(`❌ No se encontró enlace para: ${url}`);
-          continue;
-        }
-
         const sendAsDoc = durationMin >= 15;
 
         await conn.sendMessage(m.chat, {
@@ -61,7 +56,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
           ptt: false
         }, { quoted: m });
 
-        await new Promise(r => setTimeout(r, 1500)); // Espera breve entre audios
+        await new Promise(r => setTimeout(r, 1500)); // Espera breve entre envíos
 
       } catch (err) {
         console.error(err);
