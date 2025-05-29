@@ -1,41 +1,38 @@
 import axios from "axios"
 
 let handler = async (m, { conn, text }) => {
-  if (!text) return conn.reply(m.chat, `❗ Por favor proporciona el nombre de una canción o artista.`, m)
-  
+  if (!text) return conn.reply(m.chat, `❗ Ingresa el nombre de una canción para buscar en Spotify.`, m)
+
   try {
-    await m.react('⌛')
-    
-    // Buscar en API velyn.biz.id
-    let response = await axios.get(`https://velyn.biz.id/api/search/spotify?query=${encodeURIComponent(text)}`)
-    if (!response.data.status || !response.data.data || response.data.data.length === 0) {
+    await m.react('🎧')
+
+    const res = await axios.get(`https://velyn.biz.id/api/search/spotify?query=${encodeURIComponent(text)}`)
+    const data = res.data
+
+    if (!data?.status || !Array.isArray(data.data) || data.data.length === 0) {
       await m.react('❌')
-      return conn.reply(m.chat, 'No se encontró ninguna canción con ese nombre.', m)
+      return conn.reply(m.chat, '❌ No se encontraron canciones.', m)
     }
-    
-    let track = response.data.data[0]
 
-    // Formatear duración en mm:ss
-    let durSeg = Math.floor(track.duration_ms / 1000)
-    let minutos = Math.floor(durSeg / 60)
-    let segundos = durSeg % 60
-    let duracionFmt = `${minutos}:${segundos.toString().padStart(2,'0')}`
+    let listado = data.data.slice(0, 10).map((track, i) => {
+      let dur = track.duration_ms || 0
+      let seg = Math.floor(dur / 1000)
+      let min = Math.floor(seg / 60)
+      let rem = seg % 60
+      let duracion = `${min}:${rem.toString().padStart(2, '0')}`
+      return `*${i + 1}.* 🎧 *${track.name}*\n🎤 ${track.artists}\n⏱ ${duracion}\n🔗 ${track.link}`
+    }).join('\n\n')
 
-    let caption = `★━━━━━━━━━━━━━━━━━━━━★
-🎶 𝐒𝐩𝐨𝐭𝐢𝐟𝐲 𝐓𝐫𝐚𝐜𝐤 𝐈𝐧𝐟𝐨 🎶\n
-𝘼𝙧𝙩𝙞𝙨𝙩𝙖: ${track.artists}\n
-𝐓í𝐭𝐮𝐥𝐨: ${track.name}\n
-𝐃𝐮𝐫𝐚𝐜𝐢ó𝐧: ${duracionFmt}\n
-🔗 Link: ${track.link}
-★━━━━━━━━━━━━━━━━━━━━★`
+    let image = data.data[0].image
+    let caption = `🎶 *Resultados de Spotify para:* _${text}_\n\n${listado}`
 
-    await conn.sendFile(m.chat, track.image, 'cover.jpg', caption, m)
+    await conn.sendFile(m.chat, image, 'spotify.jpg', caption, m)
     await m.react('✅')
 
-  } catch (error) {
-    console.error(error)
-    await m.react('❌')
-    return conn.reply(m.chat, 'Ocurrió un error al buscar la canción.', m)
+  } catch (e) {
+    console.error('[❌ ERROR EN SPOTIFY]', e)
+    await m.react('⚠️')
+    return conn.reply(m.chat, '❌ Ocurrió un error al buscar la canción.', m)
   }
 }
 
