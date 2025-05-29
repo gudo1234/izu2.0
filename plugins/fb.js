@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { igdl } from 'ruhend-scraper'
 
 const handler = async (m, { text, conn, args }) => {
@@ -6,60 +5,42 @@ const handler = async (m, { text, conn, args }) => {
     return conn.reply(m.chat, `${e} Por favor, ingresa un enlace de Facebook.`, m)
   }
 
-  const fbRegex = /(?:https?:\/\/)?(?:www\.)?(facebook\.com|fb\.watch)\/[\w\-\.\/?\=&]+/i
-  if (!fbRegex.test(args[0])) {
-    return conn.reply(m.chat, `${e} El enlace proporcionado no parece ser válido de Facebook.`, m)
-  }
-
-  // Función para expandir enlaces tipo /share/
-  const expandFacebookUrl = async (url) => {
-    try {
-      const res = await axios.get(url, { maxRedirects: 5 })
-      return res.request?.res?.responseUrl || url
-    } catch {
-      return url
-    }
-  }
-
-  let inputUrl = args[0]
-  if (inputUrl.includes('/share/')) {
-    //await conn.reply(m.chat, '🔄 El enlace es compartido. Intentando resolver...', m)
-  }
-
-  let finalUrl = await expandFacebookUrl(inputUrl)
-
-  let res
+  let res;
   try {
-    await m.react('🕒') // rwait
-    res = await igdl(finalUrl)
+    await m.react(rwait);
+    res = await igdl(args[0]);
   } catch (e) {
-    console.error(e)
-    return conn.reply(m.chat, `${e} Error al obtener datos. Verifica el enlace o inténtalo más tarde.`, m)
+    return conn.reply(m.chat, `${msm} Error al obtener datos. Verifica el enlace.`, m)
   }
 
-  const result = res.data
+  let result = res.data;
   if (!result || result.length === 0) {
-    return conn.reply(m.chat, `${e} No se encontraron resultados para este enlace.`, m)
+    return conn.reply(m.chat, `${e} No se encontraron resultados.`, m)
   }
 
-  let data = result.find(i => i.resolution === '720p (HD)') || result.find(i => i.resolution === '360p (SD)')
-  if (!data) {
-    return conn.reply(m.chat, `${e} No se encontró una resolución compatible para este video.`, m)
-  }
-
-  const video = data.url
+  let data;
   try {
-    await conn.sendFile(m.chat, video, `thumbnail.mp4`, `${e} _Video de facebook_`, m, null, rcanal)
-    })
-    await m.react('✅')
+    data = result.find(i => i.resolution === "720p (HD)") || result.find(i => i.resolution === "360p (SD)");
   } catch (e) {
-    console.error(e)
-    await m.react('❌')
-    return conn.reply(m.chat, `${e} Error al enviar el video. Asegúrate de que sea público.`, m)
+    return conn.reply(m.chat, `${msm} Error al procesar los datos.`, m)
+  }
+
+  if (!data) {
+    return conn.reply(m.chat, `${e} No se encontró una resolución adecuada.`, m)
+  }
+
+  let video = data.url;
+  try {
+  await conn.sendFile(m.chat, video, `thumbnail.mp4`, `${e} Video de facebook`, m, null, rcanal)
+  
+    await m.react(done);
+  } catch (e) {
+    return conn.reply(m.chat, `${msm} Error al enviar el video.`, m)
+    await m.react(error);
   }
 }
 
 handler.command = ['facebook', 'fb']
-handler.group = true
+handler.group = true;
 
 export default handler
