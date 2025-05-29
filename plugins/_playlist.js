@@ -7,15 +7,19 @@ const handler = async (m, { conn, text, args, usedPrefix, command }) => {
     return m.reply(`📂 Usa el comando correctamente:\n\nEjemplo:\n${usedPrefix}${command} https://youtube.com/playlist?list=PLRW7iEDD9RDRv8EQ3AO-CUqmKfEkaYQ2M`);
   }
 
-  await m.react('🕒');
+  const listIdMatch = text.match(/list=([a-zA-Z0-9_-]+)/);
+  if (!listIdMatch) return m.reply('❌ No se encontró un ID de playlist válido en el enlace.');
+
+  const listId = listIdMatch[1];
+  await m.react('🔎');
 
   try {
-    const res = await yts({ query: text, pages: 1 });
-    const videos = res.videos.filter(v => v.url.includes('watch'));
+    const search = await yts(listId);
+    const videos = search.videos.filter(v => v.url.includes(`/watch`) && v.url.includes(`list=${listId}`));
 
     if (!videos.length) return m.reply('❌ No se encontraron videos en la playlist.');
 
-    m.reply(`🎧 Se encontraron ${videos.length} canciones. Enviando audios uno por uno...`);
+    m.reply(`🎧 Se encontraron ${videos.length} canciones en la playlist. Enviando audios...`);
 
     for (const video of videos) {
       try {
@@ -61,7 +65,7 @@ const handler = async (m, { conn, text, args, usedPrefix, command }) => {
           mimetype: 'audio/mpeg'
         }, { quoted: m });
 
-        await new Promise(r => setTimeout(r, 3000)); // pausa entre envíos
+        await new Promise(r => setTimeout(r, 3000));
       } catch (err) {
         console.error('[ERROR audio]', err.message);
         await m.reply(`❌ Error al enviar *${video.title}*`);
