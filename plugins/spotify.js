@@ -1,76 +1,50 @@
-import axios from 'axios';
-import yts from 'yt-search';
+import axios from "axios"
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`${e} Usa el comando así:\n${usedPrefix + command} diles`);
-
-  await m.react('🕒');
-
+let handler = async (m, { conn, text }) => {
+  if (!text) return conn.reply(m.chat, `❗ Por favor proporciona el nombre de una canción o artista.`, m)
+  
   try {
-    // 1. Buscar en API Velyn Spotify
-    const searchUrl = `https://velyn.biz.id/api/search/spotify?query=${encodeURIComponent(text)}`;
-    const { data: spotifyRes } = await axios.get(searchUrl);
-
-    if (!spotifyRes.status || !spotifyRes.data.length) {
-      return m.reply(`${e} No se encontró ninguna canción en Spotify para: ${text}`);
+    await m.react('⌛')
+    
+    // Llamada a la API para buscar canción en Spotify
+    let response = await axios.get(`https://velyn.biz.id/api/search/spotify?query=${encodeURIComponent(text)}`)
+    if (!response.data.status || !response.data.data || response.data.data.length === 0) {
+      await m.react('❌')
+      return conn.reply(m.chat, 'No se encontró ninguna canción con ese nombre.', m)
     }
+    
+    // Tomamos el primer resultado
+    let track = response.data.data[0]
 
-    // Tomamos la primer canción
-    const song = spotifyRes.data[0];
-    const { name, artists, duration_ms, link: spotifyLink, image } = song;
+    // Datos útiles que esperamos en track:
+    // track.title, track.artists (array), track.duration, track.cover (imagen), track.url (descarga directa)
+    
+    let caption = `★━━━━━━━━━━━━━━━━━━━━★
+🎶 𝐒𝐩𝐨𝐭𝐢𝐟𝐲 𝐓𝐫𝐚𝐜𝐤 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝𝐞𝐫 🎶\n
+𝘼𝙧𝙩𝙞𝙨𝙩𝙖: ${track.artists.join(", ")}\n
+𝐓í𝐭𝐮𝐥𝐨: ${track.title}\n
+𝐃𝐮𝐫𝐚𝐜𝐢ó𝐧: ${track.duration}
+★━━━━━━━━━━━━━━━━━━━━★`
 
-    // 2. Buscar en YouTube usando el título y artista para mejor precisión
-    const ytQuery = `${name} ${artists}`;
-    const ytSearchRes = await yts(ytQuery);
+    // Enviamos la portada con info
+    await conn.sendFile(m.chat, track.cover, 'cover.jpg', caption, m)
 
-    if (!ytSearchRes.videos.length) {
-      return m.reply(`${e} No se encontró la canción en YouTube para descargar: ${ytQuery}`);
-    }
-
-    const ytVideo = ytSearchRes.videos[0];
-    const ytUrl = ytVideo.url;
-
-    // 3. Usar API Siputzx para obtener link de descarga mp3 de YouTube
-    const downloadApiUrl = `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(ytUrl)}`;
-    const { data: downloadRes } = await axios.get(downloadApiUrl);
-
-    if (!downloadRes?.data?.dl) {
-      return m.reply(`${e} No se pudo obtener el enlace de descarga de la canción.`);
-    }
-
-    const audioUrl = downloadRes.data.dl;
-
-    // 4. Preparar texto de info y enviar
-    const durationSec = Math.floor(duration_ms / 1000);
-    const minutes = Math.floor(durationSec / 60);
-    const seconds = durationSec % 60;
-
-    const caption = `
-🎵 *Spotify:* ${name}
-👤 *Artista(s):* ${artists}
-⏳ *Duración:* ${minutes}:${seconds.toString().padStart(2, '0')}
-🔗 *Spotify Link:* ${spotifyLink}
-🔎 *YouTube:* ${ytUrl}
-`.trim();
-
-    await conn.sendMessage(m.chat, { image: { url: image }, caption }, { quoted: m });
-
-    // 5. Enviar audio
+    // Enviamos el audio con la URL que da la API
     await conn.sendMessage(m.chat, {
-      audio: { url: audioUrl },
-      mimetype: 'audio/mpeg',
-      fileName: `${name} - ${artists}.mp3`
-    }, { quoted: m });
+      audio: { url: track.url },
+      fileName: `${track.title}.mp3`,
+      mimetype: 'audio/mpeg'
+    }, { quoted: m })
 
-    await m.react('✅');
+    await m.react('✅')
 
-  } catch (e) {
-    console.error(e);
-    m.reply(`${e} Ocurrió un error inesperado al procesar tu solicitud.`);
+  } catch (error) {
+    console.error(error)
+    await m.react('❌')
+    return conn.reply(m.chat, 'Ocurrió un error al intentar descargar la canción.', m)
   }
-};
+}
 
-handler.command = ['spotify', 'spotdl'];
-handler.group = true;
-
-export default handler;
+handler.command = ['spotify']
+handler.group = true
+export default handler
