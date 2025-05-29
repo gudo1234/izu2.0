@@ -12,6 +12,8 @@ export async function before(m, { conn }) {
   if (!allowedTypes.includes(type)) return true
 
   try {
+    await m.react('🕒') // Reacción de espera
+
     const media = content[type]
     const stream = await downloadContentFromMessage(media, type.replace('Message', ''))
     let buffer = Buffer.concat([])
@@ -25,8 +27,11 @@ export async function before(m, { conn }) {
         ptt: type === 'audioMessage'
       })
 
+    await m.react('✅') // Reacción de éxito
+
   } catch (err) {
     console.error('[❌ Error en viewOnce auto]', err)
+    await m.react('❌')
     await conn.reply(m.chat, `❌ Error al procesar viewOnce:\n${err.message}`, m)
   }
 
