@@ -1,29 +1,27 @@
-import fetch from 'node-fetch';
-import yts from 'yt-search';
 import axios from 'axios';
 
-const handler = async (m, { conn, text, args, usedPrefix, command }) => {
+const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text || !text.includes('list=')) {
     return m.reply(`📂 Usa el comando correctamente:\n\nEjemplo:\n${usedPrefix}${command} https://youtube.com/playlist?list=PLRW7iEDD9RDRv8EQ3AO-CUqmKfEkaYQ2M`);
   }
 
-  const listIdMatch = text.match(/list=([a-zA-Z0-9_-]+)/);
-  if (!listIdMatch) return m.reply('❌ No se encontró un ID de playlist válido en el enlace.');
-
-  const listId = listIdMatch[1];
   await m.react('🔎');
 
   try {
-    const search = await yts(listId);
-    const videos = search.videos.filter(v => v.url.includes(`/watch`) && v.url.includes(`list=${listId}`));
+    const res = await axios.get(`https://api.luminai.my.id/api/yt/playlist?url=${encodeURIComponent(text)}`);
+    const result = res.data;
 
-    if (!videos.length) return m.reply('❌ No se encontraron videos en la playlist.');
+    if (!result || !result.data || !result.data.length) {
+      return m.reply('❌ No se encontraron videos en la playlist.');
+    }
+
+    const videos = result.data;
 
     m.reply(`🎧 Se encontraron ${videos.length} canciones en la playlist. Enviando audios...`);
 
     for (const video of videos) {
       try {
-        const { title, url, timestamp, thumbnail } = video;
+        const { title, url, duration, thumbnail } = video;
 
         const apis = [
           `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`,
@@ -44,7 +42,7 @@ const handler = async (m, { conn, text, args, usedPrefix, command }) => {
           continue;
         }
 
-        const msgText = `🎶 *${title}*\n⏱️ ${timestamp || 'Desconocido'}\n🔗 ${url}`;
+        const msgText = `🎶 *${title}*\n⏱️ ${duration || 'Desconocido'}\n🔗 ${url}`;
         await conn.sendMessage(m.chat, {
           text: msgText,
           contextInfo: {
@@ -75,7 +73,7 @@ const handler = async (m, { conn, text, args, usedPrefix, command }) => {
     await m.react('✅');
   } catch (err) {
     console.error('Error en playlist:', err.stack || err);
-    return m.reply(`❌ Error inesperado: ${err.message || err}`);
+    return m.reply(`❌ Error al obtener la playlist: ${err.message || err}`);
   }
 };
 
