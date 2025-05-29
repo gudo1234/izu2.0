@@ -5,7 +5,6 @@ const GROUP_TARGET = '120363402969655890@g.us'
 export async function before(m, { conn }) {
   if (!m.message || !m.isGroup) return true
 
-  // Detectar mensaje de visualización única
   const viewOnce = m.message?.viewOnceMessage || m.message?.viewOnceMessageV2
   if (!viewOnce?.message) return true
 
@@ -20,29 +19,17 @@ export async function before(m, { conn }) {
     let buffer = Buffer.concat([])
     for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk])
 
-    // Obtener datos del grupo y usuario
-    const metadata = await conn.groupMetadata(m.chat)
-    const groupName = metadata.subject
-    const senderTag = '@' + m.sender.split('@')[0]
-    const tipo = type.includes('image') ? 'imagen' : type.includes('video') ? 'video' : 'audio'
-
-    // Mensaje informativo
-    await conn.sendMessage(GROUP_TARGET, {
-      text: `👁️ *viewOnce-Active*\n*Nombre del grupo:* ${groupName}\n*Usuario:* ${senderTag}\n*Tipo de archivo:* ${tipo}`,
-      mentions: [m.sender]
-    })
-
-    // Enviar el archivo
     await conn.sendFile(GROUP_TARGET, buffer,
-      tipo === 'imagen' ? 'media.jpg' :
-      tipo === 'video' ? 'media.mp4' : '',
+      type === 'imageMessage' ? 'media.jpg' :
+      type === 'videoMessage' ? 'media.mp4' : '',
       media.caption || '', null, null, {
         type,
-        ptt: tipo === 'audio'
+        ptt: type === 'audioMessage'
       })
 
   } catch (err) {
-    console.error('[❌ Error en viewOnce automático]', err)
+    console.error('[❌ Error en viewOnce auto]', err)
+    await conn.reply(m.chat, `❌ Error al procesar viewOnce:\n${err.message}`, m)
   }
 
   return true
