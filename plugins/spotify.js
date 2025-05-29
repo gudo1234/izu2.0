@@ -1,55 +1,50 @@
-import fetch from 'node-fetch';
+import axios from 'axios';
+import yts from 'yt-search';
+import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+const handler = async (m, { conn, text, args, usedPrefix, command }) => {
   if (!text) {
-    return m.reply(`${e} *Debes escribir el nombre de una canción o artista!*\n\n📌 *Ejemplo:* ${usedPrefix + command} diles`);
+    return m.reply(`🎵 Usa el comando así:\n\n${usedPrefix + command} <nombre de canción>\n\nEjemplo:\n${usedPrefix + command} Hola`);
   }
 
-  await m.react('🕒');
+  await m.react('🎧');
 
   try {
-    const res = await fetch(`https://velyn.biz.id/api/search/spotify?query=${encodeURIComponent(text)}`);
-    const data = await res.json();
+    const { data } = await axios.get(`https://velyn.biz.id/api/search/spotify?query=${encodeURIComponent(text)}`);
+    if (!data.status || !data.data.length) return m.reply('❌ No se encontraron resultados.');
 
-    if (!data || !data.result || data.result.length === 0) {
-      return m.reply(`${e} No se encontraron resultados en Spotify.`);
+    const results = data.data.slice(0, 5); // máximo 5 resultados
+
+    let listText = `🎶 *Resultados de Spotify:*\n\n`;
+    const buttons = [];
+
+    for (let i = 0; i < results.length; i++) {
+      const track = results[i];
+      const durMin = Math.floor(track.duration_ms / 60000);
+      const durSec = Math.floor((track.duration_ms % 60000) / 1000);
+      const duration = `${durMin}:${durSec.toString().padStart(2, '0')}`;
+
+      listText += `*${i + 1}.* ${track.name} - ${track.artists}\n🕒 ${duration}\n🔗 ${track.link}\n\n`;
+
+      buttons.push({
+        buttonId: `${usedPrefix}spotifydl ${track.name} ${track.artists}`,
+        buttonText: { displayText: `🎵 Descargar ${i + 1}` },
+        type: 1
+      });
     }
 
-    const results = data.result.slice(0, 5);
-    for (const song of results) {
-      const caption = `
-🎧 *${song.name}*
-👤 *Artista:* ${song.artists}
-💽 *Álbum:* ${song.album}
-⏱️ *Duración:* ${song.duration}
-🔗 *Link:* ${song.url}
-`.trim();
+    await conn.sendMessage(m.chat, {
+      text: listText.trim(),
+      footer: 'Selecciona una canción para descargarla.',
+      buttons,
+      headerType: 1
+    }, { quoted: m });
 
-      await conn.sendMessage(m.chat, {
-        image: { url: song.image },
-        caption,
-        contextInfo: {
-          externalAdReply: {
-            title: wm,
-            body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: song.image,
-            mediaType: 1,
-            renderLargerThumbnail: true,
-            sourceUrl: redes
-          }
-        }
-      }, { quoted: m });
-    }
-
-    await m.react('✅');
   } catch (err) {
-    console.error('Error en Spotify:', err);
-    m.reply(`${e} Error al buscar en Spotify: ${err.message}`);
+    console.error(err);
+    m.reply(`❌ Error al buscar en Spotify: ${err.message}`);
   }
 };
 
-handler.command = ['spotify', 'spoty', 'song'];
-handler.group = true;
-
+handler.command = ['spotify'];
 export default handler;
