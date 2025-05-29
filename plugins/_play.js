@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
-    return m.reply(`${e} Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
+    return m.reply(`${e} _Usa el comando correctamente:_\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
   }
 
   await m.react('🕒');
