@@ -1,77 +1,69 @@
 import axios from 'axios';
+import yts from 'yt-search';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text || !text.includes('list=')) {
-    return m.reply(`📂 Usa el comando correctamente:\n\nEjemplo:\n${usedPrefix}${command} https://youtube.com/playlist?list=PLRW7iEDD9RDRv8EQ3AO-CUqmKfEkaYQ2M`);
+    return m.reply(`❌ Usa el comando correctamente:\nEjemplo:\n${usedPrefix}${command} https://youtube.com/playlist?list=PLRW7iEDD9RDRv8EQ3AO-CUqmKfEkaYQ2M`);
   }
 
   await m.react('🔎');
 
-  const apis = [
-    `https://api.siputzx.my.id/api/yt/playlist?url=${encodeURIComponent(text)}`,
-    `https://api.vreden.my.id/api/ytplaylist?url=${encodeURIComponent(text)}`
-  ];
-
-  let videos = [];
-
-  for (const api of apis) {
-    try {
-      const r = await axios.get(api);
-      const list = r.data?.data || r.data?.result || [];
-      if (list.length) {
-        videos = list;
-        break;
-      }
-    } catch {}
+  // 1. Buscar la playlist y obtener videos con yt-search
+  let playlistInfo;
+  try {
+    playlistInfo = await yts({ listId: text.split('list=')[1].split('&')[0] });
+  } catch (err) {
+    return m.reply('❌ Error al obtener la playlist: ' + err.message);
   }
 
-  if (!videos.length) return m.reply('❌ No se encontraron videos en la playlist.');
+  const videos = playlistInfo?.videos || [];
+  if (videos.length === 0) return m.reply('❌ No se encontraron videos en la playlist.');
 
-  for (const video of videos) {
+  // Limitar a los primeros 10 videos para no saturar (opcional)
+  const maxVideos = 10;
+  const videosToProcess = videos.slice(0, maxVideos);
+
+  for (const video of videosToProcess) {
     try {
-      const { title, url, duration } = video;
+      const videoUrl = video.url;
+      const title = video.title;
 
-      const audioApis = [
-        `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(url)}`,
-        `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`
+      // APIs para obtener el audio
+      const apis = [
+        `https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(videoUrl)}`,
+        `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(videoUrl)}`
       ];
 
-      let dl = null;
+      let downloadUrl = null;
 
-      for (const api of audioApis) {
+      for (const api of apis) {
         try {
-          const r = await axios.get(api);
-          if (r.data?.data?.dl) {
-            dl = {
-              url: r.data.data.dl,
-              duration: r.data.data.duration,
-              size: r.data.data.size
-            };
+          const res = await axios.get(api);
+          if (res.data?.data?.dl) {
+            downloadUrl = res.data.data.dl;
             break;
-          } else if (r.data?.result?.download?.url) {
-            dl = {
-              url: r.data.result.download.url,
-              duration: r.data.result.duration,
-              size: r.data.result.size
-            };
+          } else if (res.data?.result?.download?.url) {
+            downloadUrl = res.data.result.download.url;
             break;
           }
         } catch {}
       }
 
-      if (!dl || !dl.url) continue;
+      if (!downloadUrl) {
+        // saltar video si no hay enlace de descarga
+        continue;
+      }
 
-      const durMin = parseFloat((dl.duration || '0:0').split(':')[0]) || 0;
-      const isDoc = durMin >= 15;
-
+      // Enviar audio
       await conn.sendMessage(m.chat, {
-        audio: { url: dl.url },
-        fileName: `${title}.mp3`,
+        audio: { url: downloadUrl },
         mimetype: 'audio/mpeg',
-        ...(isDoc ? { document: true } : {})
+        fileName: `${title}.mp3`
       }, { quoted: m });
 
+      // Pausa entre envíos para evitar saturación
       await new Promise(r => setTimeout(r, 3000));
+
     } catch {}
   }
 
