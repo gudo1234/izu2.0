@@ -35,16 +35,15 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
     const sizeMB = fileSize / (1024 * 1024);
 
-    // Calcular duración real en minutos (hh:mm:ss o mm:ss)
     let durationMin = 0;
     if (timestamp) {
       const parts = timestamp.split(':').map(Number);
       if (parts.length === 3) {
-        durationMin = parts[0] * 60 + parts[1] + parts[2] / 60; // hh:mm:ss
+        durationMin = parts[0] * 60 + parts[1] + parts[2] / 60;
       } else if (parts.length === 2) {
-        durationMin = parts[0] + parts[1] / 60; // mm:ss
+        durationMin = parts[0] + parts[1] / 60;
       } else if (parts.length === 1) {
-        durationMin = parts[0]; // ss
+        durationMin = parts[0];
       }
     }
 
@@ -112,12 +111,19 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       } else throw new Error();
     } catch {
       try {
-        const api2 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
-        if (api2.data?.result?.download?.url) {
-          downloadUrl = api2.data.result.download.url;
-        }
+        const api2 = await axios.get(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`);
+        if (api2.data?.data?.url) {
+          downloadUrl = api2.data.data.url;
+        } else throw new Error();
       } catch {
-        return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
+        try {
+          const api3 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
+          if (api3.data?.result?.download?.url) {
+            downloadUrl = api3.data.result.download.url;
+          }
+        } catch {
+          return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
+        }
       }
     }
 
