@@ -12,23 +12,35 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const res = await fetch(text);
     const html = await res.text();
 
-    const videoUrlRegex = /\/watch\?v=([a-zA-Z0-9_-]{11})&list=([a-zA-Z0-9_-]+)/g;
-    const matches = [...html.matchAll(videoUrlRegex)];
+    const jsonData = html.split('var ytInitialData = ')[1]?.split(';</script>')[0];
+    if (!jsonData) return m.reply('❌ No se pudo extraer la información de la playlist.');
 
-    const urls = [...new Set(matches.map(match => 'https://www.youtube.com/watch?v=' + match[1]))];
+    const data = JSON.parse(jsonData);
 
-    if (!urls.length) return m.reply('❌ No se encontraron videos en la playlist.');
+    const videos = [];
+    const items = data?.contents?.twoColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer?.content
+      ?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents?.[0]?.playlistVideoListRenderer?.contents;
 
-    await m.reply(`🎶 Se encontraron *${urls.length}* canciones. Enviando audios...`);
+    if (!items || !Array.isArray(items)) return m.reply('❌ No se encontraron videos en la playlist.');
 
-    for (const url of urls) {
+    for (const item of items) {
+      const videoId = item.playlistVideoRenderer?.videoId;
+      if (videoId) {
+        videos.push(`https://www.youtube.com/watch?v=${videoId}`);
+      }
+    }
+
+    const uniqueUrls = [...new Set(videos)];
+    if (!uniqueUrls.length) return m.reply('❌ No se encontraron videos en la playlist.');
+
+    await m.reply(`🎶 Se encontraron *${uniqueUrls.length}* canciones. Enviando audios...`);
+
+    for (const url of uniqueUrls) {
       try {
-        // Obtener info del video
         const info = await axios.get(`https://yt.elchicodev.com/api/info?url=${url}`);
         const { title, duration } = info.data || {};
         const durationMin = (duration || 0) / 60;
 
-        // Obtener URL de descarga
         let downloadUrl;
         try {
           const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${url}`);
@@ -56,7 +68,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
           ptt: false
         }, { quoted: m });
 
-        await new Promise(r => setTimeout(r, 1500)); // Espera breve entre envíos
+        await new Promise(r => setTimeout(r, 1500)); // Espera entre envíos
 
       } catch (err) {
         console.error(err);
