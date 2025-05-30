@@ -86,10 +86,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}autoaceptar *‹on/off›*
 │ ${e}${s}soloadmin *‹on/off›*
 │ ${e}${s}nsfw *‹on/off›*
-│ ${e}${s}modohorny *‹on/off›*
 │ ${e}${s}detect *‹on/off›*
 │ ${e}${s}antilink *‹on/off›*
 │ ${e}${s}antifake *‹on/off›*
+│ ${e}${s}autosticker *‹on/off›*
 └────────────
 
 \`✜ᴅᴇsᴄᴀʀɢᴀs ᴍᴜʟᴛɪᴍᴇᴅɪᴀ📂\`
