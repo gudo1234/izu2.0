@@ -9,7 +9,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
   let isAll = false
   let isEnable
 
-  // Detectar si el primer argumento es "on" o "off", o si está al revés
+  // Permitir .on feature o .feature on (ambos)
   if (['on', 'enable'].includes(args[0])) {
     isEnable = true
     type = args[1]?.toLowerCase()
@@ -23,18 +23,41 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     isEnable = false
     type = args[0]?.toLowerCase()
   } else {
-    const estado = (chat[type] || bot[type]) ? '✓ Activado' : '✗ Desactivado'
-    return conn.reply(m.chat, `*${estado}*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇs ᴅɪsᴘᴏɴɪʙʟᴇs:\nwelcome\nautoaceptar\nsoloadmin\nnsfw\nmodohorny\ndetect\nantilink\nantifake\nantibot\nantibot2\nautosticker`, m)
+    // Si no se especifica correctamente, mostrar todas las funciones y su estado
+    const funciones = {
+      welcome: chat.welcome,
+      autoaceptar: chat.autoaceptar,
+      autorechazar: chat.autorechazar,
+      soloadmin: chat.modoadmin,
+      reaction: chat.reaction,
+      nsfw: chat.nsfw,
+      detect: chat.detect,
+      antilink: chat.antilink,
+      antifake: chat.antifake,
+      antibot: chat.antibot,
+      antibot2: chat.antibot2,
+      autoresponder: chat.autoresponder,
+      autosticker: chat.autosticker,
+      antiprivado: bot.antiprivado,
+      restrict: bot.restrict,
+      jadibotmd: bot.jadibotmd
+    }
+
+    let texto = '*⚙️ Lista de funciones y su estado:*\n\n'
+    for (const [k, v] of Object.entries(funciones)) {
+      texto += `> ${k.padEnd(14)} ${v ? '✓ Activado' : '✗ Desactivado'}\n`
+    }
+    texto += `\nUsa: *${usedPrefix}on <función>* o *${usedPrefix}off <función>*`
+
+    return conn.reply(m.chat, texto.trim(), m)
   }
 
-  if (!type) return conn.reply(m.chat, `${e} Especifica una opción. Ejemplo:\n${usedPrefix}on autosticker`, m)
+  if (!type) return conn.reply(m.chat, `${e} Especifica una función. Ejemplo:\n${usedPrefix}on autosticker`, m)
 
-  // Requiere permisos de grupo
+  // Permisos de grupo
   const requiresGroup = [
-    'welcome', 'bienvenida', 'autoaceptar', 'aceptarauto',
-    'autorechazar', 'rechazarauto', 'modoadmin', 'soloadmin',
-    'reaction', 'reaccion', 'nsfw', 'modohorny', 'detect', 'avisos',
-    'antilink', 'antifake', 'antibot', 'antibots', 'antisubbots', 'antibot2', 'autosticker'
+    'welcome', 'autoaceptar', 'autorechazar', 'modoadmin', 'reaction', 'nsfw',
+    'detect', 'antilink', 'antifake', 'antibot', 'antibot2', 'autoresponder', 'autosticker'
   ]
 
   if (requiresGroup.includes(type)) {
@@ -49,8 +72,8 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     chat[type] = isEnable
   }
 
-  // Requiere permisos globales
-  const requiresGlobal = ['restrict', 'restringir', 'antiprivado', 'antiprivate', 'jadibotmd', 'modejadibot']
+  // Permisos globales
+  const requiresGlobal = ['restrict', 'antiprivado', 'jadibotmd']
   if (requiresGlobal.includes(type)) {
     isAll = true
     if (!isOwner) {
