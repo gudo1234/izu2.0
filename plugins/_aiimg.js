@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text?.trim()) {
-    return conn.reply(m.chat, `${e} Ejemplo:\n${usedPrefix + command} loli cyberpunk`, m)
+    return conn.reply(m.chat, `${e} Genera una imagen con la ia.\n*Ejemplo:* \`${usedPrefix + command}\` loli cyberpunk`, m)
   }
 
   try {
