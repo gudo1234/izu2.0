@@ -17,7 +17,6 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     antibot2: 'chat',
     autosticker: 'chat',
     antiprivado: 'bot',
-    restrict: 'bot',
     jadibotmd: 'bot',
   }
 
@@ -89,7 +88,7 @@ handler.command = [
   'detect', 'antilink',
   'antifake', 'antibot',
   'antibot2', 'autosticker',
-  'antiprivado', 'restrict',
+  'antiprivado',
   'jadibotmd'
 ]
 
