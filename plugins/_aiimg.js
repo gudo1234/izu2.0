@@ -6,7 +6,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 
   try {
-    await conn.reply(m.chat, 'Creando imagen...', m)
+    m.react('🕒')
 
     const payload = {
       prompt: text,
@@ -54,6 +54,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     if (!result) throw new Error('La generación de imagen falló o tomó demasiado tiempo')
+    m.react('🕒')
     await conn.sendFile(m.chat, result, "Thumbnail.jpg", `*Prompt:* ${text}`, m, null, rcanal)
 
   } catch (err) {
