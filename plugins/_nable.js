@@ -2,14 +2,13 @@ import { createHash } from 'crypto'
 
 const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
   const chat = global.db.data.chats[m.chat]
-  const user = global.db.data.users[m.sender]
   const bot = global.db.data.settings[conn.user.jid] || {}
 
   let type = (command || '').toLowerCase()
   let isAll = false
   let isEnable
 
-  // Permitir .on feature o .feature on (ambos)
+  // Permitir .on función o .función on (ambos)
   if (['on', 'enable'].includes(args[0])) {
     isEnable = true
     type = args[1]?.toLowerCase()
@@ -23,23 +22,19 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     isEnable = false
     type = args[0]?.toLowerCase()
   } else {
-    // Si no se especifica correctamente, mostrar todas las funciones y su estado
+    // Mostrar lista de funciones y estado
     const funciones = {
       welcome: chat.welcome,
       autoaceptar: chat.autoaceptar,
-      autorechazar: chat.autorechazar,
       soloadmin: chat.modoadmin,
-      reaction: chat.reaction,
       nsfw: chat.nsfw,
       detect: chat.detect,
       antilink: chat.antilink,
       antifake: chat.antifake,
       antibot: chat.antibot,
       antibot2: chat.antibot2,
-      autoresponder: chat.autoresponder,
       autosticker: chat.autosticker,
       antiprivado: bot.antiprivado,
-      restrict: bot.restrict,
       jadibotmd: bot.jadibotmd
     }
 
@@ -47,20 +42,20 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     for (const [k, v] of Object.entries(funciones)) {
       texto += `> ${k.padEnd(14)} ${v ? '✓ Activado' : '✗ Desactivado'}\n`
     }
-    texto += `\nUsa: *${usedPrefix}on <función>* o *${usedPrefix}off <función>*`
+    texto += `\nUsa: \`${usedPrefix}on\` *<función>* o \`${usedPrefix}off\` *<función>*`
 
     return conn.reply(m.chat, texto.trim(), m)
   }
 
   if (!type) return conn.reply(m.chat, `${e} Especifica una función. Ejemplo:\n${usedPrefix}on autosticker`, m)
 
-  // Permisos de grupo
-  const requiresGroup = [
-    'welcome', 'autoaceptar', 'autorechazar', 'modoadmin', 'reaction', 'nsfw',
-    'detect', 'antilink', 'antifake', 'antibot', 'antibot2', 'autoresponder', 'autosticker'
+  // Funciones por grupo
+  const groupFunctions = [
+    'welcome', 'autoaceptar', 'modoadmin', 'nsfw',
+    'detect', 'antilink', 'antifake', 'antibot', 'antibot2', 'autosticker'
   ]
 
-  if (requiresGroup.includes(type)) {
+  if (groupFunctions.includes(type)) {
     if (!m.isGroup) {
       global.dfail('group', m, conn)
       throw false
@@ -72,9 +67,9 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     chat[type] = isEnable
   }
 
-  // Permisos globales
-  const requiresGlobal = ['restrict', 'antiprivado', 'jadibotmd']
-  if (requiresGlobal.includes(type)) {
+  // Funciones globales
+  const globalFunctions = ['antiprivado', 'jadibotmd']
+  if (globalFunctions.includes(type)) {
     isAll = true
     if (!isOwner) {
       global.dfail('rowner', m, conn)
@@ -86,7 +81,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
   conn.reply(m.chat, `✅ La función *${type}* fue *${isEnable ? 'activada' : 'desactivada'}* ${isAll ? 'a nivel global' : 'para este chat'}`, m)
 }
 
-handler.help = ['on', 'off'].map(v => `${v} <función>`)
+handler.help = ['on <función>', 'off <función>']
 handler.tags = ['nable']
 handler.command = ['on', 'off', 'enable', 'disable']
 
