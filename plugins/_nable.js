@@ -41,10 +41,10 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     const estados = Object.entries(opcionesValidas)
       .map(([opt, scope]) => {
         const estado = scope === 'bot' ? bot[opt] : chat[opt]
-        return `> *${opt}* ${estado ? 'Activo ✓' : 'Desactivado ✗'}`
+        return `> *${opt}*      ${estado ? 'Activo ✓' : 'Desactivado ✗'}`
       })
       .join('\n')
-    return conn.reply(m.chat, `⚙️ *Lista de funciones y su estado:*\n${estados}\n\n${e} _Ejemplo de uso:_\n\`${usedPrefix}on\` welcome\n\`${usedPrefix}off\` autosticker`, m)
+    return conn.reply(m.chat, `⚙️ *Lista de funciones y su estado:*\n${estados}\n\n${e} *_Ejemplo de uso:_*\n\`${usedPrefix}on\` welcome\n\`${usedPrefix}off\` autosticker`, m)
   }
 
   if ((type === 'on' || type === 'off' || type === 'enable' || type === 'disable') && !opcion) {
@@ -64,7 +64,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
       })
       .join('\n')
 
-    return conn.reply(m.chat, `📢 La función *${type}* está actualmente: ${estado ? '✓ ACTIVADA' : '✗ DESACTIVADA'}\n\nUsa:\n${usedPrefix}${type} on – para activar\n${usedPrefix}${type} off – para desactivar\n\n📋 *Otros estados:*\n${listaExtra}`, m)
+    return conn.reply(m.chat, `⚙️ _La función *${type}* está actualmente: ${estado ? '✓ ACTIVADA' : '✗ DESACTIVADA'}_\n\nUsa:\n\`${usedPrefix}${type}\` on – para activar\n\`${usedPrefix}${type}\` off – para desactivar\n\n📋 *Otros estados:*\n${listaExtra}`, m)
   }
 
   const scope = opcionesValidas[type]
