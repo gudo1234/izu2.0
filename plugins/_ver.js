@@ -2,15 +2,16 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys'
 
 let handler = m => m
 
-handler.all = async function (m, { conn }) {
-  let chat = db.data.chats[m.chat]
-  //if (!chat?.autosticker || !m.isGroup) return // puedes cambiar esta condición si quieres que funcione en privados también
+handler.all = async function (m) {
+  // Lógica de detección tipo autosticker
+  let q = m
+  let mime = (q.msg || q).mimetype || q.mediaType || ''
+  if (!q?.message) return
 
-  if (!m?.message) return
-  let msgContent = Object.values(m.message || {})[0]
-  if (!msgContent?.contextInfo?.isViewOnce) return
+  let content = Object.values(q.message || {})[0]
+  if (!content?.contextInfo?.isViewOnce) return
 
-  let quoted = msgContent?.contextInfo?.quotedMessage
+  let quoted = content?.contextInfo?.quotedMessage
   if (!quoted) return
 
   let type = Object.keys(quoted)[0]
@@ -22,6 +23,7 @@ handler.all = async function (m, { conn }) {
     buffer = Buffer.concat([buffer, chunk])
   }
 
+  // Mostrar automáticamente según tipo
   if (/imageMessage/.test(type)) {
     await this.sendFile(m.chat, buffer, 'photo.jpg', media.caption || '', m)
   } else if (/videoMessage/.test(type)) {
