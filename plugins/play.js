@@ -103,35 +103,31 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }, { quoted: m });
 
-    // ⚙️ Manejamos múltiples APIs de descarga con tolerancia a fallos
-    let downloadUrl = null;
-    const apis = [
-      async () => {
-        const res = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`, { timeout: 10000 });
-        return res.data?.data?.dl;
-      },
-      async () => {
-        const res = await axios.get(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`, { timeout: 10000 });
-        return res.data?.data?.url;
-      },
-      async () => {
-        const res = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`, { timeout: 10000 });
-        return res.data?.result?.download?.url;
-      }
-    ];
-
-    for (let i = 0; i < apis.length; i++) {
+    let downloadUrl;
+    try {
+      const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`);
+      if (api1.data?.data?.dl) {
+        downloadUrl = api1.data.data.dl;
+      } else throw new Error();
+    } catch {
       try {
-        downloadUrl = await apis[i]();
-        if (downloadUrl) break;
-      } catch (err) {
-        console.warn(`API ${i + 1} falló:`, err.code || err.message);
+        const api2 = await axios.get(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`);
+        if (api2.data?.data?.url) {
+          downloadUrl = api2.data.data.url;
+        } else throw new Error();
+      } catch {
+        try {
+          const api3 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
+          if (api3.data?.result?.download?.url) {
+            downloadUrl = api3.data.result.download.url;
+          }
+        } catch {
+          return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
+        }
       }
     }
 
-    if (!downloadUrl) {
-      return m.reply(`${e} *No se pudo obtener el enlace de descarga.* Intenta más tarde.`);
-    }
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
