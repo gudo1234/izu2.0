@@ -3,31 +3,35 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys'
 let handler = m => m
 
 handler.all = async function (m) {
-  if (!m.message || !m.message.viewOnceMessage) return
-
   try {
-    let viewOnce = m.message.viewOnceMessage.message
-    let type = Object.keys(viewOnce)[0] // imageMessage, videoMessage, audioMessage
-    let media = viewOnce[type]
+    // Verifica si el mensaje es de visualización única
+    let vmsg = m.message?.viewOnceMessage?.message
+    if (!vmsg) return
 
-    let stream = await downloadContentFromMessage(media, type.replace('Message', ''))
+    // Obtiene el tipo: imageMessage, videoMessage, audioMessage
+    let type = Object.keys(vmsg)[0]
+    let media = vmsg[type]
+
+    // Descarga el contenido
+    const stream = await downloadContentFromMessage(media, type.replace('Message', ''))
     let buffer = Buffer.concat([])
-    for await (let chunk of stream) {
+    for await (const chunk of stream) {
       buffer = Buffer.concat([buffer, chunk])
     }
 
-    if (/imageMessage/.test(type)) {
+    // Reenvía según el tipo
+    if (type === 'imageMessage') {
       await this.sendFile(m.chat, buffer, 'foto.jpg', media.caption || '', m)
-    } else if (/videoMessage/.test(type)) {
+    } else if (type === 'videoMessage') {
       await this.sendFile(m.chat, buffer, 'video.mp4', media.caption || '', m)
-    } else if (/audioMessage/.test(type)) {
+    } else if (type === 'audioMessage') {
       await this.sendFile(m.chat, buffer, '', null, m, true, {
         type: 'audioMessage',
         ptt: true
       })
     }
   } catch (e) {
-    console.error('[ERROR viewOnce auto]', e)
+    console.error('[❌ ERROR auto-viewOnce]', e)
   }
 }
 
