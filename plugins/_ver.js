@@ -3,36 +3,31 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys'
 let handler = m => m
 
 handler.all = async function (m) {
-  // Lógica de detección tipo autosticker
-  let q = m
-  let mime = (q.msg || q).mimetype || q.mediaType || ''
-  if (!q?.message) return
+  if (!m.message || !m.message.viewOnceMessage) return
 
-  let content = Object.values(q.message || {})[0]
-  if (!content?.contextInfo?.isViewOnce) return
+  try {
+    let viewOnce = m.message.viewOnceMessage.message
+    let type = Object.keys(viewOnce)[0] // imageMessage, videoMessage, audioMessage
+    let media = viewOnce[type]
 
-  let quoted = content?.contextInfo?.quotedMessage
-  if (!quoted) return
+    let stream = await downloadContentFromMessage(media, type.replace('Message', ''))
+    let buffer = Buffer.concat([])
+    for await (let chunk of stream) {
+      buffer = Buffer.concat([buffer, chunk])
+    }
 
-  let type = Object.keys(quoted)[0]
-  let media = quoted[type]
-  let stream = await downloadContentFromMessage(media, type.replace('Message', ''))
-  let buffer = Buffer.concat([])
-
-  for await (const chunk of stream) {
-    buffer = Buffer.concat([buffer, chunk])
-  }
-
-  // Mostrar automáticamente según tipo
-  if (/imageMessage/.test(type)) {
-    await this.sendFile(m.chat, buffer, 'photo.jpg', media.caption || '', m)
-  } else if (/videoMessage/.test(type)) {
-    await this.sendFile(m.chat, buffer, 'video.mp4', media.caption || '', m)
-  } else if (/audioMessage/.test(type)) {
-    await this.sendFile(m.chat, buffer, '', null, m, true, {
-      type: 'audioMessage',
-      ptt: true
-    })
+    if (/imageMessage/.test(type)) {
+      await this.sendFile(m.chat, buffer, 'foto.jpg', media.caption || '', m)
+    } else if (/videoMessage/.test(type)) {
+      await this.sendFile(m.chat, buffer, 'video.mp4', media.caption || '', m)
+    } else if (/audioMessage/.test(type)) {
+      await this.sendFile(m.chat, buffer, '', null, m, true, {
+        type: 'audioMessage',
+        ptt: true
+      })
+    }
+  } catch (e) {
+    console.error('[ERROR viewOnce auto]', e)
   }
 }
 
