@@ -42,7 +42,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const comandosAnime = comandosPorCategoria('anime', '*‹@υsєя›*')
   const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
   const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
-
+var hawemod = ["⬯⬯⬯⬯⬯", "⬯⬯⬯⬯⬮", "⬯⬯⬯⬮⬮", "⬯⬯⬮⬮⬮", "⬯⬮⬮⬮⬮", "⬮⬮⬮⬮⬮" ]
+let { key } = await conn.sendMessage(m.chat, {text: `► *Cargando...*`}, {quoted: m})
+for (let i = 0; i < hawemod.length; i++) {
+await new Promise(resolve => setTimeout(resolve, 1000)); 
+await conn.sendMessage(m.chat, {text: hawemod[i], edit: key}, {quoted: m})}
+await conn.sendMessage(m.chat, {text: `◙ *Carga Completa*`, edit: key}, {quoted: m});
   let txt = `${e} _¡Hola!_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
 
 ━━━━━━━━━━━━━
