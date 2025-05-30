@@ -1,7 +1,12 @@
 import axios from 'axios'
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-    if (!text) throw `${e} Ejemplo:\n${usedPrefix + command} loli cyberpunk`
+/*let handler = async (m, { conn, text, usedPrefix, command }) => {
+    if (!text) throw `${e} Ejemplo:\n${usedPrefix + command} loli cyberpunk`*/
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  try {
+    if (!text.trim()) {
+      return conn.reply(m.chat, `{e} Ejemplo:\n${usedPrefix + command} loli cyberpunk`, m)
+    }
     
     await conn.reply(m.chat, 'Creando imagen...', m)
 
