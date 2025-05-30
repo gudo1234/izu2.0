@@ -1,4 +1,4 @@
-import { createHash } from 'crypto' 
+/*import { createHash } from 'crypto' 
 import fetch from 'node-fetch'
 
 const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
@@ -212,5 +212,107 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
 handler.help = ['welcome', 'bienvenida', 'antiprivado', 'antiprivate', 'restrict', 'restringir', 'autolevelup', 'autonivel', 'antibot', 'antibots', 'autoaceptar', 'aceptarauto', 'autorechazar', 'rechazarauto', 'autoresponder', 'autorespond', 'antisubbots', 'antibot2', 'modoadmin', 'soloadmin', 'reaction', 'reaccion', 'nsfw', 'modohorny', 'antispam', 'jadibotmd', 'modejadibot', 'subbots', 'detect', 'avisos', 'antilink', 'antifake', 'autosticker']
 handler.tags = ['nable']
 handler.command = ['on', 'off', 'welcome', 'bienvenida', 'antiprivado', 'antiprivate', 'restrict', 'restringir', 'autolevelup', 'autonivel', 'antibot', 'antibots', 'autoaceptar', 'aceptarauto', 'autorechazar', 'rechazarauto', 'autoresponder', 'autorespond', 'antisubbots', 'antibot2', 'modoadmin', 'soloadmin', 'reaction', 'reaccion', 'nsfw', 'modohorny', 'antispam', 'jadibotmd', 'modejadibot', 'subbots', 'detect', 'avisos', 'antilink', 'antifake', 'autosticker']
+
+export default handler*/
+
+import { createHash } from 'crypto'
+import fetch from 'node-fetch'
+
+const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin }) => {
+  let chat = global.db.data.chats[m.chat]
+  let user = global.db.data.users[m.sender]
+  let bot = global.db.data.settings[conn.user.jid] || {}
+  let type = command.toLowerCase()
+  let isEnable
+
+  const showStatus = (key) => {
+    const estado = chat[key] || false
+    return conn.reply(m.chat, `La función *${key}* está actualmente: ${estado ? '✅ ACTIVADA' : '✖️ DESACTIVADA'}.\n\nUsa:\n${usedPrefix + key} on – para activar\n${usedPrefix + key} off – para desactivar`, m)
+  }
+
+  if (!['on', 'enable', 'off', 'disable'].includes(args[0])) {
+    if ([
+      'welcome', 'bienvenida', 'autoaceptar', 'soloadmin', 'nsfw', 'modohorny', 'detect',
+      'antilink', 'antifake', 'antibot', 'antibot2', 'autosticker'
+    ].includes(type)) {
+      return showStatus(type)
+    } else {
+      return conn.reply(m.chat, `Uso correcto:\n${usedPrefix}${type} on/off\n\nOpciones válidas:\nwelcome\nautoaceptar\nsoloadmin\nnsfw\ndetect\nantilink\nantifake\nantibot\nantibot2\nautosticker`, m)
+    }
+  }
+
+  isEnable = /true|enable|on|(turn)?on/i.test(args[0])
+
+  switch (type) {
+    case 'welcome':
+    case 'bienvenida':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.welcome = isEnable
+      break
+
+    case 'autoaceptar':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.autoAceptar = isEnable
+      break
+
+    case 'soloadmin':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.modoadmin = isEnable
+      break
+
+    case 'nsfw':
+    case 'modohorny':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.nsfw = isEnable
+      break
+
+    case 'detect':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.detect = isEnable
+      break
+
+    case 'antilink':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.antiLink = isEnable
+      break
+
+    case 'antifake':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.antifake = isEnable
+      break
+
+    case 'antibot':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.antiBot = isEnable
+      break
+
+    case 'antibot2':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.antiBot2 = isEnable
+      break
+
+    case 'autosticker':
+      if (m.isGroup && !isAdmin && !isOwner) return global.dfail('admin', m, conn)
+      chat.autosticker = isEnable
+      break
+
+    default:
+      return conn.reply(m.chat, `⚠️ Opción desconocida. Usa:\n${usedPrefix}${command} <on/off>\n\nOpciones válidas:\nwelcome\nautoaceptar\nsoloadmin\nnsfw\ndetect\nantilink\nantifake\nantibot\nantibot2\nautosticker`, m)
+  }
+
+  conn.reply(m.chat, `✅ La función *${type}* fue *${isEnable ? 'activada' : 'desactivada'}* correctamente.`, m)
+}
+
+handler.help = ['on', 'off'].map(v => v + ' <función>')
+handler.tags = ['nable']
+handler.command = [
+  'on', 'off',
+  'welcome', 'bienvenida',
+  'autoaceptar', 'soloadmin',
+  'nsfw', 'modohorny',
+  'detect', 'antilink',
+  'antifake', 'antibot',
+  'antibot2', 'autosticker'
+]
 
 export default handler
