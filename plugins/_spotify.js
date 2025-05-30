@@ -2,66 +2,45 @@ import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 import axios from "axios"
 
 let handler = async (m, { conn, text }) => {
-  if (!text) return conn.reply(m.chat, `🎧 Por favor proporciona el nombre de una canción o enlace de Spotify.`, m)
+  if (!text) return conn.reply(m.chat, `🎧 Por favor proporciona el enlace de una playlist de Spotify.`, m)
 
   try {
     await m.react('⌛')
 
-    // Verificamos si es una playlist
-    if (text.includes('open.spotify.com/playlist/')) {
-      const playlistID = extraerIDPlaylist(text)
-      if (!playlistID) return conn.reply(m.chat, '❌ ID de playlist no válido.', m)
+    const playlistID = extraerIDPlaylist(text)
+    if (!playlistID) return conn.reply(m.chat, '❌ Enlace de playlist no válido.', m)
 
-      // Usamos API de spotifydown.com para obtener la lista de canciones
-      const playlistRes = await axios.get(`https://api.spotifydown.com/metadata/playlist/${playlistID}`)
-      const canciones = playlistRes.data?.tracks?.items
-      if (!canciones || canciones.length === 0) return conn.reply(m.chat, '❌ No se encontraron canciones en la playlist.', m)
+    const playlistRes = await axios.get(`https://api.spotifydown.com/metadata/playlist/${playlistID}`)
+    const canciones = playlistRes.data?.tracks?.items
+    if (!canciones || canciones.length === 0) return conn.reply(m.chat, '❌ No se encontraron canciones en la playlist.', m)
 
-      await conn.reply(m.chat, `🎶 Descargando ${canciones.length} canciones de la playlist...`, m)
+    await conn.reply(m.chat, `🎶 Descargando ${canciones.length} canciones de la playlist...`, m)
 
-      for (const item of canciones) {
-        const cancion = item.track
-        const nombre = `${cancion.name} ${cancion.artists.map(a => a.name).join(' ')}`
+    for (const item of canciones) {
+      const cancion = item.track
+      const nombre = `${cancion.name} ${cancion.artists.map(a => a.name).join(' ')}`
 
-        try {
-          let downTrack = await downloadTrack2(nombre)
-          let urlspo = await spotifydl(downTrack.url)
-          if (!urlspo.status) continue
+      try {
+        let downTrack = await downloadTrack2(nombre)
+        let urlspo = await spotifydl(downTrack.url)
+        if (!urlspo.status) continue
 
-          urlspo = urlspo.download
-          let txt = `*Artista:* ${downTrack.artists}\n*Título:* ${downTrack.title}\n*Duración:* ${downTrack.duration}`
+        urlspo = urlspo.download
+        let txt = `*Artista:* ${downTrack.artists}\n*Título:* ${downTrack.title}\n*Duración:* ${downTrack.duration}`
 
-          await conn.sendFile(m.chat, downTrack.imageUrl, 'cover.jpg', txt, m)
-          await conn.sendMessage(m.chat, {
-            audio: { url: urlspo },
-            fileName: `${downTrack.title}.mp3`,
-            mimetype: 'audio/mpeg'
-          }, { quoted: m })
+        await conn.sendFile(m.chat, downTrack.imageUrl, 'cover.jpg', txt, m)
+        await conn.sendMessage(m.chat, {
+          audio: { url: urlspo },
+          fileName: `${downTrack.title}.mp3`,
+          mimetype: 'audio/mpeg'
+        }, { quoted: m })
 
-        } catch (e) {
-          console.log('❌ Error individual al procesar una canción:', nombre)
-        }
+      } catch (e) {
+        console.log('❌ Error con una canción:', nombre)
       }
-
-      return await m.react('✅')
     }
 
-    // Lógica original para una sola canción
-    let downTrack = await downloadTrack2(text)
-    let urlspo = await spotifydl(downTrack.url)
-    if (!urlspo.status) return await m.react('❌')
-
-    urlspo = urlspo.download
-    let txt = `*Artista:* ${downTrack.artists}\n*Título:* ${downTrack.title}\n*Duración:* ${downTrack.duration}`
-    await conn.sendFile(m.chat, downTrack.imageUrl, 'cover.jpg', txt, m)
-    await conn.sendMessage(m.chat, {
-      audio: { url: urlspo },
-      fileName: `${downTrack.title}.mp3`,
-      mimetype: 'audio/mpeg'
-    }, { quoted: m })
-
     return await m.react('✅')
-
   } catch (e) {
     console.log(e)
     return await m.react('❌')
@@ -72,13 +51,13 @@ handler.command = ['playlist']
 handler.group = true
 export default handler
 
-// Extrae el ID de la playlist desde la URL
+// Función que extrae el ID de playlist desde URLs con o sin parámetros
 function extraerIDPlaylist(url) {
-  const match = url.match(/playlist\/([a-zA-Z0-9]+)/)
+  const match = url.match(/playlist\/([a-zA-Z0-9]+)(?=\?|$)/)
   return match ? match[1] : null
 }
 
-// Función para obtener el audio descargable
+// Función auxiliar de descarga desde la API de fabdl
 async function spotifydl(url) {
   try {
     let maxIntentos = 10
