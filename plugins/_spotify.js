@@ -1,22 +1,29 @@
-import { downloadTrack2, getPlaylist } from "@nechlophomeriaa/spotifydl"
+import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 import axios from "axios"
 
-let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  if (!text) return conn.reply(m.chat, `🎧 Por favor proporciona el nombre de una canción o un enlace de Spotify.`, m)
+let handler = async (m, { conn, text }) => {
+  if (!text) return conn.reply(m.chat, `🎧 Proporciona un nombre de canción o enlace de Spotify.`, m)
 
   try {
     await m.react('⌛')
 
     if (text.includes('open.spotify.com/playlist/')) {
-      // Es una playlist
-      const playlist = await getPlaylist(text)
-      if (!playlist || !playlist.length) return await m.react('❌')
+      // Detectamos que es una playlist
+      const playlistData = await axios.get(`https://api.spotifydown.com/metadata/playlist/${extraerIDPlaylist(text)}`)
+      const tracks = playlistData.data?.tracks?.items
 
-      await m.reply(`🎶 Descargando *${playlist.length}* canciones de la playlist...`)
+      if (!tracks || tracks.length === 0) {
+        await m.react('❌')
+        return conn.reply(m.chat, `❌ No se encontraron canciones en la playlist.`, m)
+      }
 
-      for (const track of playlist) {
+      await m.reply(`🎶 Descargando ${tracks.length} canciones de la playlist...`)
+
+      for (const trackObj of tracks) {
+        const track = trackObj.track
+        const query = `${track.name} ${track.artists.map(a => a.name).join(' ')}`
         try {
-          const downTrack = await downloadTrack2(track.url)
+          const downTrack = await downloadTrack2(query)
           const urlspo = await spotifydl(downTrack.url)
           if (!urlspo.status) continue
 
@@ -27,15 +34,12 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
             fileName: `${downTrack.title}.mp3`,
             mimetype: 'audio/mpeg'
           }, { quoted: m })
-
-        } catch (e) {
-          console.log(`❌ Error en canción: ${track.title}`)
-          continue
+        } catch {
+          continue // Ignorar errores individuales
         }
       }
-
     } else {
-      // Es una canción individual
+      // Descarga individual
       const downTrack = await downloadTrack2(text)
       const urlspo = await spotifydl(downTrack.url)
       if (!urlspo.status) return await m.react('❌')
@@ -59,6 +63,12 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 handler.command = ['playlist']
 handler.group = true
 export default handler
+
+// Función auxiliar para extraer el ID de la playlist
+function extraerIDPlaylist(url) {
+  const match = url.match(/playlist\/([a-zA-Z0-9]+)/)
+  return match ? match[1] : null
+}
 
 async function spotifydl(url) {
   try {
@@ -109,4 +119,4 @@ async function spotifydl(url) {
   } catch (e) {
     return { status: false, message: "Error inesperado.", code: 500 }
   }
-        }
+}
