@@ -27,7 +27,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     return conn.reply(m.chat, `*${estado}*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇs ᴅɪsᴘᴏɴɪʙʟᴇs:\nwelcome\nautoaceptar\nsoloadmin\nnsfw\nmodohorny\ndetect\nantilink\nantifake\nantibot\nantibot2\nautosticker`, m)
   }
 
-  if (!type) return conn.reply(m.chat, `⚠️ Especifica una opción. Ejemplo:\n${usedPrefix}on autosticker`, m)
+  if (!type) return conn.reply(m.chat, `${e} Especifica una opción. Ejemplo:\n${usedPrefix}on autosticker`, m)
 
   // Requiere permisos de grupo
   const requiresGroup = [
