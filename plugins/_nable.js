@@ -64,7 +64,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     }
 
     const estado = opcionesValidas[type] === 'bot' ? bot[type] : chat[type]
-    return conn.reply(m.chat, `📢 La función *${type}* está actualmente: ${estado ? '✅ ACTIVADA' : '❌ DESACTIVADA'}.\n\nUsa:\n${usedPrefix}${type} on – para activar\n${usedPrefix}${type} off – para desactivar`, m)
+    return conn.reply(m.chat, `📢 La función *${type}* está actualmente: ${estado ? '✅ ACTIVADA' : '❌ DESACTIVADA'}.\n\nUsa:\n${usedPrefix}${type} on – para activar\n${usedPrefix}${type} off – para desactivar\n\n⚙️ *Opciones disponibles*\n${estados}`, m)
   }
 
   // Activar / desactivar según tipo y permisos
