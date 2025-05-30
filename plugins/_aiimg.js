@@ -54,11 +54,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     }
 
     if (!result) throw new Error('La generación de imagen falló o tomó demasiado tiempo')
-
-    await conn.sendMessage(m.chat, {
-      image: { url: result },
-      caption: `*Prompt:* ${text}`
-    }, { quoted: m })
+    await conn.sendFile(m.chat, result, "Thumbnail.jpg", `*Prompt:* ${text}`, m, null, rcanal)
 
   } catch (err) {
     console.error(err)
