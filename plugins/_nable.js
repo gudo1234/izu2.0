@@ -3,7 +3,6 @@ import fetch from 'node-fetch'
 
 const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin }) => {
   const chat = global.db.data.chats[m.chat]
-  const user = global.db.data.users[m.sender]
   const bot = global.db.data.settings[conn.user.jid] || {}
 
   const opcionesValidas = {
@@ -24,46 +23,48 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
 
   let type = command.toLowerCase()
   let opcion = args[0]?.toLowerCase()
-  let valor
+  let valor = null
 
-  if (['on', 'enable'].includes(type)) {
-    if (!opcion || !(opcion in opcionesValidas)) {
-      return conn.reply(m.chat, `❌ Debes indicar una opción válida. Ejemplo:\n${usedPrefix}on welcome`, m)
-    }
+  // Caso: .on <opción>  || .off <opción>
+  if ((type === 'on' || type === 'enable') && opcion in opcionesValidas) {
     type = opcion
     valor = true
-  } else if (['off', 'disable'].includes(type)) {
-    if (!opcion || !(opcion in opcionesValidas)) {
-      return conn.reply(m.chat, `❌ Debes indicar una opción válida. Ejemplo:\n${usedPrefix}off welcome`, m)
-    }
+  } else if ((type === 'off' || type === 'disable') && opcion in opcionesValidas) {
     type = opcion
     valor = false
-  } else {
-    // Formato: .welcome, .autosticker, etc.
+  }
+
+  // Caso: .<opción> on/off
+  else if ((type in opcionesValidas) && (opcion === 'on' || opcion === 'enable')) {
+    valor = true
+  } else if ((type in opcionesValidas) && (opcion === 'off' || opcion === 'disable')) {
+    valor = false
+  }
+
+  // Caso: .<opción> solo para mostrar estado
+  if (valor === null) {
     if (!(type in opcionesValidas)) {
-      return conn.reply(m.chat, `❌ Opción no reconocida.\nOpciones válidas:\n${Object.keys(opcionesValidas).join('\n')}`, m)
+      return conn.reply(m.chat, `❌ Opción no reconocida.\nOpciones válidas:\n${Object.keys(opcionesValidas).join(', ')}`, m)
     }
+
     const estado = opcionesValidas[type] === 'bot' ? bot[type] : chat[type]
     return conn.reply(m.chat, `📢 La función *${type}* está actualmente: ${estado ? '✅ ACTIVADA' : '✖️ DESACTIVADA'}.\n\nUsa:\n${usedPrefix}${type} on – para activar\n${usedPrefix}${type} off – para desactivar`, m)
   }
 
+  // Verificación de permisos y activación/desactivación
   const scope = opcionesValidas[type]
   if (scope === 'chat') {
-    if (m.isGroup && !(isAdmin || isOwner)) {
-      return global.dfail('admin', m, conn)
-    }
+    if (m.isGroup && !(isAdmin || isOwner)) return global.dfail('admin', m, conn)
     chat[type] = valor
   } else if (scope === 'bot') {
-    if (!isOwner) {
-      return global.dfail('rowner', m, conn)
-    }
+    if (!isOwner) return global.dfail('rowner', m, conn)
     bot[type] = valor
   }
 
-  conn.reply(m.chat, `✅ La función *${type}* fue *${valor ? 'activada' : 'desactivada'}* correctamente ${scope === 'bot' ? 'para el bot completo' : 'en este chat'}.`, m)
+  conn.reply(m.chat, `✅ La función *${type}* fue *${valor ? 'activada' : 'desactivada'}* correctamente ${scope === 'bot' ? 'para todo el bot' : 'en este chat'}.`, m)
 }
 
-handler.help = ['on <opción>', 'off <opción>', '<opción> (ver estado)']
+handler.help = ['on <opción>', 'off <opción>', '<opción> (ver estado)', '<opción> on/off']
 handler.tags = ['nable']
 handler.command = [
   'on', 'off',
