@@ -4,7 +4,7 @@ let handler = m => m
 
 handler.all = async function (m, { conn }) {
   let chat = db.data.chats[m.chat]
-  if (!chat?.autosticker || !m.isGroup) return // puedes cambiar esta condición si quieres que funcione en privados también
+  //if (!chat?.autosticker || !m.isGroup) return // puedes cambiar esta condición si quieres que funcione en privados también
 
   if (!m?.message) return
   let msgContent = Object.values(m.message || {})[0]
