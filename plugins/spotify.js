@@ -11,13 +11,9 @@ if (!text) return conn.reply(m.chat, `${emoji} Por favor proporciona el nombre d
     let urlspo=await spotifydl(downTrack.url)
     if (!urlspo.status) return await m.react('❌')
     urlspo=urlspo.download
-    let txt = `★━━━━━━━━━━━━━━━━━━━━★
-🎶 𝐒𝐩𝐨𝐭𝐢𝐟𝐲 𝐓𝐫𝐚𝐜𝐤 𝐃𝐨𝐰𝐥𝐨𝐚𝐝𝐞𝐫 🎶\n
-𝘼𝙧𝙩𝙞𝙨𝙩𝙖:${downTrack.artists}\n
-𝐓í𝐭𝐮𝐥𝐨:${downTrack.title}\n
-𝐃𝐮𝐫𝐚𝐜𝐢ó𝐧:${downTrack.duration}
-★━━━━━━━━━━━━━━━━━━━━★`
-  //await conn.sendMessage(m.chat, {image: {url: downTrack.imageUrl}, caption: `${caption2}`}, {quoted: m});
+    let txt = `*Artista:* ${downTrack.artists}\n
+*Título:* ${downTrack.title}\n
+*Duración:* ${downTrack.duration}`
     
 conn.sendFile(m.chat, downTrack.imageUrl, 'error.jpg', txt, m, null, rcanal)
 
