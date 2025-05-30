@@ -11,8 +11,8 @@ if (!text) return conn.reply(m.chat, `${emoji} Por favor proporciona el nombre d
     let urlspo=await spotifydl(downTrack.url)
     if (!urlspo.status) return await m.react('❌')
     urlspo=urlspo.download
-    let txt = `*Artista:* ${downTrack.artists}\n
-*Título:* ${downTrack.title}\n
+    let txt = `*Artista:* ${downTrack.artists}
+*Título:* ${downTrack.title}
 *Duración:* ${downTrack.duration}`
     
 conn.sendFile(m.chat, downTrack.imageUrl, 'error.jpg', txt, m, null, rcanal)
