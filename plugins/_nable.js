@@ -1,88 +1,77 @@
-import { createHash } from 'crypto'
-
-const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
+const handler = async (m, { conn, args, usedPrefix, command, isAdmin, isOwner }) => {
   const chat = global.db.data.chats[m.chat]
   const bot = global.db.data.settings[conn.user.jid] || {}
 
-  let type = (command || '').toLowerCase()
-  let isAll = false
-  let isEnable
+  let input = (args[0] || '').toLowerCase()
+  let second = (args[1] || '').toLowerCase()
 
-  // Permitir .on función o .función on (ambos)
-  if (['on', 'enable'].includes(args[0])) {
+  let type = ''
+  let isEnable = null
+
+  // Detecta formatos: .on autosticker | .autosticker on | .autosticker
+  if (input === 'on' || input === 'enable') {
+    type = second
     isEnable = true
-    type = args[1]?.toLowerCase()
-  } else if (['off', 'disable'].includes(args[0])) {
+  } else if (input === 'off' || input === 'disable') {
+    type = second
     isEnable = false
-    type = args[1]?.toLowerCase()
-  } else if (['on', 'enable'].includes(args[1])) {
-    isEnable = true
-    type = args[0]?.toLowerCase()
-  } else if (['off', 'disable'].includes(args[1])) {
-    isEnable = false
-    type = args[0]?.toLowerCase()
   } else {
-    // Mostrar lista de funciones y estado
-    const funciones = {
-      welcome: chat.welcome,
-      autoaceptar: chat.autoaceptar,
-      soloadmin: chat.modoadmin,
-      nsfw: chat.nsfw,
-      detect: chat.detect,
-      antilink: chat.antilink,
-      antifake: chat.antifake,
-      antibot: chat.antibot,
-      antibot2: chat.antibot2,
-      autosticker: chat.autosticker,
-      antiprivado: bot.antiprivado,
-      jadibotmd: bot.jadibotmd
-    }
-
-    let texto = '*⚙️ Lista de funciones y su estado:*\n\n'
-    for (const [k, v] of Object.entries(funciones)) {
-      texto += `> ${k.padEnd(14)} ${v ? '✓ Activado' : '✗ Desactivado'}\n`
-    }
-    texto += `\nUsa: \`${usedPrefix}on\` *<función>* o \`${usedPrefix}off\` *<función>*`
-
-    return conn.reply(m.chat, texto.trim(), m)
+    type = input
   }
 
-  if (!type) return conn.reply(m.chat, `${e} Especifica una función. Ejemplo:\n${usedPrefix}on autosticker`, m)
-
-  // Funciones por grupo
-  const groupFunctions = [
-    'welcome', 'autoaceptar', 'modoadmin', 'nsfw',
-    'detect', 'antilink', 'antifake', 'antibot', 'antibot2', 'autosticker'
-  ]
-
-  if (groupFunctions.includes(type)) {
-    if (!m.isGroup) {
-      global.dfail('group', m, conn)
-      throw false
-    }
-    if (!(isAdmin || isOwner)) {
-      global.dfail('admin', m, conn)
-      throw false
-    }
-    chat[type] = isEnable
+  const options = {
+    welcome: { name: 'welcome', group: true },
+    autoaceptar: { name: 'autoaceptar', group: true },
+    soloadmin: { name: 'modoadmin', group: true },
+    modohorny: { name: 'nsfw', group: true },
+    detect: { name: 'detect', group: true },
+    antilink: { name: 'antiLink', group: true },
+    antifake: { name: 'antifake', group: true },
+    antibot: { name: 'antiBot', group: true },
+    antibot2: { name: 'antiBot2', group: true },
+    autosticker: { name: 'autosticker', group: true },
+    antiprivado: { name: 'antiPrivate', global: true },
+    jadibotmd: { name: 'jadibotmd', global: true }
   }
 
-  // Funciones globales
-  const globalFunctions = ['antiprivado', 'jadibotmd']
-  if (globalFunctions.includes(type)) {
-    isAll = true
-    if (!isOwner) {
-      global.dfail('rowner', m, conn)
-      throw false
-    }
-    bot[type] = isEnable
+  if (!type || !(type in options)) {
+    // Mostrar lista de opciones con su estado actual
+    let list = Object.keys(options).map(k => {
+      const opt = options[k]
+      const val = opt.global ? bot[opt.name] : chat[opt.name]
+      return `> *${k}*       ${val ? '✓ Activado' : '✗ Desactivado'}`
+    }).join('\n')
+    return conn.reply(m.chat, `${e} *Opciones disponibles:*\n\n${list}\n\nEjemplo de uso:\n*.antilink on*\n*.on welcome*`, m)
   }
 
-  conn.reply(m.chat, `✅ La función *${type}* fue *${isEnable ? 'activada' : 'desactivada'}* ${isAll ? 'a nivel global' : 'para este chat'}`, m)
+  const opt = options[type]
+  const current = opt.global ? bot[opt.name] : chat[opt.name]
+
+  if (isEnable === null) {
+    return conn.reply(m.chat, `✅ *${type}* está actualmente ${current ? '✓ Activado' : '✗ Desactivado'}`, m)
+  }
+
+  if (opt.group && m.isGroup && !(isAdmin || isOwner)) {
+    global.dfail('admin', m, conn)
+    return
+  }
+
+  if (opt.global && !isOwner) {
+    global.dfail('rowner', m, conn)
+    return
+  }
+
+  if (opt.global) {
+    bot[opt.name] = isEnable
+  } else {
+    chat[opt.name] = isEnable
+  }
+
+  conn.reply(m.chat, `✅ La función *${type}* fue *${isEnable ? 'activada ✓' : 'desactivada ✗'}* ${opt.global ? 'para el bot' : 'en este chat'}`, m)
 }
 
-handler.help = ['on <función>', 'off <función>']
-handler.tags = ['nable']
-handler.command = ['on', 'off', 'enable', 'disable']
+handler.help = ['on', 'off', 'welcome', 'antilink', 'autosticker', 'modohorny', 'antibot', 'antibot2', 'antifake', 'autoaceptar', 'soloadmin', 'detect', 'jadibotmd', 'antiprivado']
+handler.tags = ['group', 'admin']
+handler.command = /^((en|dis)?able|on|off|autosticker|antilink|antibot2?|antifake|autoaceptar|soloadmin|modohorny|nsfw|welcome|detect|jadibotmd|antiprivado)$/i
 
 export default handler
