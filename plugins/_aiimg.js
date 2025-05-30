@@ -32,7 +32,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const requestId = createRes?.data?.request_id
     if (!requestId) throw new Error('No se pudo obtener request_id de la API')
 
-    // Esperar resultado de la imagen
+    // Esperar resultado de la imagenn
     let retries = 0
     let result = null
 
