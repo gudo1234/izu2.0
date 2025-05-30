@@ -112,7 +112,7 @@ global.icono = [
 'https://files.catbox.moe/9tkqgt.jpg',
 'https://files.catbox.moe/3s7htp.jpg',
 'https://files.catbox.moe/kkcj69.jpg',
-'https://files.catbox.moe/mkjnzl.jpg',
+'https://files.catbox.moe/5ztwwp.jpg',
 'https://files.catbox.moe/mkjnzl.jpg',
 'https://files.catbox.moe/zxwp9c.jpg',
 'https://files.catbox.moe/p3fssk.jpg',
@@ -121,7 +121,8 @@ global.icono = [
 'https://files.catbox.moe/f28poz.jpg',
 'https://files.catbox.moe/dpx2s1.jpg',
 'https://files.catbox.moe/wg1vbo.jpg',
-'https://files.catbox.moe/grk81s.jpg'].getRandom()
+'https://files.catbox.moe/grk81s.jpg',
+'https://files.catbox.moe/s7j9j7.jpg'].getRandom()
 
 const thumbnail = await (await fetch(icono)).buffer()
 global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: wm, body: textbot, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: redes, sourceUrl: redes, thumbnail, mediaType: 1, renderLargerThumbnail: false }, }, }}
