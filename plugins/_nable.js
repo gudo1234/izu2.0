@@ -8,7 +8,6 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
   let isAll = false
   let isEnable
 
-  // Permitir .on función o .función on (ambos)
   if (['on', 'enable'].includes(args[0])) {
     isEnable = true
     type = args[1]?.toLowerCase()
@@ -22,11 +21,10 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     isEnable = false
     type = args[0]?.toLowerCase()
   } else {
-    // Mostrar lista de funciones y estado
     const funciones = {
       welcome: chat.welcome,
       autoaceptar: chat.autoaceptar,
-      soloadmin: chat.modoadmin,
+      modoadmin: chat.modoadmin,
       nsfw: chat.nsfw,
       detect: chat.detect,
       antilink: chat.antilink,
@@ -42,14 +40,15 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     for (const [k, v] of Object.entries(funciones)) {
       texto += `> ${k.padEnd(14)} ${v ? '✓ Activado' : '✗ Desactivado'}\n`
     }
-    texto += `\nUsa: \`${usedPrefix}on\` *<función>* o \`${usedPrefix}off\` *<función>*`
+    texto += `\nUsa: *${usedPrefix}on <función>* o *${usedPrefix}off <función>*`
 
     return conn.reply(m.chat, texto.trim(), m)
   }
 
-  if (!type) return conn.reply(m.chat, `${e} Especifica una función. Ejemplo:\n${usedPrefix}on autosticker`, m)
+  if (!type) return conn.reply(m.chat, `⚠️ Especifica una función. Ejemplo:\n${usedPrefix}on autosticker`, m)
 
-  // Funciones por grupo
+  if (type === 'soloadmin') type = 'modoadmin'
+
   const groupFunctions = [
     'welcome', 'autoaceptar', 'modoadmin', 'nsfw',
     'detect', 'antilink', 'antifake', 'antibot', 'antibot2', 'autosticker'
@@ -67,7 +66,6 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
     chat[type] = isEnable
   }
 
-  // Funciones globales
   const globalFunctions = ['antiprivado', 'jadibotmd']
   if (globalFunctions.includes(type)) {
     isAll = true
