@@ -68,7 +68,7 @@ handler.group = true
 
 export default handler*/
 
-import axios from 'axios'
+/*import axios from 'axios'
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text?.trim()) {
@@ -161,6 +161,44 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 }
 
 handler.command = ['aiimg']
+handler.group = true
+
+export default handler*/
+
+import axios from 'axios'
+
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text?.trim()) {
+    return conn.reply(m.chat, `🚫 Genera una imagen con la IA.\n*Ejemplo:* \`${usedPrefix + command}\` loli cyberpunk`, m)
+  }
+
+  m.react('🕒')
+
+  try {
+    const prompt = text.trim()
+    
+    const { data } = await axios.post('https://gpt1image.exomlapi.com/v1/images/generations', {
+      prompt,
+      size: '512x768',
+      model: 'midjourney',
+      n: 1
+    }, {
+      headers: { 'Content-Type': 'application/json' }
+    })
+
+    const imageUrl = data?.data?.[0]?.url
+    if (!imageUrl) throw new Error('No se pudo generar la imagen')
+
+    m.react('✅')
+    await conn.sendFile(m.chat, imageUrl, "Thumbnail.jpg", `*Prompt:* ${prompt}`, m, null, rcanal)
+
+  } catch (err) {
+    console.error('[❌ Error en Exoml API]', err)
+    m.reply('Ocurrió un error al generar la imagen. Intenta de nuevo más tarde.')
+  }
+}
+
+handler.command = ['aiimg', 'aim']
 handler.group = true
 
 export default handler
