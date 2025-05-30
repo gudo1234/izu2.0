@@ -10,155 +10,49 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, i
   let isEnable = chat[type] || false
 
   if (args[0] === 'on' || args[0] === 'enable') {
-    isEnable = true;
-} else if (args[0] === 'off' || args[0] === 'disable') {
+    isEnable = true
+  } else if (args[0] === 'off' || args[0] === 'disable') {
     isEnable = false
-} else {
+  } else {
     const estado = isEnable ? '✓ Activado' : '✗ Desactivado'
-    return conn.reply(m.chat, `*${e}Ejemplo de uso:*\n.antilink on *para activar*\n.antilink off *para desactivar*\n\n> ʟɪsᴛᴀ ᴅᴇ ᴏᴘᴄɪᴏɴᴇ\nwelcome
-autoaceptar
-soloadmin
-nsfw
-modohorny
-detect
-antilink
-antifake
-antibot
-antibot2`, m)
+    return conn.reply(m.chat, `*${estado}*\n\n*Ejemplo de uso:*\n${usedPrefix + command} autosticker on\n${usedPrefix + command} autosticker off\n\n> Opciones disponibles:\nwelcome\nautoaceptar\nsoloadmin\nnsfw\nmodohorny\ndetect\nantilink\nantifake\nantibot\nantibot2\nautosticker`, m)
   }
 
   switch (type) {
     case 'welcome':
     case 'bienvenida':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
+    case 'autoaceptar':
+    case 'aceptarauto':
+    case 'autorechazar':
+    case 'rechazarauto':
+    case 'autoresponder':
+    case 'autorespond':
+    case 'modoadmin':
+    case 'soloadmin':
+    case 'reaction':
+    case 'reaccion':
+    case 'nsfw':
+    case 'modohorny':
+    case 'detect':
+    case 'avisos':
+    case 'antilink':
+    case 'antifake':
+    case 'antibot':
+    case 'antibots':
+    case 'antisubbots':
+    case 'antibot2':
+    case 'autosticker': // ✅ NUEVO
+      if (m.isGroup && !(isAdmin || isOwner)) {
         global.dfail('admin', m, conn)
         throw false
       }
-      chat.welcome = isEnable
-      break  
+      chat[type] = isEnable
+      break
 
     case 'antiprivado':
     case 'antiprivate':
-      isAll = true
-      if (!isOwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      bot.antiPrivate = isEnable
-      break
-
     case 'restrict':
     case 'restringir':
-      isAll = true
-      if (!isOwner) {
-        global.dfail('rowner', m, conn)
-        throw false
-      }
-      bot.restrict = isEnable
-      break
-
-    case 'antibot':
-    case 'antibots':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antiBot = isEnable
-      break
-
-    case 'autoaceptar':
-    case 'aceptarauto':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
-        global.dfail('admin', m, conn)
-        throw false
-      }
-      chat.autoAceptar = isEnable
-      break
-
-    case 'autorechazar':
-    case 'rechazarauto':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
-        global.dfail('admin', m, conn)
-        throw false
-      }
-      chat.autoRechazar = isEnable
-      break
-
-    case 'autoresponder':
-    case 'autorespond':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.autoresponder = isEnable
-      break
-
-    case 'antisubbots':
-    case 'antibot2':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antiBot2 = isEnable
-      break
-
-    case 'modoadmin':
-    case 'soloadmin':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn);
-          throw false;
-        }
-      }
-      chat.modoadmin = isEnable;
-      break;
-
-    case 'reaction':
-    case 'reaccion':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
-        global.dfail('admin', m, conn)
-        throw false
-      }
-      chat.reaction = isEnable
-      break
-      
-    case 'nsfw':
-    case 'modohorny':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.nsfw = isEnable
-      break
-
     case 'jadibotmd':
     case 'modejadibot':
       isAll = true
@@ -166,51 +60,30 @@ antibot2`, m)
         global.dfail('rowner', m, conn)
         throw false
       }
-      bot.jadibotmd = isEnable
-      break
-
-    case 'detect':
-    case 'avisos':
-      if (!m.isGroup) {
-        if (!isOwner) {
-          global.dfail('group', m, conn)
-          throw false
-        }
-      } else if (!isAdmin) {
-        global.dfail('admin', m, conn)
-        throw false
-      }
-      chat.detect = isEnable
-      break
-
-    case 'antilink':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antiLink = isEnable
-      break
-
-      case 'antifake':
-      if (m.isGroup) {
-        if (!(isAdmin || isOwner)) {
-          global.dfail('admin', m, conn)
-          throw false
-        }
-      }
-      chat.antifake = isEnable
+      bot[type] = isEnable
       break
   }
-  
-  chat[type] = isEnable;
-  
-  conn.reply(m.chat, `${e} La función *${type}* se *${isEnable ? 'activó' : 'desactivó'}* ${isAll ? 'para este Bot' : isUser ? '' : 'para este chat'}`, m);
-};
 
-handler.help = ['welcome', 'bienvenida', 'antiprivado', 'antiprivate', 'restrict', 'restringir', 'autolevelup', 'autonivel', 'antibot', 'antibots', 'autoaceptar', 'aceptarauto', 'autorechazar', 'rechazarauto', 'autoresponder', 'autorespond', 'antisubbots', 'antibot2', 'modoadmin', 'soloadmin', 'reaction', 'reaccion', 'nsfw', 'modohorny', 'antispam', 'jadibotmd', 'modejadibot', 'subbots', 'detect', 'avisos', 'antilink']
-handler.tags = ['nable'];
-handler.command = ['on', 'off', 'welcome', 'bienvenida', 'antiprivado', 'antiprivate', 'restrict', 'restringir', 'autolevelup', 'autonivel', 'antibot', 'antibots', 'autoaceptar', 'aceptarauto', 'autorechazar', 'rechazarauto', 'autoresponder', 'autorespond', 'antisubbots', 'antibot2', 'modoadmin', 'soloadmin', 'reaction', 'reaccion', 'nsfw', 'modohorny', 'antispam', 'jadibotmd', 'modejadibot', 'subbots', 'detect', 'avisos', 'antilink', 'antifake']
+  conn.reply(m.chat, `✅ La función *${type}* se *${isEnable ? 'activó' : 'desactivó'}* ${isAll ? 'globalmente' : 'en este chat'}`, m)
+}
+
+handler.help = [
+  'welcome', 'bienvenida', 'antiprivado', 'antiprivate', 'restrict', 'restringir',
+  'autolevelup', 'autonivel', 'antibot', 'antibots', 'autoaceptar', 'aceptarauto',
+  'autorechazar', 'rechazarauto', 'autoresponder', 'autorespond', 'antisubbots',
+  'antibot2', 'modoadmin', 'soloadmin', 'reaction', 'reaccion', 'nsfw', 'modohorny',
+  'antispam', 'jadibotmd', 'modejadibot', 'subbots', 'detect', 'avisos', 'antilink',
+  'antifake', 'autosticker' // ✅ NUEVO
+]
+
+handler.tags = ['nable']
+handler.command = [
+  'on', 'off', 'welcome', 'bienvenida', 'antiprivado', 'antiprivate', 'restrict',
+  'restringir', 'autolevelup', 'autonivel', 'antibot', 'antibots', 'autoaceptar',
+  'aceptarauto', 'autorechazar', 'rechazarauto', 'autoresponder', 'autorespond',
+  'antisubbots', 'antibot2', 'modoadmin', 'soloadmin', 'reaction', 'reaccion',
+  'nsfw', 'modohorny', 'antispam', 'jadibotmd', 'modejadibot', 'subbots', 'detect',
+  'avisos', 'antilink', 'antifake', 'autosticker' // ✅ NUEVO
+]
 
 export default handler
