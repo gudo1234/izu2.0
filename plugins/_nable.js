@@ -41,17 +41,33 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     valor = false
   }
 
-  // Caso: .<opción> solo para mostrar estado
+  // Si no hay opción válida, mostrar lista de estados
+  const mostrarLista = () => {
+    const estados = Object.entries(opcionesValidas)
+      .map(([opt, scope]) => {
+        const estado = scope === 'bot' ? bot[opt] : chat[opt]
+        return `• *${opt}* ${estado ? '✅' : '❌'}`
+      })
+      .join('\n')
+    return conn.reply(m.chat, `📋 *Opciones disponibles:*\n\n${estados}\n\nUsa:\n${usedPrefix}on <opción>\n${usedPrefix}off <opción>\no\n${usedPrefix}<opción> on / off`, m)
+  }
+
+  // .on / .off sin argumento → mostrar lista
+  if ((type === 'on' || type === 'off' || type === 'enable' || type === 'disable') && !opcion) {
+    return mostrarLista()
+  }
+
+  // .<opción> → mostrar estado
   if (valor === null) {
     if (!(type in opcionesValidas)) {
-      return conn.reply(m.chat, `❌ Opción no reconocida.\nOpciones válidas:\n${Object.keys(opcionesValidas).join(', ')}`, m)
+      return mostrarLista()
     }
 
     const estado = opcionesValidas[type] === 'bot' ? bot[type] : chat[type]
-    return conn.reply(m.chat, `📢 La función *${type}* está actualmente: ${estado ? '✅ ACTIVADA' : '✖️ DESACTIVADA'}.\n\nUsa:\n${usedPrefix}${type} on – para activar\n${usedPrefix}${type} off – para desactivar`, m)
+    return conn.reply(m.chat, `📢 La función *${type}* está actualmente: ${estado ? '✅ ACTIVADA' : '❌ DESACTIVADA'}.\n\nUsa:\n${usedPrefix}${type} on – para activar\n${usedPrefix}${type} off – para desactivar`, m)
   }
 
-  // Verificación de permisos y activación/desactivación
+  // Activar / desactivar según tipo y permisos
   const scope = opcionesValidas[type]
   if (scope === 'chat') {
     if (m.isGroup && !(isAdmin || isOwner)) return global.dfail('admin', m, conn)
@@ -67,7 +83,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
 handler.help = ['on <opción>', 'off <opción>', '<opción> (ver estado)', '<opción> on/off']
 handler.tags = ['nable']
 handler.command = [
-  'on', 'off',
+  'on', 'off', 'enable', 'disable',
   'welcome', 'bienvenida',
   'autoaceptar', 'soloadmin',
   'nsfw', 'modohorny',
