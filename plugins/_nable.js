@@ -44,7 +44,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
         return `> *${opt}* ${estado ? 'Activo ✓' : 'Desactivado ✗'}`
       })
       .join('\n')
-    return conn.reply(m.chat, `⚙️ *Opciones disponibles:*\n\n${e} _Ejemplo de uso:_\n${usedPrefix}on <opción>\n${usedPrefix}off <opción>\no\n${usedPrefix}<opción> on / off\n\n${estados}`, m)
+    return conn.reply(m.chat, `⚙️ *Lista de funciones y su estado:*\n${estados}\n\n${e} _Ejemplo de uso:_\n\`${usedPrefix}on\` welcome\n\`${usedPrefix}off\` autosticker`, m)
   }
 
   if ((type === 'on' || type === 'off' || type === 'enable' || type === 'disable') && !opcion) {
