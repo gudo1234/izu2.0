@@ -1,38 +1,40 @@
-import { downloadContentFromMessage } from '@whiskeysockets/baileys'
-
 let handler = m => m
 
-handler.all = async function (m) {
+handler.all = async function (m, { conn }) {
+  let msg = m.msg || m
+
+  // Solo continuar si es viewOnce y contiene un mensaje multimedia
+  if (!msg || !msg.message || !msg.message.viewOnceMessageV2) return
+
   try {
-    // Verifica si el mensaje es de visualización única
-    let vmsg = m.message?.viewOnceMessage?.message
-    if (!vmsg) return
+    let viewOnce = msg.message.viewOnceMessageV2.message
+    let type = Object.keys(viewOnce || {})[0]
+    let media = viewOnce[type]
+    if (!media) return
 
-    // Obtiene el tipo: imageMessage, videoMessage, audioMessage
-    let type = Object.keys(vmsg)[0]
-    let media = vmsg[type]
-
-    // Descarga el contenido
-    const stream = await downloadContentFromMessage(media, type.replace('Message', ''))
-    let buffer = Buffer.concat([])
+    let stream = await downloadContentFromMessage(media, type.replace('Message', ''))
+    let buffer = Buffer.from([])
     for await (const chunk of stream) {
       buffer = Buffer.concat([buffer, chunk])
     }
 
-    // Reenvía según el tipo
-    if (type === 'imageMessage') {
-      await this.sendFile(m.chat, buffer, 'foto.jpg', media.caption || '', m)
-    } else if (type === 'videoMessage') {
+    if (/imageMessage/.test(type)) {
+      await this.sendFile(m.chat, buffer, 'image.jpg', media.caption || '', m)
+    } else if (/videoMessage/.test(type)) {
       await this.sendFile(m.chat, buffer, 'video.mp4', media.caption || '', m)
-    } else if (type === 'audioMessage') {
-      await this.sendFile(m.chat, buffer, '', null, m, true, {
+    } else if (/audioMessage/.test(type)) {
+      await this.sendFile(m.chat, buffer, 'audio.mp3', null, m, true, {
         type: 'audioMessage',
         ptt: true
       })
     }
   } catch (e) {
-    console.error('[❌ ERROR auto-viewOnce]', e)
+    console.error('[ERROR viewOnce auto]', e)
   }
+
+  return !0
 }
 
 export default handler
+
+import { downloadContentFromMessage } from '@whiskeysockets/baileys'
