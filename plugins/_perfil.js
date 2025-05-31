@@ -78,6 +78,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Zona horaria:* ${business.business_hours?.timezone || '-'}\n`
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
+  m.react('🔥')
   await conn.sendMessage(m.chat, {
     image: { url: img },
     caption,
