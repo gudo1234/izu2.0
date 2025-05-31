@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
-import { sticker } from '../lib/sticker2.js';
+import { sticker } from '../lib/sticker.js';
 import uploadFile from '../lib/uploadFile.js';
 import uploadImage from '../lib/uploadImage.js';
 import { webp2png } from '../lib/webp2mp4.js';
@@ -79,13 +79,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const ffmpeg = spawn('ffmpeg', [
   '-y',
   '-i', tempInputPath,
-  '-vf', 'scale=512:512:force_original_aspect_ratio=decrease,fps=15',
+  '-vf', "scale='min(512,iw)':min'(512,ih)':force_original_aspect_ratio=decrease,fps=15,pad=512:512:-1:-1:color=white@0.0",
   '-loop', '0',
   '-ss', '0',
   '-t', '8',
   '-an',
   '-vsync', '0',
-  // '-s', '512:512', // Elimina esta línea
   '-preset', 'default',
   '-f', 'webp',
   tempOutputPath
