@@ -79,13 +79,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
         const ffmpeg = spawn('ffmpeg', [
   '-y',
   '-i', tempInputPath,
-  '-vf', 'scale=512:512:force_original_aspect_ratio=decrease,fps=15',
+  '-vf', "scale='min(512,iw)':min'(512,ih)':force_original_aspect_ratio=decrease,fps=15,pad=512:512:-1:-1:color=white@0.0",
   '-loop', '0',
   '-ss', '0',
   '-t', '8',
   '-an',
   '-vsync', '0',
-  // '-s', '512:512', // Elimina esta línea
   '-preset', 'default',
   '-f', 'webp',
   tempOutputPath
