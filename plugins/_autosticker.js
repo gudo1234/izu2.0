@@ -18,14 +18,14 @@ stiker = await sticker(img, false, packname, author)
 } else if (/video/g.test(mime)) {
 let img = await q.download()
 if (!img) return
-stiker = await sticker(img, false, packname, author)
+stiker = await sticker(img, false, `${m.pushName}`)
 } else if (m.text.split(/\n| /i)[0]) {
 if (isUrl(m.text)) stiker = await sticker(false, m.text.split(/\n| /i)[0], packname, author)
 else return
 }
 if (stiker) {
 //await this.sendFile(m.chat, stiker, null, { asSticker: true })
-await conn.sendMessage(m.chat, { sticker: stiker }, { quoted: m })
+await conn.sendMessage(m.chat, { sticker: stiker }, { quoted: null })
 }}
 return !0
 
