@@ -1,6 +1,6 @@
 let handler = async (m, { conn }) => {
   let vn = './media/prueba.mp3' //canwe kis forever
-  let vn2 = './media/prueba2.mp3'
+  let vn2 = './media/prueba2.mp3' //death bed
   let vn3 = './media/snow.mp3'
   let vn4 = './media/sad.mp3'
   let vn5 = './media/cardigansad.mp3'
