@@ -18,17 +18,19 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const selectedFlag = args.find(arg => Object.keys(shapeFlags).includes(arg));
   const selectedShape = shapeFlags[selectedFlag] || null;
 
-  let q = m.quoted ? m.quoted : m;
-  let mime = (q.msg || q).mimetype || q.mediaType || '';
-  let img;
+  let q = m.quoted && m.quoted.mimetype ? m.quoted : m;
+  let mime = q?.mimetype || q?.mediaType || '';
+  let isVideo = /video|gif|mp4/.test(mime) || m.mtype === 'videoMessage';
 
-  if (/webp|image|video|gif/.test(mime)) {
-    if (/video/.test(mime) && (q.msg || q).seconds > 8)
-      return m.reply('¡El video no puede durar más de 8 segundos!');
-    img = await q.download?.();
+  // Intenta descargar el archivo
+  let img;
+  if (q?.download) {
+    if (isVideo && (q.msg || q).seconds > 8) return m.reply('¡El video no puede durar más de 8 segundos!');
+    img = await q.download();
   } else if (args[0] && isUrl(args[0])) {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
+    isVideo = false;
   } else {
     return conn.reply(m.chat, mensajeForma(usedPrefix, command), m);
   }
@@ -36,9 +38,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   m.react('⚡');
 
   try {
-    const isVideo = /video|mp4|gif/.test(mime);
-
-    // Si es video o gif, no aplicar forma, se pasa tal cual
+    // Si es video/gif → no aplicar forma
     if (isVideo) {
       const resultado = await sticker(img, true, m.pushName);
       if (resultado) {
@@ -74,7 +74,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       bufferProcesado = img;
     }
 
-    // Generar sticker
     const resultado = await sticker(bufferProcesado, false, m.pushName);
     if (resultado) {
       return conn.sendFile(m.chat, resultado, 'sticker.webp', '', m, true, {
