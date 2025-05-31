@@ -82,7 +82,6 @@
 "qrcode-terminal": "^0.12.0",
 "sanzy-spotifydl": "*",
 "readline": "^1.3.0",
-"puppeteer": "*",
 "similarity": "^1.2.1",
 "g-i-s": "^2.1.6",
 "socket.io": "^4.5.2",
