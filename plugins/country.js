@@ -2356,6 +2356,8 @@ let flags = [
 ];
 
 export async function before(m, { conn, args, usedPrefix, command }) {
+  let chat = db.data.chats[m.chat];
+if (!chat.autoband || !m.isGroup) return !0;
     if (!m.message) return !0;
     if (!userMessageCount[m.chat]) userMessageCount[m.chat] = { count: 0, currentFlag: null, questionMessage: null, timestamp: null };
 
