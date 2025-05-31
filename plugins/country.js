@@ -1,6 +1,6 @@
 import moment from 'moment-timezone';
 let userMessageCount = {};
-if (chat.autoband && m.isGroup) {
+//if (chat.autoband && m.isGroup) {
 let flags = [
   {
     "name": "Afganistán",
@@ -2412,4 +2412,4 @@ export async function before(m, { conn, args, usedPrefix, command }) {
         await conn.reply(m.chat, `*¡Respuesta Incorrecta!*\n> vuelve a intentar\n🧩 _*Pista:* Su código de área es *${userMessageCount[m.chat].currentFlag3}* ${userMessageCount[m.chat].currentFlag2}_ \n⏳ *Tiempo restante:* _${minutesRemaining} minutos y ${secondsRemaining} segundos._`, m);
     }
 }
-}
+//}
