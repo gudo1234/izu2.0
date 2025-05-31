@@ -2,9 +2,6 @@ import sharp from 'sharp';
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
 import { sticker } from '../lib/sticker.js';
-import uploadFile from '../lib/uploadFile.js';
-import uploadImage from '../lib/uploadImage.js';
-import { webp2png } from '../lib/webp2mp4.js';
 import fs from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
@@ -28,13 +25,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   if (/webp|image|video|gif/g.test(mime)) {
     if (/video/g.test(mime) && (q.msg || q).seconds > 8)
-      return m.reply('¡El video no puede durar más de 8 segundos!');
+      return conn.sendMessage(m.chat, { text: '¡El video no puede durar más de 8 segundos!' }, { quoted: m });
     img = await q.download?.();
   } else if (args[0] && isUrl(args[0])) {
     img = await fetch(args[0]).then(res => res.buffer());
     mime = 'image/url';
   } else {
-    return conn.reply(m.chat, `${e} _Responde a una *imagen, video o GIF* para crear un sticker. También puedes agregar una forma personalizada con una opción._
+    return conn.sendMessage(m.chat, {
+      text: `${e} _Responde a una *imagen, video o GIF* para crear un sticker. También puedes agregar una forma personalizada con una opción._
 
 ┌🎨 \`Formas disponibles:\`
 │
@@ -64,32 +62,24 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ └─ -v → Vertical
 └──────────
 
-◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``, m);
+◈ *Ejemplo:* responde a una imagen con: \`${usedPrefix + command} -a\``
+    }, { quoted: m });
   }
 
   m.react('🧩');
 
   try {
-    // VIDEO o GIF sin forma personalizada => sticker animado
     if (/video|mp4|gif/.test(mime) && !selectedShape) {
       const tempInputPath = path.join(tmpdir(), `${randomUUID()}.mp4`);
       const tempOutputPath = path.join(tmpdir(), `${randomUUID()}.webp`);
       await fs.writeFile(tempInputPath, img);
       await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', [
-  '-y',
-  '-i', tempInputPath,
-  '-vf', 'scale=512:512:force_original_aspect_ratio=decrease,fps=15',
-  '-loop', '0',
-  '-ss', '0',
-  '-t', '8',
-  '-an',
-  '-vsync', '0',
-  // '-s', '512:512', // Elimina esta línea
-  '-preset', 'default',
-  '-f', 'webp',
-  tempOutputPath
-]);
+          '-y', '-i', tempInputPath,
+          '-vf', "scale='min(512,iw)':min'(512,ih)':force_original_aspect_ratio=decrease,fps=15,pad=512:512:-1:-1:color=white@0.0",
+          '-loop', '0', '-ss', '0', '-t', '8',
+          '-an', '-vsync', '0', '-preset', 'default', '-f', 'webp', tempOutputPath
+        ]);
         ffmpeg.on('close', resolve);
         ffmpeg.on('error', reject);
       });
@@ -98,14 +88,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       await fs.unlink(tempInputPath).catch(() => {});
       await fs.unlink(tempOutputPath).catch(() => {});
 
-      return await conn.sendFile(m.chat, animatedSticker, 'sticker.webp', '', m, true, {
-        asSticker: true
-      });
+      return await conn.sendMessage(m.chat, {
+        sticker: animatedSticker
+      }, { quoted: m });
     }
 
-    // FRAME ESTÁTICO si es imagen o video con forma
     let frameBuffer = img;
-
     if (/video|mp4|gif/.test(mime)) {
       const tempInputPath = path.join(tmpdir(), `${randomUUID()}.mp4`);
       const tempOutputPath = path.join(tmpdir(), `${randomUUID()}.png`);
@@ -120,7 +108,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       await fs.unlink(tempOutputPath).catch(() => {});
     }
 
-    // Transformaciones según forma o flip
     let processed;
     if (selectedShape === 'flip-horizontal') {
       processed = await sharp(frameBuffer)
@@ -152,7 +139,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     let stiker = await sticker(processed, false, `${m.pushName}`);
 
     if (stiker) {
-      return conn.sendFile(m.chat, stiker, 'sticker.webp', '', m, true, {
+      return conn.sendMessage(m.chat, {
+        sticker: stiker,
         contextInfo: {
           forwardingScore: 200,
           isForwarded: false,
@@ -166,11 +154,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
             thumbnailUrl: redes
           }
         }
-      });
+      }, { quoted: m });
     }
   } catch (e) {
     console.error(e);
-    return conn.reply(m.chat, `${e} Por favor, envía una imagen o video para hacer un sticker.`, m);
+    return conn.sendMessage(m.chat, {
+      text: `${e} Por favor, envía una imagen o video para hacer un sticker.`
+    }, { quoted: m });
   }
 };
 
@@ -217,4 +207,4 @@ function getSVGMask(shape, size) {
 
 function isUrl(text) {
   return /^https?:\/\/.*\.(jpg|jpeg|png|gif|webp|mp4)$/i.test(text);
-  }
+}
