@@ -25,7 +25,7 @@ else return
 }
 if (stiker) {
 //await this.sendFile(m.chat, stiker, null, { asSticker: true })
-await conn.sendMessage(m.chat, { sticker: stiker }, { quoted: null })
+await conn.sendMessage(m.chat, { sticker: stiker }, { quoted: m })
 }}
 return !0
 
