@@ -2362,7 +2362,7 @@ export async function before(m, { conn, args, usedPrefix, command }) {
 
     userMessageCount[m.chat].count += 1;
 
-    if (userMessageCount[m.chat].count % 100 === 0) {
+    if (userMessageCount[m.chat].count % 3 === 0) {
         const randomFlag = flags[Math.floor(Math.random() * flags.length)];
         userMessageCount[m.chat].currentFlag = randomFlag.name; 
         userMessageCount[m.chat].currentFlag2 = randomFlag.emoji; 
