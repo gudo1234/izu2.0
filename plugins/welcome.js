@@ -14,6 +14,11 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let vn7 = './media/bloody.mp3'; //welcome
   let vn8 = './media/sad.mp3'; // bye
   let vn9 = './media/cardigansad.mp3' // bye
+  let vn10 = './media/iwas.mp3'
+  let vn11 = './media/juntos.mp3'
+  let vn12 = './media/space.mp3'
+  let vn13 = './media/stellar.mp3'
+  let vn14 = './media/theb.mp3'
   let or = ['stiker', 'audio', 'texto', 'gifPlayback'];
   let media = or[Math.floor(Math.random() * 4)];
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
@@ -155,7 +160,7 @@ await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
 }
 
 if (media === 'audio') {
-await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6, vn8, vn9].getRandom() }, 
+await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6, vn8, vn9, vn10, vn11, vn12, vn13, vn14].getRandom() }, 
     contextInfo: { forwardedNewsletterMessageInfo: { 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
