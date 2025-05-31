@@ -1,6 +1,8 @@
 import moment from 'moment-timezone';
 let userMessageCount = {};
-//if (chat.autoband && m.isGroup) {
+let chat = db.data.chats[m.chat]
+//let user = db.data.users[m.sender]
+if (chat.autosticker && m.isGroup) {
 let flags = [
   {
     "name": "Afganistán",
@@ -2362,7 +2364,7 @@ export async function before(m, { conn, args, usedPrefix, command }) {
 
     userMessageCount[m.chat].count += 1;
 
-    if (userMessageCount[m.chat].count % 100 === 0) {
+    if (userMessageCount[m.chat].count % 3 === 0) {
         const randomFlag = flags[Math.floor(Math.random() * flags.length)];
         userMessageCount[m.chat].currentFlag = randomFlag.name; 
         userMessageCount[m.chat].currentFlag2 = randomFlag.emoji; 
@@ -2412,4 +2414,4 @@ export async function before(m, { conn, args, usedPrefix, command }) {
         await conn.reply(m.chat, `*¡Respuesta Incorrecta!*\n> vuelve a intentar\n🧩 _*Pista:* Su código de área es *${userMessageCount[m.chat].currentFlag3}* ${userMessageCount[m.chat].currentFlag2}_ \n⏳ *Tiempo restante:* _${minutesRemaining} minutos y ${secondsRemaining} segundos._`, m);
     }
 }
-//}
+}
