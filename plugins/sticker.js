@@ -33,7 +33,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     return conn.reply(m.chat, mensajeForma(usedPrefix, command), m);
   }
 
-  m.react('🧩');
+  m.react('⚡');
 
   try {
     const isAnimated = /video|mp4|gif/.test(mime) && !selectedShape;
