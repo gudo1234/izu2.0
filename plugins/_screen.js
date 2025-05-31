@@ -1,35 +1,34 @@
-import fs from 'fs'
-import robot from 'robotjs'
-import Jimp from 'jimp'
+import puppeteer from 'puppeteer'
 
 let handler = async (m, { conn }) => {
   try {
-    m.react('🖥️')
+    m.react('📸')
+    let browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    })
 
-    // Captura pantalla completa
-    const screenSize = robot.getScreenSize()
-    const img = robot.screen.capture(0, 0, screenSize.width, screenSize.height)
+    let page = await browser.newPage()
+    
+    // Dirección de WhatsApp Web (opcional si ya tienes sesión)
+    await page.goto('https://web.whatsapp.com', { waitUntil: 'networkidle2' })
 
-    // Crea una imagen compatible usando Jimp
-    const jimpImage = new Jimp(img.width, img.height)
+    // Espera a que cargue lista de chats
+    await page.waitForSelector('._3m_Xw') // Clase típica de chat list
+    await page.setViewport({ width: 1280, height: 720 })
 
-    let pos = 0
-    for (let y = 0; y < img.height; y++) {
-      for (let x = 0; x < img.width; x++) {
-        const i = (y * img.width + x) * 4
-        const color = img.image.readUInt32LE(i)
-        jimpImage.setPixelColor(color, x, y)
-      }
-    }
+    // Toma captura de la vista de chats
+    const buffer = await page.screenshot({ fullPage: false })
 
-    const buffer = await jimpImage.getBufferAsync(Jimp.MIME_PNG)
-    await conn.sendFile(m.chat, buffer, 'screenshot.png', '🖼 Captura de pantalla', m)
+    await browser.close()
+
+    await conn.sendFile(m.chat, buffer, 'screenshot.jpg', '🖼 Captura de los chats recientes', m)
   } catch (e) {
     console.error(e)
-    m.reply(`${e} Error al capturar la pantalla. Asegúrate de que el entorno tiene interfaz gráfica.`)
+    m.reply(`${e} Ocurrió un error al capturar la pantalla.`)
   }
 }
 
 handler.command = ['screen']
-handler.owner = true
+handler.owner = true // Solo el dueño puede usarlo
 export default handler
