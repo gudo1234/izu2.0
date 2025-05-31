@@ -1,14 +1,33 @@
 import fetch from 'node-fetch';
 
 const mimeFromExt = ext => ({
-  '7z' : 'application/x-7z-compressed',
-  'zip': 'application/zip',
-  'rar': 'application/vnd.rar',
-  'apk': 'application/vnd.android.package-archive',
-  'mp4': 'video/mp4',
-  'mp3': 'audio/mpeg',
-  'pdf': 'application/pdf'
-}[ext] || 'application/octet-stream');
+  '7z'   : 'application/x-7z-compressed',
+  'zip'  : 'application/zip',
+  'rar'  : 'application/vnd.rar',
+  'apk'  : 'application/vnd.android.package-archive',
+  'mp4'  : 'video/mp4',
+  'mkv'  : 'video/x-matroska',
+  'mp3'  : 'audio/mpeg',
+  'wav'  : 'audio/wav',
+  'ogg'  : 'audio/ogg',
+  'flac' : 'audio/flac',
+  'pdf'  : 'application/pdf',
+  'doc'  : 'application/msword',
+  'docx' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'xls'  : 'application/vnd.ms-excel',
+  'xlsx' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'ppt'  : 'application/vnd.ms-powerpoint',
+  'pptx' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'txt'  : 'text/plain',
+  'html' : 'text/html',
+  'csv'  : 'text/csv',
+  'json' : 'application/json',
+  'js'   : 'application/javascript',
+  'py'   : 'text/x-python',
+  'c'    : 'text/x-c',
+  'cpp'  : 'text/x-c++',
+  'exe'  : 'application/vnd.microsoft.portable-executable'
+}[ext]);
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) throw `${usedPrefix + command} <link de MediaFire>`;
@@ -23,9 +42,9 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   const file = json.data[0];
 
   // ── extensión y mime ────────────────────────────────────────────────
-  const extMatch = file.nama.match(/\.(\w+)$/);
-  const ext      = extMatch ? extMatch[1].toLowerCase() : 'bin';
-  const mime     = mimeFromExt(ext);
+  const extMatch = file.nama.match(/\.(\w+)$/i);
+  const ext      = extMatch ? extMatch[1].toLowerCase() : 'zip'; // default a zip
+  const mime     = mimeFromExt(ext) || 'application/zip';        // default MIME
 
   // ── mensaje descriptivo ─────────────────────────────────────────────
   const caption = `*Nombre:* ${file.nama}
