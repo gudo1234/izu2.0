@@ -5,7 +5,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok\.com\/[^\s]+/gi.test(url)
 
   if (!input) {
-    return conn.reply(m.chat, `🚩 Ingresa el *nombre del video* o un *enlace* de TikTok.\n\nEjemplo búsqueda:\n> *${usedPrefix + command}* Ai Hoshino Edit\n\nEjemplo descarga:\n> *${usedPrefix + command}* https://vm.tiktok.com/ZMrFCX5jf/`, m, rcanal)
+    return conn.reply(m.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\nEjemplo búsqueda:\n> *${usedPrefix + command}* Lady Gaga\n\nEjemplo descarga:\n> *${usedPrefix + command}* https://vm.tiktok.com/ZMShLNoJe/`, m, rcanal)
   }
 
   await m.react('🕓')
