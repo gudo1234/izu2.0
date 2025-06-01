@@ -133,28 +133,25 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
     let enviados = 0
     const maxResults = 5
-    let anuncioMostrado = false // ✅ Mostrar texto solo una vez
+    let anuncioMostrado = false
 
     for (let i = 0; i < Math.min(maxResults, results.length); i++) {
-      const { title, author, url } = results[i]
+      const { url } = results[i]
       if (!isTikTokUrl(url)) continue
 
       try {
         const video = await Starlights.tiktokdl(url)
         if (!video?.dl_url) continue
 
-        let caption = `*乂  T I K T O K  -  R E S U L T A D O ${i + 1}*\n\n` +
-          `✩ *Título* : ${title}\n` +
-          `✩ *Autor* : ${author}\n` +
-          `✩ *URL* : ${url}`
-
-        // ✅ Agrega el mensaje al primer resultado
         if (!anuncioMostrado) {
-          caption = '*Se muestran resultados de TikTok*\n\n' + caption
+          // ✅ Solo mostrar el texto en el primer video
+          await conn.sendFile(m.chat, video.dl_url, `tiktok_1.mp4`, '*Se muestran resultados de TikTok*', m, null, rcanal)
           anuncioMostrado = true
+        } else {
+          // ✅ En los demás videos, enviar sin texto
+          await conn.sendFile(m.chat, video.dl_url, `tiktok_${i + 1}.mp4`, '', m, null, rcanal)
         }
 
-        await conn.sendFile(m.chat, video.dl_url, `tiktok_${i + 1}.mp4`, caption, m, null, rcanal)
         enviados++
       } catch (err) {
         console.log(`❌ Error al descargar resultado #${i + 1}:`, err)
