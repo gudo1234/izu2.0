@@ -204,21 +204,17 @@ ${comandosNsfw}
   m.react('🏖️')
 let stiker2 = await sticker(thumbnail, false, 'hola')
 await conn.sendFile(m.chat, stiker2, 'sticker.webp', '', null, true, {
-        contextInfo: {
-            'mentionedJid': [m.sender],
-            'forwardingScore': 200,
-            'isForwarded': false,
-            externalAdReply: {
-                showAdAttribution: false,
-                title: wm,
-                body: textbot,
-                mediaType: 1,
-                sourceUrl: redes,
-                thumbnailUrl: redes,
-                thumbnail: icono
-            }
-        }
-    }, { quoted: m });
+  contextInfo: {
+    externalAdReply: {
+      title: wm,
+      body: textbot,
+      mediaType: 1,
+      sourceUrl: redes,
+      thumbnail: icono,
+      thumbnailUrl: redes
+    }
+  }
+}, { quoted: m })
 
   }
 
