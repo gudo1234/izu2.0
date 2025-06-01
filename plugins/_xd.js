@@ -15,7 +15,7 @@ const handler = async (m, { conn }) => {
     
     const url = pickRandom(stikerxd)
     const imgBuffer = await fetch(url).then(res => res.buffer())
-    const webpBuffer = await sticker(imgBuffer, false, 'hola')
+    const webpBuffer = await sticker(imgBuffer, false, packname, author)
 
     await conn.sendMessage(
       m.chat,
