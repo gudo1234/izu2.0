@@ -1,51 +1,51 @@
 import Starlights from '@StarlightsTeam/Scraper';
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { conn, usedPrefix, command, text }) => {
   if (!text) {
-    return conn.reply(m.chat, `✎ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola`, m);
+    return conn.reply(m.chat, '🚩 Ingresa un texto junto al comando.\n\n`Ejemplo:`\n' + `> *${usedPrefix + command}* Ai Hoshino Edit`, m);
   }
 
-  await m.react('🔍');
+  await m.react('🕓');
 
   try {
-    const isUrl = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com|vm\.tiktok\.com|vt\.tiktok\.com)/i.test(text);
-    if (isUrl) {
-      return conn.reply(m.chat, '✗ Este comando solo funciona con búsquedas por texto, no enlaces.', m);
+    // Rechaza enlaces
+    const isLink = /(https?:\/\/)?(www\.)?(vm|vt|tiktok)\.com/i.test(text);
+    if (isLink) {
+      return conn.reply(m.chat, '✗ Este comando es solo para búsquedas por texto, no enlaces.', m);
     }
 
-    // Ejecutar búsqueda
-    const searchData = await Starlights.tiktoksearch(text);
-    const videos = Array.isArray(searchData) ? searchData : searchData?.result || searchData?.data || [];
+    // Buscar en TikTok
+    const data = await Starlights.tiktoksearch(text);
+    const results = Array.isArray(data) ? data : data.result || [];
 
-    if (!videos || videos.length === 0) {
-      return conn.reply(m.chat, '✗ No se encontraron resultados para esa búsqueda.', m);
+    if (!results.length) {
+      await m.react('✖️');
+      return conn.reply(m.chat, '✗ No se encontraron resultados.', m);
     }
 
-    // Filtrar videos válidos con URL
-    const validVideos = videos.filter(v => v.video && v.video.startsWith('http'));
+    // Filtrar y elegir 20 aleatorios con URL de video
+    const valid = results.filter(v => v.video && v.video.startsWith('http'));
+    const selected = valid.sort(() => Math.random() - 0.5).slice(0, 20);
 
-    if (validVideos.length === 0) {
-      return conn.reply(m.chat, '✗ No se encontraron videos válidos para mostrar.', m);
+    if (!selected.length) {
+      await m.react('✖️');
+      return conn.reply(m.chat, '✗ No hay videos válidos para mostrar.', m);
     }
 
-    const selected = validVideos.sort(() => Math.random() - 0.5).slice(0, 20);
+    // Enviar primer video con caption
+    await conn.sendFile(m.chat, selected[0].video, 'tiktok.mp4', '*Se muestran 20 resultados*', m);
 
-    await conn.sendMessage(m.chat, {
-      video: { url: selected[0].video },
-      caption: '*Se muestran 20 resultados*'
-    }, { quoted: m });
-
+    // Enviar los siguientes sin caption
     for (let i = 1; i < selected.length; i++) {
-      await conn.sendMessage(m.chat, {
-        video: { url: selected[i].video }
-      }, { quoted: m });
+      await conn.sendFile(m.chat, selected[i].video, `video${i + 1}.mp4`, '', m);
     }
 
     await m.react('✅');
 
-  } catch (e) {
-    console.error('[ERROR EN TIKTOKSEARCH]', e);
-    conn.reply(m.chat, '✗ Error al buscar videos en TikTok.', m);
+  } catch (err) {
+    console.error('[ERROR TIKTOKSEARCH]', err);
+    await m.react('✖️');
+    conn.reply(m.chat, '✗ Ocurrió un error al buscar videos en TikTok.', m);
   }
 };
 
