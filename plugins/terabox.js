@@ -1,6 +1,8 @@
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { conn, text }) => {
   const emoji = '📦';
   const emoji2 = '❌';
   const msm = '⚠️';
@@ -21,25 +23,31 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
         continue;
       }
 
-      const caption = `📄 *Nombre:* ${fileName}\n📂 *Formato:* ${type}\n🔗 URL: ${url}`;
-      console.log(`Enviando archivo: ${fileName}, URL: ${url}`);
+      const caption = `📄 *Nombre:* ${fileName}\n📂 *Formato:* ${type}`;
+      const tempPath = path.join('./tmp', fileName);
 
       try {
-        await conn.sendFile(
-          m.chat,
-          url,
-          fileName,
-          caption,
-          m,
-          false,
-          {
-            thumbnail: thumb ? await getBuffer(thumb) : undefined
-          }
-        );
+        // Descargar archivo
+        const response = await axios.get(url, { responseType: 'stream' });
+        await new Promise((resolve, reject) => {
+          const writer = fs.createWriteStream(tempPath);
+          response.data.pipe(writer);
+          writer.on('finish', resolve);
+          writer.on('error', reject);
+        });
+
+        // Enviar archivo
+        await conn.sendFile(m.chat, tempPath, fileName, caption, m, false, {
+          thumbnail: thumb ? await getBuffer(thumb) : undefined
+        });
         await m.react('✅');
+
+        // Borrar archivo temporal
+        fs.unlinkSync(tempPath);
       } catch (error) {
-        console.error('❌ Error al enviar el archivo:', error);
+        console.error(`❌ Error al enviar "${fileName}":`, error.message);
         m.reply(`${msm} No se pudo enviar el archivo: *${fileName}*`);
+        if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
       }
     }
   } catch (err) {
@@ -53,12 +61,11 @@ handler.group = true;
 
 export default handler;
 
-// Función auxiliar: Terabox
 async function terabox(url) {
   try {
     const res = await axios.post('https://teradl-api.dapuntaratya.com/generate_file', {
       mode: 1,
-      url: url
+      url
     });
 
     const { list, js_token, cookie, sign, timestamp, shareid, uk } = res.data;
@@ -71,10 +78,7 @@ async function terabox(url) {
         });
 
         const link = dlRes.data?.download_link?.url_1;
-        if (!link) {
-          console.warn('🔍 No se encontró el enlace de descarga para:', x.name);
-          continue;
-        }
+        if (!link) continue;
 
         array.push({
           fileName: x.name,
@@ -83,24 +87,23 @@ async function terabox(url) {
           url: link
         });
       } catch (err) {
-        console.error(`⚠️ Error al generar el enlace de descarga para "${x.name}":`, err?.response?.data || err);
+        console.error('⚠️ Error al generar enlace de descarga:', err?.response?.data || err);
       }
     }
 
     return array;
   } catch (e) {
-    console.error('❌ Error al consultar la API de Terabox:', e?.response?.data || e);
+    console.error('❌ Error al consultar la API Terabox:', e?.response?.data || e);
     return [];
   }
 }
 
-// Función auxiliar: Obtener imagen en buffer
 async function getBuffer(url) {
   try {
     const res = await axios.get(url, { responseType: 'arraybuffer' });
     return res.data;
   } catch (err) {
-    console.error('⚠️ Error al obtener la imagen de miniatura:', err);
+    console.error('⚠️ Error al obtener la imagen:', err);
     return null;
   }
 }
