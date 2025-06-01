@@ -1,4 +1,4 @@
-/*import fetch from 'node-fetch'
+import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
 
 function pickRandom(list) {
@@ -14,8 +14,8 @@ const handler = async (m, { conn }) => {
     ]
     
     const url = pickRandom(stikerxd)
-    const imgBuffer = await fetch(url).then(res => res.buffer())
-    const webpBuffer = await sticker(imgBuffer, false, global.packname, global.author)
+    const imgBuffer = await fetch(icono).then(res => res.buffer())
+    const webpBuffer = await sticker(imgBuffer, false, 'hola')
 
     await conn.sendMessage(
       m.chat,
@@ -27,7 +27,7 @@ const handler = async (m, { conn }) => {
   }
 }
 
-handler.customPrefix = /xd/
-handler.command = new RegExp
-
+//handler.customPrefix = /xd/
+//handler.command = new RegExp
+handler.command = ['xd']
 export default handler*/
