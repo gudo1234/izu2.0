@@ -149,7 +149,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
           anuncioMostrado = true
         } else {
           // ✅ En los demás videos, enviar sin texto
-          await conn.sendFile(m.chat, video.dl_url, `tiktok_${i + 1}.mp4`, '', m, null, rcanal)
+          await conn.sendFile(m.chat, video.dl_url, `tiktok_${i + 1}.mp4`, '', m)
         }
 
         enviados++
