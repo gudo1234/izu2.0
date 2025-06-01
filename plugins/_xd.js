@@ -15,7 +15,7 @@ const handler = async (m, { conn }) => {
     
     const url = pickRandom(stikerxd)
     const imgBuffer = await fetch(url).then(res => res.buffer())
-    const webpBuffer = await sticker(imgBuffer, false, packname, author)
+    const webpBuffer = await sticker(imgBuffer, false, `hola`)
 
     await conn.sendMessage(
       m.chat,
@@ -30,4 +30,4 @@ const handler = async (m, { conn }) => {
 //handler.customPrefix = /xd/
 //handler.command = new RegExp
 handler.command = ['xd']
-export default handler*/
+export default handler
