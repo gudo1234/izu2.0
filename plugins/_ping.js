@@ -1,10 +1,5 @@
-import { exec as _exec } from 'child_process'
-import { totalmem, freemem } from 'os'
+import { totalmem, freemem, cpus, uptime } from 'os'
 import { sizeFormatter } from 'human-readable'
-import speed from 'performance-now'
-import util from 'util'
-
-const exec = util.promisify(_exec)
 
 const formatSize = sizeFormatter({
   std: 'JEDEC',
@@ -14,28 +9,22 @@ const formatSize = sizeFormatter({
 })
 
 let handler = async (m, { conn }) => {
-  let start = speed()
-  let latency = speed() - start
+  const start = performance.now()
 
-  // Ejecutar comandos en paralelo
-  let [uptimeOut, unameOut, cpuOut, ramOut, upPrettyOut] = await Promise.all([
-    exec('cat /proc/uptime').catch(() => ({ stdout: '0 0' })),
-    exec('uname -a').catch(() => ({ stdout: 'Unknown' })),
-    exec('cat /proc/cpuinfo').catch(() => ({ stdout: '' })),
-    exec('free -m').catch(() => ({ stdout: '' })),
-    exec('uptime -p').catch(() => ({ stdout: 'unknown' })),
-  ])
+  const cpuInfo = cpus()[0]
+  const procesador = cpuInfo.model
+  const cpuSpeed = cpuInfo.speed // MHz
+  const usedRam = totalmem() - freemem()
+  const uptimeMs = uptime() * 1000
+  const latency = performance.now() - start
 
-  const uptimeMs = parseFloat(uptimeOut.stdout.split(' ')[0]) * 1000
-  const cpuInfo = cpuOut.stdout
-  const procesador = (cpuInfo.match(/model name\s*:\s*(.*)/) || [])[1] || 'Unknown'
-  const cpu = (cpuInfo.match(/cpu MHz\s*:\s*(.*)/) || [])[1] || 'Unknown'
-
-  let replyText = `*» Velocidad:* ${latency.toFixed(4)} _ms_`
-  replyText += `\n*» Procesador:* ${procesador}`
-  replyText += `\n*» CPU:* ${cpu} MHz`
-  replyText += `\n*» RAM:* ${formatSize(totalmem() - freemem())} / ${formatSize(totalmem())}`
-  replyText += `\n*» Tiempo de actividad:* ${clockString(uptimeMs)}`
+  const replyText = [
+    `*» Velocidad:* ${latency.toFixed(4)} _ms_`,
+    `*» Procesador:* ${procesador}`,
+    `*» CPU:* ${cpuSpeed} MHz`,
+    `*» RAM:* ${formatSize(usedRam)} / ${formatSize(totalmem())}`,
+    `*» Tiempo de actividad:* ${clockString(uptimeMs)}`
+  ].join('\n')
 
   conn.reply(m.chat, replyText, m)
 }
