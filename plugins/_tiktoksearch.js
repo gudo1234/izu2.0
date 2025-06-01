@@ -8,44 +8,48 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   await m.react('🔍');
 
   try {
-    // Solo permite búsquedas por texto
     const isUrl = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com|vm\.tiktok\.com|vt\.tiktok\.com)/i.test(text);
     if (isUrl) {
       return conn.reply(m.chat, '✗ Este comando solo funciona con búsquedas por texto, no enlaces.', m);
     }
 
-    // Buscar videos por texto
-    const results = await Starlights.tiktoksearch(text);
-    if (!results || results.length === 0) {
-      return conn.reply(m.chat, '✗ No se encontraron resultados.', m);
+    // Ejecutar búsqueda
+    const searchData = await Starlights.tiktoksearch(text);
+    const videos = Array.isArray(searchData) ? searchData : searchData?.result || searchData?.data || [];
+
+    if (!videos || videos.length === 0) {
+      return conn.reply(m.chat, '✗ No se encontraron resultados para esa búsqueda.', m);
     }
 
-    // Seleccionar 20 resultados aleatorios
-    const shuffled = results.sort(() => Math.random() - 0.5).slice(0, 20);
+    // Filtrar videos válidos con URL
+    const validVideos = videos.filter(v => v.video && v.video.startsWith('http'));
 
-    // Mostrar mensaje en el primero
+    if (validVideos.length === 0) {
+      return conn.reply(m.chat, '✗ No se encontraron videos válidos para mostrar.', m);
+    }
+
+    const selected = validVideos.sort(() => Math.random() - 0.5).slice(0, 20);
+
     await conn.sendMessage(m.chat, {
-      video: { url: shuffled[0].video },
+      video: { url: selected[0].video },
       caption: '*Se muestran 20 resultados*'
     }, { quoted: m });
 
-    // Enviar los 19 restantes sin caption
-    for (let i = 1; i < shuffled.length; i++) {
+    for (let i = 1; i < selected.length; i++) {
       await conn.sendMessage(m.chat, {
-        video: { url: shuffled[i].video }
+        video: { url: selected[i].video }
       }, { quoted: m });
     }
 
     await m.react('✅');
 
   } catch (e) {
-    console.error('[ERROR]', e);
+    console.error('[ERROR EN TIKTOKSEARCH]', e);
     conn.reply(m.chat, '✗ Error al buscar videos en TikTok.', m);
   }
 };
 
-// Solo para .tiktoksearch
-handler.command = ['ed'];
+handler.command = ['edi'];
 handler.group = true;
 
 export default handler;
