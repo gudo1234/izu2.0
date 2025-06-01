@@ -168,6 +168,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}spotifysearch *‹τ×τ›*
 │ ${e}${s}xnxxsearch *‹τ×τ›*
 │ ${e}${s}xvideosearch *‹τ×τ›*
+│ ${e}${s}tiktoksearch *‹τ×τ›*
 │ ${e}${s}noticias *‹›*
 │ ${e}${s}githubsearch *‹τ×τ›*
 └────────────
