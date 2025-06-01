@@ -203,7 +203,7 @@ ${comandosNsfw}
 
   m.react('🏖️')
 let stiker = await sticker(icono, false, txt)
-await conn.sendFile(m.chat, stiker2, 'sticker.webp', '', null, true, {
+await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
         contextInfo: {
             'mentionedJid': [m.sender],
             'forwardingScore': 200,
