@@ -33,7 +33,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     } catch (e) {
       console.error('❌ Error en descarga por URL:', e)
       await m.react('✖️')
-      return conn.reply(m.chat, '❌ Ocurrió un error al descargar el video de TikTok.', m, rcanal)
+      return conn.reply(m.chat, `${e} Ocurrió un error al descargar el video de TikTok.`, m, rcanal)
     }
   }
 
@@ -42,7 +42,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     const results = await Starlights.tiktokSearch(input)
     if (!results || results.length === 0) {
       await m.react('✖️')
-      return conn.reply(m.chat, '❌ No se encontraron resultados para tu búsqueda en TikTok.', m, rcanal)
+      return conn.reply(m.chat, `${e} No se encontraron resultados para tu búsqueda en TikTok.`, m, rcanal)
     }
 
     let enviados = 0
