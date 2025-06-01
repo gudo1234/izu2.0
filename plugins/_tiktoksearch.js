@@ -5,7 +5,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok\.com\/[^\s]+/gi.test(url)
 
   if (!input) {
-    return conn.reply(m.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\nEjemplo búsqueda:\n> *${usedPrefix + command}* Lady Gaga\n\nEjemplo descarga:\n> *${usedPrefix + command}* https://vm.tiktok.com/ZMShLNoJe/`, m, rcanal)
+    return conn.reply(m.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\n🔎 _Ejemplo de búsqueda:_\n> *${usedPrefix + command}* Lady Gaga\n\n📹 _Ejemplo de descarga:_\n> *${usedPrefix + command}* https://vm.tiktok.com/ZMShLNoJe/`, m, rcanal)
   }
 
   await m.react('🕓')
@@ -84,6 +84,6 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   }
 }
 
-handler.command = ['edi']
+handler.command = ['tiktoks', 'ttsearch', 'tiktoksearch']
 handler.group = true
 export default handler
