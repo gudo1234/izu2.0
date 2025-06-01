@@ -202,7 +202,7 @@ ${comandosNsfw}
 └────────────`
 
   m.react('🏖️')
-let stiker2 = await sticker(thumbnail, false, txt)
+let stiker2 = await sticker(thumbnail, false, 'hola')
 await conn.sendFile(m.chat, stiker2, 'sticker.webp', '', null, true, {
         contextInfo: {
             'mentionedJid': [m.sender],
