@@ -1,7 +1,7 @@
 import Starlights from '@StarlightsTeam/Scraper';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-if (!args[0]) return conn.reply(m.chat,`${e} Ingrese un enlace de Pinterest\n\nEjemplo:\n> *${usedPrefix + command}* https://ar.pinterest.com/pin/588142032613788991/`, m);
+if (!args[0]) return conn.reply(m.chat,`🚩 Ingrese un enlace de Pinterest\n\nEjemplo:\n> *${usedPrefix + command}* https://ar.pinterest.com/pin/588142032613788991/`, m);
 
 await m.react('🕓');
 try {
@@ -15,15 +15,16 @@ txt += `  ✩   *Url* : ${url}\n\n`
 txt += `> *${textbot}*`
 
 
-//await conn.sendMessage(m.chat, { video: { url: dl_url }, caption: txt, mimetype: 'video/mp4', fileName:  `pinterest.mp4`}, {quoted: m })
-await conn.sendFile(m.chat, dl_url, `thumbnail.mp4`, txt, m, null, rcanal)
+await conn.sendMessage(m.chat, { video: { url: dl_url }, caption: txt, mimetype: 'video/mp4', fileName:  `pinterest.mp4`}, {quoted: m })
 await m.react('✅');
 } catch {
 await m.react('✖️');
-  m.reply(`${e} Error al procesar el vide, asegurate de procesar una URL válida de pinterest.`)
 }
 };
 
-handler.command = ['pinterestdl', 'pindl', 'pinterest', 'pin'];
+handler.help = ['pinterestdl *<url pin>*'];
+handler.tags = ['downloader'];
+handler.command = ['pinterestdl', 'pindl'];
 handler.group = true;
+
 export default handler;
