@@ -9,8 +9,9 @@ let handler = async (m, { conn }) => {
   let vn8 = './media/space.mp3'
   let vn9 = './media/stellar.mp3'
   let vn10 = './media/theb.mp3'
+  let vn11 = './media/alanspectre.mp3'
   await conn.sendMessage(m.chat, {
-    audio: { url: [vn, vn2, vn3, vn4, vn5, vn6, vn7, vn8, vn9, vn10].getRandom() },
+    audio: { url: [vn, vn2, vn3, vn4, vn5, vn6, vn7, vn8, vn9, vn10, vn11].getRandom() },
     ptt: true,
     mimetype: 'audio/mpeg',
     fileName: 'audio.mp3',
