@@ -46,10 +46,11 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     }
 
     let enviados = 0
+    const maxResults = 5
 
-    for (let i = 0; i < results.length; i++) {
+    for (let i = 0; i < Math.min(maxResults, results.length); i++) {
       const { title, author, url } = results[i]
-      if (!isTikTokUrl(url)) continue
+      if (!isTikTokUrl(url)) continue // Validación de URL
 
       try {
         const video = await Starlights.tiktokdl(url)
