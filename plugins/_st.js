@@ -25,7 +25,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
  // let media = or[Math.floor(Math.random() * or.length)]
 
   const thumbnail = await (await fetch(icono)).buffer()
-  let stiker = await sticker(thumbnail, false, global.packname, global.author)
+  //let stiker2 = await sticker(thumbnail, false, global.packname, global.author)
 
   const comandosPorCategoria = (categoria, emoji) => {
     return Object.entries(global.plugins)
@@ -202,8 +202,8 @@ ${comandosNsfw}
 └────────────`
 
   m.react('🏖️')
-let stiker = await sticker(icono, false, txt)
-await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
+let stiker2 = await sticker(thumbnail, false, txt)
+await conn.sendFile(m.chat, stiker2, 'sticker.webp', '', null, true, {
         contextInfo: {
             'mentionedJid': [m.sender],
             'forwardingScore': 200,
