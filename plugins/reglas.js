@@ -2,13 +2,14 @@ import moment from 'moment-timezone'
 import 'moment/locale/es'
 
 let handler = async (m, { conn }) => {
-  const thumbnail = await (await fetch(icono)).buffer()
   m.react('🍉')
+
+  const thumbnail = await (await fetch(icono)).buffer()
 
   // Fecha y hora en español, Bogotá
   const fechaHoraBOG = moment().tz('America/Bogota').locale('es').format('dddd D [de] MMMM [del] YYYY [a las] h:mm a')
 
-  let txt = `${e} _*Hola ${m.pushName}*_
+  const txt = `${e} _*Hola ${m.pushName}*_
 
 ⚖️ \`Términos y Condiciones del Servicio\`
 
@@ -33,7 +34,7 @@ let handler = async (m, { conn }) => {
         newsletterName: channelRD.name,
         serverMessageId: -1,
       },
-      forwardingScore: false,
+      forwardingScore: 0,
       externalAdReply: {
         title: wm,
         body: textbot,
@@ -45,7 +46,7 @@ let handler = async (m, { conn }) => {
         renderLargerThumbnail: true,
       },
     },
-  }, { quoted: m });
+  }, { quoted: m })
 }
 
 handler.command = ['reglas', 'términos', 'condiciones']
