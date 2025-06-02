@@ -12,6 +12,6 @@ let handler = async (m, { conn, isAdmin, isROwner, command }) => {
     await m.react('✅')
 }
 
-handler.command = ['banearbot', 'banchat', 'desbanearbot', 'unbanchat']
+handler.command = ['banearbot', 'banchat']
 handler.group = true
 export default handler
