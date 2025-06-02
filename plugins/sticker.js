@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
-import { sticker } from '../lib/sticker.js';
+import { sticker } from '../lib/sticker2.js';
 import uploadFile from '../lib/uploadFile.js';
 import uploadImage from '../lib/uploadImage.js';
 import { webp2png } from '../lib/webp2mp4.js';
