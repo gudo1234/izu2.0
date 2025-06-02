@@ -91,7 +91,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}antifake *‹on/off›*
 │ ${e}${s}autosticker *‹on/off›*
 │ ${e}${s}autoband *‹on/off›*
-│ ${e}${s}banchat/unbanchat *‹›*
 └────────────
 
 \`✜ᴅᴇsᴄᴀʀɢᴀs ᴍᴜʟᴛɪᴍᴇᴅɪᴀ📂\`
