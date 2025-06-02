@@ -20,7 +20,7 @@ let handler = async (m, { conn }) => {
   });
 };
 
-handler.command = ['update'];
+handler.command = ['update', 'up'];
 handler.rowner = true;
 
 export default handler;
