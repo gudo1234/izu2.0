@@ -9,10 +9,6 @@ let handler = async (m, { conn, args, usedPrefix, text, command }) => {
     const end = Date.now()
     const latency = end - start
 
-    /*await conn.sendMessage(m.chat, {
-        text: `Tiempo de respuesta: ${latency}ms`,
-        quoted: m.key ? m : undefined
-    })*/
     await conn.sendMessage(m.chat, { text: `Tiempo de respuesta: ${latency}ms` }, { quoted: m });
 }
 
