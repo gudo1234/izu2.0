@@ -5,6 +5,10 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) throw `*Uso correcto:*\n${usedPrefix + command} <título o enlace de YouTube>`;
 
   const isAudio = command === 'audio';
+  const waitMessage = isAudio
+    ? '⏳ Buscando y procesando el audio...'
+    : '⏳ Buscando y procesando el video...';
+  const errorMessage = '❌ Ocurrió un error. Intenta nuevamente más tarde.';
   const apiKey = 'mOpoAHjJ';
 
   try {
