@@ -2,54 +2,59 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 
 const handler = async (m, { conn, text, command }) => {
-  if (!text) return m.reply('❌ Ingresa el nombre de una canción.\n\n📌 Ejemplo: *.play diles bad bunny*');
+  if (!text) {
+    return m.reply('❌ Por favor, proporciona el nombre de la canción que deseas buscar.\n\n📌 Ejemplo: *.play diles bad bunny*');
+  }
 
-  await m.react('🎵');
+  await m.react('🔍');
 
   try {
     const query = text.trim().toLowerCase().replace(/\s+/g, '-');
-    const url = `https://es.mygomp3.com/mp3/${encodeURIComponent(query)}.html`;
+    const searchUrl = `https://es.mygomp3.com/mp3/${encodeURIComponent(query)}.html`;
 
-    const res = await axios.get(url, {
+    const searchResponse = await axios.get(searchUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
     });
 
-    const $ = cheerio.load(res.data);
-    const resultado = $('div.media').first();
+    const $ = cheerio.load(searchResponse.data);
+    const firstResult = $('div.media').first();
 
-    if (!resultado.length) return m.reply('❌ No se encontró ninguna canción.');
+    if (!firstResult.length) {
+      return m.reply('❌ No se encontró ninguna canción con ese nombre.');
+    }
 
-    const titulo = resultado.find('.media-body > h3 > a').text().trim();
-    const enlace = 'https://es.mygomp3.com' + resultado.find('.media-body > h3 > a').attr('href');
-    const duracion = resultado.find('.media-body > .duration').text().trim();
-    const thumb = resultado.find('img').attr('src');
+    const title = firstResult.find('.media-body > h3 > a').text().trim();
+    const link = 'https://es.mygomp3.com' + firstResult.find('.media-body > h3 > a').attr('href');
+    const duration = firstResult.find('.media-body > .duration').text().trim();
+    const thumbnail = firstResult.find('img').attr('src');
 
-    // Obtener el enlace de descarga desde la página interna
-    const res2 = await axios.get(enlace, {
+    const detailResponse = await axios.get(link, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
     });
 
-    const $$ = cheerio.load(res2.data);
+    const $$ = cheerio.load(detailResponse.data);
     const downloadLink = $$('a.btn.btn-primary.btn-lg[href^="https://cdn"]').attr('href');
 
-    if (!downloadLink) return m.reply('❌ No se pudo obtener el enlace de descarga.');
+    if (!downloadLink) {
+      return m.reply('❌ No se pudo obtener el enlace de descarga.');
+    }
 
-    const caption = `🎶 *Resultado encontrado:*\n\n📌 *Título:* ${titulo}\n⏱️ *Duración:* ${duracion}\n🔗 *Enlace:* ${enlace}\n\n⏬ *Enviando audio...*`;
+    const caption = `🎶 *Resultado encontrado:*\n\n📌 *Título:* ${title}\n⏱️ *Duración:* ${duration}\n🔗 *Enlace:* ${link}\n\n⏬ *Enviando audio...*`;
 
     await conn.sendMessage(m.chat, {
-      image: { url: thumb },
+      image: { url: thumbnail },
       caption,
     }, { quoted: m });
 
     await conn.sendMessage(m.chat, {
       audio: { url: downloadLink },
       mimetype: 'audio/mpeg',
-      fileName: `${titulo}.mp3`
+      fileName: `${title}.mp3`
     }, { quoted: m });
 
     await m.react('✅');
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     m.reply('❌ Ocurrió un error al procesar la descarga.');
   }
 };
