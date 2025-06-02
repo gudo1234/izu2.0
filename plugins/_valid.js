@@ -39,9 +39,9 @@ export async function before(m) {
 
   if (validCommand(command, global.plugins)) {
     if (chat.isBanned) {
-      const avisoDesactivado = `${e} El bot *${botname}* está desactivado en este grupo.\n\n` +
+      const avisoDesactivado = `${e} El bot está desactivado en este grupo.\n\n` +
         `> ${mundo} Un *administrador* puede activarlo con el comando:\n` +
-        `> » *${usedPrefix}unbanchat on*`;
+        `\`${usedPrefix}unbanchat\``;
       await m.reply(avisoDesactivado);
       return;
     }
