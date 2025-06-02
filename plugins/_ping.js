@@ -18,11 +18,15 @@ export default handler*/
 let handler = async (m, { conn }) => {
     const start = Date.now()
 
-    // Enviamos un mensaje "en typing" para que haga una operación real
-    await conn.sendPresenceUpdate('composing', m.chat)
+    // Esperamos que el mensaje realmente se envíe y se reciba confirmación
+    await conn.sendMessage(m.chat, {
+        text: `🏓`,
+        quoted: m.key ? m : undefined
+    })
 
     const latency = Date.now() - start
 
+    // Editamos el mensaje anterior (si usas API tipo Baileys MD que soporta edición)
     await conn.sendMessage(m.chat, {
         text: `🏓 Tiempo de respuesta: ${latency}ms`,
         quoted: m.key ? m : undefined
