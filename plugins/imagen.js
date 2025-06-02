@@ -19,7 +19,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const respuesta = await luminsesi(text, username, prompt)
 
     if (/^s[ií]/i.test(respuesta)) {
-      return m.reply(`${e} *Búsqueda bloqueada*> No se puede compartir contenido delicado.`)
+      return m.reply(`${e} *Búsqueda bloqueada*\n> No se puede compartir contenido delicado.`)
     }
   } catch (e) {
     console.error('Error al verificar contenido sensible:', e)
