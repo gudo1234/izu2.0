@@ -3,7 +3,19 @@ import PhoneNumber from 'awesome-phonenumber'
 let handler = async (m, { conn, args, usedPrefix, command }) => {
 const thumbnail = await (await fetch(icono)).buffer()
 m.react('🍉')
-let txt = `_Hola *${m.pushName}* ¿Cómo estás?_\n\n\`⚖️TÉRMINOS Y CONDICIONES DEL SERVICIO\`\n> ${e} IZUBOT y su desarrollador no se hacen responsables por el uso, gestión, contenido compartido, privacidad ni por los números involucrados en las interacciones con el bot.\n\n*El uso del bot es completamente bajo tu propia responsabilidad. Te recomendamos usarlo de forma consciente y segura.*\n.\`[🗓]Fecha:\` _${moment.tz('America/Bogota').format('DD/MM/YY')}_`
+let txt = `${e} _*Hola ${m.pushName}*._
+
+⚖️ \`Términos y Condiciones del Servicio\`
+
+> ${e} Izubot y su equipo no se hacen responsables por el uso, contenido compartido, privacidad ni números involucrados en las interacciones con el bot.
+
+👥 _El uso de Izubot es bajo tu propia responsabilidad. Se recomienda emplearlo de forma consciente y segura, respetando las normas aplicables y evitando cualquier conducta que pueda afectar la privacidad o seguridad de terceros._
+
+🤖 *Este servicio se proporciona “tal cual”, sin garantías explícitas o implícitas. Izubot se reserva el derecho de modificar o interrumpir el servicio en cualquier momento sin previo aviso.*
+
+🗓 *Fecha:* ${moment.tz('america/bogota').format('dd/mm/yyyy')}
+
+> © ${new Date().getFullYear()} Izubot. Todos los derechos reservados.`
 await conn.sendMessage(m.chat, {
       text: txt,
       footer: textbot,
