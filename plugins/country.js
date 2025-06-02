@@ -2391,20 +2391,32 @@ if (!chat.autoband || !m.isGroup) return !0;
         return; 
     }
 
-    if (m.quoted && m.quoted.id === userMessageCount[m.chat].questionMessage.id && m.text.toLowerCase() === userMessageCount[m.chat].currentFlag.toLowerCase()) {
-        m.react('🎉');
-        await conn.reply(m.chat, `*¡Correcto, ${m.pushName}!* 🎉 La bandera es de *${userMessageCount[m.chat].currentFlag}* ${userMessageCount[m.chat].currentFlag2} y su código es: *${userMessageCount[m.chat].currentFlag3}*.`, m);
-        
-        try {
-            await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, id: userMessageCount[m.chat].questionMessage.id, fromMe: true } });
-        } catch (error) {
-            console.error("Error al eliminar el mensaje:", error);
-        }
-        
-        userMessageCount[m.chat].currentFlag = null; 
-        userMessageCount[m.chat].questionMessage = null; 
-        userMessageCount[m.chat].timestamp = null; 
-    } else if (m.quoted && m.quoted.id === userMessageCount[m.chat].questionMessage.id) {
+if (m.quoted && m.quoted.id === userMessageCount[m.chat].questionMessage.id && m.text.toLowerCase() === userMessageCount[m.chat].currentFlag.toLowerCase()) {
+    m.react('🎉');
+
+    // Obtener lista de participantes
+    let participants = (await conn.groupMetadata(m.chat)).participants
+    // Filtrar miembros válidos (excluye al bot y al autor del mensaje si deseas)
+    let others = participants.filter(p => p.id !== m.sender && p.id !== conn.user.jid);
+    // Elegir uno al azar
+    let random = others[Math.floor(Math.random() * others.length)];
+    let rewardTag = random?.id || m.sender; // fallback por si algo falla
+
+    await conn.reply(m.chat, `*¡Correcto, ${m.pushName}!* 🎉 La bandera es de *${userMessageCount[m.chat].currentFlag}* ${userMessageCount[m.chat].currentFlag2} y su código es: *${userMessageCount[m.chat].currentFlag3}*.\n\n🎁 *Recompensa:* se la tienes que chupar a @${rewardTag.split('@')[0]}`, m, {
+        mentions: [rewardTag]
+    });
+
+    try {
+        await conn.sendMessage(m.chat, { delete: { remoteJid: m.chat, id: userMessageCount[m.chat].questionMessage.id, fromMe: true } });
+    } catch (error) {
+        console.error("Error al eliminar el mensaje:", error);
+    }
+
+    // Limpiar estado
+    userMessageCount[m.chat].currentFlag = null; 
+    userMessageCount[m.chat].questionMessage = null; 
+    userMessageCount[m.chat].timestamp = null; 
+} else if (m.quoted && m.quoted.id === userMessageCount[m.chat].questionMessage.id) {
         const timeRemaining = Math.max(0, 180000 - timeElapsed); // Tiempo restante en milisegundos
         const minutesRemaining = Math.floor(timeRemaining / 60000); // Convertir a minutos
         const secondsRemaining = Math.floor((timeRemaining % 60000) / 1000); // Convertir a segundos
