@@ -22,7 +22,7 @@ let handler = async (m, { conn, usedPrefix, command, args }) => {
 
   let chat = global.db.data.chats[m.chat];
 
-  if (command === 'bot') {
+  if (command === 'bo') {
     if (args.length === 0) {
       const estado = chat.isBanned ? '✗ Desactivado' : '✓ Activado';
       const info = `
