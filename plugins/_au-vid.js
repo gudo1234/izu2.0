@@ -30,7 +30,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 *∘ URL:* ${video.url}
 `.trim();
 
-    // Mensaje con miniatura y descripción
     await conn.sendMessage(m.chat, {
       image: { url: video.image },
       caption,
@@ -64,7 +63,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         }
       }, { quoted: m });
     } else {
-      // Enviar el video
       await conn.sendMessage(m.chat, {
         video: { url: response.result?.mp4 },
         mimetype: 'video/mp4',
@@ -80,23 +78,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
             renderLargerThumbnail: true
           }
         }
-      }, { quoted: m });
-
-      // Enviar mensaje tipo rcanal
-      await conn.sendMessage(m.chat, {
-        text: `Canal: ${video.author.name}`,
-        contextInfo: {
-          externalAdReply: {
-            title: video.author.name,
-            body: 'Visita el canal en YouTube',
-            thumbnailUrl: video.author.bestAvatar || video.image,
-            sourceUrl: video.author.url || video.url,
-            mediaType: 1,
-            renderLargerThumbnail: true,
-            showAdAttribution: true
-          }
-        }
-      }, { quoted: m });
+      }, { quoted: m... rcanal });
     }
 
   } catch (e) {
