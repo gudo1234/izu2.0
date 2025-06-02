@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 import { spawn } from 'child_process';
-import { sticker } from '../lib/sticker2.js';
+import { sticker } from '../lib/sticker.js';
 import uploadFile from '../lib/uploadFile.js';
 import uploadImage from '../lib/uploadImage.js';
 import { webp2png } from '../lib/webp2mp4.js';
@@ -77,18 +77,17 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       await fs.writeFile(tempInputPath, img);
       await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', [
-  '-y',
-  '-i', tempInputPath,
-  '-vf',
-'scale=512:512:force_original_aspect_ratio=decrease,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000,split=2[main][blur],[blur]boxblur=10:1[bg],[bg][main]overlay=(W-w)/2:(H-h)/2',
-  '-loop', '0',
-  '-ss', '0',
-  '-t', '8',
-  '-an',
-  '-vsync', '0',
-  '-preset', 'default',
-  '-f', 'webp',
-  tempOutputPath
+'-y',
+'-i', tempInputPath,
+'-vf', "scale='min(512,iw)':min'(512,ih)':force_original_aspect_ratio=decrease,fps=15,pad=512:512:-1:-1:color=0x00000000",
+'-loop', '0',
+'-ss', '0',
+'-t', '8',
+'-an',
+'-vsync', '0',
+'-preset', 'default',
+'-f', 'webp',
+tempOutputPath
 ]);
         ffmpeg.on('close', resolve);
         ffmpeg.on('error', reject);
