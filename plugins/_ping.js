@@ -16,10 +16,15 @@ handler.command = ['ping', 'p']
 export default handler*/
 
 let handler = async (m, { conn }) => {
-    const start = performance.now()
+    const start = Date.now()
+
+    // Enviamos un mensaje "en typing" para que haga una operación real
+    await conn.sendPresenceUpdate('composing', m.chat)
+
+    const latency = Date.now() - start
 
     await conn.sendMessage(m.chat, {
-        text: `🏓 Tiempo de respuesta: ${Math.round(performance.now() - start)}ms`,
+        text: `🏓 Tiempo de respuesta: ${latency}ms`,
         quoted: m.key ? m : undefined
     })
 }
