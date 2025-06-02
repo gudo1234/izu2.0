@@ -1,4 +1,4 @@
-let handler = async (m, { conn, isAdmin, isROwner, command }) => {
+/*let handler = async (m, { conn, isAdmin, isROwner, command }) => {
     if (!(isAdmin || isROwner)) return dfail('admin', m, conn)
 
     if (command === 'banearbot' || command === 'banchat') {
@@ -14,4 +14,15 @@ let handler = async (m, { conn, isAdmin, isROwner, command }) => {
 
 handler.command = ['banearbot', 'banchat']
 handler.group = true
+export default handler*/
+let handler = async (m, { conn, isAdmin, isROwner} ) => {
+    if (!(isAdmin || isROwner)) return dfail('admin', m, conn)
+    global.db.data.chats[m.chat].isBanned = false
+    await conn.reply(m.chat, '🚩 Bot activo en este grupo.', m, rcanal)
+    await m.react('✅')
+}
+
+handler.command = ['desbanearbot', 'unbanchat']
+handler.group = true 
+
 export default handler
