@@ -78,7 +78,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       await new Promise((resolve, reject) => {
         const ffmpeg = spawn('ffmpeg', [
   '-y',
-  '-i', tempInputPath,
+  '-i', inputPath,
   '-vf', 'fps=15,scale=512:512:force_original_aspect_ratio=decrease',
   '-loop', '0',
   '-ss', '0',
@@ -87,7 +87,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   '-vsync', '0',
   '-preset', 'default',
   '-f', 'webp',
-  tempOutputPath
+  outputPath
 ]);
         ffmpeg.on('close', resolve);
         ffmpeg.on('error', reject);
