@@ -1,15 +1,12 @@
 import moment from 'moment-timezone'
-import 'moment/locale/es'  // importa el locale español
+import 'moment/locale/es'
 
 let handler = async (m, { conn }) => {
   const thumbnail = await (await fetch(icono)).buffer()
   m.react('🍉')
 
-  // Establece el locale a español
-  moment.locale('es')
-
-  // Obtiene la fecha completa en español
-  let fechaEsp = moment.tz('America/Bogota').format('dddd, D [de] MMMM [de] YYYY')
+  // Fecha y hora en español, Bogotá
+  const fechaHoraBOG = moment().tz('America/Bogota').locale('es').format('dddd D [de] MMMM [del] YYYY [a las] h:mm a')
 
   let txt = `${e} _*Hola ${m.pushName}*._
 
@@ -21,7 +18,7 @@ let handler = async (m, { conn }) => {
 
 🤖 *Este servicio se proporciona “tal cual”, sin garantías explícitas o implícitas. Izubot se reserva el derecho de modificar o interrumpir el servicio en cualquier momento sin previo aviso.*
 
-🗓 *Fecha:* ${fechaEsp}
+🗓 *Fecha:* ${fechaHoraBOG}
 
 > © ${new Date().getFullYear()} Izubot. Todos los derechos reservados.`
 
@@ -38,7 +35,7 @@ let handler = async (m, { conn }) => {
       },
       forwardingScore: false,
       externalAdReply: {
-        title: botname,
+        title: wm,
         body: textbot,
         thumbnailUrl: redes,
         thumbnail,
@@ -50,5 +47,6 @@ let handler = async (m, { conn }) => {
     },
   }, { quoted: m });
 }
+
 handler.command = ['reglas', 'términos', 'condiciones']
 export default handler
