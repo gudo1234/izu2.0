@@ -16,7 +16,7 @@ let handler = async (m, { conn }) => {
 
 👥 _El uso de Izubot es bajo tu propia responsabilidad. Se recomienda emplearlo de forma consciente y segura, respetando las normas aplicables y evitando cualquier conducta que pueda afectar la privacidad o seguridad de terceros._
 
-🤖 *Este servicio se proporciona “tal cual”, sin garantías explícitas o implícitas. Izubot se reserva el derecho de modificar o interrumpir el servicio en cualquier momento sin previo aviso.*
+> 🤖 *Este servicio se proporciona “tal cual”, sin garantías explícitas o implícitas. Izubot se reserva el derecho de modificar o interrumpir el servicio en cualquier momento sin previo aviso.*
 
 🗓 *Fecha:* ${fechaHoraBOG}
 
