@@ -164,7 +164,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   try {
     await conn.sendMessage(m.chat, {
       image: fs.readFileSync(file),
-      caption: `${emoji} Estilo ${style}\n*> ${title}* = ${message}`
+      caption: `${emoji} Estilo ${style}\n> *${title}* = ${message}`
     }, { quoted: m });
 
     await conn.sendMessage(m.chat, { react: { text: emoji, key: m.key } });
