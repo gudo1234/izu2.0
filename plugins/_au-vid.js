@@ -13,6 +13,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   try {
     await m.reply(waitMessage);
+
     const result = await ytSearch(text);
     const video = result.videos[0];
     if (!video) throw '❌ No se encontró ningún video.';
@@ -30,55 +31,27 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 *∘ URL:* ${video.url}
 `.trim();
 
+    // Enviar imagen con información
     await conn.sendMessage(m.chat, {
       image: { url: video.image },
-      caption,
-      contextInfo: {
-        externalAdReply: {
-          title: video.title,
-          body: isAudio ? 'Descarga de audio en curso' : 'Descarga de video en curso',
-          thumbnailUrl: video.image,
-          sourceUrl: video.url,
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
+      caption
     }, { quoted: m });
 
     if (isAudio) {
+      // Enviar solo el audio
       await conn.sendMessage(m.chat, {
         audio: { url: response.result?.mp3 },
         mimetype: 'audio/mpeg',
-        fileName: `${video.title}.mp3`,
-        contextInfo: {
-          externalAdReply: {
-            title: video.title,
-            body: '',
-            thumbnailUrl: video.image,
-            sourceUrl: video.url,
-            mediaType: 1,
-            showAdAttribution: true,
-            renderLargerThumbnail: true
-          }
-        }
+        fileName: `${video.title}.mp3`
       }, { quoted: m });
     } else {
+      // Enviar solo el video con título como caption
       await conn.sendMessage(m.chat, {
         video: { url: response.result?.mp4 },
         mimetype: 'video/mp4',
         fileName: `${video.title}.mp4`,
-        contextInfo: {
-          externalAdReply: {
-            title: video.title,
-            body: '',
-            thumbnailUrl: video.image,
-            sourceUrl: video.url,
-            mediaType: 1,
-            showAdAttribution: true,
-            renderLargerThumbnail: true
-          }
-        }
-      }, { quoted: m... rcanal });
+        caption: `${video.title}`
+      }, { quoted: m });
     }
 
   } catch (e) {
