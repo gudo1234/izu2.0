@@ -8,7 +8,7 @@ let handler = async (m, { conn }) => {
   // Fecha y hora en español, Bogotá
   const fechaHoraBOG = moment().tz('America/Bogota').locale('es').format('dddd D [de] MMMM [del] YYYY [a las] h:mm a')
 
-  let txt = `${e} _*Hola ${m.pushName}*._
+  let txt = `${e} _*Hola ${m.pushName}*_
 
 ⚖️ \`Términos y Condiciones del Servicio\`
 
