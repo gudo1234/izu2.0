@@ -3,7 +3,7 @@ let handler = async (m, { conn, args, usedPrefix, text, command }) => {
 
     await conn.sendMessage(m.chat, {
         text: 'Pong!',
-        quoted: m
+        quoted: m.key ? m : undefined
     })
 
     const end = Date.now()
@@ -11,7 +11,7 @@ let handler = async (m, { conn, args, usedPrefix, text, command }) => {
 
     await conn.sendMessage(m.chat, {
         text: `Tiempo de respuesta: ${latency}ms`,
-        quoted: m
+        quoted: m.key ? m : undefined
     })
 }
 
