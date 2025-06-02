@@ -1,5 +1,4 @@
 import moment from 'moment-timezone'
-import 'moment/locale/es'
 
 let handler = async (m, { conn }) => {
   m.react('🍉')
