@@ -7,7 +7,7 @@ import { randomUUID } from 'crypto';
 
 const handler = async (m, { conn, args }) => {
   if (!args[0]) {
-    return m.reply(`🚩 Por favor, proporciona un texto para generar el video.\n_Ejemplo: .bratvid Hola mundo_`);
+    return m.reply(`${e} Por favor, proporciona un texto para generar el video.\n_Ejemplo: .bratvid Hola mundo_`);
   }
 
   const text = args.join(' ');
