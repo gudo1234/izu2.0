@@ -1,7 +1,7 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
 
     try {
-        m.reply('「❀」 Reiniciando El Bot....')
+        m.reply(`${e} Reiniciando El Bot....\n> Esto tomará unos segundos`)
         setTimeout(() => {
             process.exit(0)
         }, 3000) 
@@ -11,9 +11,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     }
 }
 
-handler.help = ['restart']
-handler.tags = ['owner']
-handler.command = ['restart', 'reiniciar'] 
+handler.command = ['restart', 'reiniciar', 'res'] 
 handler.rowner = true
 
 export default handler
