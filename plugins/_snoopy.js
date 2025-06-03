@@ -44,6 +44,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   }
 };
 
-handler.command = ['faketexto', 'fakesnoopy'];
+handler.command = ['snoopy'];
 handler.group = true;
 export default handler;
