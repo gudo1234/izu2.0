@@ -3,82 +3,47 @@ import fs from 'fs';
 import path from 'path';
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
-  const emojiMap = {
-    5: '🎨'
-  };
-
   if (!text) return m.reply(
     `🎨 *Formato incorrecto.*\n\n` +
     `> Usa el comando así:\n` +
-    `👉🏻 ${usedPrefix + command} <Título> <Mensaje>\n\n` +
+    `👉🏻 ${usedPrefix + command} <Texto>\n\n` +
     `*Ejemplo:*\n` +
-    `\`${usedPrefix + command}\` Buenos días Hoy será un gran día\n\n` +
-    `*Estilo disponible:*\n` +
-    `5 o snoopy – _Snoopy pintando un mural colorido_`
+    `\`${usedPrefix + command}\` Buenos días\n\n` +
+    `Este estilo usa la imagen de Snoopy pintando como fondo.`
   );
 
-  const style = 5;
-  const emoji = emojiMap[style];
+  const message = text.trim();
+  const width = 768;
+  const height = 768;
 
-  const parts = text.trim().split(/\s+/);
-  const title = parts[0];
-  const message = parts.slice(1).join(' ');
-
-  const width = 512;
-  const height = 512;
   const canvas = createCanvas(width, height);
   const ctx = canvas.getContext('2d');
-  ctx.textAlign = 'center';
 
-  // Fondo tipo mural claro
-  ctx.fillStyle = '#f5e3c3';
-  ctx.fillRect(0, 0, width, height);
+  // Cargar imagen de Snoopy subida por el usuario
+  const bgPath = path.join('./media', 'snoopy-wall.png'); // Asegúrate de guardar la imagen como snoopy-wall.png
+  const bg = await loadImage(bgPath);
+  ctx.drawImage(bg, 0, 0, width, height);
 
-  // Salpicaduras de pintura
-  const splashColors = ['#ff5252', '#42a5f5', '#66bb6a', '#ffca28', '#ab47bc'];
-  for (let i = 0; i < 14; i++) {
-    ctx.beginPath();
-    const x = Math.random() * width;
-    const y = Math.random() * height;
-    const r = 15 + Math.random() * 30;
-    ctx.arc(x, y, r, 0, 2 * Math.PI);
-    ctx.fillStyle = splashColors[Math.floor(Math.random() * splashColors.length)];
-    ctx.fill();
-  }
-
-  // Texto
+  // Añadir texto encima
   ctx.fillStyle = '#000000';
-  ctx.font = 'bold 34px sans-serif';
-  ctx.fillText(title, width / 2, 180);
+  ctx.font = 'bold 60px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(message, width / 2, 120);
 
-  ctx.font = '26px sans-serif';
-  ctx.fillText(message, width / 2, 240);
-
-  // Imagen de Snoopy pintor
-  try {
-    const imgPath = path.join('./media', 'snoopy-paint.png'); // asegúrate de tener esta imagen
-    const snoopy = await loadImage(imgPath);
-    ctx.drawImage(snoopy, width - 160, height - 220, 140, 140);
-  } catch (e) {
-    console.error('❌ No se pudo cargar la imagen de Snoopy:', e);
-  }
-
-  const file = path.join('./tmp', `snoopytext-${Date.now()}.png`);
+  const file = path.join('./tmp', `snoopy-${Date.now()}.png`);
   const buffer = canvas.toBuffer('image/png');
   fs.writeFileSync(file, buffer);
 
   try {
     await conn.sendMessage(m.chat, {
       image: fs.readFileSync(file),
-      caption: `${emoji} Estilo Snoopy\n> *${title}* = ${message}`
+      caption: `🎨 *Snoopy artista*\n> ${text}`
     }, { quoted: m });
-
-    await conn.sendMessage(m.chat, { react: { text: emoji, key: m.key } });
   } finally {
     fs.unlinkSync(file);
   }
 };
 
-handler.command = ['snoopy'];
+handler.command = ['faketexto', 'fakesnoopy'];
 handler.group = true;
 export default handler;
