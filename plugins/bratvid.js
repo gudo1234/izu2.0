@@ -61,6 +61,6 @@ const handler = async (m, { conn, args }) => {
   }
 };
 
-handler.command = ['br'];
+handler.command = ['bratvid', 'vidbrat'];
 handler.group = true;
 export default handler;
