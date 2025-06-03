@@ -1,39 +1,56 @@
 const handler = async (m, { conn }) => {
   try {
-    const chats = [...conn.chats.values()]
-      .filter(c => c.messages && c.messages.size)
-      .map(c => {
-        const msgs = [...c.messages.values()].filter(msg => msg.key.fromMe === false && msg.message?.conversation);
-        return {
-          id: c.id,
-          messages: msgs,
-        };
-      })
-      .filter(c => c.messages.length > 0)
-      .sort((a, b) => b.messages.at(-1).messageTimestamp - a.messages.at(-1).messageTimestamp)
-      .slice(0, 20);
+    const chats = conn.chats ? [...conn.chats.entries()] : [];
 
-    if (!chats.length) return m.reply('❌ No se encontraron chats recientes.');
+    const chatList = [];
 
-    let text = `📨 *Se muestran ${chats.length} chats recientes:*\n\n`;
+    for (const [jid, chatData] of chats) {
+      const messages = chatData.messages ? [...chatData.messages.values()] : [];
 
-    for (let i = 0; i < chats.length; i++) {
-      const chat = chats[i];
-      const jid = chat.id;
-      const userJid = jid.split('@')[0];
-      const messageCount = chat.messages.length;
-      const recentMsgs = chat.messages.slice(-3).map(msg => `- ${msg.message.conversation}`).join('\n') || '- (sin mensajes de texto)';
+      const receivedMessages = messages.filter(msg =>
+        !msg.key.fromMe &&
+        msg.message &&
+        (msg.message.conversation || msg.message.extendedTextMessage?.text)
+      );
 
-      text += `*#${i + 1}*\n📱 (${userJid})\n📨 *Cantidad de mensajes:* ${messageCount}\n📬 *Mensajes recibidos:*\n${recentMsgs}\n\n`;
+      if (receivedMessages.length === 0) continue;
+
+      const lastMessages = receivedMessages
+        .slice(-3)
+        .map(msg => {
+          return msg.message.conversation || msg.message.extendedTextMessage?.text || '[Otro tipo de mensaje]';
+        });
+
+      chatList.push({
+        jid,
+        count: receivedMessages.length,
+        lastMessages
+      });
+    }
+
+    if (!chatList.length) return m.reply('❌ No se encontraron chats recientes con mensajes recibidos.');
+
+    chatList.sort((a, b) => b.count - a.count);
+    const limitedList = chatList.slice(0, 20);
+
+    let text = `📨 *Se muestran ${limitedList.length} chats recientes:*\n\n`;
+
+    for (let i = 0; i < limitedList.length; i++) {
+      const { jid, count, lastMessages } = limitedList[i];
+      const number = jid.split('@')[0];
+      const preview = lastMessages.map(m => `- ${m}`).join('\n');
+
+      text += `*#${i + 1}*\n📱 (${number})\n📨 *Cantidad de mensajes:* ${count}\n📬 *Mensajes recibidos:*\n${preview}\n\n`;
     }
 
     m.reply(text.trim());
   } catch (e) {
-    console.error(e);
+    console.error('❌ Error en el handler de /chats:', e);
     m.reply('❌ Ocurrió un error al obtener los chats.');
   }
 };
 
+handler.help = ['chats'];
 handler.command = ['chats'];
 handler.owner = true;
 
