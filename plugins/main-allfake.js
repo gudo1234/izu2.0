@@ -102,27 +102,28 @@ global.fkontak = { key: {participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJ
 global.fake = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, newsletterName: channelRD.name, serverMessageId: -1 }
 }}, { quoted: m }
 
-global.icono = [ 
-'https://files.catbox.moe/ztexr8.jpg',
-'https://files.catbox.moe/fd7x3t.jpg',
-'https://files.catbox.moe/nsfx7f.jpg',
-'https://files.catbox.moe/p3wdxz.jpg',
-'https://files.catbox.moe/cbagtg.jpg',
-'https://files.catbox.moe/ojqdd0.jpg',
-'https://files.catbox.moe/9tkqgt.jpg',
-'https://files.catbox.moe/3s7htp.jpg',
-'https://files.catbox.moe/kkcj69.jpg',
-'https://files.catbox.moe/5ztwwp.jpg',
-'https://files.catbox.moe/mkjnzl.jpg',
-'https://files.catbox.moe/zxwp9c.jpg',
-'https://files.catbox.moe/p3fssk.jpg',
-'https://files.catbox.moe/u5bspe.jpg',
-'https://files.catbox.moe/wf4bb1.jpg',
-'https://files.catbox.moe/f28poz.jpg',
-'https://files.catbox.moe/dpx2s1.jpg',
-'https://files.catbox.moe/wg1vbo.jpg',
-'https://files.catbox.moe/grk81s.jpg',
-'https://files.catbox.moe/s7j9j7.jpg'].getRandom()
+global.icono = [
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me2.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me3.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me4.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me5.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me6.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me7.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me8.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me9.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me10.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me11.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me12.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me13.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me14.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me15.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me16.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me17.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me18.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me19.jpg',
+  'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me20.jpg'
+].getRandom()
 
 const thumbnail = await (await fetch(icono)).buffer()
 global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: wm, body: textbot, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: redes, sourceUrl: redes, thumbnail, mediaType: 1, renderLargerThumbnail: false }, }, }}
