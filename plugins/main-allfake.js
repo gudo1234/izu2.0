@@ -98,7 +98,24 @@ global.packsticker = `${nombre}`;
 global.packsticker2 = `${wm}`
   
 global.fkontak = { key: {participant: `0@s.whatsapp.net`, ...(m.chat ? { remoteJid: `6285600793871-1614953337@g.us` } : {}) }, message: { 'contactMessage': { 'displayName': `${nombre}`, 'vcard': `BEGIN:VCARD\nVERSION:3.0\nN:XL;${nombre},;;;\nFN:${nombre},\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD`, 'jpegThumbnail': null, thumbnail: null,sendEphemeral: true}}}
-
+global.meta = {
+  key: {
+    participant: '0@s.whatsapp.net',
+    remoteJid: 'status@broadcast',
+    fromMe: false,
+    id: 'MetaAI'
+  },
+  message: {
+    contactMessage: {
+      displayName: '🫩Meta AI',
+      vcard: `BEGIN:VCARD\nVERSION:3.0\nN:AI;Meta;;;\nFN:Meta AI\nitem1.TEL;waid=13135550002:13135550002\nitem1.X-ABLabel:Soporte\nEND:VCARD`,
+      jpegThumbnail: null,
+      thumbnail: null,
+      sendEphemeral: true
+    }
+  },
+  participant: '0@s.whatsapp.net'
+};
 global.fake = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, newsletterName: channelRD.name, serverMessageId: -1 }
 }}, { quoted: m }
 
