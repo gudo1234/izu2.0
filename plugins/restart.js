@@ -1,6 +1,7 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
 
     try {
+        m.react('🕒')
         m.reply(`${e} Reiniciando El Bot....\n> Esto tomará unos segundos`)
         setTimeout(() => {
             process.exit(0)
