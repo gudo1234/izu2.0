@@ -18,8 +18,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     mundo = 'Desconocido'
   }
 
-  let jpg = 'https://files.catbox.moe/rdyj5q.mp4'
-  let jpg2 = 'https://files.catbox.moe/693ws4.mp4'
+  let jpg = './media/gif.mp4'
+  let jpg2 = '/media/gif2.mp4'
   let or = ['grupo', 'gif', 'anu']
   let media = or[Math.floor(Math.random() * or.length)]
 
