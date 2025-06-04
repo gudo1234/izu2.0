@@ -244,7 +244,6 @@ setInterval(async function () {
 if (queque.indexOf(previousID) === -1) clearInterval(this)
 await delay(time)
 }, time)*/
-//mio🥵
 
 let queque = this.msgqueque
 const previousID = queque[queque.length - 1]
@@ -255,8 +254,7 @@ const interval = setInterval(() => {
         clearInterval(interval)
     }
 }, 0)}
-//mio🥵
-//
+
 if (m.isBaileys) {
 return
 }
