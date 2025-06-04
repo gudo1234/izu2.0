@@ -56,8 +56,8 @@ global.imagen8 = fs.readFileSync('./media/byenavidad.jpg')
 global.moneda = '¥enes'
 global.welcom1 = '❍ Edita Con El Comando setwelcome'
 global.welcom2 = '❍ Edita Con El Comando setbye'
-global.banner = 'https://files.catbox.moe/nsfx7f.jpg'
-global.avatar = 'https://files.catbox.moe/fd7x3t.jpg'
+global.banner = 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me.jpg'
+global.avatar = 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me2.jpg'
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
