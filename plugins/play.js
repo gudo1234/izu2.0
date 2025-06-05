@@ -94,7 +94,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           mediaType: 1,
           renderLargerThumbnail: true,
           showAdAttribution: true,
-          sourceUrl: url
+          sourceUrl: redes
         }
       }
     }, { quoted: m })
