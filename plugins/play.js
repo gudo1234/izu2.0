@@ -91,6 +91,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
             ? (isAudio ? '📂 Enviando audio como documento...' : '📂 Enviando video como documento...')
             : (isAudio ? '🔊 Enviando audio...' : '🎞️ Enviando video...'),
           thumbnail: await (await fetch(thumbnail)).buffer(),
+          thumbnailUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: true,
           showAdAttribution: true,
