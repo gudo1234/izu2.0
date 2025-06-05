@@ -99,9 +99,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }, { quoted: m });
 
-    // APIS de respaldo
-    let downloadUrl;
-    const fallbackApis = [
+    // Lista de APIs en orden de fallback
+    const apis = [
       `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`,
       `https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`,
       `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`,
@@ -112,10 +111,13 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`
     ];
 
-    for (const api of fallbackApis) {
+    let downloadUrl;
+
+    for (const api of apis) {
       try {
-        const res = await axios.get(api);
-        const data = res.data;
+        const response = await axios.get(api);
+        // intenta encontrar la URL en los posibles formatos de respuesta
+        const data = response.data;
 
         if (data?.data?.dl) {
           downloadUrl = data.data.dl;
@@ -129,16 +131,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           downloadUrl = data.result.download.url;
           break;
         }
-        if (typeof data?.url === 'string') {
+        if (data?.url) {
           downloadUrl = data.url;
           break;
         }
-      } catch {
-        continue;
+      } catch (err) {
+        console.log(`API fallida: ${api}`);
       }
     }
 
-    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga desde ninguna API.*`);
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga con ninguna API.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
