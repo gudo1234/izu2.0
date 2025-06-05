@@ -138,7 +138,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }
 
-    if (!downloadUrl) return m.reply(`${e}*No se pudo procesar la descarga desde ninguna API.*`);
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga desde ninguna API.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
