@@ -99,48 +99,66 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }, { quoted: m });
 
-    // Lista de APIs en orden de fallback
-    const apis = [
-      `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`,
-      `https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`,
-      `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`,
-      `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
-      `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`,
-      `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
-      `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
-      `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`
-    ];
-
     let downloadUrl;
-
-    for (const api of apis) {
+    try {
+      const apiDelirius = await axios.get(`https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`);
+      if (apiDelirius.data?.url) {
+        downloadUrl = apiDelirius.data.url;
+      } else throw new Error();
+    } catch {
       try {
-        const response = await axios.get(api);
-        // intenta encontrar la URL en los posibles formatos de respuesta
-        const data = response.data;
-
-        if (data?.data?.dl) {
-          downloadUrl = data.data.dl;
-          break;
+        const api2 = await axios.get(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`);
+        if (api2.data?.data?.url) {
+          downloadUrl = api2.data.data.url;
+        } else throw new Error();
+      } catch {
+        try {
+          const api3 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
+          if (api3.data?.result?.download?.url) {
+            downloadUrl = api3.data.result.download.url;
+          } else throw new Error();
+        } catch {
+          try {
+            const api4 = await axios.get(`https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`);
+            if (api4.data?.url) {
+              downloadUrl = api4.data.url;
+            } else throw new Error();
+          } catch {
+            try {
+              const api5 = await axios.get(`https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`);
+              if (api5.data?.url) {
+                downloadUrl = api5.data.url;
+              } else throw new Error();
+            } catch {
+              try {
+                const api6 = await axios.get(`https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`);
+                if (api6.data?.url) {
+                  downloadUrl = api6.data.url;
+                } else throw new Error();
+              } catch {
+                try {
+                  const api7 = await axios.get(`https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`);
+                  if (api7.data?.url) {
+                    downloadUrl = api7.data.url;
+                  } else throw new Error();
+                } catch {
+                  try {
+                    const api8 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`);
+                    if (api8.data?.data?.dl) {
+                      downloadUrl = api8.data.data.dl;
+                    } else throw new Error();
+                  } catch {
+                    return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
+                  }
+                }
+              }
+            }
+          }
         }
-        if (data?.data?.url) {
-          downloadUrl = data.data.url;
-          break;
-        }
-        if (data?.result?.download?.url) {
-          downloadUrl = data.result.download.url;
-          break;
-        }
-        if (data?.url) {
-          downloadUrl = data.url;
-          break;
-        }
-      } catch (err) {
-        console.log(`API fallida: ${api}`);
       }
     }
 
-    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga con ninguna API.*`);
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
