@@ -5,6 +5,7 @@ import fetch from 'node-fetch'
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
+  let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
   let userName = user ? user.name : await conn.getName(who)
   let vn = './media/a.mp3'; //welcome bendicion
