@@ -2,33 +2,36 @@ import fetch from 'node-fetch';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    return m.reply(`❌ Usa el comando así:\n${usedPrefix + command} <tema>`);
+    return conn.reply(m.chat, `❀ Ingresa una palabra clave para buscar imágenes.\n\nEjemplo:\n${usedPrefix + command} gatos`, m);
   }
 
-  await m.react('🔍');
+  m.react('🔍');
 
   try {
-    // Llamada a la API de Pinterest
-    const res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
-    const json = await res.json();
+    const apiUrl = `https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`;
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error('Error al contactar con la API de Pinterest.');
 
-    if (!json.status || !json.result || json.result.length === 0) {
-      return m.reply('❌ No se encontraron imágenes para ese término.');
+    const json = await res.json();
+    const resultados = json?.result;
+
+    if (!json.status || !Array.isArray(resultados) || resultados.length === 0) {
+      return conn.reply(m.chat, '❌ No se encontraron imágenes para ese término.', m);
     }
 
-    // Selecciona una imagen aleatoria del array
-    const img = json.result[Math.floor(Math.random() * json.result.length)];
+    // Mezclar y tomar hasta 10 resultados
+    const imagenes = resultados.sort(() => 0.5 - Math.random()).slice(0, 10);
 
-    await conn.sendMessage(m.chat, {
-      image: { url: img },
-      caption: `🔎 Resultado de: *${text}*\n🌐 Fuente: Pinterest`
-    }, { quoted: m });
+    for (let i = 0; i < imagenes.length; i++) {
+      const url = imagenes[i];
+      await conn.sendFile(m.chat, url, `imagen_${i + 1}.jpg`, `📌 *Resultado ${i + 1}*\n🔎 *Término:* ${text}`, m);
+    }
 
     await m.react('✅');
 
   } catch (e) {
-    console.error(e);
-    m.reply('❌ Error al buscar imágenes en Pinterest.');
+    console.error('[Pinterest ERROR]', e);
+    conn.reply(m.chat, '❌ Ocurrió un error al buscar imágenes. Intenta nuevamente más tarde.', m);
   }
 };
 
