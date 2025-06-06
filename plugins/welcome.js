@@ -5,19 +5,9 @@ import fetch from 'node-fetch'
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
-  /*let who = m.messageStubParameters[0] + '@s.whatsapp.net'
+  let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
-  let userName = user ? user.name : await conn.getName(who)*/
-// Obtener el JID original del usuario que se unió (puede venir como @lid)
-let rawJid = m.messageStubParameters?.[0]
-if (!rawJid) return // Evita errores si no hay parámetro
-
-let num = rawJid.split('@')[0]
-let who = num + '@s.whatsapp.net'
-
-let user = global.db.data.users[who]
-let userName = user?.name || await conn.getName(who)
-let tag = '@' + num
+  let tag = user ? user.name : await conn.getName(who)
   
   let vn = './media/a.mp3'; //welcome bendicion
   let vn2 = './media/bien.mp3'; //welcome entra épica
