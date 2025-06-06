@@ -41,12 +41,12 @@ let handler = async (m, { conn }) => {
 
     console.error(errorMsg)
 
-    await conn.reply(m.chat, `❌ Error procesando *${path.basename(inputPath)}* con ffmpeg. Ya fue notificado al owner.`, m)
+    await conn.reply(m.chat, `${errorMsg}\n\n❌ Error procesando *${path.basename(inputPath)}* con ffmpeg. Ya fue notificado al owner.`, m)
     await conn.reply(OWNER_JID, errorMsg, null, {
       contextInfo: { mentionedJid: [m.sender] }
     })
   }
 }
 
-handler.command = ['ffmpegtest']
+handler.command = ['ffmpeg']
 export default handler
