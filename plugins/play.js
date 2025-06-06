@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
-    return m.reply(`${e} Usa el comando correctamente:\n\n🔎 _Ejemplo:_\n*${usedPrefix + command}* nombre del video o enlace de YouTube`);
+    return m.reply(`❌ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* nombre del video o enlace de YouTube`);
   }
 
   await m.react('🕒');
@@ -16,18 +16,21 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     let video;
     if (match) {
+      // Si es URL, usar búsqueda con el ID para obtener info completa
       const id = match[1];
-      const result = await yts({ videoId: id });
-      video = result;
+      const search = await yts({ videoId: id });
+      video = search.videos?.[0];
     } else {
+      // Si es texto, hacer búsqueda normal
       const search = await yts(query);
-      video = search.videos[0];
-      if (!video) return m.reply(`${e} No se encontró el video.`);
+      video = search.videos?.[0];
     }
+
+    if (!video) return m.reply('❌ No se encontró el video.');
 
     const { title, thumbnail, url, timestamp, views, ago, author } = video;
 
-    // Comando -> lógica
+    // Lógica según comando
     const isAudio = ['play', 'play3'].includes(command);
     const asDocument = ['play3', 'play4'].includes(command);
     const apiUrl = isAudio
@@ -36,7 +39,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const res = await axios.get(apiUrl);
     const downloadUrl = res.data?.url;
-    if (!downloadUrl) return m.reply(`${e} No se pudo obtener el enlace desde Delirius.`);
+    if (!downloadUrl) return m.reply('❌ No se pudo obtener el enlace desde Delirius.');
 
     const caption = `
 🎬 *Título:* ${title}
@@ -81,7 +84,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   }
 };
 
-// Comandos válidos solo con Delirius
 handler.command = ['play', 'play2', 'play3', 'play4'];
 handler.group = true;
 
