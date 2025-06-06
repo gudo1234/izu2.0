@@ -1,15 +1,25 @@
 import ffmpeg from 'fluent-ffmpeg'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { writeFileSync } from 'fs'
+import { tmpdir } from 'os'
+import { join } from 'path'
 
 const OWNER_JID = '50492280729@s.whatsapp.net'
 
 let handler = async (m, { conn }) => {
+  if (!m.quoted || !/video/.test(m.quoted.mimetype)) {
+    return conn.reply(m.chat, '❌ Responde a un video para procesarlo.', m)
+  }
+
   const __filename = fileURLToPath(import.meta.url)
   const scriptName = path.basename(__filename)
 
-  const inputPath = '/mnt/data/input.mp4' // aquí define o pasa el archivo real
-  const outputPath = '/mnt/data/output.mp4'
+  const buffer = await m.quoted.download()
+  const inputPath = join(tmpdir(), `${Date.now()}_input.mp4`)
+  const outputPath = join(tmpdir(), `${Date.now()}_output.mp4`)
+
+  writeFileSync(inputPath, buffer)
 
   try {
     await new Promise((resolve, reject) => {
@@ -19,26 +29,24 @@ let handler = async (m, { conn }) => {
         .on('error', reject)
         .run()
     })
+
+    await conn.sendFile(m.chat, outputPath, 'output.mp4', '✅ Conversión exitosa.', m)
   } catch (e) {
     const errorMsg = `
 ❌ *FFmpeg Error*
 📁 *Script:* ${scriptName}
 🎬 *Video de entrada:* ${path.basename(inputPath)}
 📄 *Mensaje:* ${e.message}
-🔍 *Causa:* ${e.stack?.split('\n')[0] || 'No disponible'}
     `.trim()
 
     console.error(errorMsg)
 
-    // Aviso en grupo
     await conn.reply(m.chat, `❌ Error procesando *${path.basename(inputPath)}* con ffmpeg. Ya fue notificado al owner.`, m)
-
-    // Aviso privado al OWNER
     await conn.reply(OWNER_JID, errorMsg, null, {
       contextInfo: { mentionedJid: [m.sender] }
     })
   }
 }
 
-handler.command = ['ffmpeg'] // o el comando que uses
+handler.command = ['ffmpegtest']
 export default handler
