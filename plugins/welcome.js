@@ -9,8 +9,12 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let user = global.db.data.users[who]
   let userName = user ? user.name : await conn.getName(who)*/
 // Obtener el JID original del usuario que se unió (puede venir como @lid)
+let rawJid = m.messageStubParameters?.[0]
+if (!rawJid) return // Evita errores si no hay parámetro
+
 let num = rawJid.split('@')[0]
 let who = num + '@s.whatsapp.net'
+
 let user = global.db.data.users[who]
 let userName = user?.name || await conn.getName(who)
 let tag = '@' + num
