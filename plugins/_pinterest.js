@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-const pinterest = async (m, { conn, text }) => {
+const handler = async (m, { conn, text }) => {
   if (!text) return m.reply('❌ Proporciona una palabra clave para buscar imágenes.');
 
   const res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
@@ -21,4 +21,4 @@ const pinterest = async (m, { conn, text }) => {
 };
 
 handler.command = ['pinalbum'];
-export default pinterest;
+export default handler;
