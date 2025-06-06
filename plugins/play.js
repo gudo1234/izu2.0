@@ -28,7 +28,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
 
-    // Función para convertir duración (ej. "12:34" o "1:05:23") a segundos
     function durationToSeconds(duration) {
       const parts = duration.split(':').map(Number);
       if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
@@ -59,17 +58,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     } else if (normalVideoCommands.includes(command)) {
       isVideo = true;
       sendAsDocument = false;
-    }
-
-    // ⛔ Validaciones de duración con mensaje personalizado
-    if (isAudio && durationSeconds > 600) {
-      m.react('❌')
-      return m.reply(`${e} *¡Por seguridad y para evitar errores, no se puede descargar un audio mayor a 10 minutos.!*`);
-    }
-
-    if (isVideo && durationSeconds > 900) {
-      m.react('❌')
-      return m.reply(`${e} *¡Por seguridad y para evitar errores, no se puede descargar un video mayor a 15 minutos.!*`);
     }
 
     let yt = await youtubedl(url).catch(() => youtubedlv2(url));
@@ -106,6 +94,17 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         }
       }
     }, { quoted: m });
+
+    // ⛔ Validaciones de duración después de mostrar el contextInfo
+    if (isAudio && durationSeconds > 600) {
+      m.react('❌');
+      return m.reply(`${e} *¡Por seguridad y para evitar errores, no se puede descargar un audio mayor a 10 minutos.!*`);
+    }
+
+    if (isVideo && durationSeconds > 900) {
+      m.react('❌');
+      return m.reply(`${e} *¡Por seguridad y para evitar errores, no se puede descargar un video mayor a 15 minutos.!*`);
+    }
 
     let downloadUrl;
     try {
@@ -156,7 +155,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
                       downloadUrl = api8.data.data.dl;
                     } else throw new Error();
                   } catch {
-                    return m.reply(`❌ *Error al obtener el enlace de descarga.*`);
+                    return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
                   }
                 }
               }
@@ -166,7 +165,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }
 
-    if (!downloadUrl) return m.reply(`❌ *No se pudo procesar la descarga.*`);
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
@@ -179,7 +178,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
   } catch (err) {
     console.error('Error en línea:', err.stack || err);
-    return m.reply(`❌ Error inesperado: ${err.message || err}`);
+    return m.reply(`${e} Error inesperado: ${err.message || err}`);
   }
 };
 
