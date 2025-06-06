@@ -5,32 +5,35 @@ import { fileURLToPath } from 'url'
 const OWNER_JID = '50492280729@s.whatsapp.net'
 
 let handler = async (m, { conn }) => {
+  const __filename = fileURLToPath(import.meta.url)
+  const scriptName = path.basename(__filename)
+
   try {
     await new Promise((resolve, reject) => {
-      ffmpeg('input.mp4') // Cambia esto por el input real
-        .output('output.mp4') // Cambia esto por el output deseado
+      ffmpeg('/mnt/data/input.mp4') // Asegúrate que el archivo exista
+        .output('/mnt/data/output.mp4')
         .on('end', resolve)
         .on('error', reject)
         .run()
     })
   } catch (e) {
-    const __filename = fileURLToPath(import.meta.url)
-    const scriptName = path.basename(__filename)
-
-    const errorMsg = `❌ Error en ${scriptName} al procesar con ffmpeg:\n${e.message}`
+    const errorMsg = `
+❌ *FFmpeg Error en ${scriptName}:*
+*Mensaje:* ${e.message}
+*Stack:* ${e.stack?.split('\n')[0] || 'No disponible'}
+    `.trim()
 
     console.error(errorMsg)
 
-    // Responder en el grupo o chat donde ocurrió
-    await conn.reply(m.chat, errorMsg, m)
+    // Mensaje al usuario en el grupo/chat actual
+    await conn.reply(m.chat, '❌ Hubo un problema procesando el video con ffmpeg.', m)
 
-    // Enviar en privado al OWNER
+    // Mensaje directo al owner con detalles
     await conn.reply(OWNER_JID, errorMsg, null, {
       contextInfo: { mentionedJid: [m.sender] }
     })
   }
 }
 
-handler.command = ['ffmpeg'] // Comando de prueba, puedes cambiarlo
-
+handler.command = ['ffmpeg'] // o el comando que uses
 export default handler
