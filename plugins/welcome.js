@@ -5,6 +5,8 @@ import fetch from 'node-fetch'
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0;
   //😍mi desmadre
+  let user = global.db.data.users[who]
+  let userName = user ? user.name : await conn.getName(who)
   let vn = './media/a.mp3'; //welcome bendicion
   let vn2 = './media/bien.mp3'; //welcome entra épica
   let vn3 = './media/adios.mp3'; //bye y se marchó
@@ -24,8 +26,10 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let media = or[Math.floor(Math.random() * 4)];
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
   let stiker2 = await sticker(imagen8, false, global.packname, global.author) //welcome
-  let a = `🎉 _Welcome_ *@${m.messageStubParameters[0].split`@`[0]}*`
-  let b = `✋🏻 Adiós *@${m.messageStubParameters[0].split`@`[0]}*`
+  //let a = `🎉 _Welcome_ *@${m.messageStubParameters[0].split`@`[0]}*`
+  //let b = `✋🏻 Adiós *@${m.messageStubParameters[0].split`@`[0]}*`
+  let a = `🎉 _Welcome_ *${userName}*`
+  let b = `✋🏻 Adiós *${userName}*`
   //😍mi desmadre
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono )
   let im = await (await fetch(`${pp}`)).buffer()
@@ -49,7 +53,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
             'isForwarded': false,
             externalAdReply: {
                 showAdAttribution: false,
-                title: `💫 WELCOME +${m.messageStubParameters[0].split`@`[0]}`,
+                title: `💫 WELCOME +${userName}`,
                 body: 'IzuBot te da la bienvenida',
                 mediaType: 1,
                 sourceUrl: redes,
@@ -66,7 +70,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `❤️WELCOME +${m.messageStubParameters[0].split`@`[0]}`, 
+    "title": `❤️WELCOME +${userName}`, 
     "body": 'IzuBot te da la bienvenida', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
@@ -78,7 +82,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
 if (media === 'texto') {
   let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
 ╭━━━━━━━━━━❤︎₊᪲
-┃ _¡Hola!_ *@${m.messageStubParameters[0].split`@`[0]}*
+┃ _¡Hola!_ *+${userName}*
 ┃ ⇝ Bıεŋvεŋıɖσ(a) a:
 ┃ *${groupMetadata.subject}*
 ┃
@@ -149,7 +153,7 @@ await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
             'isForwarded': false,
             externalAdReply: {
                 showAdAttribution: false,
-                title: `👋🏻ADIOS +${m.messageStubParameters[0].split`@`[0]}`,
+                title: `👋🏻ADIOS +${userName}`,
                 body: 'Esperemos que no vuelva -_-',
                 mediaType: 1,
                 sourceUrl: redes,
@@ -166,7 +170,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6, vn8, vn9, vn10, vn11, 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `${e} ADIOS +${m.messageStubParameters[0].split`@`[0]}`, 
+    "title": `${e} ADIOS +${userName}`, 
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
