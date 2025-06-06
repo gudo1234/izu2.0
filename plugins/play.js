@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
-    return m.reply(`❌ Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
+    return m.reply(`${e} Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
   }
 
   await m.react('🕒');
@@ -23,16 +23,29 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     } else {
       const ytres = await yts(query);
       video = ytres.videos[0];
-      if (!video) return m.reply(`❌ *Video no encontrado.*`);
+      if (!video) return m.reply(`${e} *Video no encontrado.*`);
     }
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
 
     let yt = await youtubedl(url).catch(() => youtubedlv2(url));
     let videoInfo = yt.video['360p'];
-    if (!videoInfo) return m.reply(`❌ *No se encontró una calidad compatible para el video.*`);
+    if (!videoInfo) return m.reply(`${e} *No se encontró una calidad compatible para el video.*`);
 
     const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
+    const sizeMB = fileSize / (1024 * 1024);
+
+    let durationMin = 0;
+    if (timestamp) {
+      const parts = timestamp.split(':').map(Number);
+      if (parts.length === 3) {
+        durationMin = parts[0] * 60 + parts[1] + parts[2] / 60;
+      } else if (parts.length === 2) {
+        durationMin = parts[0] + parts[1] / 60;
+      } else if (parts.length === 1) {
+        durationMin = parts[0];
+      }
+    }
 
     const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
     const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
@@ -51,10 +64,10 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       sendAsDocument = true;
     } else if (normalAudioCommands.includes(command)) {
       isAudio = true;
-      sendAsDocument = false; // <- Se eliminan las limitaciones
+      sendAsDocument = sizeMB >= 100 || durationMin >= 15;
     } else if (normalVideoCommands.includes(command)) {
       isVideo = true;
-      sendAsDocument = false; // <- Se eliminan las limitaciones
+      sendAsDocument = sizeMB >= 100 || durationMin >= 15;
     }
 
     const caption = `
@@ -67,6 +80,10 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
 ✦ *📅 Publicado:* ${ago || 'N/A'}
 ✦ *🔗 Link:* ${url}
+
+╭───── • ─────╮
+> ${textbot}
+╰───── • ─────╯
 `.trim();
 
     await conn.sendMessage(m.chat, {
@@ -77,8 +94,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           body: sendAsDocument
             ? (isAudio ? '📂 Enviando audio como documento...' : '📂 Enviando video como documento...')
             : (isAudio ? '🔊 Enviando audio...' : '🎞️ Enviando video...'),
+          thumbnailUrl: redes,
           thumbnail: await (await fetch(thumbnail)).buffer(),
-          sourceUrl: url,
+          sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: true
         }
@@ -87,9 +105,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     let downloadUrl;
     try {
-      const apiDelirius = await axios.get(`https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`);
-      if (apiDelirius.data?.url) {
-        downloadUrl = apiDelirius.data.url;
+      const api1 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`);
+      if (api1.data?.data?.dl) {
+        downloadUrl = api1.data.data.dl;
       } else throw new Error();
     } catch {
       try {
@@ -102,49 +120,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           const api3 = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`);
           if (api3.data?.result?.download?.url) {
             downloadUrl = api3.data.result.download.url;
-          } else throw new Error();
-        } catch {
-          try {
-            const api4 = await axios.get(`https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`);
-            if (api4.data?.url) {
-              downloadUrl = api4.data.url;
-            } else throw new Error();
-          } catch {
-            try {
-              const api5 = await axios.get(`https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`);
-              if (api5.data?.url) {
-                downloadUrl = api5.data.url;
-              } else throw new Error();
-            } catch {
-              try {
-                const api6 = await axios.get(`https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`);
-                if (api6.data?.url) {
-                  downloadUrl = api6.data.url;
-                } else throw new Error();
-              } catch {
-                try {
-                  const api7 = await axios.get(`https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`);
-                  if (api7.data?.url) {
-                    downloadUrl = api7.data.url;
-                  } else throw new Error();
-                } catch {
-                  try {
-                    const api8 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${url}`);
-                    if (api8.data?.data?.dl) {
-                      downloadUrl = api8.data.data.dl;
-                    } else throw new Error();
-                  } catch {
-                    return m.reply(`❌ *Error al obtener el enlace de descarga.*`);
-                  }
-                }
-              }
-            }
           }
+        } catch {
+          return m.reply(`${e} *Error al obtener el enlace de descarga.*`);
         }
       }
     }
 
-    if (!downloadUrl) return m.reply(`❌ *No se pudo procesar la descarga.*`);
+    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
@@ -157,7 +140,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
   } catch (err) {
     console.error('Error en línea:', err.stack || err);
-    return m.reply(`❌ Error inesperado: ${err.message || err}`);
+    return m.reply(`${e} Error inesperado: ${err.message || err}`);
   }
 };
 
