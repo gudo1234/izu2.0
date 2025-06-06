@@ -1,5 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg'
 
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+export default handler
 try {
   await new Promise((resolve, reject) => {
     ffmpeg('input.mp4') // ajusta según tu input
@@ -17,3 +19,5 @@ try {
     contextInfo: { mentionedJid: [m.sender] }
   })
 }
+}
+export default handler
