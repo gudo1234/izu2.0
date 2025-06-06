@@ -10,7 +10,7 @@ const handler = async (m, { conn, text }) => {
     return m.reply(`${e} No se encontraron imágenes.`);
   }
 
-  const results = data.slice(0, 5); // Limita a 5 resultados
+  const results = data.slice(0, 20); // Limita a 5 resultados
   let first = true;
 
   for (const item of results) {
