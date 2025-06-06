@@ -28,11 +28,15 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
 
-    let yt = await youtubedl(url).catch(() => youtubedlv2(url));
-    let videoInfo = yt.video['360p'];
-    if (!videoInfo) return m.reply(`${e} *No se encontró una calidad compatible para el video.*`);
+    // Función para convertir duración (ej. "12:34" o "1:05:23") a segundos
+    function durationToSeconds(duration) {
+      const parts = duration.split(':').map(Number);
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      return 0;
+    }
 
-    const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
+    const durationSeconds = durationToSeconds(timestamp || '0:00');
 
     const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
     const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
@@ -51,11 +55,28 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       sendAsDocument = true;
     } else if (normalAudioCommands.includes(command)) {
       isAudio = true;
-      sendAsDocument = false; // <- Se eliminan las limitaciones
+      sendAsDocument = false;
     } else if (normalVideoCommands.includes(command)) {
       isVideo = true;
-      sendAsDocument = false; // <- Se eliminan las limitaciones
+      sendAsDocument = false;
     }
+
+    // ⛔ Validaciones de duración con mensaje personalizado
+    if (isAudio && durationSeconds > 600) {
+      m.react('❌')
+      return m.reply(`${e} *¡Por seguridad y para evitar errores, no se puede descargar un audio mayor a 10 minutos.!*`);
+    }
+
+    if (isVideo && durationSeconds > 900) {
+      m.react('❌')
+      return m.reply(`${e} *¡Por seguridad y para evitar errores, no se puede descargar un video mayor a 15 minutos.!*`);
+    }
+
+    let yt = await youtubedl(url).catch(() => youtubedlv2(url));
+    let videoInfo = yt.video['360p'];
+    if (!videoInfo) return m.reply(`${e} *No se encontró una calidad compatible para el video.*`);
+
+    const { fileSizeH: sizeHumanReadable, fileSize } = videoInfo;
 
     const caption = `
 ╭───── • ─────╮
@@ -145,7 +166,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }
     }
 
-    if (!downloadUrl) return m.reply(`${e} *No se pudo procesar la descarga.*`);
+    if (!downloadUrl) return m.reply(`❌ *No se pudo procesar la descarga.*`);
 
     const sendPayload = {
       [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
@@ -158,7 +179,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
   } catch (err) {
     console.error('Error en línea:', err.stack || err);
-    return m.reply(`${e} Error inesperado: ${err.message || err}`);
+    return m.reply(`❌ Error inesperado: ${err.message || err}`);
   }
 };
 
