@@ -20,5 +20,5 @@ const pinterest = async (m, { conn, text }) => {
   }
 };
 
-handler.command = ['pinterest', 'pin'];
+handler.command = ['pinalbum'];
 export default pinterest;
