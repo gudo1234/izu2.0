@@ -8,10 +8,17 @@ export async function before(m, { conn, participants, groupMetadata }) {
   /*let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
   let userName = user ? user.name : await conn.getName(who)*/
+// Obtener el JID original del usuario que se unió (puede venir como @lid)
 let rawJid = m.messageStubParameters[0]
-let who = rawJid.replace(/@.+/, '@s.whatsapp.net') // Evita que sea @lid u otro sufijo raro
+
+// Corregir el JID para reemplazar cualquier sufijo (@lid, @c.us, etc.) por @s.whatsapp.net
+let who = rawJid.replace(/@.+/, '@s.whatsapp.net')
+
+// Obtener datos del usuario, o su nombre desde WhatsApp si no está en la base de datos
 let user = global.db.data.users[who]
 let userName = user?.name || await conn.getName(who)
+
+// Obtener solo el número para el @tag
 let tag = '@' + who.split('@')[0]
   
   let vn = './media/a.mp3'; //welcome bendicion
