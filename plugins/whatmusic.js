@@ -8,19 +8,23 @@ const acr = new acrcloud({
 })
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-   // Revisa si el mensaje tiene audio o video, directo o citado
-   const mediaMsg = m.quoted?.mimetype ? m.quoted : m;
-   const msgType = Object.keys(mediaMsg.message || {})[0] || '';
-   const isMedia = ['audioMessage', 'videoMessage'].includes(msgType);
+   // 📌 Revisa si hay multimedia directo o citado
+   const quoted = m.quoted || {};
+   const msg = m.message || {};
+   const quotedMsg = quoted.message || {};
 
-   if (!isMedia) {
+   // Verifica si hay un tipo multimedia válido
+   const mediaMsg = quotedMsg.audioMessage || quotedMsg.videoMessage
+                  || msg.audioMessage || msg.videoMessage;
+
+   if (!mediaMsg) {
       return m.reply(`🔍 Por favor, responde a un *audio* o adjunta un *video corto* junto con el comando:\n\n➤ *${usedPrefix + command}*`)
    }
 
    try {
       m.react('🎵');
 
-      const buffer = await mediaMsg.download();
+      const buffer = await (m.quoted ? m.quoted.download() : m.download());
       const data = await recognizeSong(buffer);
 
       if (!data.length) return m.reply("❌ No se pudo identificar la canción. Intenta con otra parte del audio.");
@@ -59,10 +63,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 }
 
 handler.command = ["whatmusic", "quemusica", "shazam"]
-handler.group = true // Cambia a false si quieres que funcione en privados
+handler.group = true // o true si lo quieres restringir
 export default handler
 
-// Detectar canción con ACRCloud
+// 🎵 Reconocimiento con ACRCloud
 async function recognizeSong(buffer) {
    const result = await acr.identify(buffer);
    const musicList = result?.metadata?.music;
