@@ -12,7 +12,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
    const mime = msg?.mimetype || '';
 
    if (!/audio|video/.test(mime)) {
-      return m.reply(`🔍 Por favor, responde o envía un *audio* o *video corto* con el comando:\n\n➤ *${usedPrefix + command}*`)
+      return m.reply(`  Por favor, responde o envía un *audio* o *video corto* con el comando:\n\n➤ *${usedPrefix + command}*`)
    }
 
    try {
