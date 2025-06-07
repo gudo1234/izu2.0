@@ -53,27 +53,22 @@ handler.group = true;
 export default handler;*/
 
 import fetch from 'node-fetch';
-import { https } from 'follow-redirects';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   const e = '⚠️';
+
   if (!text) return m.reply(`${e} *Ingresa un enlace de Pinterest o una palabra clave para buscar.*`);
 
-  conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key } });
+  conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
 
-  // Detectar URLs de Pinterest, incluyendo pin.it
+  // Detectar cualquier URL válida de Pinterest (pin.it o pinterest.com)
   const pinterestUrlRegex = /^https?:\/\/(www\.)?(pinterest\.[a-z.]+\/pin\/|pin\.it\/)/i;
 
   if (pinterestUrlRegex.test(text)) {
     try {
-      // Resolver si es enlace acortado (pin.it)
-      let finalUrl = text;
-      if (/^https?:\/\/pin\.it\//i.test(text)) {
-        finalUrl = await resolveShortUrl(text);
-      }
-
-      let res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${encodeURIComponent(finalUrl)}`);
-      let json = await res.json();
+      // Enviar la URL directamente a la API (sin resolver)
+      const res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${encodeURIComponent(text)}`);
+      const json = await res.json();
 
       if (!json?.data?.result) throw `${e} No se pudo obtener el contenido del enlace.`;
 
@@ -84,8 +79,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     }
   } else {
     try {
-      let res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
-      let data = await res.json();
+      const res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
+      const data = await res.json();
 
       if (!Array.isArray(data) || data.length === 0) {
         return m.reply(`${e} No se encontraron imágenes para: *${text}*`);
@@ -117,13 +112,3 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 handler.command = ['pin', 'pinterest', 'pinvid', 'pinimg', 'pinterestvid', 'pindl', 'pinterestdl'];
 handler.group = true;
 export default handler;
-
-// 🔗 Función para resolver enlaces acortados de pin.it
-async function resolveShortUrl(shortUrl) {
-  return new Promise((resolve, reject) => {
-    https.get(shortUrl, (res) => {
-      if (res.responseUrl) resolve(res.responseUrl);
-      else reject(new Error('No se pudo resolver el enlace corto.'));
-    }).on('error', reject);
-  });
-}
