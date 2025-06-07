@@ -113,7 +113,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ ${e}${s}xnxxdl *‹υяʟ›*
 │ ${e}${s}xvideosdl *‹υяʟ›*
 │ ${e}${s}imagen *‹τ×τ›*
-│ ${e}${s}pinterest *‹υяʟ›*
+│ ${e}${s}pinterest *‹υяʟ/τ×τ›*
 │ ${e}${s}ytmp3 *‹υяʟ›*
 │ ${e}${s}ytmp4 *‹υяʟ›*
 │ ${e}${s}ytmp3doc *‹υяʟ›*
