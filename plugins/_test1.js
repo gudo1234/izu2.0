@@ -1,10 +1,9 @@
-import {googleImage} from '@bochilteam/scraper';
 const handler = async (m, {conn, args, usedPrefix, command}) => {
 
 let contact = 'https://wa.me/50492280729?text=aqui+está+mi+pack🔥'
 const messages = [
 [`hola`, 
-'', icono,
+'', 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me10.jpg',
 [],
 [],
 [[], ['🌎Canal', channel], ['🌱Intagram', 'https://www.instagram.com/edar504__']],
@@ -18,7 +17,7 @@ const messages = [
 []
 ], [ 
 `hola3`, 
-'', icono,
+'', 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me20.jpg',
 [],
 [],
 [[], ['🤝Donar', contact], ['🔆Socializar', contact]],
