@@ -7,15 +7,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
   //😍mi desmadre
 let who = m.messageStubParameters[0] + '@s.whatsapp.net'
 let user = global.db.data.users[who]
-let name = (user && user.name) || await conn.getName(who)
-
-let tag
-if (name && !name.startsWith('@')) {
-  tag = name
-} else {
-  let num = who.split('@')[0]
-  tag = '+' + num.replace(/(\d{1,3})(\d{4})(\d{4})$/, '$1 $2-$3')
-}
+let tag = (user && user.name) || await conn.getName(who) || '@' + who.split('@')[0]
   
   let vn = './media/a.mp3'; //welcome bendicion
   let vn2 = './media/bien.mp3'; //welcome entra épica
