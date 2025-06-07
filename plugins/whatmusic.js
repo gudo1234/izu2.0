@@ -14,7 +14,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   const isAudio = mime.includes('audio');
 
   if (!isVideo && !isAudio)
-    return m.reply(`🔍 Por favor, responde a un *audio* o adjunta un *video corto* junto con el comando:\n\n➤ *${usedPrefix + command}*`);
+    return m.reply(`${e} Por favor, responde a un *audio* o adjunta un *video corto* junto con el comando: \`${usedPrefix + command}\``);
 
   try {
     m.react('🎵');
@@ -22,7 +22,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     const data = await recognizeSong(buffer);
 
     if (!data.length)
-      return m.reply("❌ No se pudo identificar la canción. Intenta con otra parte del audio.");
+      return m.reply(`${e} No se pudo identificar la canción. Intenta con otra parte del audio.`);
 
     let caption = `🎧 *Resultado de búsqueda musical*\n\n`;
     for (const song of data) {
@@ -53,7 +53,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     m.react('✅');
   } catch (err) {
     console.error(err);
-    m.reply("⚠️ Ocurrió un error al analizar el archivo. Intenta con otro audio/video.");
+    m.reply(`${e} Ocurrió un error al analizar el archivo. Intenta con otro audio/video.`);
   }
 };
 
