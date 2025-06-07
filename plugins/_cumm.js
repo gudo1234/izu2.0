@@ -3,7 +3,6 @@ import fetch from "node-fetch";
 import axios from "axios";
 import yts from "yt-search";
 import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
-import { fromBuffer } from 'file-type';
 
 const acr = new acrcloud({
   host: "identify-ap-southeast-1.acrcloud.com",
@@ -66,7 +65,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       if (vid) youtubeUrl = vid.url;
     }
 
-    // Descargar audio si hay YouTube
+    // Descargar y enviar audio si hay YouTube
     if (youtubeUrl) {
       m.react('⏬');
       try {
@@ -75,12 +74,11 @@ let handler = async (m, { conn, usedPrefix, command }) => {
           responseType: 'arraybuffer'
         });
         const audioBuffer = Buffer.from(response.data);
-        const fileType = await fromBuffer(audioBuffer);
 
         await conn.sendMessage(m.chat, {
           document: audioBuffer,
           fileName: `${title}.mp3`,
-          mimetype: fileType?.mime || 'audio/mpeg'
+          mimetype: 'audio/mpeg'
         }, { quoted: m });
 
         m.react('✅');
