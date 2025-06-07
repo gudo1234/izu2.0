@@ -29,7 +29,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         return m.reply(`${e} No se encontraron imágenes para: *${text}*`);
       }
 
-      const results = data.slice(0, 20);
+      const results = data.slice(0, 15);
       let first = true;
 
       for (const item of results) {
