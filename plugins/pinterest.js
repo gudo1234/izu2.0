@@ -1,13 +1,10 @@
 import fetch from 'node-fetch';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`${e} Ingresa un enlace de Pinterest o una palabra clave para buscar.`);
+  if (!text) return m.reply(`${e} *Ingresa un enlace de Pinterest o una palabra clave para buscar.*`);
 
   conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
-
-  // Detectar si es URL
   if (/^https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\//i.test(text)) {
-    // Video o imagen por URL
     try {
       let res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${text}`);
       let json = await res.json();
@@ -20,7 +17,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       m.reply(`${e} Hubo un error al procesar el enlace.`);
     }
   } else {
-    // Búsqueda por texto
     try {
       let res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
       let data = await res.json();
