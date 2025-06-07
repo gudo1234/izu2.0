@@ -8,18 +8,19 @@ const acr = new acrcloud({
 })
 
 let handler = async (m, { conn, usedPrefix, command }) => {
-   const msg = m.quoted || m;
-   const mime = msg?.mimetype || '';
+   const mediaMessage = m.quoted || m;
+   const mime = mediaMessage?.mimetype || '';
 
    if (!/audio|video/.test(mime)) {
-      return m.reply(`  Por favor, responde o envía un *audio* o *video corto* con el comando:\n\n➤ *${usedPrefix + command}*`)
+      return m.reply(`🔍 Por favor, responde a un *audio* o adjunta un *video corto* junto con el comando:\n\n➤ *${usedPrefix + command}*`)
    }
 
    try {
       m.react('🎵')
-      const buffer = await msg.download();
 
+      const buffer = await mediaMessage.download();
       const data = await recognizeSong(buffer);
+
       if (!data.length) return m.reply("❌ No se pudo identificar la canción. Intenta con otra parte del audio.");
 
       let caption = `🎧 *Resultado de búsqueda musical*\n\n`;
@@ -56,11 +57,10 @@ let handler = async (m, { conn, usedPrefix, command }) => {
 }
 
 handler.command = ["whatmusic", "quemusica", "shazam"]
-handler.group = true; // cambia a true si deseas que solo funcione en grupos
+handler.group = true // Cambia a false si quieres que funcione también en privado
 export default handler
 
-
-// Función que llama a ACRCloud y organiza los resultados
+// 🔎 Función que llama a ACRCloud y organiza los resultados
 async function recognizeSong(buffer) {
    const result = await acr.identify(buffer);
    const musicList = result?.metadata?.music;
