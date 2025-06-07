@@ -47,7 +47,6 @@ const handler = async (m, { conn, text }) => {
   }
 }
 
-handler.command = /^emo$/i
-handler.help = ['emo 😆']
-handler.tags = ['sticker']
+handler.command = ['emo']
+handler.group = true;
 export default handler
