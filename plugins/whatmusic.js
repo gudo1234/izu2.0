@@ -37,12 +37,13 @@ let handler = async (m, { conn, usedPrefix, command }) => {
          text: caption.trim(),
          contextInfo: {
             externalAdReply: {
-               title: "Reconocimiento de Canción",
-               body: "Resultado de ACRCloud",
-               thumbnail: await (await fetch("https://raw.githubusercontent.com/The-King-Destroy/Adiciones/main/Contenido/1742781294508.jpeg")).buffer(),
+               title: wm,
+               body: textbot,
+               thumbnail: await (await fetch(icono)).buffer(),
+               thumbnailUrl: redes,
                mediaType: 1,
                renderLargerThumbnail: true,
-               sourceUrl: ""
+               sourceUrl: redes
             }
          }
       }, { quoted: m });
