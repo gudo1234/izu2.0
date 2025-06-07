@@ -2,7 +2,7 @@ const { createCanvas } = require('canvas')
 const { sticker } = require('../lib/sticker.js')
 
 let handler = async (m, { args, usedPrefix, command }) => {
-  if (!args[0]) throw `⚠️ Ingresa un emoji.\nEjemplo:\n${usedPrefix + command} 😆`
+  if (!args[0]) throw ` Ingresa un emoji.\nEjemplo:\n${usedPrefix + command} 😆`
 
   const emoji = args[0]
   const canvas = createCanvas(512, 512)
