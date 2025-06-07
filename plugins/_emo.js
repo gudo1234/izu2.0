@@ -1,14 +1,14 @@
-const { createCanvas } = require('canvas')
-const { sticker } = require('../lib/sticker.js')
+import { createCanvas } from 'canvas'
+import { sticker } from '../lib/sticker.js'
 
-let handler = async (m, { args, usedPrefix, command }) => {
-  if (!args[0]) throw ` Ingresa un emoji.\nEjemplo:\n${usedPrefix + command} 😆`
+const handler = async (m, { args, usedPrefix, command, conn }) => {
+  if (!args[0]) throw `⚠️ Ingresa un emoji.\nEjemplo:\n${usedPrefix + command} 😆`
 
   const emoji = args[0]
   const canvas = createCanvas(512, 512)
   const ctx = canvas.getContext('2d')
 
-  // Fondo blanco opcional (puedes comentarlo si prefieres fondo transparente)
+  // Fondo blanco opcional
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, 512, 512)
 
@@ -37,11 +37,12 @@ let handler = async (m, { args, usedPrefix, command }) => {
   // Convertir canvas a buffer
   const buffer = canvas.toBuffer()
 
-  // Enviar como sticker usando tu sistema
-  return await conn.sendFile(m.chat, await sticker(buffer, false, packname, author), 'emoji.webp', '', m)
+  // Usa tu función sticker personalizada
+  const stickerBuffer = await sticker(buffer, false, global.packname || 'Bot', global.author || '🤖')
+
+  await conn.sendFile(m.chat, stickerBuffer, 'emoji.webp', '', m)
 }
 
 handler.command = ['emo']
 handler.group = true;
-
-module.exports = handler
+export default handler
