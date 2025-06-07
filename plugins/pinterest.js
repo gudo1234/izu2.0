@@ -52,6 +52,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
 };
 
-handler.command = ['pin', 'pinterest', 'pinvid', 'pinimg', 'pinterestvid'];
+handler.command = ['pin', 'pinterest', 'pinvid', 'pinimg', 'pinterestvid', 'pindl', 'pinterestdl'];
 handler.group = true;
 export default handler;
