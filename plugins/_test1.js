@@ -1,39 +1,6 @@
-/*const handler = async (m, {conn, args, usedPrefix, command}) => {
-
-let contact = 'https://wa.me/50492280729?text=aqui+está+mi+pack🔥'
-const messages = [
-[`hola`, 
-'', 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me10.jpg',
-[],
-[],
-[[], ['🌎Canal', channel], ['🌱Intagram', 'https://www.instagram.com/edar504__']],
-[]
-], [ 
-`hola2`, 
-'', icono,
-[],
-[],
-[[], ['🗿Owner', contact], [`${e} github`, 'https://github.com/edar123']],
-[]
-], [ 
-`hola3`, 
-'', 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me20.jpg',
-[],
-[],
-[[], ['🤝Donar', contact], ['🔆Socializar', contact]],
-[]
-]]
-
-conn.sendCarousel(m.chat, null, null, null, messages)
-}
-
-handler.command = ['test1']
-export default handler*/
-
 const handler = async (m, { conn }) => {
   let contact = 'https://wa.me/50492280729?text=aqui+está+mi+pack🔥';
-  let channel = 'https://t.me/+vJqN7uGp_SM1MzQx';
-
+  let contact2 = 'https://wa.me/50492280729?text=https://chat.whatsapp.com/LTxRo0FxlZi6OSC8BHjUxc'
   const imagenes = [
     'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me.jpg',
     'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me2.jpg',
@@ -56,15 +23,11 @@ const handler = async (m, { conn }) => {
     'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me19.jpg',
     'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me20.jpg'
   ];
-
-  // Función para obtener una imagen aleatoria sin repetir
   const obtenerImagenAleatoria = (utilizadas = []) => {
     const disponibles = imagenes.filter(img => !utilizadas.includes(img));
     return disponibles[Math.floor(Math.random() * disponibles.length)];
   };
-
   const usadas = [];
-
   const messages = [
     [
       'hola',
@@ -101,15 +64,12 @@ const handler = async (m, { conn }) => {
       [
         [],
         ['🤝 Donar', contact],
-        ['🔆 Socializar', contact]
+        ['🔆 Socializar', contact2]
       ],
       []
     ]
   ];
-
-  // Guardar las usadas para evitar repetición si haces más ítems
   messages.forEach(msg => usadas.push(msg[2]));
-
   conn.sendCarousel(m.chat, null, null, null, messages);
 };
 
