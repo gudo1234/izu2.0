@@ -1,5 +1,8 @@
-import { createCanvas } from 'canvas'
+import { createCanvas, registerFont } from 'canvas'
 import { sticker } from '../lib/sticker.js'
+
+// (Opcional) Carga una fuente emoji si la tienes en tu carpeta local
+// registerFont('./fonts/NotoColorEmoji.ttf', { family: 'Emoji' })
 
 const handler = async (m, { conn, text }) => {
   if (!text) {
@@ -12,33 +15,24 @@ const handler = async (m, { conn, text }) => {
     const canvas = createCanvas(512, 512)
     const ctx = canvas.getContext('2d')
 
-    // Fondo blanco opcional
-    ctx.fillStyle = '#ffffff'
-    ctx.fillRect(0, 0, 512, 512)
+    // Fondo transparente (por defecto)
+    ctx.clearRect(0, 0, 512, 512)
 
-    // Emoji centrado
-    ctx.font = '220px "Noto Color Emoji", "Segoe UI Emoji", "Apple Color Emoji"'
+    // Dibujar emoji centrado
+    ctx.font = '280px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(emoji, 256, 300)
+    ctx.fillText(emoji, 256, 256)
 
-    // Flecha diagonal verde
+    // Si quieres agregar el círculo, lo dejamos (transparente)
     ctx.strokeStyle = '#00ff00'
-    ctx.lineWidth = 12
-    ctx.beginPath()
-    ctx.moveTo(100, 100)
-    ctx.lineTo(230, 230)
-    ctx.stroke()
-
-    // Círculo verde
-    ctx.beginPath()
-    ctx.arc(256, 300, 100, 0, Math.PI * 2)
     ctx.lineWidth = 10
+    ctx.beginPath()
+    ctx.arc(256, 256, 100, 0, Math.PI * 2)
     ctx.stroke()
 
-    const buffer = canvas.toBuffer()
-
-    const stickerBuffer = await sticker(buffer, false, global.packname || 'EmojiBot', global.author || 'Bot')
+    const buffer = canvas.toBuffer('image/png') // fondo transparente
+    const stickerBuffer = await sticker(buffer, false, global.packname || '', global.author || '')
 
     await conn.sendFile(m.chat, stickerBuffer, 'emoji.webp', '', m)
   } catch (e) {
@@ -48,5 +42,6 @@ const handler = async (m, { conn, text }) => {
 }
 
 handler.command = ['emo']
-handler.group = true;
+handler.help = ['emo 😆']
+handler.tags = ['sticker']
 export default handler
