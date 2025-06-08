@@ -23,7 +23,7 @@ await m.react('✅')
 await m.react('✖️')
 }}
 
-handler.command = ['play']
+handler.command = ['music', 'musica', 'música']
 handler.group = true;
 export default handler
 
