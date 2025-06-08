@@ -2,7 +2,7 @@ import Starlights from '@StarlightsTeam/Scraper'
 import yts from 'yt-search'
 
 let handler = async (m, { conn, args, usedPrefix, command, text }) => {
-  if (!text) return conn.reply(m.chat, `[ ✰ ] Ingresa el título de un video o canción de *YouTube*.\n\nEjemplo:\n> *${usedPrefix + command}* soy pero remix`, m, rcanal)
+  if (!text) return conn.reply(m.chat, `[ ✰ ] Ingresa el título de un video o canción de *YouTube*.\n\nEjemplo:\n> *${usedPrefix + command}* soy peor remix`, m, rcanal)
 
   await m.react('🕓')
   let res = await yts(text)
