@@ -20,9 +20,6 @@ Reglas:
 3. Mantienes un tono cercano y teatral.
 Lenguaje: Español coloquial, exagerado, pero cercano.`
 
-  // Saludo neutral sin referencia a la hora
-  const saludoCompleto = `*${username}*, soy \`izuBot\`, ¡Estoy lista para charlar contigo y ayudarte en lo que necesites! 😊`
-
   if (isQuotedImage) {
     const q = m.quoted
     const img = await q.download?.()
@@ -46,9 +43,8 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
     if (!text) {
       return conn.reply(m.chat, `Hola *${username}*, ¿en qué puedo ayudarte hoy?`, m)
     }
-    await m.react('💬')
+    await m.react('⚡')
     try {
-      await conn.reply(m.chat, saludoCompleto, m)
       const query = text
       const prompt = `${basePrompt}. Responde lo siguiente: ${query}`
       const response = await luminsesi(query, username, prompt)
