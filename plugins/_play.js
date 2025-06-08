@@ -6,28 +6,29 @@ let handler = async (m, { conn, text }) => {
   if (!m.quoted) return m.react('✖️')
   if (!m.quoted.text.includes("╭───── • ─────╮")) return m.react('✖️')
 
-  let urls = m.quoted.text.match(/https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+/gi)
+  let urls = m.quoted.text.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed|shorts)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]+)/gi)
   if (!urls) return m.react('✖️')
 
-  let format = text?.trim()?.toLowerCase()
-  if (!/^(audio|video)$/.test(format)) return m.react('✖️')
+  let tipo = text?.toLowerCase().includes('audio') ? 'audio' : text?.toLowerCase().includes('video') ? 'video' : null
+  if (!tipo) return m.react('✖️')
+
+  let user = global.db.data.users[m.sender]
+  await m.react('🕓')
 
   try {
-    await m.react('🕐')
     let link = urls[0]
-    let user = global.db.data.users[m.sender]
 
-    if (format === 'audio') {
+    if (tipo === 'audio') {
       let { title, size, dl_url } = await Starlights.ytmp3(link)
-      if (parseFloat(size) > limitAudio) return m.reply(`El audio pesa más de ${limitAudio} MB.`).then(_ => m.react('✖️'))
+      if (parseFloat(size) > limitAudio) return m.reply(`El archivo pesa más de ${limitAudio} MB.`).then(_ => m.react('✖️'))
 
       await conn.sendFile(m.chat, dl_url, `${title}.mp3`, null, m, false, {
         mimetype: 'audio/mpeg',
         asDocument: user.useDocument
       })
-    } else {
+    } else if (tipo === 'video') {
       let { title, size, quality, dl_url } = await Starlights.ytmp4(link)
-      if (parseFloat(size) > limitVideo) return m.reply(`El video pesa más de ${limitVideo} MB.`).then(_ => m.react('✖️'))
+      if (parseFloat(size) > limitVideo) return m.reply(`El archivo pesa más de ${limitVideo} MB.`).then(_ => m.react('✖️'))
 
       await conn.sendFile(m.chat, dl_url, `${title}.mp4`, `*» Título:* ${title}\n*» Calidad:* ${quality}`, m, false, {
         asDocument: user.useDocument
