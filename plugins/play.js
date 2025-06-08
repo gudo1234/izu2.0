@@ -4,8 +4,7 @@ import yts from 'yt-search'
 let handler = async (m, { conn, args, usedPrefix, command, text }) => {
   if (!text) {
     return conn.reply(
-      m.chat,
-      `⚠️ Ingresa el título de un video o canción de *YouTube*.\n\n📌 Ejemplo:\n> *${usedPrefix + command}* soy peor remix`,
+      m.chat,`${e} Ingresa el título de un video o canción de *YouTube*.\n\n*Ejemplo:* \`${usedPrefix + command}\` diles`,
       m
     )
   }
