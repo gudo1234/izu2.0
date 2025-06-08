@@ -40,7 +40,7 @@ let handler = async (m, { conn, args, usedPrefix, text, command }) => {
   }
  }
 
-handler.command = ['ytplay', 'play2']
+handler.command = ['ytplay']
 export default handler
 
 function eYear(txt) {
