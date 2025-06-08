@@ -28,7 +28,7 @@ let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
 > *Responde a este mensaje con:* 
 \`Video\`ó \`Audio\` para descargar...`
     
-    await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, rcanal)
+    await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m)
     await m.react('✅')
   } catch {
     await m.react('✖️')
