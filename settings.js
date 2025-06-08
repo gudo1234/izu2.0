@@ -65,7 +65,7 @@ global.gp1 = 'https://chat.whatsapp.com/KlFxtwHtqIWIWOTjnjqnu3' //꙳🧧𓆩ί�
 global.comunidad1 = 'https://chat.whatsapp.com/HHDvYPActKSDNgMB8bBJ9G' //comunidad
 global.channel = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H' //꙳🧧𓆩ίʑ᭘ɱί-ⲃⲟτ𓆪🧧꙳
 global.channel2 = 'https://whatsapp.com/channel/0029Vb3os7zEFeXtsN5swC44' //➲౽໋ⲉⷡυⷪ᥉ࣰ֧ⷮ✰᮫݄݃🪴
-global.md = 'https://www.instagram.com/edar504__'
+global.md = '*Siganme en instagram:*\nhttps://www.instagram.com/edar504__'
 global.correo = 'izumilitee@gmail.com'
 global.cn ='https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H';
 
