@@ -59,7 +59,7 @@ handler.command = [
   'play2', 'playvideo', 'ytv', 'mp4', 'ytmp4',
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
-
+handler.group = true;
 export default handler
 
 // Funciones auxiliares
