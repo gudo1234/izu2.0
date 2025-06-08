@@ -17,7 +17,7 @@ txt += '✦ *Canal:* ' + (res[0].author.name || 'Desconocido') + '\n'
 txt += '✦ *ID:* ' + res[0].videoId + '\n'
 txt += '✦ *Url:* https://youtu.be/' + res[0].videoId + '\n\n'
 txt += '> *-* Para descargar responde a este mensaje con *Video* o *Audio*.'
-await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, rcanal)
+await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m)
 await m.react('✅')
 } catch {
 await m.react('✖️')
