@@ -6,11 +6,11 @@ let handler = async (m, { conn, text }) => {
   if (!m.quoted) return m.react('✖️')
   if (!m.quoted.text.includes("╭───── • ─────╮")) return m.react('✖️')
 
-  let urls = m.quoted.text.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed|shorts)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]+)/gi)
+  let urls = m.quoted.text.match(/https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s]+/gi)
   if (!urls || urls.length < 1) return m.react('✖️')
 
   let format = text.trim().toLowerCase()
-  if (!format) return m.react('✖️')
+  if (!format || !/^(audio|video|audiodoc|videodoc|mp3|mp4|mp3doc|mp4doc)$/.test(format)) return m.react('✖️')
 
   await m.react('🕐')
 
@@ -35,7 +35,8 @@ let handler = async (m, { conn, text }) => {
     }, { quoted: m })
 
     await m.react('✅')
-  } catch {
+  } catch (e) {
+    console.error(e)
     await m.react('✖️')
   }
 }
