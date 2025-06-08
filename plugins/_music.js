@@ -7,24 +7,22 @@ let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
     try {
     let res = await search(args.join(" "))
     let img = await (await fetch(`${res[0].image}`)).buffer()
-    let txt = '╭───── • ─────╮\n'
-txt += '  𖤐 `YOUTUBE EXTRACTOR` 𖤐\n'
-txt += '╰───── • ─────╯\n\n'
-txt += '✦ *Título:* ' + res[0].title + '\n'
-txt += '✦ *Duración:* ' + secondString(res[0].duration.seconds) + '\n'
-txt += '✦ *Publicado:* ' + eYear(res[0].ago) + '\n'
-txt += '✦ *Canal:* ' + (res[0].author.name || 'Desconocido') + '\n'
-txt += '✦ *ID:* ' + res[0].videoId + '\n'
-txt += '✦ *Url:* https://youtu.be/' + res[0].videoId + '\n\n'
-txt += '> *-* Para descargar responde a este mensaje con *Video* o *Audio*.'
+    let txt = '`╭───── • ─────╮\n𖤐 \`YOUTUBE EXTRACTOR\` 𖤐\n╰───── • ─────╯\n\n'
+       txt += `\t\t✦ *Título* : ${res[0].title}\n`
+       txt += `\t\t✦ *Duración* : ${secondString(res[0].duration.seconds)}\n`
+       txt += `\t\t✦ *Publicado* : ${eYear(res[0].ago)}\n`
+       txt += `\t\t✦ *Canal* : ${res[0].author.name || 'Desconocido'}\n`
+       txt += `\t\t✦ *ID* : ${res[0].videoId}\n`
+       txt += `\t\t✦ *Url* : ${'https://youtu.be/' + res[0].videoId}\n\n`
+       txt += `> Para descargar responde a este mensaje con *Video* o *Audio*.`
 await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m)
 await m.react('✅')
 } catch {
 await m.react('✖️')
 }}
 
-handler.command = ['music', 'musica', 'música']
-handler.group = true;
+handler.command = ['music']
+handler.group = true
 export default handler
 
 async function search(query, options = {}) {
