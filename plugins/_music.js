@@ -15,14 +15,14 @@ let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
        txt += `\t\t*» ID* : ${res[0].videoId}\n`
        txt += `\t\t*» Url* : ${'https://youtu.be/' + res[0].videoId}\n\n`
        txt += `> *-* Para descargar responde a este mensaje con *Video* o *Audio*.`
-await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m)
+await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, null, rcanal)
 await m.react('✅')
 } catch {
 await m.react('✖️')
 }}
 
 handler.command = ['music']
-handler.group = true 
+handler.group = true;
 export default handler
 
 async function search(query, options = {}) {
