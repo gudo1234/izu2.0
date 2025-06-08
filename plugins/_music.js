@@ -1,84 +1,35 @@
-import axios from 'axios';
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
-import { pipeline } from 'stream';
-import { fileURLToPath } from 'url';
-import ytSearch from 'yt-search';
+import fetch from 'node-fetch';
 
-const streamPipeline = promisify(pipeline);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+let handler = async(m, { conn, usedPrefix, command, text }) => {
 
-const handler = async (m, { conn, text }) => {
-  if (!text) {
-    return await conn.sendMessage(m.chat, {
-      text: `✳️ Usa el comando correctamente:\n\n📌 Ejemplo: *music* La Factoría - Perdoname`
-    }, { quoted: m });
+if (!text) return m.reply(`✐ Ingresa Un Texto Para Buscar En Youtube\n> *Ejemplo:* ${usedPrefix + command}ozuna`);
+
+try {
+let api = await (await fetch(`https://delirius-apiofc.vercel.app/search/ytsearch?q=${text}`)).json();
+
+let results = api.data[0];
+
+let txt = `*「✦」 ${results.title}*
+
+> ✦ *Canal* » ${results.author.name}\n> ⴵ *Duración:* » ${results.duration}\n> ✰ *Vistas:* » ${results.views}
+> ✐Publicación » ${results.publishedAt} \n> ❒ *Tamaño:* » ${results.HumanReadable}\n> 🜸 *Link* » ${results.url} `;
+
+let img = results.image;
+
+conn.sendMessage(m.chat, { image: { url: img }, caption: txt }, { quoted: m });
+
+let api2 = await(await fetch(`https://api.vreden.my.id/api/ytmp3?url=${results.url}`)).json();
+
+// if (!api2?.result?.download.url) return m.reply('No Se  Encontraron Resultados');
+
+await conn.sendMessage(m.chat, { document: { url: api2.result.download.url }, mimetype: 'audio/mpeg', fileName: `${results.title}.mp3` }, { quoted: m });
+
+} catch (e) {
+m.reply(`Error: ${e.message}`);
+m.react('✖️');
   }
+}
 
-  await conn.sendMessage(m.chat, {
-    react: { text: '⏳', key: m.key }
-  });
+handler.command = ['pdoc'];
 
-  try {
-    // Buscar en YouTube con yt-search
-    const searchResult = await ytSearch(text);
-    if (!searchResult.videos.length) throw new Error('No se encontraron resultados en YouTube');
-
-    const video = searchResult.videos[0];
-    const videoUrl = video.url;
-    const title = video.title;
-    const duration = video.timestamp;
-    const author = video.author.name;
-
-    // Obtener MP3 desde la API de Vreden
-    const vredenAPI = `https://api.vreden.my.id/api/ytmp3?url=${videoUrl}`;
-    const response = await axios.get(vredenAPI);
-    if (!response.data?.result?.url) throw new Error('No se pudo obtener el audio del video');
-
-    const audioUrl = response.data.result.url;
-    const tmpDir = path.join(__dirname, '../tmp');
-    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-    const filePath = path.join(tmpDir, `${Date.now()}.mp3`);
-
-    const download = await axios.get(audioUrl, {
-      responseType: 'stream',
-      headers: { 'User-Agent': 'Mozilla/5.0' }
-    });
-    await streamPipeline(download.data, fs.createWriteStream(filePath));
-
-    const stats = fs.statSync(filePath);
-    if (!stats || stats.size < 100000) {
-      fs.unlinkSync(filePath);
-      throw new Error('El audio descargado está vacío o incompleto');
-    }
-
-    // Enviar audio como documento
-    const caption = `🎶 *${title}*\n🕒 Duración: ${duration}\n👤 Autor: ${author}`;
-    await conn.sendMessage(m.chat, {
-      document: fs.readFileSync(filePath),
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`,
-      caption: caption
-    }, { quoted: m });
-
-    fs.unlinkSync(filePath);
-
-    await conn.sendMessage(m.chat, {
-      react: { text: '✅', key: m.key }
-    });
-
-  } catch (err) {
-    console.error(err);
-    await conn.sendMessage(m.chat, {
-      text: `❌ *Error:* ${err.message}`
-    }, { quoted: m });
-    await conn.sendMessage(m.chat, {
-      react: { text: '❌', key: m.key }
-    });
-  }
-};
-
-handler.command = ['music'];
-export default handler;
+export default handler
