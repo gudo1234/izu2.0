@@ -1,46 +1,27 @@
 import fetch from 'node-fetch';
 
-const handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  if (!text) {
-    return conn.reply(m.chat, `✦ Ingresa una URL de YouTube.\n\nEjemplo:\n${usedPrefix + command} https://youtu.be/dQw4w9WgXcQ`, m);
+const handler = async (m, { args, usedPrefix, command }) => {
+  if (!args[0]) {
+    return m.reply(`${e} Usa el comando así:\n${usedPrefix + command} Hola`);
   }
 
-  const ytUrl = text.trim();
-  const ytRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/i;
-  if (!ytRegex.test(ytUrl)) {
-    return conn.reply(m.chat, '❌ URL no válida de YouTube.', m);
-  }
+  const texto = args.join(' ');
+  const user = m.sender.split('@')[0]; // o reemplazar por un nombre fijo
 
-  m.react('🎧');
+  const url = `http://optishield.zapto.org:38566/api/?type=gemini&user=${encodeURIComponent(user)}&text=${encodeURIComponent(texto)}`;
 
   try {
-    const api = `https://api.neoxr.eu/api/youtube?url=${encodeURIComponent(ytUrl)}&type=video&quality=480p&apikey=GataDios`;
-    const res = await fetch(api);
-    if (!res.ok) throw new Error('❌ Error al contactar la API.');
-
+    const res = await fetch(url);
     const json = await res.json();
-    const audioUrl = json?.data?.audio;
 
-    if (!audioUrl) {
-      return conn.reply(m.chat, '❌ No se pudo obtener el audio del video.', m);
-    }
-
-    const title = json.data.title || 'Audio de YouTube';
-
-    await conn.sendFile(m.chat, audioUrl, 'audio.mp3', `🎵 *${title}*`, m, null, {
-      mimetype: 'audio/mpeg',
-      fileName: `${title}.mp3`
-    });
-
-    await m.react('✅');
-
+    m.reply(json.text || '❌ No se recibió respuesta de Gemini.');
   } catch (e) {
-    console.error('[ERROR MUSIC]', e);
-    conn.reply(m.chat, '❌ Error al procesar el audio. Intenta con otro enlace.', m);
+    console.error(e);
+    m.reply(`${e} Ocurrió un error al conectar con Gemini.`);
   }
 };
 
-handler.command = ['music'];
+handler.command = ['gptgemini', 'mierd']; // puedes usar varios comandos
 handler.group = true;
 
 export default handler;
