@@ -35,7 +35,7 @@ let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
   }
 }
 
-handler.command = ['music']
+handler.command = ['music', 'musica', 'música']
 handler.group = true
 export default handler
 
