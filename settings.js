@@ -47,7 +47,7 @@ global.dev = '―͟͞🍁͓̽𝆥⟅ₑᵤ⟆𝇃𝇄⳻݊͜⳺𝇄𝇃'
 global.textbot = 'Powered System WA-Bot © 2025'
 global.etiqueta = '―͟͞🍁͓̽𝆥⟅ₑᵤ⟆𝇃𝇄⳻݊͜⳺𝇄𝇃'
 global.e = '🪴'
-global.s = '⬫'
+global.s = '➪'
 
 //*─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─⭒─ׄ─ׅ─ׄ─*
 
