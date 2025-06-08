@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import yts from 'yt-search'
 
 let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
-  if (!text) return m.reply(`${e} Ingresa el título de un video de YouTube, Ejemplo: ${usedPrefix + command} Poker Face`)
+  if (!text) return m.reply(`${e} Ingresa el título de un video de YouTube, Ejemplo: \`${usedPrefix + command}\` Poker Face`)
     await m.react('🕓')
     try {
     let res = await search(args.join(" "))
