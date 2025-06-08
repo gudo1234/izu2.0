@@ -4,12 +4,6 @@ import fetch from 'node-fetch'
 let handler = async (m, { conn, usedPrefix, command, text }) => {
   const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
   const username = `${conn.getName(m.sender)}`
-  const hour = new Date().getHours()
-  let saludo
-  if (hour >= 6 && hour < 12) saludo = '¡Buen día'
-  else if (hour >= 12 && hour < 20) saludo = '¡Buenas tardes'
-  else if (hour >= 20 || hour < 1) saludo = '¡Buenas noches'
-  else saludo = '¡Feliz madrugada'
 
   const basePrompt = `Tu nombre es izuBot (IA creada por ${author}). Eres divertida, enérgica y excéntrica. Eres amigable y teatral, y te encanta animar a ${username} con entusiasmo y buen humor.
 Tono y comportamiento:
@@ -26,8 +20,8 @@ Reglas:
 3. Mantienes un tono cercano y teatral.
 Lenguaje: Español coloquial, exagerado, pero cercano.`
 
-  // Saludo inicial para cada mensaje
-  const saludoCompleto = `¡Hola! *${username}* ${saludo}\n> Soy \`izuBot\`, ¡Estoy lista para charlar contigo y ayudarte en lo que necesites! 😊`
+  // Saludo neutral sin referencia a la hora
+  const saludoCompleto = `*${username}*, soy \`izuBot\`, ¡Estoy lista para charlar contigo y ayudarte en lo que necesites! 😊`
 
   if (isQuotedImage) {
     const q = m.quoted
@@ -50,7 +44,7 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
     }
   } else {
     if (!text) {
-      return conn.reply(m.chat, `${e} Hola *${username}* ¿En qué puedo ayudarte hoy?`, m)
+      return conn.reply(m.chat, `Hola *${username}*, ¿en qué puedo ayudarte hoy?`, m)
     }
     await m.react('💬')
     try {
@@ -67,7 +61,7 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
 }
 
 handler.command = ['ia', 'chatgpt', 'gpt', 'gemini']
-handler.group = true;
+handler.group = true
 
 export default handler
 
