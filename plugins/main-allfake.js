@@ -55,11 +55,11 @@ global.error = '✖️'
 global.msm = '⚠︎'
 
 global.emoji = '🪴'
-global.emoji2 = '🪴'
-global.emoji3 = '🪴'
-global.emoji4 = '🪴'
-global.emoji5 = '🪴'
-global.emojis = [emoji, emoji2, emoji3, emoji4].getRandom()
+global.emoji2 = '🍁'
+global.emoji3 = '🍎'
+global.emoji4 = '⚡'
+global.emoji5 = '🌱'
+global.emojis = [emoji, emoji2, emoji3, emoji4, emoji5].getRandom()
 global.e1 = '🪴'
 global.e2 = '🍁'
 global.e3 = '🍎'
