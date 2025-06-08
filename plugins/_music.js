@@ -2,27 +2,27 @@ import fetch from 'node-fetch'
 import yts from 'yt-search'
 
 let handler = async (m, { conn: star, command, args, text, usedPrefix }) => {
-  if (!text) return m.reply('[ ✰ ] Ingresa el título de un video o canción de *YouTube*.\n\n`Ejemplo:`\n' + `> *${usedPrefix + command}* Mc Davo - Debes De Saber`)
+  if (!text) return m.reply(`${e} Ingresa el título de un video de YouTube, Ejemplo: \`${usedPrefix + command}\` Poker Face`)
     await m.react('🕓')
     try {
     let res = await search(args.join(" "))
     let img = await (await fetch(`${res[0].image}`)).buffer()
-    let txt = '`乂  Y O U T U B E  -  P L A Y`\n\n'
-       txt += `\t\t*» Título* : ${res[0].title}\n`
-       txt += `\t\t*» Duración* : ${secondString(res[0].duration.seconds)}\n`
-       txt += `\t\t*» Publicado* : ${eYear(res[0].ago)}\n`
-       txt += `\t\t*» Canal* : ${res[0].author.name || 'Desconocido'}\n`
-       txt += `\t\t*» ID* : ${res[0].videoId}\n`
-       txt += `\t\t*» Url* : ${'https://youtu.be/' + res[0].videoId}\n\n`
-       txt += `> *-* Para descargar responde a este mensaje con *Video* o *Audio*.`
+    let txt = '╭───── • ─────╮\n𖤐 \`YOUTUBE EXTRACTOR\` 𖤐\n╰───── • ─────╯\n\n'
+       txt += `\t✦ *Título* : ${res[0].title}\n`
+       txt += `\t✦ *Duración* : ${secondString(res[0].duration.seconds)}\n`
+       txt += `\t✦ *Publicado* : ${eYear(res[0].ago)}\n`
+       txt += `\t✦ *Canal* : ${res[0].author.name || 'Desconocido'}\n`
+       txt += `\t✦ *ID* : ${res[0].videoId}\n`
+       txt += `\t✦ *Url* : ${'https://youtu.be/' + res[0].videoId}\n\n`
+       txt += `> Para descargar responde a este mensaje con \`Video\` o \`Audio\``
 await star.sendFile(m.chat, img, 'thumbnail.jpg', txt, m)
 await m.react('✅')
 } catch {
 await m.react('✖️')
 }}
 
-handler.command = ['music', 'música', 'musica']
-handler.group = true 
+handler.command = ['music', 'musica', 'música', 'audio', 'video']
+handler.group = true
 export default handler
 
 async function search(query, options = {}) {
