@@ -2,34 +2,28 @@ import Starlights from '@StarlightsTeam/Scraper'
 let limitAudio = 200
 let limitVideo = 300
 
-let handler = async (m, { conn, text, isPrems, isOwner, usedPrefix, command }) => {
-  if (!m.quoted) return conn.reply(m.chat, `[ ✰ ] Etiqueta el mensaje que contenga el resultado de YouTube Play.`, m).then(_ => m.react('✖️'))
-  if (!m.quoted.text.includes("╭───── • ─────╮")) return conn.reply(m.chat, `[ ✰ ] Etiqueta el mensaje que contenga el resultado de YouTube Play.`, m).then(_ => m.react('✖️'))
+let handler = async (m, { conn, text }) => {
+  if (!m.quoted) return conn.reply(m.chat, `Etiqueta el mensaje del bot con el resultado de YouTube.`, m).then(_ => m.react('✖️'))
+  if (!m.quoted.text.includes("╭───── • ─────╮")) return conn.reply(m.chat, `Ese mensaje no parece ser un resultado de YouTube.`, m).then(_ => m.react('✖️'))
 
-  let urls = m.quoted.text.match(new RegExp(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed|shorts)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]+)/, 'gi'))
-  if (!urls || urls.length < 1) return conn.reply(m.chat, `Resultado no encontrado.`, m).then(_ => m.react('✖️'))
+  let urls = m.quoted.text.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed|shorts)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]+)/gi)
+  if (!urls || urls.length < 1) return m.reply(`No se encontró el enlace.`, m).then(_ => m.react('✖️'))
 
-  const formatList = ['audio', 'video', 'audiodoc', 'videodoc', 'mp3', 'mp4', 'mp3doc', 'mp4doc']
-  let feature = text.trim().toLowerCase()
+  let format = text.trim().toLowerCase()
+  if (!format) return m.reply(`Escribe el formato que deseas: audio, video, mp3, mp4, audiodoc, videodoc, mp3doc o mp4doc`).then(_ => m.react('✖️'))
 
-  if (!formatList.includes(feature)) {
-    return conn.reply(m.chat, `[ ✰ ] Especifica el formato que deseas descargar.\n\n` +
-      `*» Formatos válidos:*\n- audio\n- video\n- audiodoc\n- videodoc\n- mp3\n- mp4\n- mp3doc\n- mp4doc\n\n` +
-      `*Ejemplo:* ${usedPrefix + command} mp3`, m).then(_ => m.react('✖️'))
-  }
-
-  await m.react('🕓')
+  await m.react('🕐')
 
   try {
     let v = urls[0]
-    let isAudio = feature.includes('audio') || feature.includes('mp3')
-    let isDoc = feature.includes('doc')
+    let isAudio = format.includes('audio') || format.includes('mp3')
+    let isDoc = format.includes('doc')
 
     let data = isAudio ? await Starlights.ytmp3(v) : await Starlights.ytmp4(v)
     let size = parseFloat(data.size)
 
-    if (isAudio && size >= limitAudio) return m.reply(`El archivo pesa más de ${limitAudio} MB, se canceló la descarga.`).then(_ => m.react('✖️'))
-    if (!isAudio && size >= limitVideo) return m.reply(`El archivo pesa más de ${limitVideo} MB, se canceló la descarga.`).then(_ => m.react('✖️'))
+    if (isAudio && size >= limitAudio) return m.reply(`El audio pesa más de ${limitAudio} MB.`).then(_ => m.react('✖️'))
+    if (!isAudio && size >= limitVideo) return m.reply(`El video pesa más de ${limitVideo} MB.`).then(_ => m.react('✖️'))
 
     let mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
     let filename = `${data.title}.${isAudio ? 'mp3' : 'mp4'}`
@@ -41,11 +35,12 @@ let handler = async (m, { conn, text, isPrems, isOwner, usedPrefix, command }) =
     }, { quoted: m })
 
     await m.react('✅')
-  } catch (e) {
+  } catch {
     await m.react('✖️')
+    conn.reply(m.chat, `No se pudo descargar.`, m)
   }
 }
 
 handler.customPrefix = /^audio|video|audiodoc|videodoc|mp3|mp4|mp3doc|mp4doc$/i
-handler.command = new RegExp // evita conflicto con comandos regulares
+handler.command = new RegExp // descarga directa al detectar palabra clave
 export default handler
