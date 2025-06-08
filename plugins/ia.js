@@ -27,7 +27,7 @@ Reglas:
 Lenguaje: Español coloquial, exagerado, pero cercano.`
 
   // Saludo inicial para cada mensaje
-  const saludoCompleto = `${saludo}, ${username}! Soy izuBot, tu amiga creada por ${author}. ¡Estoy lista para charlar contigo y ayudarte en lo que necesites! 😊`
+  const saludoCompleto = `¡Hola! *${username}* ${saludo}\n> Soy \`izuBot\`, ¡Estoy lista para charlar contigo y ayudarte en lo que necesites! 😊`
 
   if (isQuotedImage) {
     const q = m.quoted
@@ -50,7 +50,7 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
     }
   } else {
     if (!text) {
-      return conn.reply(m.chat, `${saludoCompleto}\n\n⚠️ *Ingrese su petición*\nEjemplo: ${usedPrefix + command} Cómo hacer un avión de papel`, m)
+      return conn.reply(m.chat, `${e} Hola *${username}* ¿En qué puedo ayudarte hoy?`, m)
     }
     await m.react('💬')
     try {
