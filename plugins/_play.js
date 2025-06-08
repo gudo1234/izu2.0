@@ -10,38 +10,36 @@ let handler = async (m, { conn, text }) => {
   if (!urls) return m.react('✖️')
 
   let format = text?.trim()?.toLowerCase()
-  if (!/^(audio|video|audiodoc|videodoc|mp3|mp4|mp3doc|mp4doc)$/.test(format)) return m.react('✖️')
-
-  let isAudio = /audio|mp3/.test(format)
-  let isDoc = /doc$/.test(format)
+  if (!/^(audio|video)$/.test(format)) return m.react('✖️')
 
   try {
     await m.react('🕐')
     let link = urls[0]
     let user = global.db.data.users[m.sender]
-    let data = isAudio ? await Starlights.ytmp3(link) : await Starlights.ytmp4(link)
-    let size = parseFloat(data.size)
 
-    if (isAudio && size > limitAudio) return m.reply(`El audio pesa más de ${limitAudio} MB.`).then(_ => m.react('✖️'))
-    if (!isAudio && size > limitVideo) return m.reply(`El video pesa más de ${limitVideo} MB.`).then(_ => m.react('✖️'))
+    if (format === 'audio') {
+      let { title, size, dl_url } = await Starlights.ytmp3(link)
+      if (parseFloat(size) > limitAudio) return m.reply(`El audio pesa más de ${limitAudio} MB.`).then(_ => m.react('✖️'))
 
-    let ext = isAudio ? 'mp3' : 'mp4'
-    let mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
+      await conn.sendFile(m.chat, dl_url, `${title}.mp3`, null, m, false, {
+        mimetype: 'audio/mpeg',
+        asDocument: user.useDocument
+      })
+    } else {
+      let { title, size, quality, dl_url } = await Starlights.ytmp4(link)
+      if (parseFloat(size) > limitVideo) return m.reply(`El video pesa más de ${limitVideo} MB.`).then(_ => m.react('✖️'))
 
-    await conn.sendMessage(m.chat, {
-      [isDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: data.dl_url },
-      mimetype,
-      fileName: `${data.title}.${ext}`,
-      caption: isDoc ? undefined : `*» Título:* ${data.title}\n*» Calidad:* ${data.quality}`
-    }, { quoted: m })
+      await conn.sendFile(m.chat, dl_url, `${title}.mp4`, `*» Título:* ${title}\n*» Calidad:* ${quality}`, m, false, {
+        asDocument: user.useDocument
+      })
+    }
 
     await m.react('✅')
-  } catch (e) {
-    console.error(e)
+  } catch {
     await m.react('✖️')
   }
 }
 
-handler.customPrefix = /^(audio|video|audiodoc|videodoc|mp3|mp4|mp3doc|mp4doc)$/i
+handler.customPrefix = /^(audio|video)$/i
 handler.command = new RegExp
 export default handler
