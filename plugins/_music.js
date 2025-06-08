@@ -6,32 +6,22 @@ const handler = async (m, { args, usedPrefix, command }) => {
   }
 
   const texto = args.join(' ');
-  const user = m.sender.split('@')[0]; // se puede personalizar
-
+  const user = m.sender.split('@')[0];
   const url = `http://optishield.zapto.org:38566/api/?type=gemini&user=${encodeURIComponent(user)}&text=${encodeURIComponent(texto)}`;
 
   try {
     const res = await fetch(url);
-    const data = await res.text(); // obtenemos texto crudo para inspección
+    const raw = await res.text();
 
-    // Mostramos el texto recibido para depurar
-    console.log('RESPUESTA CRUDA:', data);
+    // Convertir texto crudo a objeto
+    const data = Function('"use strict";return (' + raw + ')')();
 
-    let json;
-    try {
-      json = JSON.parse(data);
-    } catch (err) {
-      return m.reply(`⚠️ Error al analizar la respuesta:\n${data}`);
-    }
+    if (!data.text) throw new Error('Respuesta inválida');
 
-    if (!json.text) {
-      return m.reply('❌ No se recibió respuesta válida de Gemini.');
-    }
-
-    m.reply(json.text.trim());
+    await m.reply(data.text.trim());
   } catch (e) {
     console.error(e);
-    m.reply('⚠️ Error al conectar con Gemini.');
+    m.reply('❌ No se recibió respuesta válida de Gemini.');
   }
 };
 
