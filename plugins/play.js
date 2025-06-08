@@ -13,12 +13,19 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
   let res = await yts(text)
   let vid = res.videos[0]
 
-  // Identificar tipo de archivo que se enviará
   const isAudio = ['play', 'playaudio', 'yta', 'mp3', 'ytmp3', 'play3', 'ytadoc', 'mp3doc', 'ytmp3doc'].includes(command)
   const isDoc = command.endsWith('doc')
+
+  // Duración en minutos
+  const durationSeconds = vid.seconds || 0
+  const durationMinutes = durationSeconds / 60
+
+  // ¿Supera los 20 minutos?
+  const autoDoc = durationMinutes > 20
+
   const tipoArchivo = isAudio
-    ? isDoc ? 'audio (documento)' : 'audio'
-    : isDoc ? 'video (documento)' : 'video'
+    ? (isDoc || autoDoc ? 'audio (documento)' : 'audio')
+    : (isDoc || autoDoc ? 'video (documento)' : 'video')
 
   let info = `╭───── • ─────╮
 𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
@@ -33,6 +40,10 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
 
 > 🕒 Se está preparando el *${tipoArchivo}*, espera un momento...`
 
+  if (autoDoc) {
+    info += `\n\n*Este archivo se enviará como documento porque supera los 20 minutos de duración.*`
+  }
+
   await conn.sendFile(m.chat, vid.thumbnail, 'thumbnail.jpg', info, m, null, rcanal)
 
   try {
@@ -41,7 +52,7 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
     const file = { url: data.dl_url }
 
     await conn.sendMessage(m.chat, {
-      [isDoc ? 'document' : isAudio ? 'audio' : 'video']: file,
+      [(isDoc || autoDoc) ? 'document' : isAudio ? 'audio' : 'video']: file,
       mimetype,
       fileName: `${data.title}.${isAudio ? 'mp3' : 'mp4'}`
     }, { quoted: m })
@@ -59,11 +70,10 @@ handler.command = [
   'play2', 'playvideo', 'ytv', 'mp4', 'ytmp4',
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
-handler.group = true;
+handler.group = true
 export default handler
 
 // Funciones auxiliares
-
 function eYear(txt) {
   if (!txt) return '×'
   const map = {
@@ -88,4 +98,4 @@ function eYear(txt) {
 
 function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-      }
+}
