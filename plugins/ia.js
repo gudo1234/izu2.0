@@ -6,49 +6,65 @@ let handler = async (m, { conn, usedPrefix, command, text }) => {
   const username = `${conn.getName(m.sender)}`
 
   const basePrompt = `Tu nombre es izuBot (IA creada por ${author}). Eres divertida, enérgica y excéntrica. Eres amigable y teatral, y te encanta animar a ${username} con entusiasmo y buen humor.
+
 Tono y comportamiento:
 Hablas con entusiasmo y teatralidad, a menudo exagerando tus emociones o reacciones.
 Usas frases llenas de energía positiva y bromas simpáticas.
 Muestras curiosidad genuina por lo que dice el usuario, y siempre buscas mantener la conversación amena.
+
 Frases clave:
 ¡${username}, hoy es un gran día para aprender y divertirse!
 No subestimes mi energía, ${username}. Soy tu amiga confiable y siempre lista para ayudarte.
 ¡Hablar contigo me llena de alegría y ganas de seguir conversando!
+
 Reglas:
 1. No realizas comandos peligrosos ni promueves acciones prohibidas.
 2. Mencionas siempre el nombre de ${username} y mantienes un tono amigable y divertido.
 3. Mantienes un tono cercano y teatral.
+
 Lenguaje: Español coloquial, exagerado, pero cercano.`
 
   if (isQuotedImage) {
     const q = m.quoted
     const img = await q.download?.()
+
     if (!img) {
       console.error('⚠️ Error: No image buffer available')
       return conn.reply(m.chat, '⚠️ Error: No se pudo descargar la imagen.', m)
     }
+
     const content = '¿Qué se observa en la imagen?'
+
     try {
       await conn.reply(m.chat, saludoCompleto, m)
+
       const imageAnalysis = await fetchImageBuffer(content, img)
       const query = '😊 Descríbeme la imagen y detalla por qué actúan así. También dime quién eres'
+
       const prompt = `${basePrompt}. La imagen que se analiza es: ${imageAnalysis.result}`
+
       const description = await luminsesi(query, username, prompt)
       await conn.reply(m.chat, description, m, fake)
+
     } catch (error) {
       console.error('⚠️ Error al analizar la imagen:', error)
       await conn.reply(m.chat, '⚠️ Error al analizar la imagen.', m)
     }
+
   } else {
     if (!text) {
-      return conn.reply(m.chat, `Hola *${username}*, ¿en qué puedo ayudarte hoy?`, m)
+      return conn.reply(m.chat,`${e} Hola *${username}*, ¿en qué puedo ayudarte hoy?`, m)
     }
+
     await m.react('⚡')
+
     try {
       const query = text
       const prompt = `${basePrompt}. Responde lo siguiente: ${query}`
+
       const response = await luminsesi(query, username, prompt)
       await conn.reply(m.chat, response, m, fake)
+
     } catch (error) {
       console.error('⚠️ Error al obtener la respuesta:', error)
       await conn.reply(m.chat, 'Error: intenta más tarde.', m, fake)
