@@ -7,8 +7,7 @@ let handler = async (m, { conn, text, isPrems, isOwner, usedPrefix, command }) =
   if (!m.quoted.text.includes("╭───── • ─────╮")) return conn.reply(m.chat, `[ ✰ ] Etiqueta el mensaje que contenga el resultado de YouTube Play.`, m).then(_ => m.react('✖️'))
 
   let urls = m.quoted.text.match(new RegExp(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed|shorts)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]+)/, 'gi'))
-  if (!urls) return conn.reply(m.chat, `Resultado no Encontrado.`, m).then(_ => m.react('✖️'))
-  if (urls.length < 1) return conn.reply(m.chat, `Resultado no Encontrado.`, m).then(_ => m.react('✖️'))
+  if (!urls || urls.length < 1) return conn.reply(m.chat, `Resultado no encontrado.`, m).then(_ => m.react('✖️'))
 
   const formatList = ['audio', 'video', 'audiodoc', 'videodoc', 'mp3', 'mp4', 'mp3doc', 'mp4doc']
   let feature = text.trim().toLowerCase()
@@ -19,7 +18,6 @@ let handler = async (m, { conn, text, isPrems, isOwner, usedPrefix, command }) =
       `*Ejemplo:* ${usedPrefix + command} mp3`, m).then(_ => m.react('✖️'))
   }
 
-  let user = global.db.data.users[m.sender]
   await m.react('🕓')
 
   try {
@@ -48,5 +46,6 @@ let handler = async (m, { conn, text, isPrems, isOwner, usedPrefix, command }) =
   }
 }
 
-handler.command = /^audio|video|audiodoc|videodoc|mp3|mp4|mp3doc|mp4doc$/i
+handler.customPrefix = /^audio|video|audiodoc|videodoc|mp3|mp4|mp3doc|mp4doc$/i
+handler.command = new RegExp // evita conflicto con comandos regulares
 export default handler
