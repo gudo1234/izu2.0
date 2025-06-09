@@ -99,160 +99,162 @@ function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }*/
 
-import yts from 'yt-search'
-import axios from 'axios'
+import fetch from 'node-fetch';
+import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
+import yts from 'yt-search';
+import axios from 'axios';
+import Starlights from '@StarlightsTeam/Scraper';
 
-let handler = async (m, { conn, args, usedPrefix, command, text }) => {
+const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
-    return conn.reply(
-      m.chat,
-      `❗ Ingresa el título o link de un video de *YouTube*.\n\n📌 *Ejemplo:* \`${usedPrefix + command}\` diles`,
-      m
-    )
+    return m.reply(`${e} Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
   }
 
-  await m.react('🕓')
-  let res = await yts(text)
-  let vid = res.videos[0]
-  if (!vid) return m.reply('❌ No se encontró el video.')
-
-  const durationSeconds = vid.seconds || 0
-  const durationMinutes = durationSeconds / 60
-  const url = `https://youtu.be/${vid.videoId}`
-
-  // ==== SISTEMA DE COMANDOS CORREGIDO ====
-  const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
-  const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
-  const normalAudioCommands = ['play', 'playaudio', 'yta', 'mp3', 'ytmp3']
-  const normalVideoCommands = ['play2', 'playvideo', 'ytv', 'mp4', 'ytmp4']
-
-  let isAudio = false
-  let isVideo = false
-  let sendAsDoc = false
-
-  if (docAudioCommands.includes(command)) {
-    isAudio = true
-    sendAsDoc = true
-  } else if (docVideoCommands.includes(command)) {
-    isVideo = true
-    sendAsDoc = true
-  } else if (normalAudioCommands.includes(command)) {
-    isAudio = true
-  } else if (normalVideoCommands.includes(command)) {
-    isVideo = true
-  }
-
-  // Si la duración es muy larga, se fuerza como documento
-  if (!sendAsDoc && durationMinutes > 20) {
-    sendAsDoc = true
-  }
-
-  const tipoArchivo = isAudio
-    ? (sendAsDoc ? 'audio (documento)' : 'audio')
-    : (sendAsDoc ? 'video (documento)' : 'video')
-
-  const caption = `╭───── • ─────╮
-𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
-╰───── • ─────╯
-
-➪ *Título:* ${vid.title}
-➪ *Duración:* ${vid.timestamp}
-➪ *Visitas:* ${formatNumber(vid.views)}
-➪ *Autor:* ${vid.author.name}
-➪ *Publicado:* ${eYear(vid.ago)}
-➪ *Url:* ${url}
-
-🕒 Preparando *${tipoArchivo}*...`
-
-  await conn.sendFile(m.chat, vid.thumbnail, 'thumb.jpg', caption, m)
-
-  let downloadUrl
-  let titleFinal = vid.title
-  let mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
+  await m.react('🕒');
 
   try {
-    const Starlights = (await import('@StarlightsTeam/Scraper')).default
-    const result = isAudio ? await Starlights.ytmp3(url) : await Starlights.ytmp4(url)
-    if (result?.dl_url) {
-      downloadUrl = result.dl_url
-      titleFinal = result.title || vid.title
-    } else throw new Error('Starlights sin resultado')
-  } catch (err) {
-    const fallbacks = [
-      `https://delirius-apiofc.vercel.app/download/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`,
-      `https://api.neoxr.eu/api/youtube?url=${url}&type=${isVideo ? 'video' : 'audio'}&quality=480p&apikey=GataDios`,
+    const query = args.join(' ');
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const ytMatch = query.match(ytRegex);
+
+    let video;
+    if (ytMatch) {
+      const videoId = ytMatch[1];
+      const ytres = await yts({ videoId });
+      video = ytres;
+    } else {
+      const ytres = await yts(query);
+      video = ytres.videos[0];
+      if (!video) return m.reply(`${e} *Video no encontrado.*`);
+    }
+
+    const { title, thumbnail, timestamp, views, ago, url, author } = video;
+
+    function durationToSeconds(duration) {
+      const parts = duration.split(':').map(Number);
+      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      if (parts.length === 2) return parts[0] * 60 + parts[1];
+      return 0;
+    }
+
+    const durationSeconds = durationToSeconds(timestamp || '0:00');
+    const durationMinutes = durationSeconds / 60;
+
+    const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
+    const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
+    const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
+    const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
+
+    let sendAsDocument = false;
+    let isAudio = false;
+    let isVideo = false;
+
+    if (docAudioCommands.includes(command)) {
+      isAudio = true;
+      sendAsDocument = true;
+    } else if (docVideoCommands.includes(command)) {
+      isVideo = true;
+      sendAsDocument = true;
+    } else if (normalAudioCommands.includes(command)) {
+      isAudio = true;
+    } else if (normalVideoCommands.includes(command)) {
+      isVideo = true;
+    }
+
+    if (!sendAsDocument && durationMinutes > 20) sendAsDocument = true;
+
+    const tipoArchivo = isAudio
+      ? (sendAsDocument ? 'audio (documento)' : 'audio')
+      : (sendAsDocument ? 'video (documento)' : 'video');
+
+    const caption = `
+╭───── • ─────╮
+  𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
+╰───── • ─────╯
+
+✦ *📺 Canal:* ${author?.name || 'Desconocido'}
+✦ *⏱️ Duración:* ${timestamp || 'N/A'}
+✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
+✦ *📅 Publicado:* ${ago || 'N/A'}
+✦ *🔗 Link:* ${url}
+
+> 🕒 Se está preparando el *${tipoArchivo}*...${durationMinutes > 20 && !sendAsDocument ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*` : ''}
+`.trim();
+
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
+
+    if (isAudio && durationSeconds > 600) {
+      return m.reply(`${e} *Por seguridad, no se permite descargar audio de más de 10 minutos.*`);
+    }
+    if (isVideo && durationSeconds > 900) {
+      return m.reply(`${e} *Por seguridad, no se permite descargar video de más de 15 minutos.*`);
+    }
+
+    let fileData;
+    try {
+      fileData = isAudio
+        ? await Starlights.ytmp3(url)
+        : await Starlights.ytmp4(url);
+
+      const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
+      await conn.sendMessage(m.chat, {
+        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: fileData.dl_url },
+        mimetype,
+        fileName: `${fileData.title}.${isAudio ? 'mp3' : 'mp4'}`
+      }, { quoted: m });
+
+      return await m.react('✅');
+    } catch (err) {
+      console.log('[❌ Starlights Error]', err);
+      m.react('🔄')
+    }
+
+    // Fallback usando APIs
+    let downloadUrl = null;
+    const fallbackApis = [
+      `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`,
+      `https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`,
       `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`,
       `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
       `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`,
       `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
       `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
       `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`
-    ]
+    ];
 
-    for (let api of fallbacks) {
+    for (const api of fallbackApis) {
       try {
-        const res = await axios.get(api)
-        if (res.data?.url) {
-          downloadUrl = res.data.url
-          break
-        } else if (res.data?.data?.url) {
-          downloadUrl = res.data.data.url
-          break
-        } else if (res.data?.result?.download?.url) {
-          downloadUrl = res.data.result.download.url
-          break
-        } else if (res.data?.data?.dl) {
-          downloadUrl = res.data.data.dl
-          break
-        }
-      } catch {}
+        const res = await axios.get(api);
+        downloadUrl = res.data?.url || res.data?.data?.url || res.data?.data?.dl || res.data?.result?.download?.url;
+        if (downloadUrl) break;
+      } catch (e) {
+        continue;
+      }
     }
 
-    if (!downloadUrl) {
-      await m.react('❌')
-      return conn.reply(m.chat, '❌ No se pudo obtener el enlace de descarga.', m)
-    }
+    if (!downloadUrl) return m.reply(`${e} *No se pudo obtener el enlace de descarga.*`);
+
+    const sendPayload = {
+      [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
+      mimetype: isVideo ? 'video/mp4' : 'audio/mpeg',
+      fileName: `${title}.${isVideo ? 'mp4' : 'mp3'}`
+    };
+
+    await conn.sendMessage(m.chat, sendPayload, { quoted: m });
+    await m.react('✅');
+
+  } catch (err) {
+    console.error('[ERROR]', err);
+    return m.reply(`${e} Error inesperado: ${err.message || err}`);
   }
-
-  await conn.sendMessage(m.chat, {
-    [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: downloadUrl },
-    mimetype,
-    fileName: `${titleFinal}.${isAudio ? 'mp3' : 'mp4'}`
-  }, { quoted: m })
-
-  await m.react('✅')
-}
+};
 
 handler.command = [
-  'play', 'playaudio', 'yta', 'mp3', 'ytmp3',
+  'play', 'yta', 'mp3', 'ytmp3',
   'play3', 'ytadoc', 'mp3doc', 'ytmp3doc',
-  'play2', 'playvideo', 'ytv', 'mp4', 'ytmp4',
+  'play2', 'ytv', 'mp4', 'ytmp4',
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
-]
-handler.group = true
-export default handler
+];
 
-// Funciones auxiliares
-function eYear(txt) {
-  if (!txt) return '×'
-  const map = {
-    'month ago': 'mes',
-    'months ago': 'meses',
-    'year ago': 'año',
-    'years ago': 'años',
-    'hour ago': 'hora',
-    'hours ago': 'horas',
-    'minute ago': 'minuto',
-    'minutes ago': 'minutos',
-    'day ago': 'día',
-    'days ago': 'días'
-  }
-  for (let key in map) {
-    if (txt.includes(key)) return `hace ${txt.replace(key, '').trim()} ${map[key]}`
-  }
-  return txt
-}
-
-function formatNumber(n) {
-  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-}
+handler.group = true;
+export default handler;
