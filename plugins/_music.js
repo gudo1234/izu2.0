@@ -66,7 +66,7 @@ ${forceDocByDuration ? '\n📎 *Este archivo se enviará como documento por supe
     // 1. Primer intento: Stellar API
     try {
       const stellar = await axios.get(
-        `https://stelar.sylphy.xyz/dow/${isAudioMode ? 'ytmp3' : 'ytmp4'}?url=${encodeURIComponent(url)}`
+        `https://stellar.sylphy.xyz/dow/${isAudioMode ? 'ytmp3' : 'ytmp4'}?url=${encodeURIComponent(url)}`
       );
       if (stellar?.data?.result?.url) {
         downloadUrl = stellar.data.result.url;
