@@ -4,7 +4,11 @@ const handler = async (m, { conn }) => {
   //const icono = 'https://i.pinimg.com/originals/88/3b/2e/883b2eb449fa9228f2b595bff00d95cd.jpg';
 
   try {
-    const thumbnail = await (await fetch(icono)).buffer();
+    const res = await fetch(icono);
+    if (!res.ok) throw new Error('No se pudo descargar la imagen');
+
+    const thumbnail = await res.buffer();
+    console.log('[DEBUG] Thumbnail size:', thumbnail.length);
 
     await conn.sendMessage(m.chat, {
       productMessage: {
@@ -20,13 +24,13 @@ const handler = async (m, { conn }) => {
           retailerId: 'Ryze MD',
           productImageCount: 1
         },
-        businessOwnerJid: m.sender // o cualquier JID válido, también puede ser: conn.decodeJid(conn.user.id)
+        businessOwnerJid: m.sender
       }
     }, { quoted: m });
 
   } catch (e) {
     console.error('[❌ ERROR FAKECATALOGO]', e);
-    m.reply('❌ Ocurrió un error al enviar el catálogo.');
+    m.reply('❌ Ocurrió un error al enviar el catálogo.\n' + e.message);
   }
 };
 
