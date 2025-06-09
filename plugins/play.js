@@ -99,20 +99,19 @@ function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }*/
 
-import Starlights from '@StarlightsTeam/Scraper'
 import yts from 'yt-search'
 import axios from 'axios'
 
 let handler = async (m, { conn, args, usedPrefix, command, text }) => {
   if (!text) {
     return conn.reply(
-      m.chat, `${e} Ingresa el título de un video o canción de *YouTube*.\n\n📌 *Ejemplo:* \`${usedPrefix + command}\` diles`,
+      m.chat,
+      `❗ Ingresa el título de un video o canción de *YouTube*.\n\n📌 *Ejemplo:* \`${usedPrefix + command}\` diles`,
       m
     )
   }
 
   await m.react('🕓')
-
   let res = await yts(text)
   let vid = res.videos[0]
   if (!vid) return m.reply('❌ No se encontró el video.')
@@ -130,7 +129,7 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
     ? (sendAsDoc ? 'audio (documento)' : 'audio')
     : (sendAsDoc ? 'video (documento)' : 'video')
 
-  let info = `╭───── • ─────╮
+  const caption = `╭───── • ─────╮
 𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
@@ -144,44 +143,71 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
 > 🕒 Se está preparando el *${tipoArchivo}*, espera un momento...`
 
   if (autoDoc) {
-    info += `\n\n${e} *Este archivo se enviará como documento porque supera los 20 minutos de duración.*`
+    caption += `\n\n⚠️ *Este archivo se enviará como documento porque supera los 20 minutos de duración.*`
   }
 
-  await conn.sendFile(m.chat, vid.thumbnail, 'thumbnail.jpg', info, m, null, rcanal)
+  await conn.sendFile(m.chat, vid.thumbnail, 'thumb.jpg', caption, m)
 
+  let downloadUrl
+  let titleFinal = vid.title
   try {
-    const data = isAudio ? await Starlights.ytmp3(vid.url) : await Starlights.ytmp4(vid.url)
-    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
-    const file = { url: data.dl_url }
+    // Intentar con Starlights
+    let Starlights = (await import('@StarlightsTeam/Scraper')).default
+    const result = isAudio ? await Starlights.ytmp3(vid.url) : await Starlights.ytmp4(vid.url)
+    if (result?.dl_url) {
+      downloadUrl = result.dl_url
+      titleFinal = result.title || vid.title
+    } else throw new Error('No result from Starlights')
+  } catch (err) {
+    // Si falla, usar APIs externas como respaldo (igual que primer código)
+    const url = `https://youtu.be/${vid.videoId}`
+    const fallbacks = [
+      `https://delirius-apiofc.vercel.app/download/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`,
+      `https://api.neoxr.eu/api/youtube?url=${url}&type=${isAudio ? 'audio' : 'video'}&quality=480p&apikey=GataDios`,
+      `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`,
+      `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
+      `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`,
+      `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
+      `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
+      `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`
+    ]
 
-    await conn.sendMessage(m.chat, {
-      [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: file,
-      mimetype,
-      fileName: `${data.title}.${isAudio ? 'mp3' : 'mp4'}`
-    }, { quoted: m })
-
-    await m.react('✅')
-  } catch (e) {
-    await m.react('⚠️')
-
-    let urlFinal = await obtenerUrlDesdeApis(vid.url, isAudio)
-    if (!urlFinal) {
-      await conn.reply(m.chat, '❌ Error al descargar el archivo con todas las fuentes disponibles.', m)
-      return
+    for (let apiUrl of fallbacks) {
+      try {
+        const res = await axios.get(apiUrl)
+        if (res.data?.url) {
+          downloadUrl = res.data.url
+          break
+        } else if (res.data?.data?.url) {
+          downloadUrl = res.data.data.url
+          break
+        } else if (res.data?.result?.download?.url) {
+          downloadUrl = res.data.result.download.url
+          break
+        } else if (res.data?.data?.dl) {
+          downloadUrl = res.data.data.dl
+          break
+        }
+      } catch (e) {
+        continue
+      }
     }
 
-    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
-    const ext = isAudio ? 'mp3' : 'mp4'
-    const file = { url: urlFinal }
-
-    await conn.sendMessage(m.chat, {
-      [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: file,
-      mimetype,
-      fileName: `${vid.title}.${ext}`
-    }, { quoted: m })
-
-    await m.react('✅')
+    if (!downloadUrl) {
+      await m.react('❌')
+      return conn.reply(m.chat, '❌ No se pudo obtener el enlace de descarga.', m)
+    }
   }
+
+  const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
+
+  await conn.sendMessage(m.chat, {
+    [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: downloadUrl },
+    mimetype,
+    fileName: `${titleFinal}.${isAudio ? 'mp3' : 'mp4'}`
+  }, { quoted: m })
+
+  await m.react('✅')
 }
 
 handler.command = [
@@ -190,6 +216,7 @@ handler.command = [
   'play2', 'playvideo', 'ytv', 'mp4', 'ytmp4',
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
+
 handler.group = true
 export default handler
 
@@ -219,32 +246,3 @@ function eYear(txt) {
 function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
-
-// Función para fallback con APIs externas
-async function obtenerUrlDesdeApis(url, isAudio) {
-  const endpoints = [
-    isAudio
-      ? `https://api.vreden.my.id/api/ytmp3?url=${url}`
-      : `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`,
-    `https://api.neoxr.eu/api/youtube?url=${url}&type=${isAudio ? 'audio' : 'video'}&quality=360p&apikey=GataDios`,
-    isAudio
-      ? `https://api.siputzx.my.id/api/d/ytmp3?url=${url}`
-      : `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
-    `https://api.nekorinn.my.id/downloader/savetube?url=${url}&format=${isAudio ? 'audio' : '720'}`,
-    `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
-    `https://axeel.my.id/api/download/${isAudio ? 'audio' : 'video'}?url=${url}`
-  ]
-
-  for (let api of endpoints) {
-    try {
-      const { data } = await axios.get(api)
-      if (data?.url) return data.url
-      if (data?.data?.url) return data.data.url
-      if (data?.data?.dl) return data.data.dl
-      if (data?.result?.download?.url) return data.result.download.url
-    } catch (e) {
-      continue
-    }
-  }
-  return null
-      }
