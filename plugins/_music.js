@@ -2,6 +2,7 @@ import axios from 'axios';
 import yts from 'yt-search';
 
 const handler = async (m, { conn, text, command }) => {
+  const e = '🍎';
 
   if (!text) {
     return m.reply(`${e} Usa el comando correctamente:\n\n📌 *Ejemplo:*\n.audio diles\n.video https://youtube.com/watch?v=abc123XYZ`);
@@ -47,12 +48,8 @@ const handler = async (m, { conn, text, command }) => {
     const res = await axios.get(`https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(url)}`);
     const data = res.data;
 
-    // Revisión de estructura de respuesta
-    const audioUrl = data?.result?.audio?.url || data?.audio?.url;
-    const videoUrl = data?.result?.video?.url || data?.video?.url;
-
-    const downloadUrl = isAudio ? audioUrl : videoUrl;
-    const fileName = `${title}.${isAudio ? 'mp3' : 'mp4'}`;
+    const downloadUrl = data?.data?.dl;
+    const fileName = `${title}.${data?.data?.format || (isAudio ? 'mp3' : 'mp4')}`;
     const mimeType = isAudio ? 'audio/mpeg' : 'video/mp4';
 
     if (!downloadUrl) {
