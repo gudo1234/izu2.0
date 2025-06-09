@@ -2,8 +2,6 @@ import axios from 'axios';
 import yts from 'yt-search';
 
 const handler = async (m, { conn, text, command }) => {
-  const e = '🍎';
-
   if (!text) {
     return m.reply(`${e} Usa el comando correctamente:\n\n📌 *Ejemplo:*\n.audio diles\n.video https://youtube.com/watch?v=abc123XYZ`);
   }
@@ -45,7 +43,12 @@ const handler = async (m, { conn, text, command }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
 
-    const res = await axios.get(`https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(url)}`);
+    // Elegir la URL correcta según el comando
+    const apiUrl = isAudio
+      ? `https://stellar.sylphy.xyz/dow/ytmp3?url=${encodeURIComponent(url)}`
+      : `https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(url)}`;
+
+    const res = await axios.get(apiUrl);
     const data = res.data;
 
     const downloadUrl = data?.data?.dl;
