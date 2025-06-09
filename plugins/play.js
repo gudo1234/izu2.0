@@ -101,18 +101,21 @@ function formatNumber(number) {
 
 import Starlights from '@StarlightsTeam/Scraper'
 import yts from 'yt-search'
-import fetch from 'node-fetch'
+import axios from 'axios'
 
 let handler = async (m, { conn, args, usedPrefix, command, text }) => {
   if (!text) {
-    return conn.reply(m.chat, `${e} Ingresa el título de un video o canción de *YouTube*.\n\n*Ejemplo:* \`${usedPrefix + command} diles\``,
+    return conn.reply(
+      m.chat, `${e} Ingresa el título de un video o canción de *YouTube*.\n\n📌 *Ejemplo:* \`${usedPrefix + command}\` diles`,
       m
     )
   }
 
   await m.react('🕓')
+
   let res = await yts(text)
   let vid = res.videos[0]
+  if (!vid) return m.reply('❌ No se encontró el video.')
 
   const isAudio = ['play', 'playaudio', 'yta', 'mp3', 'ytmp3', 'play3', 'ytadoc', 'mp3doc', 'ytmp3doc'].includes(command)
   const isDoc = command.endsWith('doc')
@@ -144,14 +147,11 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
     info += `\n\n${e} *Este archivo se enviará como documento porque supera los 20 minutos de duración.*`
   }
 
-  await conn.sendFile(m.chat, vid.thumbnail, 'thumb.jpg', info, m, null, rcanal)
-
-  let url = vid.url
-  let title = vid.title
-  let mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
+  await conn.sendFile(m.chat, vid.thumbnail, 'thumbnail.jpg', info, m, null, rcanal)
 
   try {
-    const data = isAudio ? await Starlights.ytmp3(url) : await Starlights.ytmp4(url)
+    const data = isAudio ? await Starlights.ytmp3(vid.url) : await Starlights.ytmp4(vid.url)
+    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
     const file = { url: data.dl_url }
 
     await conn.sendMessage(m.chat, {
@@ -160,48 +160,28 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
       fileName: `${data.title}.${isAudio ? 'mp3' : 'mp4'}`
     }, { quoted: m })
 
-    return await m.react('✅')
+    await m.react('✅')
   } catch (e) {
-    await m.react('🔁')
-  }
+    await m.react('⚠️')
 
-  const fallbackApis = [
-    async () => (await (await fetch(`https://delirius-api.vercel.app/download/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`)).json()).url,
-    async () => (await (await fetch(`https://api.vreden.my.id/api/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`)).json()).result.download.url,
-    async () => (await (await fetch(`https://api.nekorinn.my.id/downloader/savetube?url=${url}&format=720`)).json()).url,
-    async () => (await (await fetch(`https://api.zenkey.my.id/api/download/${isAudio ? 'ytmp3' : 'ytmp4'}?apikey=zenkey&url=${url}`)).json()).url,
-    async () => (await (await fetch(`https://axeel.my.id/api/download/${isAudio ? 'audio' : 'video'}?url=${url}`)).json()).url,
-    async () => (await (await fetch(`https://api.siputzx.my.id/api/d/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`)).json()).data.dl,
-    async () => (await (await fetch(`https://api.neoxr.my.id/api/media/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`)).json()).data.url,
-    async () => (await (await fetch(`https://caliphapi.xyz/api/download/yt${isAudio ? 'mp3' : 'mp4'}?url=${url}`)).json()).result.url,
-    async () => (await (await fetch(`https://api.lolhuman.xyz/api/yt${isAudio ? 'audio' : 'video'}?apikey=TuAPIKey&url=${url}`)).json()).result.link
-  ]
-
-  let fallbackUrl = null
-  for (let api of fallbackApis) {
-    try {
-      const result = await api()
-      if (result) {
-        fallbackUrl = result
-        break
-      }
-    } catch {
-      continue
+    let urlFinal = await obtenerUrlDesdeApis(vid.url, isAudio)
+    if (!urlFinal) {
+      await conn.reply(m.chat, '❌ Error al descargar el archivo con todas las fuentes disponibles.', m)
+      return
     }
+
+    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
+    const ext = isAudio ? 'mp3' : 'mp4'
+    const file = { url: urlFinal }
+
+    await conn.sendMessage(m.chat, {
+      [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: file,
+      mimetype,
+      fileName: `${vid.title}.${ext}`
+    }, { quoted: m })
+
+    await m.react('✅')
   }
-
-  if (!fallbackUrl) {
-    await m.react('✖️')
-    return conn.reply(m.chat, '❌ *No se pudo obtener el archivo desde ninguna fuente.*', m)
-  }
-
-  await conn.sendMessage(m.chat, {
-    [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: fallbackUrl },
-    mimetype,
-    fileName: `${title}.${isAudio ? 'mp3' : 'mp4'}`
-  }, { quoted: m })
-
-  await m.react('✅')
 }
 
 handler.command = [
@@ -213,6 +193,7 @@ handler.command = [
 handler.group = true
 export default handler
 
+// Funciones auxiliares
 function eYear(txt) {
   if (!txt) return '×'
   const map = {
@@ -237,4 +218,33 @@ function eYear(txt) {
 
 function formatNumber(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+// Función para fallback con APIs externas
+async function obtenerUrlDesdeApis(url, isAudio) {
+  const endpoints = [
+    isAudio
+      ? `https://api.vreden.my.id/api/ytmp3?url=${url}`
+      : `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`,
+    `https://api.neoxr.eu/api/youtube?url=${url}&type=${isAudio ? 'audio' : 'video'}&quality=360p&apikey=GataDios`,
+    isAudio
+      ? `https://api.siputzx.my.id/api/d/ytmp3?url=${url}`
+      : `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
+    `https://api.nekorinn.my.id/downloader/savetube?url=${url}&format=${isAudio ? 'audio' : '720'}`,
+    `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
+    `https://axeel.my.id/api/download/${isAudio ? 'audio' : 'video'}?url=${url}`
+  ]
+
+  for (let api of endpoints) {
+    try {
+      const { data } = await axios.get(api)
+      if (data?.url) return data.url
+      if (data?.data?.url) return data.data.url
+      if (data?.data?.dl) return data.data.dl
+      if (data?.result?.download?.url) return data.result.download.url
+    } catch (e) {
+      continue
     }
+  }
+  return null
+      }
