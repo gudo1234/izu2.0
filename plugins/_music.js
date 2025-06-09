@@ -42,7 +42,17 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
 
     const forceDocByDuration = durationMinutes > 20;
     const asDocument = isAudioDoc || isVideoDoc || (!isAudioDoc && !isVideoDoc && forceDocByDuration);
-
+    const file = isAudio
+  ? '> 🎧 Enviando *Audio* espere un momento...'
+  : isAudioDoc
+  ? '> 📂 *Audio (documento)* espere un momento...'
+  : isVideo
+  ? '> 🎥 Enviando *Video* espere un momento...'
+  : isVideoDoc
+  ? '> 📥 Enviando *Video (documento)* espere un momento...'
+  : forceDocByDuration
+  ? `> 📦 Enviando *${isAudioMode ? 'Audio' : 'Video'} (documento)* espere un momento...`
+  : '';
     const caption = `
 ╭────── ⋆⋅☆⋅⋆ ──────╮
    𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
@@ -53,7 +63,7 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
 ✦ *Vistas:* ${views?.toLocaleString() || 'N/A'}
 ✦ *Publicado:* ${ago || 'N/A'}
 ✦ *Canal:* ${author?.name || 'Desconocido'}
-✦ *Enlace:* ${url}
+✦ *Enlace:* ${url}\n\n${file}
 ${forceDocByDuration ? '\n📎 *Este archivo se enviará como documento por superar los 20 minutos.*' : ''}
 `.trim();
 
