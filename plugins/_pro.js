@@ -7,15 +7,14 @@ const handler = async (m, { conn }) => {
     const res = await fetch(icono);
     if (!res.ok) throw new Error('No se pudo descargar la imagen');
 
-    const thumbnail = await res.buffer();
-    console.log('[DEBUG] Thumbnail size:', thumbnail.length);
+    const buffer = await res.buffer();
 
     await conn.sendMessage(m.chat, {
       productMessage: {
         product: {
           productImage: {
             mimetype: 'image/jpeg',
-            jpegThumbnail: thumbnail
+            url: icono // también puedes usar `buffer: buffer`
           },
           title: '🌌 Ryze MD ☠️',
           description: 'Producto generado por IA',
@@ -34,5 +33,5 @@ const handler = async (m, { conn }) => {
   }
 };
 
-handler.command = /^fakecatalogo$/i;
+handler.command = ['fakecatalogo']
 export default handler;
