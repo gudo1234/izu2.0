@@ -75,6 +75,7 @@ ${forceDocByDuration ? '\n📎 *Este archivo se enviará como documento por supe
       }
     } catch (e) {
       console.log('Fallo Stellar API:', e.message);
+      m.react('🔄')
     }
 
     // 2. Segundo intento: StarlightsTeam-Scraper
