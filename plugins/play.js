@@ -106,7 +106,7 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
   if (!text) {
     return conn.reply(
       m.chat,
-      `❗ Ingresa el título de un video o canción de *YouTube*.\n\n📌 *Ejemplo:* \`${usedPrefix + command}\` diles`,
+      `❗ Ingresa el título o link de un video de *YouTube*.\n\n📌 *Ejemplo:* \`${usedPrefix + command}\` diles`,
       m
     )
   }
@@ -116,14 +116,36 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
   let vid = res.videos[0]
   if (!vid) return m.reply('❌ No se encontró el video.')
 
-  const isAudio = ['play', 'playaudio', 'yta', 'mp3', 'ytmp3', 'play3', 'ytadoc', 'mp3doc', 'ytmp3doc'].includes(command)
-  const isDoc = command.endsWith('doc')
-
   const durationSeconds = vid.seconds || 0
   const durationMinutes = durationSeconds / 60
+  const url = `https://youtu.be/${vid.videoId}`
 
-  const autoDoc = !isDoc && durationMinutes > 20
-  const sendAsDoc = isDoc || autoDoc
+  // ==== SISTEMA DE COMANDOS CORREGIDO ====
+  const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
+  const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
+  const normalAudioCommands = ['play', 'playaudio', 'yta', 'mp3', 'ytmp3']
+  const normalVideoCommands = ['play2', 'playvideo', 'ytv', 'mp4', 'ytmp4']
+
+  let isAudio = false
+  let isVideo = false
+  let sendAsDoc = false
+
+  if (docAudioCommands.includes(command)) {
+    isAudio = true
+    sendAsDoc = true
+  } else if (docVideoCommands.includes(command)) {
+    isVideo = true
+    sendAsDoc = true
+  } else if (normalAudioCommands.includes(command)) {
+    isAudio = true
+  } else if (normalVideoCommands.includes(command)) {
+    isVideo = true
+  }
+
+  // Si la duración es muy larga, se fuerza como documento
+  if (!sendAsDoc && durationMinutes > 20) {
+    sendAsDoc = true
+  }
 
   const tipoArchivo = isAudio
     ? (sendAsDoc ? 'audio (documento)' : 'audio')
@@ -138,32 +160,27 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
 ➪ *Visitas:* ${formatNumber(vid.views)}
 ➪ *Autor:* ${vid.author.name}
 ➪ *Publicado:* ${eYear(vid.ago)}
-➪ *Url:* https://youtu.be/${vid.videoId}
+➪ *Url:* ${url}
 
-> 🕒 Se está preparando el *${tipoArchivo}*, espera un momento...`
-
-  if (autoDoc) {
-    caption += `\n\n⚠️ *Este archivo se enviará como documento porque supera los 20 minutos de duración.*`
-  }
+🕒 Preparando *${tipoArchivo}*...`
 
   await conn.sendFile(m.chat, vid.thumbnail, 'thumb.jpg', caption, m)
 
   let downloadUrl
   let titleFinal = vid.title
+  let mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
+
   try {
-    // Intentar con Starlights
-    let Starlights = (await import('@StarlightsTeam/Scraper')).default
-    const result = isAudio ? await Starlights.ytmp3(vid.url) : await Starlights.ytmp4(vid.url)
+    const Starlights = (await import('@StarlightsTeam/Scraper')).default
+    const result = isAudio ? await Starlights.ytmp3(url) : await Starlights.ytmp4(url)
     if (result?.dl_url) {
       downloadUrl = result.dl_url
       titleFinal = result.title || vid.title
-    } else throw new Error('No result from Starlights')
+    } else throw new Error('Starlights sin resultado')
   } catch (err) {
-    // Si falla, usar APIs externas como respaldo (igual que primer código)
-    const url = `https://youtu.be/${vid.videoId}`
     const fallbacks = [
       `https://delirius-apiofc.vercel.app/download/${isAudio ? 'ytmp3' : 'ytmp4'}?url=${url}`,
-      `https://api.neoxr.eu/api/youtube?url=${url}&type=${isAudio ? 'audio' : 'video'}&quality=480p&apikey=GataDios`,
+      `https://api.neoxr.eu/api/youtube?url=${url}&type=${isVideo ? 'video' : 'audio'}&quality=480p&apikey=GataDios`,
       `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`,
       `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
       `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`,
@@ -172,9 +189,9 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
       `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`
     ]
 
-    for (let apiUrl of fallbacks) {
+    for (let api of fallbacks) {
       try {
-        const res = await axios.get(apiUrl)
+        const res = await axios.get(api)
         if (res.data?.url) {
           downloadUrl = res.data.url
           break
@@ -188,9 +205,7 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
           downloadUrl = res.data.data.dl
           break
         }
-      } catch (e) {
-        continue
-      }
+      } catch {}
     }
 
     if (!downloadUrl) {
@@ -198,8 +213,6 @@ let handler = async (m, { conn, args, usedPrefix, command, text }) => {
       return conn.reply(m.chat, '❌ No se pudo obtener el enlace de descarga.', m)
     }
   }
-
-  const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
 
   await conn.sendMessage(m.chat, {
     [sendAsDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: downloadUrl },
@@ -216,7 +229,6 @@ handler.command = [
   'play2', 'playvideo', 'ytv', 'mp4', 'ytmp4',
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
-
 handler.group = true
 export default handler
 
@@ -236,13 +248,11 @@ function eYear(txt) {
     'days ago': 'días'
   }
   for (let key in map) {
-    if (txt.includes(key)) {
-      return `hace ${txt.replace(key, '').trim()} ${map[key]}`
-    }
+    if (txt.includes(key)) return `hace ${txt.replace(key, '').trim()} ${map[key]}`
   }
   return txt
 }
 
-function formatNumber(number) {
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+function formatNumber(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
