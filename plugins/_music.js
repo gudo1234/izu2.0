@@ -59,7 +59,7 @@ const handler = async (m, { conn, text, command }) => {
 ✦ *Publicado:* ${ago || 'N/A'}
 ✦ *Canal:* ${author?.name || 'Desconocido'}
 ✦ *Enlace:* ${url}
-${asDocument ? '\n📎 *Este archivo se enviará como documento por superar los 20 minutos.*' : ''}
+${(asDocument && !(isAudioDoc || isVideoDoc)) ? '\n📎 *Este archivo se enviará como documento por superar los 20 minutos.*' : ''}
 
 🎧 Enviando ${isAudioMode ? '*audio*' : '*video*'}...
 `.trim();
