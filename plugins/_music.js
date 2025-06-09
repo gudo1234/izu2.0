@@ -57,7 +57,7 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
 ${forceDocByDuration ? '\n📎 *Este archivo se enviará como documento por superar los 20 minutos.*' : ''}
 `.trim();
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
     let downloadUrl;
     let fileName = `${title}.${isAudioMode ? 'mp3' : 'mp4'}`;
