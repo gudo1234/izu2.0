@@ -54,7 +54,7 @@ ${(!isAudioDoc && !isVideoDoc && forceDocByDuration)
 
 🎧 Enviando ${isAudioMode ? '*audio*' : '*video*'}${asDocument ? ' como *documento*' : ''}...
 `.trim();
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
     const apiUrl = isAudioMode
       ? `https://stellar.sylphy.xyz/dow/ytmp3?url=${encodeURIComponent(url)}`
       : `https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(url)}`;
