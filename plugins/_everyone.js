@@ -8,7 +8,7 @@ let handler = async (m, { conn, participants, text, groupMetadata, isAdmin, isOw
   const msg = text || 'Hola a todos 👋';
 
   await conn.sendMessage(m.chat, {
-    text: `@*${groupName}* ${msg}`,
+    text: `@${groupName} *${msg}*`,
     mentions: users
   }, { quoted: m });
 };
