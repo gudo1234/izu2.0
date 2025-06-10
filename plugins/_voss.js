@@ -5,7 +5,8 @@ const handler = async (m, { conn, participants }) => {
     .map(p => p.id)
     .filter(id => id !== conn.user.jid);
 
-  const videoUrl = 'https://youtu.be/w6MJFSLzME8?si=0TmdvozJSrlTgfKX';
+  const videoId = 'w6MJFSLzME8';
+  const videoUrl = `https://youtu.be/${videoId}`;
   const caption = 'Como olvidar cuando Iván Boss salió en las noticias por kuaker';
 
   await m.react('🕒');
@@ -27,11 +28,13 @@ const handler = async (m, { conn, participants }) => {
 
     await m.react('✅');
   } catch (err) {
-    console.error('[ERROR .ivan]', err);
+    console.error('[ERROR 🪹]', err);
     await m.reply(`❌ Error al enviar el video: ${err.message}`);
   }
 };
 
-handler.customPrefix = /^(🪹)$/i
-handler.command = new RegExp
-export default handler
+handler.customPrefix = /^(🪹)$/i;
+handler.command = new RegExp;
+handler.group = true;
+
+export default handler;
