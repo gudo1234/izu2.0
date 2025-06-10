@@ -188,8 +188,7 @@ import axios from 'axios';
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let query = args.join(' ').trim();
-  if (!query) return conn.reply(m.chat, `${e} _Hola ${m.pushName},
-este comando puede generar respuestas con lenguaje ofensivo o inapropiado._\n\n> ${s} Ni el bot ni sus creadores se hacen responsables por el contenido o el uso que se le dé.`, m);
+  if (!query) return conn.reply(m.chat, `${e} _Hola ${m.pushName}, este comando puede generar respuestas con lenguaje ofensivo o inapropiado._\n\n> ${s} Ni el bot ni sus creadores se hacen responsables por el contenido o el uso que se le dé.`, m);
 
   await conn.sendPresenceUpdate('composing', m.chat);
 
