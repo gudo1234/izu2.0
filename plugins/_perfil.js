@@ -87,5 +87,5 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 }
 
 handler.command = ['wastalk', 'perfil', 'ava'];
-//handler.group = true;
+handler.group = true;
 export default handler
