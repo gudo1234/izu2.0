@@ -5,7 +5,7 @@ let handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const videoUrl = 'https://youtu.be/w6MJFSLzME8?si=0TmdvozJSrlTgfKX';
+  const videoUrl = 'diles';
   const caption = 'Como olvidar cuando Ivan Boss salió en las noticias por kuaker';
 
   try {
@@ -30,7 +30,7 @@ let handler = async (m, { conn, participants }) => {
     await m.react('✅');
   } catch (err) {
     console.error('[ERROR .ivan]', err);
-    //await m.reply(`❌ Error al enviar el video: ${err.message}`);
+    await m.reply(`❌ Error al enviar el video: ${err.message}`);
   }
 };
 
