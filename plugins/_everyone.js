@@ -4,53 +4,30 @@ let handler = async (m, { conn, text, participants, command, groupMetadata }) =>
       .map(u => u.id)
       .filter(v => v !== conn.user.jid);
 
-    if (m.quoted) {
-      // Reenviar mensaje citado con menciones a todos
-      return conn.sendMessage(m.chat, {
-        forward: m.quoted.fakeObj,
-        mentions: users,
-        contextInfo: {
-          mentionedJid: users,
-          groupMentions: [{
-            groupJid: m.chat,
-            groupSubject: groupMetadata?.subject || ''
-          }]
-        }
-      });
-    }
+    const groupName = groupMetadata?.subject || 'este grupo';
 
-    if (text?.trim()) {
-      // Enviar texto con menciones a todos
-      return conn.sendMessage(m.chat, {
-        text,
-        mentions: users,
-        contextInfo: {
-          mentionedJid: users,
-          groupMentions: [{
-            groupJid: m.chat,
-            groupSubject: groupMetadata?.subject || ''
-          }]
-        }
-      });
-    }
+    // Construyo el mensaje base con el nombre del grupo
+    const baseMsg = `👥 *${groupName}*`;
 
-    // Si no hay texto ni mensaje citado, solo manda las menciones vacías
-    return conn.sendMessage(m.chat, {
-      text: '‎', // Caracter invisible para que no quede vacío del todo
+    // Si hay texto, se concatena, si no, solo el grupo
+    const finalMsg = text?.trim() ? `${baseMsg} ${text.trim()}` : baseMsg;
+
+    await conn.sendMessage(m.chat, {
+      text: finalMsg,
       mentions: users,
       contextInfo: {
         mentionedJid: users,
         groupMentions: [{
           groupJid: m.chat,
-          groupSubject: groupMetadata?.subject || ''
+          groupSubject: groupName
         }]
       }
     });
   } catch (error) {
-    console.error('Error en comando totag:', error);
+    console.error('Error en comando everyone:', error);
     await m.reply('❌ Ocurrió un error al ejecutar el comando.');
   }
-}
+};
 
 handler.command = ['everyone'];
 handler.admin = true;
