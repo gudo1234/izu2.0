@@ -13,20 +13,22 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints)
 }
 
-function formatearFecha(fecha) {
-  return fecha.toLocaleDateString('es-ES', {
+function formatearFechaLarga(fecha) {
+  return fecha.toLocaleDateString('es-MX', {
     weekday: 'long',
-    year: 'numeric',
+    day: 'numeric',
     month: 'long',
-    day: 'numeric'
+    year: 'numeric'
   })
 }
 
-function formatearHora(fecha) {
-  return fecha.toLocaleTimeString('es-ES', {
+function formatearHoraMexico(fecha) {
+  return fecha.toLocaleTimeString('es-MX', {
+    timeZone: 'America/Mexico_City',
     hour: '2-digit',
-    minute: '2-digit'
-  })
+    minute: '2-digit',
+    hour12: true
+  }).replace('.', '').toLowerCase()
 }
 
 let handler = async (m, { conn, text, isOwner }) => {
@@ -51,11 +53,11 @@ let handler = async (m, { conn, text, isOwner }) => {
     console.error('Error al obtener datos del país:', e)
   }
 
-  const fechaActual = new Date()
-  const fechaFutura = new Date(fechaActual.getTime() + 31 * 24 * 60 * 60 * 1000)
-
-  const fechaTexto = `${formatearFecha(fechaActual)} _Hasta_ ${formatearFecha(fechaFutura)}`
-  const horaActual = formatearHora(fechaActual)
+  const ahora = new Date()
+  const vencimiento = new Date(ahora.getTime() + 31 * 24 * 60 * 60 * 1000)
+  const fechaInicio = formatearFechaLarga(ahora)
+  const fechaFin = formatearFechaLarga(vencimiento)
+  const horaMexico = formatearHoraMexico(ahora)
 
   let pp = await conn.profilePictureUrl(m.messageStubParameters?.[0] || m.chat, 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
@@ -66,10 +68,14 @@ let handler = async (m, { conn, text, isOwner }) => {
     `🌎 *País:* ${pais} ${bandera}\n` +
     `🏛️ *Capital:* ${capital}\n` +
     `📍 *Código:* ${countryCode}\n` +
-    `🕒 *Hora actual:* ${horaActual}\n` +
-    `📅 *Válido del:* ${fechaTexto}\n` +
+    `🕒 *Hora actual:* ${horaMexico} Hora México\n` +
+    `🗓️ *Válido desde:* ${fechaInicio}\n` +
+    `📆 *Vence:* ${fechaFin}\n`
     `🤖 *Tipo de Servicio:* Bot Online Group\n` +
-    `💵 *Tipo de pago:* No hubieron pagos`
+    `💵 *Tipo de pago:* No hubieron pagos\n\n` + 
+    `> 📱 Si detecta un error en la factura de pago o desea contratar un servicio permanente, por favor comuníquese con mi desarrollador.` +
+    `🧑🏻‍💻 wa.me/50492280729?text=Hola%2C+vengo+del+bot+y+quiero+información+sobre+el+servicio.\n` + 
+    `${e} *Instagram:* https://www.instagram.com/edar504__`
 
   if (isOwner) {
     await conn.groupAcceptInvite(code)
