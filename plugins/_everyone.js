@@ -1,33 +1,31 @@
-const handler = async (m, { conn, text, participants, groupMetadata, configSet, command }) => {
-    // Obtener números de los participantes del grupo
-    const members = participants.map(user => user.id);
+const handler = async (m, { conn, text, participants, groupMetadata }) => {
+    try {
+        // Obtener todos los IDs de participantes (JIDs)
+        const users = participants.map(user => user.id);
 
-    // Crear la whitelist desde el configSet
-    //const whitelist = configSet.whitelist.map(i => i + '@s.whatsapp.net');
+        // Mensaje por defecto
+        const message = text ? text : 'Hola 😃';
 
-    // Filtrar los usuarios que NO están en la whitelist
-    //const users = members.filter(id => !whitelist.includes(id));
+        // Construir mensaje con mención al remitente (opcional)
+        const msg = `@${m.sender.split('@')[0]} ${message}`;
 
-    // Mensaje por defecto
-    const message = text ? text : 'Hola 😃';
-
-    // Texto con mención masiva
-    const msg = `@${m.sender.split('@')[0]} ${message}`;
-
-    // Enviar respuesta con menciones
-    await conn.reply(m.chat, msg, m, {
-        mentions: users,
-        contextInfo: {
-            mentionedJid: users,
-            groupMentions: [{
-                groupJid: m.chat,
-                groupSubject: groupMetadata.subject
-            }]
-        }
-    });
+        // Enviar respuesta con menciones a todos
+        await conn.reply(m.chat, msg, m, {
+            mentions: users,
+            contextInfo: {
+                mentionedJid: users,
+                groupMentions: [{
+                    groupJid: m.chat,
+                    groupSubject: groupMetadata.subject
+                }]
+            }
+        });
+    } catch (error) {
+        console.error('Error en comando everyone:', error);
+        await conn.reply(m.chat, `${e} Ocurrió un error al ejecutar el comando. ${error}`, m);
+    }
 };
 
-// Metadata del plugin
 handler.command = ['everyone'];
 handler.help = ['everyone'];
 handler.tags = ['admin'];
