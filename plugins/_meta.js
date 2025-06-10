@@ -310,7 +310,7 @@ _© 2022-2025 Evolution Global Bots, Todos los derechos reservados_
   let result = ias;
 
   if (result && result.trim().length > 0) {
-    await conn.reply(m.chat, result, m);
+    await conn.reply(m.chat, result, m, fake);
   }
 };
 
