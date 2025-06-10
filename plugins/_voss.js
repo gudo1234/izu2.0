@@ -5,7 +5,7 @@ let handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const videoUrl = 'diles';
+  const videoUrl = 'https://youtube.com/watch?v=UWV41yEiGq0';
   const caption = 'Como olvidar cuando Ivan Boss salió en las noticias por kuaker';
 
   try {
