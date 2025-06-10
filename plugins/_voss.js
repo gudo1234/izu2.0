@@ -1,26 +1,48 @@
 import axios from 'axios';
+import Starlights from '@StarlightsTeam/Scraper';
 
 const handler = async (m, { conn, participants }) => {
   const users = participants
-    .map(p => p.id)
+    .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const videoId = 'w6MJFSLzME8';
-  const videoUrl = `https://youtu.be/${videoId}`;
-  const caption = 'Como olvidar cuando Iván Boss salió en las noticias por kuaker';
-
   await m.react('🕒');
+
+  const url = 'https://youtu.be/w6MJFSLzME8';
+  const caption = 'Como olvidar cuando Iván Boss salió en las noticias por kuaker';
+  let title = 'ivan-boss', downloadUrl, fileName = 'ivan-boss.mp4', mimeType = 'video/mp4';
+
   try {
-    const res = await axios.get(`https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(videoUrl)}`);
-    const resultUrl = res?.data?.result?.url || res?.data?.url;
+    // 1. Stellar API
+    try {
+      const stellar = await axios.get(`https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(url)}`);
+      if (stellar?.data?.result?.url) {
+        downloadUrl = stellar.data.result.url;
+        title = stellar.data.result.title || title;
+      } else if (stellar?.data?.url) {
+        downloadUrl = stellar.data.url;
+      }
+    } catch (e) {
+      console.log('Fallo Stellar API:', e.message);
+    }
 
-    if (!resultUrl) throw new Error('No se pudo obtener el enlace de descarga desde Stellar.');
+    // 2. StarlightsTeam
+    if (!downloadUrl) {
+      try {
+        const result = await Starlights.ytmp4(url);
+        downloadUrl = result?.dl_url;
+      } catch (e) {
+        console.log('Fallo Starlights:', e.message);
+      }
+    }
 
-    const fileName = `${res?.data?.result?.title || 'ivan-boss'}.mp4`;
+    if (!downloadUrl) return m.reply(`❌ No se pudo obtener el enlace de descarga.`);
+
+    fileName = `${title}.mp4`;
 
     await conn.sendMessage(m.chat, {
-      video: { url: resultUrl },
-      mimetype: 'video/mp4',
+      video: { url: downloadUrl },
+      mimetype: mimeType,
       fileName,
       caption,
       mentions: users
@@ -29,12 +51,14 @@ const handler = async (m, { conn, participants }) => {
     await m.react('✅');
   } catch (err) {
     console.error('[ERROR 🪹]', err);
-    await m.reply(`❌ Error al enviar el video: ${err.message}`);
+    await m.reply(`❌ Error inesperado: ${err.message}`);
   }
 };
 
+// Activador por emoji 🪹
 handler.customPrefix = /^(🪹)$/i;
 handler.command = new RegExp;
+
 handler.group = true;
 
 export default handler;
