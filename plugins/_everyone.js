@@ -6,9 +6,11 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 
     const groupJid = m.chat
     const groupName = groupMetadata?.subject || 'este grupo'
-    const groupMentionTag = `@${groupName}`
+    const groupMentionTag = `@${groupJid}`
 
-    const message = text?.trim() ? `${groupMentionTag} ${text.trim()}` : groupMentionTag
+    const message = text?.trim()
+      ? `${groupMentionTag} ${text.trim()}`
+      : groupMentionTag
 
     await conn.sendMessage(m.chat, {
       text: message,
@@ -22,7 +24,7 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
       }
     })
   } catch (error) {
-    console.error('Error en comando everyone:', error)
+    console.error('Error en comando .everyone:', error)
     await m.reply('❌ Ocurrió un error al ejecutar el comando.')
   }
 }
