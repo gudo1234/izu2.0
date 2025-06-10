@@ -73,7 +73,7 @@ let handler = async (m, { conn, text, isOwner }) => {
     `📆 *Vence:* ${fechaFin}\n` +
     `🤖 *Tipo de Servicio:* Bot Online Group\n` +
     `💵 *Tipo de pago:* No hubieron pagos\n\n` + 
-    `> 📱 Si detecta un error en la factura de pago o desea contratar un servicio permanente, por favor comuníquese con mi desarrollador.` +
+    `> 📱 Si detecta un error en la factura de pago o desea contratar un servicio permanente, por favor comuníquese con mi desarrollador.\n\n` +
     `🧑🏻‍💻 wa.me/50492280729?text=Hola%2C+vengo+del+bot+y+quiero+información+sobre+el+servicio.\n` + 
     `${e} *Instagram:* https://www.instagram.com/edar504__`
 
