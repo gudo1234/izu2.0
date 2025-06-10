@@ -1,36 +1,34 @@
-let handler = async (m, { conn, text, participants, command, groupMetadata }) => {
+let handler = async (m, { conn, text, participants, groupMetadata }) => {
   try {
     const users = participants
       .map(u => u.id)
-      .filter(v => v !== conn.user.jid);
+      .filter(v => v !== conn.user.jid)
 
-    const groupName = groupMetadata?.subject || 'este grupo';
+    const groupJid = m.chat
+    const groupName = groupMetadata?.subject || 'este grupo'
+    const groupMentionTag = `@${groupName}`
 
-    // El texto que simula la mención al grupo con @
-    const groupMentionText = `@${groupName}`;
-
-    // Mensaje final: "@Grupo texto opcional"
-    const finalMsg = text?.trim() ? `${groupMentionText} ${text.trim()}` : groupMentionText;
+    const message = text?.trim() ? `${groupMentionTag} ${text.trim()}` : groupMentionTag
 
     await conn.sendMessage(m.chat, {
-      text: finalMsg,
+      text: message,
       mentions: users,
       contextInfo: {
         mentionedJid: users,
         groupMentions: [{
-          groupJid: m.chat,
+          groupJid: groupJid,
           groupSubject: groupName
         }]
       }
-    });
+    })
   } catch (error) {
-    console.error('Error en comando everyone:', error);
-    await m.reply('❌ Ocurrió un error al ejecutar el comando.');
+    console.error('Error en comando everyone:', error)
+    await m.reply('❌ Ocurrió un error al ejecutar el comando.')
   }
-};
+}
 
-handler.command = ['everyone'];
-handler.admin = true;
-handler.group = true;
+handler.command = ['everyone']
+handler.admin = true
+handler.group = true
 
-export default handler;
+export default handler
