@@ -6,8 +6,7 @@ let handler = async (m, { conn, text }) => {
 
   let messageText = text || 'Hola 😃';
 
-  // Construye el texto con el JID del grupo precedido de @
-  // Sin espacio extra entre @ y JID, para que WhatsApp detecte la mención
+  // Texto con la mención exacta al grupo (sin espacios extras en el tag)
   let message = `@${groupId} ${messageText}`;
 
   await conn.sendMessage(groupId, {
