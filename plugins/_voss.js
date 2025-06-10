@@ -5,22 +5,23 @@ let handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const videoUrl = 'https://youtube.com/watch?v=UWV41yEiGq0';
-  const caption = 'Como olvidar cuando Ivan Boss salió en las noticias por kuaker';
+  const videoUrl = 'https://youtu.be/w6MJFSLzME8?si=0TmdvozJSrlTgfKX';
+  const caption = 'Como olvidar cuando Iván Boss salió en las noticias por kuaker';
 
   try {
     await m.react('🎥');
 
-    const api = `https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(videoUrl)}`;
-    const res = await axios.get(api);
-    const resultUrl = res?.data?.result?.url || res?.data?.url;
+    const res = await axios.get(`https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(videoUrl)}`);
+    const downloadUrl = res?.data?.result?.url || res?.data?.url;
 
-    if (!resultUrl) throw new Error('No se pudo obtener el enlace de descarga del video.');
+    if (!downloadUrl) {
+      throw new Error('No se pudo obtener el enlace de descarga del video.');
+    }
 
-    const fileName = `${res?.data?.result?.title || 'video'}.mp4`;
+    const fileName = `${res?.data?.result?.title || 'ivan-boss'}.mp4`;
 
     await conn.sendMessage(m.chat, {
-      video: { url: resultUrl },
+      video: { url: downloadUrl },
       mimetype: 'video/mp4',
       fileName,
       caption,
