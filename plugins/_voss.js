@@ -6,10 +6,10 @@ let handler = async (m, { conn, participants }) => {
     .filter(id => id !== conn.user.jid);
 
   const videoUrl = 'https://youtu.be/w6MJFSLzME8?si=0TmdvozJSrlTgfKX';
-  const caption = 'Como olvidar cuando Iván Boss salió en las noticias por kuaker';
+  const caption = 'Como olvidar cuando Ivan Boss salió en las noticias por kuaker';
 
   try {
-    //await m.react('🎥');
+    await m.react('🎥');
 
     const api = `https://stellar.sylphy.xyz/dow/ytmp4?url=${encodeURIComponent(videoUrl)}`;
     const res = await axios.get(api);
@@ -27,7 +27,7 @@ let handler = async (m, { conn, participants }) => {
       mentions: users
     }, { quoted: m });
 
-    //await m.react('✅');
+    await m.react('✅');
   } catch (err) {
     console.error('[ERROR .ivan]', err);
     //await m.reply(`❌ Error al enviar el video: ${err.message}`);
