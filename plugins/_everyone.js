@@ -6,11 +6,11 @@ let handler = async (m, { conn, text, participants, command, groupMetadata }) =>
 
     const groupName = groupMetadata?.subject || 'este grupo';
 
-    // Construyo el mensaje base con el nombre del grupo
-    const baseMsg = `👥 *${groupName}*`;
+    // El texto que simula la mención al grupo con @
+    const groupMentionText = `@${groupName}`;
 
-    // Si hay texto, se concatena, si no, solo el grupo
-    const finalMsg = text?.trim() ? `${baseMsg} ${text.trim()}` : baseMsg;
+    // Mensaje final: "@Grupo texto opcional"
+    const finalMsg = text?.trim() ? `${groupMentionText} ${text.trim()}` : groupMentionText;
 
     await conn.sendMessage(m.chat, {
       text: finalMsg,
