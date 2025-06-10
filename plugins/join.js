@@ -31,8 +31,8 @@ function formatearHoraMexico(fecha) {
   }).replace('.', '').toLowerCase()
 }
 
-let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply(`${emoji} Debes enviar una invitación para que *${botname}* se una al grupo.`)
+let handler = async (m, { conn, text, isOwner }) => {
+  if (!text) return m.reply(`${e} Debes enviar una invitación para que *${botname}* se una al grupo.`)
 
   const codeMatch = text.match(linkRegex)
   if (!codeMatch) return m.reply(`${e} Enlace de invitación no válido.`)
@@ -75,7 +75,7 @@ let handler = async (m, { conn, text }) => {
     `💵 *Tipo de pago:* No hubieron pagos\n\n` + 
     `> 📱 Si detecta un error en la factura de pago o desea contratar un servicio permanente, por favor comuníquese con mi desarrollador.\n\n` +
     `🧑🏻‍💻 wa.me/50492280729?text=Hola%2C+vengo+del+bot+y+quiero+información+sobre+el+servicio.\n\n` + 
-    `${e} *Instagram:* https://www.instagram.com/edar504__`
+    `${e + s} *Instagram:* https://www.instagram.com/edar504__`
 
   if (isOwner) {
     await conn.groupAcceptInvite(code)
