@@ -3,20 +3,22 @@ let handler = async (m, { conn, text }) => {
 
   let groupId = m.chat;
   let groupMetadata = await conn.groupMetadata(groupId);
-  let participants = groupMetadata.participants.map(p => p.id); // array de JIDs
+  let groupName = groupMetadata.subject || 'Grupo'; // Nombre del grupo
 
   let messageText = text || 'Hola 😃';
 
-  // Construir texto con @usuario para cada participante, separados por espacio
-  // WhatsApp detecta automáticamente las menciones en base a mentionedJid
-  let mentionsText = participants.map(jid => `@${jid.split('@')[0]}`).join(' ');
+  // Simulación de mención del grupo: formateamos el nombre del grupo para que parezca un tag
+  let simulatedMention = `@${groupName}`;
 
-  // Texto final: las menciones en azul + el mensaje
-  let fullText = `${mentionsText}\n\n${messageText}`;
+  // Construir el mensaje
+  let fullMessage = `${simulatedMention} ${messageText}`;
 
+  // Enviar mensaje con mención falsa al grupo
   await conn.sendMessage(groupId, {
-    text: fullText,
-    contextInfo: { mentionedJid: participants }
+    text: fullMessage,
+    contextInfo: {
+      mentionedJid: [groupId] // Se pone el JID del grupo para que sea reconocido
+    }
   }, { quoted: m });
 };
 
