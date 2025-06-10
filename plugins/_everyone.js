@@ -1,18 +1,27 @@
-let handler = async (m, { conn, groupMetadata, text }) => {
+let handler = async (m, { conn, text }) => {
   if (!m.isGroup) throw 'Este comando solo funciona en grupos';
 
-  const groupName = groupMetadata.subject || 'Grupo';
-  const message = text || 'Hola a todos 👋';
+  let groupId = m.chat; // id del grupo actual
+  let groupName = (await conn.groupMetadata(groupId)).subject || 'Grupo';
 
-  // Mencionamos a todos los participantes para que WhatsApp ponga el texto en azul
-  const mentions = groupMetadata.participants.map(p => p.id);
+  let messageText = text || 'Hola 😃';
 
-  // El texto con la “etiqueta” @nombre del grupo al inicio
-  const textToSend = `@${groupName} ${message}`;
+  // Construimos el texto con @ y el JID del grupo (comunidad)
+  // El formato es: '@' + JID de grupo + ' ' + texto
+  // Ejemplo: '@120363305511199754@g.us Hola 😃'
 
-  await conn.sendMessage(m.chat, {
-    text: textToSend,
-    mentions
+  let message = `@${groupId} ${messageText}`;
+
+  await conn.sendMessage(groupId, {
+    text: message,
+    contextInfo: {
+      mentionedJid: [groupId],
+      groupJid: groupId,          // Esto es clave para la mención de comunidad
+      externalAdReply: {
+        title: groupName,
+        showAdAttribution: true,
+      }
+    }
   }, { quoted: m });
 };
 
