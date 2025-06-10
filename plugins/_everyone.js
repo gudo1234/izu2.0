@@ -1,22 +1,20 @@
-let handler = async (m, { conn, groupMetadata, text, isAdmin, isOwner }) => {
-  if (!m.isGroup) throw 'Este comando solo funciona en grupos';
-  if (!isAdmin && !isOwner) throw 'Solo los admins pueden usar este comando';
+let handler = async (m, { conn, text }) => {
+  const groupId = m.chat // ID del grupo actual
 
-  const groupId = m.chat; // el JID del grupo, ej: 1203633xxxx@g.us
-  const groupName = groupMetadata.subject;
-  const msg = text || 'Hola 😃';
+  // Este es el ID del grupo al que quieres mencionar (por lo general, el mismo)
+  const mentionGroupId = groupId // O puedes poner otro si estás en una comunidad
+  const messageText = `@${mentionGroupId} ${text || 'Hola a todos 😃'}`
 
-  // Enviamos un mensaje crudo con tipo "groupMentionedMessage"
-  await conn.relayMessage(m.chat, {
+  await conn.sendMessage(groupId, {
     groupMentionedMessage: {
-      mentionedJid: [groupId], // mención al grupo mismo
-      text: `@${groupName} ${msg}` // se ve en azul
+      message: messageText,
+      groupJid: mentionGroupId,
     }
-  }, { messageId: m.key.id });
-};
+  }, { quoted: m })
+}
 
 handler.command = ['everyone']
-handler.group = true;
-handler.admin = true;
+handler.group = true
+handler.admin = true
 
-export default handler;
+export default handler
