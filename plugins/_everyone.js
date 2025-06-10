@@ -1,36 +1,51 @@
-const handler = async (m, { conn, text, participants, groupMetadata }) => {
-    try {
-        // Obtener todos los IDs de participantes (JIDs)
-        const users = participants.map(user => user.id);
+let handler = async (m, { conn, text, participants, command, groupMetadata }) => {
+  try {
+    const users = participants
+      .map(u => u.id)
+      .filter(v => v !== conn.user.jid);
 
-        // Mensaje por defecto
-        const message = text ? text : 'Hola 😃';
-
-        // Construir mensaje con mención al remitente (opcional)
-        const msg = `@${m.sender.split('@')[0]} ${message}`;
-
-        // Enviar respuesta con menciones a todos
-        await conn.reply(m.chat, msg, m, {
-            mentions: users,
-            contextInfo: {
-                mentionedJid: users,
-                groupMentions: [{
-                    groupJid: m.chat,
-                    groupSubject: groupMetadata.subject
-                }]
-            }
-        });
-    } catch (error) {
-        console.error('Error en comando everyone:', error);
-        await conn.reply(m.chat, `${e} Ocurrió un error al ejecutar el comando. ${error}`, m);
+    if (m.quoted) {
+      return conn.sendMessage(m.chat, {
+        forward: m.quoted.fakeObj,
+        mentions: users,
+        contextInfo: {
+          mentionedJid: users,
+          groupMentions: [{
+            groupJid: m.chat,
+            groupSubject: groupMetadata?.subject || ''
+          }]
+        }
+      });
     }
-};
+
+    if (text?.trim()) {
+      return conn.sendMessage(m.chat, {
+        text,
+        mentions: users,
+        contextInfo: {
+          mentionedJid: users,
+          groupMentions: [{
+            groupJid: m.chat,
+            groupSubject: groupMetadata?.subject || ''
+          }]
+        }
+      });
+    }
+
+    const prefix = command ? `.${command}` : '.totag';
+    return m.reply(
+      `⚠️ *Uso correcto:*\n` +
+      `» Responde a un mensaje con *${prefix}* para etiquetar a todos\n` +
+      `» O escribe *${prefix} <tu texto>* para enviar un texto mencionando a todos`
+    );
+  } catch (error) {
+    console.error('Error en comando totag:', error);
+    await m.reply('❌ Ocurrió un error al ejecutar el comando.');
+  }
+}
 
 handler.command = ['everyone'];
-handler.help = ['everyone'];
-handler.tags = ['admin'];
-handler.group = true;
 handler.admin = true;
-handler.fail = null;
+handler.group = true;
 
 export default handler;
