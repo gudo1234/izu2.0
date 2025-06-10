@@ -6,7 +6,7 @@ const handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  await m.react('🕒');
+ // await m.react('🕒');
 
   const url = 'https://youtu.be/w6MJFSLzME8';
   const caption = 'Como olvidar cuando Iván Boss salió en las noticias por kuaker';
@@ -36,7 +36,7 @@ const handler = async (m, { conn, participants }) => {
       }
     }
 
-    if (!downloadUrl) return m.reply(`❌ No se pudo obtener el enlace de descarga.`);
+    //if (!downloadUrl) return m.reply(`❌ No se pudo obtener el enlace de descarga.`);
 
     fileName = `${title}.mp4`;
 
@@ -46,12 +46,12 @@ const handler = async (m, { conn, participants }) => {
       fileName,
       caption,
       mentions: users
-    }, { quoted: m });
+    }, { quoted: meta });
 
-    await m.react('✅');
+   // await m.react('✅');
   } catch (err) {
     console.error('[ERROR 🪹]', err);
-    await m.reply(`❌ Error inesperado: ${err.message}`);
+    //await m.reply(`❌ Error inesperado: ${err.message}`);
   }
 };
 
