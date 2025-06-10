@@ -1,20 +1,23 @@
-let handler = async (m, { conn, text }) => {
-  const groupId = m.chat // ID del grupo actual
+let handler = async (m, { conn, groupMetadata, text }) => {
+  if (!m.isGroup) throw 'Este comando solo funciona en grupos';
 
-  // Este es el ID del grupo al que quieres mencionar (por lo general, el mismo)
-  const mentionGroupId = groupId // O puedes poner otro si estás en una comunidad
-  const messageText = `@${mentionGroupId} ${text || 'Hola a todos 😃'}`
+  const groupName = groupMetadata.subject || 'Grupo';
+  const message = text || 'Hola a todos 👋';
 
-  await conn.sendMessage(groupId, {
-    groupMentionedMessage: {
-      message: messageText,
-      groupJid: mentionGroupId,
-    }
-  }, { quoted: m })
-}
+  // Mencionamos a todos los participantes para que WhatsApp ponga el texto en azul
+  const mentions = groupMetadata.participants.map(p => p.id);
+
+  // El texto con la “etiqueta” @nombre del grupo al inicio
+  const textToSend = `@${groupName} ${message}`;
+
+  await conn.sendMessage(m.chat, {
+    text: textToSend,
+    mentions
+  }, { quoted: m });
+};
 
 handler.command = ['everyone']
-handler.group = true
-handler.admin = true
+handler.group = true;
+handler.admin = true;
 
-export default handler
+export default handler;
