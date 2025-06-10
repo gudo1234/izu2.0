@@ -70,7 +70,7 @@ let handler = async (m, { conn, text, isOwner }) => {
     `📍 *Código:* ${countryCode}\n` +
     `🕒 *Hora actual:* ${horaMexico} Hora México\n` +
     `🗓️ *Válido desde:* ${fechaInicio}\n` +
-    `📆 *Vence:* ${fechaFin}\n`
+    `📆 *Vence:* ${fechaFin}\n` +
     `🤖 *Tipo de Servicio:* Bot Online Group\n` +
     `💵 *Tipo de pago:* No hubieron pagos\n\n` + 
     `> 📱 Si detecta un error en la factura de pago o desea contratar un servicio permanente, por favor comuníquese con mi desarrollador.` +
