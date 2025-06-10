@@ -31,7 +31,7 @@ function formatearHoraMexico(fecha) {
   }).replace('.', '').toLowerCase()
 }
 
-let handler = async (m, { conn, text, isOwner }) => {
+let handler = async (m, { conn, text }) => {
   if (!text) return m.reply(`${emoji} Debes enviar una invitación para que *${botname}* se una al grupo.`)
 
   const codeMatch = text.match(linkRegex)
