@@ -70,7 +70,7 @@ return resultado;
 const message = users.map((v, index) => `(${index + 1}) +${v.user.jid.replace(/[^0-9]/g, '')}\n${v.user.name || 'Sub-Bot'}`).join('\n___________\n\n');
 const replyMessage = message.length === 0 ? `No hay Sub-Bots disponible por el momento, verifique mas tarde.` : message;
 const totalUsers = users.length;
-const responseMessage = `${e} JadiBots conectados ${totalUsers || '0'}\n\n${replyMessage.trim()}`.trim();
+const responseMessage = `${e} JadiBots conectados ${totalUsers || '0'}\n🤖 *Bot Principal* wa.me/${global.conn.user.jid.split`@`[0]}?text=.code\n\n${replyMessage.trim()}`.trim();
 await _envio.sendMessage(m.chat, {text: responseMessage, mentions: _envio.parseMention(responseMessage)}, {quoted: m})
 break   
 }}
