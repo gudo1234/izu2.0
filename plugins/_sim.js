@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 
 let handler = async (m, { text, command, usedPrefix }) => {
   if (!text) {
-    return m.reply(`${e} Escribe algo para preguntarle a ${wm}.\n\n> Ejemplo de uso: .${usedPrefix+ command} hola que tal`);
+    return m.reply(`${e} Escribe algo para preguntarle a ${wm}.\n\n> Ejemplo de uso: \`${usedPrefix+ command}\` hola que tal`);
   }
 
   const prompt = `${e} tú actuarás como un bot de whatsapp, te llamarás ${wm}`;
