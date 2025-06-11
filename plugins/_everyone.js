@@ -6,12 +6,14 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 
     const groupJid = m.chat
     const groupName = groupMetadata?.subject || 'este grupo'
+    const groupMentionTag = `@${groupJid}`
 
-    // Si hay texto, usarlo como etiqueta. Si no, usar el nombre del grupo.
-    const mentionText = text?.trim() ? `@${text.trim()}` : `@${groupName}`
+    const message = text?.trim()
+      ? `*${text.trim()}*`
+      : groupMentionTag
 
     await conn.sendMessage(m.chat, {
-      text: mentionText,
+      text: message,
       mentions: users,
       contextInfo: {
         mentionedJid: users,
