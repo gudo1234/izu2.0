@@ -50,9 +50,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ 🚩 *Nombre:* ${m.pushName}
 │ 🌎 *País:* ${mundo}
 │ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
-└────────────
+└────────────`
 
-\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
+let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 ┌────────────
 │ ${e}${s}code *‹›*
 │ ${e}${s}qr *‹›*
@@ -201,11 +201,178 @@ ${comandosNsfw}
 │ ${e}${s}salir *‹›*
 └────────────`
 
+let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
+> ${s + usedPrefix}code ⬄ ${usedPrefix}qr  
+> ${s + usedPrefix}deletesesion ⬌ ${usedPrefix}reglas  
+> ${s + usedPrefix}reporte ⬄ ${usedPrefix}owner  
+
+\`✡ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️\`
+> ${s + usedPrefix}kick ⬄ ${usedPrefix}kicknum  
+> ${s + usedPrefix}link ⬌ ${usedPrefix}admins  
+> ${s + usedPrefix}infogrupo ⬄ ${usedPrefix}tagall  
+> ${s + usedPrefix}hideteg ⬌ ${usedPrefix}tag  
+> ${s + usedPrefix}icongc ⬄ ${usedPrefix}grupo  
+> ${s + usedPrefix}promote ⬌ ${usedPrefix}demote  
+> ${s + usedPrefix}encuesta  
+
+\`➠ᴄᴏɴғɪɢ - ᴏɴ/ᴏғғ🔹\`
+> ${s + usedPrefix}on/off ⬄ ${usedPrefix}welcome  
+> ${s + usedPrefix}autoaceptar ⬌ ${usedPrefix}soloadmin  
+> ${s + usedPrefix}nsfw ⬄ ${usedPrefix}detect  
+> ${s + usedPrefix}antilink ⬌ ${usedPrefix}antifake  
+> ${s + usedPrefix}autosticker ⬄ ${usedPrefix}autoband  
+
+\`✜ᴅᴇsᴄᴀʀɢᴀs ᴍᴜʟᴛɪᴍᴇᴅɪᴀ📂\`
+> ${s + usedPrefix}play ⬄ ${usedPrefix}play2  
+> ${s + usedPrefix}play3 ⬌ ${usedPrefix}play4  
+> ${s + usedPrefix}facebook ⬄ ${usedPrefix}instagram  
+> ${s + usedPrefix}tiktokvid ⬌ ${usedPrefix}tiktok  
+> ${s + usedPrefix}tiktokimg ⬄ ${usedPrefix}twitter  
+> ${s + usedPrefix}mediafire ⬌ ${usedPrefix}apk  
+> ${s + usedPrefix}gitclone ⬄ ${usedPrefix}porno  
+> ${s + usedPrefix}porno2 ⬌ ${usedPrefix}xnxxdl  
+> ${s + usedPrefix}xvideosdl ⬄ ${usedPrefix}imagen  
+> ${s + usedPrefix}pinterest ⬌ ${usedPrefix}ytmp3  
+> ${s + usedPrefix}ytmp4 ⬄ ${usedPrefix}ytmp3doc  
+> ${s + usedPrefix}ytmp4doc ⬌ ${usedPrefix}spotify  
+> ${s + usedPrefix}spotifydl ⬄ ${usedPrefix}mega  
+> ${s + usedPrefix}terabox  
+
+\`✘ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮\`
+> ${s + usedPrefix}calendario ⬄ ${usedPrefix}toptt  
+> ${s + usedPrefix}tovid ⬌ ${usedPrefix}tomp3  
+> ${s + usedPrefix}toimg ⬄ ${usedPrefix}ver  
+> ${s + usedPrefix}hd ⬌ ${usedPrefix}ssweb  
+> ${s + usedPrefix}vcard ⬄ ${usedPrefix}whamusic  
+
+\`✔sᴛɪᴄᴋᴇʀ - ᴍᴀʀᴋᴇʀ/ʟᴏɢᴏ🧩\`
+> ${s + usedPrefix}sticker ⬄ ${usedPrefix}sticker2  
+> ${s + usedPrefix}sticker -c ⬌ ${usedPrefix}emojimix  
+> ${s + usedPrefix}qc ⬄ ${usedPrefix}brat  
+> ${s + usedPrefix}bratvid ⬌ ${usedPrefix}fakengl  
+> ${s + usedPrefix}wm ⬄ ${usedPrefix}take  
+> ${s + usedPrefix}ttp ⬌ ${usedPrefix}tweet  
+> ${s + usedPrefix}stickers ⬄ ${usedPrefix}aiimg  
+> ${s + usedPrefix}iqc ⬌ ${s + usedPrefix}par  
+
+\`✏ʙᴜsᴄᴀᴅᴏʀ - ᴡᴇʙ🔎\`
+> ${s + usedPrefix}chatgpt ⬄ ${usedPrefix}ia  
+> ${s + usedPrefix}gemini ⬌ ${usedPrefix}bot  
+> ${s + usedPrefix}ytsearch ⬄ ${usedPrefix}perfil  
+> ${s + usedPrefix}spotifysearch ⬌ ${usedPrefix}xnxxsearch  
+> ${s + usedPrefix}xvideosearch ⬄ ${usedPrefix}tiktoksearch  
+> ${s + usedPrefix}noticias ⬌ ${usedPrefix}githubsearch
+
+\`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
+> ${s + usedPrefix}abrazar ⬄ ${usedPrefix}aburrido  
+> ${s + usedPrefix}acariciar ⬌ ${usedPrefix}acurrucarse  
+> ${s + usedPrefix}amor ⬄ ${usedPrefix}angry  
+> ${s + usedPrefix}aplaudir ⬌ ${usedPrefix}asustada  
+> ${s + usedPrefix}bailar ⬄ ${usedPrefix}bath  
+> ${s + usedPrefix}bañarse ⬌ ${usedPrefix}besar  
+> ${s + usedPrefix}bite ⬄ ${usedPrefix}bleh  
+> ${s + usedPrefix}blush ⬌ ${usedPrefix}bofetada  
+> ${s + usedPrefix}bored ⬄ ${usedPrefix}borracho  
+> ${s + usedPrefix}cafe ⬌ ${usedPrefix}café  
+> ${s + usedPrefix}clap ⬄ ${usedPrefix}coffee  
+> ${s + usedPrefix}comer ⬌ ${usedPrefix}correr  
+> ${s + usedPrefix}cry ⬄ ${usedPrefix}cuddle  
+> ${s + usedPrefix}dance ⬌ ${usedPrefix}dormir  
+> ${s + usedPrefix}drunk ⬄ ${usedPrefix}eat  
+> ${s + usedPrefix}embarazar ⬌ ${usedPrefix}enamorada  
+> ${s + usedPrefix}enojado ⬄ ${usedPrefix}facepalm  
+> ${s + usedPrefix}feliz ⬌ ${usedPrefix}fumar  
+> ${s + usedPrefix}golpear ⬄ ${usedPrefix}happy  
+> ${s + usedPrefix}hello ⬌ ${usedPrefix}hola  
+> ${s + usedPrefix}hug ⬄ ${usedPrefix}kill  
+> ${s + usedPrefix}kiss ⬌ ${usedPrefix}lamer  
+> ${s + usedPrefix}laugh ⬄ ${usedPrefix}lengua  
+> ${s + usedPrefix}lick ⬌ ${usedPrefix}llorar  
+> ${s + usedPrefix}love ⬄ ${usedPrefix}matar  
+> ${s + usedPrefix}morder ⬌ ${usedPrefix}palmada  
+> ${s + usedPrefix}pat ⬄ ${usedPrefix}pegar  
+> ${s + usedPrefix}pensar ⬌ ${usedPrefix}picar  
+> ${s + usedPrefix}poke ⬄ ${usedPrefix}pout  
+> ${s + usedPrefix}ppcouple ⬌ ${usedPrefix}ppcp  
+> ${s + usedPrefix}preg ⬄ ${usedPrefix}preñar  
+> ${s + usedPrefix}pucheros ⬌ ${usedPrefix}punch  
+> ${s + usedPrefix}reirse ⬄ ${usedPrefix}run  
+> ${s + usedPrefix}sad ⬌ ${usedPrefix}scared  
+> ${s + usedPrefix}seduce ⬄ ${usedPrefix}seducir  
+> ${s + usedPrefix}shy ⬌ ${usedPrefix}slap  
+> ${s + usedPrefix}sleep ⬄ ${usedPrefix}smoke  
+> ${s + usedPrefix}sonrojarse ⬌ ${usedPrefix}think  
+> ${s + usedPrefix}timida ⬄ ${usedPrefix}triste  
+> ${s + usedPrefix}waifu
+
+\`⭓ғɪʀᴇ ғᴜɴᴄᴛɪᴏɴ - ᴊᴜᴇɢᴏs🎮\`
+> ${s + usedPrefix}amigorandom ⬄ ${usedPrefix}amistad  
+> ${s + usedPrefix}aplauso ⬌ ${usedPrefix}chaqueta  
+> ${s + usedPrefix}chaqueteame ⬄ ${usedPrefix}chiste  
+> ${s + usedPrefix}chupa ⬌ ${usedPrefix}chupalo  
+> ${s + usedPrefix}consejo ⬄ ${usedPrefix}doxear  
+> ${s + usedPrefix}doxeo ⬌ ${usedPrefix}doxxeo  
+> ${s + usedPrefix}doxxing ⬄ ${usedPrefix}facto  
+> ${s + usedPrefix}formarpareja ⬌ ${usedPrefix}formarpareja5  
+> ${s + usedPrefix}formarparejas ⬄ ${usedPrefix}formartrio  
+> ${s + usedPrefix}frase ⬌ ${usedPrefix}gay  
+> ${s + usedPrefix}huevo ⬄ ${usedPrefix}iq  
+> ${s + usedPrefix}iqtest ⬌ ${usedPrefix}jalame  
+> ${s + usedPrefix}jalamela ⬄ ${usedPrefix}lesbiana  
+> ${s + usedPrefix}manca ⬌ ${usedPrefix}manco  
+> ${s + usedPrefix}marron ⬄ ${usedPrefix}meme  
+> ${s + usedPrefix}memes ⬌ ${usedPrefix}morse  
+> ${s + usedPrefix}negro ⬄ ${usedPrefix}nombreninja  
+> ${s + usedPrefix}paja ⬌ ${usedPrefix}pajeame  
+> ${s + usedPrefix}pajera ⬄ ${usedPrefix}pajero  
+> ${s + usedPrefix}pareja ⬌ ${usedPrefix}personalidad  
+> ${s + usedPrefix}piropo ⬄ ${usedPrefix}pokedex  
+> ${s + usedPrefix}pregunta ⬌ ${usedPrefix}preguntas  
+> ${s + usedPrefix}prostituta ⬄ ${usedPrefix}prostituto  
+> ${s + usedPrefix}puta ⬌ ${usedPrefix}puto  
+> ${s + usedPrefix}rata ⬄ ${usedPrefix}ruletamuerte  
+> ${s + usedPrefix}ship ⬌ ${usedPrefix}sorteo  
+> ${s + usedPrefix}suicidar ⬄ ${usedPrefix}suicide  
+> ${s + usedPrefix}top ⬌ ${usedPrefix}zodia  
+> ${s + usedPrefix}zodiac
+
+\`⬗ɴsғᴡ-ғᴜɴᴄᴛɪᴏɴ🥵\`
+> ${s + usedPrefix}69 ⬄ ${usedPrefix}agarrartetas  
+> ${s + usedPrefix}anal ⬌ ${usedPrefix}bj  
+> ${s + usedPrefix}blowjob ⬄ ${usedPrefix}boobjob  
+> ${s + usedPrefix}chupartetas ⬌ ${usedPrefix}coger  
+> ${s + usedPrefix}coño ⬄ ${usedPrefix}culiar  
+> ${s + usedPrefix}cum ⬌ ${usedPrefix}encuerar  
+> ${s + usedPrefix}fap ⬄ ${usedPrefix}follar  
+> ${s + usedPrefix}footjob ⬌ ${usedPrefix}fuck  
+> ${s + usedPrefix}grabboobs ⬄ ${usedPrefix}grop  
+> ${s + usedPrefix}grope ⬌ ${usedPrefix}leche  
+> ${s + usedPrefix}lesbianas ⬄ ${usedPrefix}lickpussy  
+> ${s + usedPrefix}mamada ⬌ ${usedPrefix}manosear  
+> ${s + usedPrefix}nalgada ⬄ ${usedPrefix}paja  
+> ${s + usedPrefix}penetrado ⬌ ${usedPrefix}penetrar  
+> ${s + usedPrefix}perra ⬄ ${usedPrefix}pies  
+> ${s + usedPrefix}rule ⬌ ${usedPrefix}rule34  
+> ${s + usedPrefix}rusa ⬄ ${usedPrefix}sex  
+> ${s + usedPrefix}sexo ⬌ ${usedPrefix}sixnine  
+> ${s + usedPrefix}spank ⬄ ${usedPrefix}suckboobs  
+> ${s + usedPrefix}tijeras ⬌ ${usedPrefix}undress  
+> ${s + usedPrefix}violar ⬄ ${usedPrefix}yuri
+
+\`✑ᴏᴘᴄɪᴏɴᴇs/ᴏᴡɴᴇʀ🔥\`
+> ${s + usedPrefix}update ⬄ ${usedPrefix}join  
+> ${s + usedPrefix}=> ⬌ ${usedPrefix}restart  
+> ${s + usedPrefix}$ ⬄ ${usedPrefix}antiprivado  
+> ${s + usedPrefix}icon ⬌ ${usedPrefix}salir`
+
+let textos = txt2
+let textos2 = txt3
+let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
   m.react('🏖️')
 
   if (media === 'grupo') {
     await conn.sendMessage(m.chat, {
-      text: txt,
+      text: puta,
       contextInfo: {
         externalAdReply: {
           title: wm,
@@ -224,7 +391,7 @@ ${comandosNsfw}
     await conn.sendMessage(m.chat, {
       video: { url: [jpg, jpg2].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
-      caption: txt,
+      caption: puta,
       contextInfo: {
         mentionedJid: [m.sender],
         isForwarded: true,
@@ -249,7 +416,7 @@ ${comandosNsfw}
 
   if (media === 'anu') {
     await conn.sendMessage(m.chat, {
-      text: txt,
+      text: puta,
       footer: textbot,
       contextInfo: {
         mentionedJid: [m.sender],
