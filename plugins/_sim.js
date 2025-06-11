@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+/*import fetch from 'node-fetch'
 
 let handler = async (m, { text, command, usedPrefix }) => {
   if (!text) {
@@ -25,4 +25,32 @@ let handler = async (m, { text, command, usedPrefix }) => {
 
 handler.command = ['simi'];
 //handler.group = true;
+export default handler;*/
+
+import fetch from 'node-fetch';
+
+let handler = async (m, { text, command, usedPrefix }) => {
+  if (!text) {
+    return m.reply(`${e} !Hola! ¿en qué puedo ayudarte hoy?`);
+  }
+
+  const url = `https://api.stellarwa.xyz/ai/chatgpt?text=${encodeURIComponent(text)}`;
+
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (!json.status || !json.result) {
+      return m.reply(`${e} No se pudo obtener respuesta en este momento.`);
+    }
+
+    m.reply(json.result.trim());
+  } catch (e) {
+    console.error(e);
+    m.reply(`${e} Ocurrió un error al contactar con la IA.`);
+  }
+};
+
+handler.command = ['simi2']
+handler.group = true
 export default handler;
