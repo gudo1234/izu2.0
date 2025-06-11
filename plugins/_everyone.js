@@ -43,20 +43,18 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 
     const groupJid = m.chat
     const groupName = groupMetadata?.subject || 'este grupo'
-    
-    // Si hay texto, lo usaremos como el subject para la etiqueta azul
-    const hasText = text?.trim()
-    const mentionText = hasText ? `@${text.trim()}` : `@${groupJid}`
-    const visibleText = hasText ? `@${text.trim()}` : `@${groupName}`
+
+    const customText = text?.trim()
+    const mentionText = customText ? `@${customText}` : `@${groupName}`
 
     await conn.sendMessage(m.chat, {
-      text: visibleText,
+      text: mentionText,
       mentions: users,
       contextInfo: {
         mentionedJid: users,
         groupMentions: [{
           groupJid,
-          groupSubject: hasText ? text.trim() : groupName
+          groupSubject: customText || groupName
         }]
       }
     })
