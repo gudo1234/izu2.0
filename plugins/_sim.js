@@ -52,5 +52,5 @@ let handler = async (m, { text, command, usedPrefix }) => {
 };
 
 handler.command = ['simi2']
-handler.group = true
+//handler.group = true
 export default handler;
