@@ -24,5 +24,5 @@ let handler = async (m, { text, command }) => {
 };
 
 handler.command = ['simi'];
-handler.group = true;
+//handler.group = true;
 export default handler;
