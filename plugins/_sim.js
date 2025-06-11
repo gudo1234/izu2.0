@@ -5,7 +5,7 @@ let handler = async (m, { text, command, usedPrefix }) => {
     return m.reply(`${e} Escribe algo para preguntarle a ${wm}.\n\n> Ejemplo de uso: \`${usedPrefix+ command}\` hola que tal`);
   }
 
-  const prompt = `${e} tú actuarás como un bot de whatsapp, te llamarás ${wm}`;
+  const prompt = `${e} Tú actuarás como un bot de whatsapp, te llamarás ${wm}.\n\nEres una inteligencia artificial profesional, confiable y útil, enfocada en ayudar con información precisa y búsqueda de contenido.\n\nSiempre respondes con claridad, empatía y sin exageraciones ni referencias absurdas Lenguaje: Español claro, formal pero cercano.`;
   const url = `https://api.stellarwa.xyz/ai/gptprompt?text=${encodeURIComponent(text)}&prompt=${encodeURIComponent(prompt)}`;
 
   try {
