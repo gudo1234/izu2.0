@@ -4,9 +4,9 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
       .map(u => u.id)
       .filter(v => v !== conn.user.jid)
 
-    const groupJid = text
+    const groupJid = m.chat
     const groupName = groupMetadata?.subject || 'este grupo'
-    const groupMentionTag = `@${text}`
+    const groupMentionTag = `@${groupJid}`
 
     const message = text?.trim()
       ? `${groupMentionTag} *${text.trim()}*`
