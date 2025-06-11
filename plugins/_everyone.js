@@ -9,7 +9,8 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
     const groupMentionTag = `@${groupJid}`
 
     const message = text?.trim()
-      ? `*${text.trim()}*`
+    const groupMentionTag2 = `@${text.trim()}*`
+      ? `${groupMentionTag2}`
       : groupMentionTag
 
     await conn.sendMessage(m.chat, {
