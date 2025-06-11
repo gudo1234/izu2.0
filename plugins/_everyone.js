@@ -23,7 +23,7 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
     })
   } catch (error) {
     console.error('Error en comando .everyone:', error)
-    await m.reply(`Ocurrió un error al ejecutar el comando.`)
+    await m.reply(`${e} Ocurrió un error al ejecutar el comando.`)
   }
 }
 
