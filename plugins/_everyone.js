@@ -44,17 +44,25 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
     const groupJid = m.chat
     const groupName = groupMetadata?.subject || 'este grupo'
 
-    const customText = text?.trim()
-    const mentionText = customText ? `@${customText}` : `@${groupName}`
+    let message = ''
+    let groupSubject = ''
+
+    if (text?.trim()) {
+      message = `@${text.trim()}`
+      groupSubject = text.trim()
+    } else {
+      message = `@${groupJid}` // aquí está la clave
+      groupSubject = groupName
+    }
 
     await conn.sendMessage(m.chat, {
-      text: mentionText,
+      text: message,
       mentions: users,
       contextInfo: {
         mentionedJid: users,
         groupMentions: [{
           groupJid,
-          groupSubject: customText || groupName
+          groupSubject
         }]
       }
     })
