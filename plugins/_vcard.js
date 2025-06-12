@@ -10,22 +10,25 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints);
 }
 
-async function handler(m, { conn, text, mentionedJid }) {
+async function handler(m, { conn, text }) {
   let number, jid;
 
-  // 1. Mención
-  if (mentionedJid && mentionedJid.length > 0) {
-    jid = mentionedJid[0];
+  // Obtenemos la mención directamente del mensaje original
+  const mention = m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+
+  // 1. Si se menciona a alguien con @
+  if (mention) {
+    jid = mention;
     number = jid.split('@')[0];
   }
 
-  // 2. Respuesta a un mensaje
+  // 2. Si se responde a un mensaje
   else if (m.quoted?.sender) {
     jid = m.quoted.sender;
     number = jid.split('@')[0];
   }
 
-  // 3. Número escrito manualmente
+  // 3. Si se escribe un número manualmente
   else if (/^\+?\d{5,16}$/.test(text.trim())) {
     number = text.replace(/\D/g, '');
     jid = number + '@s.whatsapp.net';
@@ -68,7 +71,6 @@ async function handler(m, { conn, text, mentionedJid }) {
   }, { quoted: m });
 }
 
-// ✅ Aquí solo declaras el comando
 handler.command = ['vcard']
 handler.group = true;
 export default handler;
