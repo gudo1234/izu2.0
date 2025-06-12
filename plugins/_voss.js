@@ -116,10 +116,12 @@ handler.group = true;
 export default handler;*/
 
 import fs from 'fs';
+import path from 'path';
 
-const FILE_PATH = './textos.json';
+// Usa ruta absoluta basada en el directorio actual del archivo
+const FILE_PATH = path.join(process.cwd(), 'textos.json');
 
-// Asegura que el archivo exista y tenga estructura básica
+// Asegura que el archivo exista
 function ensureFile() {
   if (!fs.existsSync(FILE_PATH)) {
     fs.writeFileSync(FILE_PATH, JSON.stringify({ textos: [] }, null, 2));
@@ -128,12 +130,22 @@ function ensureFile() {
 
 function readTexts() {
   ensureFile();
-  return JSON.parse(fs.readFileSync(FILE_PATH));
+  try {
+    const raw = fs.readFileSync(FILE_PATH);
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('[ERROR] No se pudo leer el archivo textos.json:', e);
+    return { textos: [] };
+  }
 }
 
 function writeTexts(data) {
   ensureFile();
-  fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+  try {
+    fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('[ERROR] No se pudo escribir en textos.json:', e);
+  }
 }
 
 const handler = async (m, { conn, participants }) => {
@@ -181,7 +193,6 @@ const handler = async (m, { conn, participants }) => {
   }
 };
 
-// Activador por 🪹 o comandos .addtext, .deltext, .vertext
 handler.customPrefix = /^(🪹|\.addtext|\.deltext|\.vertext)$/i;
 handler.command = new RegExp;
 handler.group = true;
