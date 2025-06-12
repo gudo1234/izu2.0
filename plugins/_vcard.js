@@ -54,6 +54,6 @@ async function handler(m, { conn, text, mentionedJid }) {
   }, { quoted: m });
 }
 
-handler.command = /^vcard$/i;
+handler.command = ['vcard']
 handler.group = true;
 export default handler;
