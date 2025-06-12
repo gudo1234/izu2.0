@@ -128,51 +128,54 @@ function writeTexts(data) {
   fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
 }
 
-const handler = async (m, { conn, participants, args, command, text }) => {
-  const data = readTexts();
-  const users = participants
-    .map(u => u.id)
-    .filter(id => id !== conn.user.jid);
+const handler = async (m, { conn, participants }) => {
+  try {
+    const users = participants
+      .map(u => u.id)
+      .filter(id => id !== conn.user.jid);
 
-  if (command === 'addtext') {
-    if (!text) return m.reply('Debes escribir el texto que deseas agregar.');
-    data.textos.push(text);
-    writeTexts(data);
-    return m.reply('✅ Texto agregado correctamente.');
-  }
+    const body = m.text.trim();
+    const data = readTexts();
 
-  if (command === 'deltext') {
-    if (!text) return m.reply('Debes escribir el texto exacto que deseas eliminar.');
-    const index = data.textos.indexOf(text);
-    if (index === -1) return m.reply('❌ El texto no existe.');
-    data.textos.splice(index, 1);
-    writeTexts(data);
-    return m.reply('🗑️ Texto eliminado correctamente.');
-  }
+    if (body.startsWith('.addtext')) {
+      const contenido = body.slice(8).trim();
+      if (!contenido) return m.reply('❗ Escribe el texto que deseas agregar.');
+      data.textos.push(contenido);
+      writeTexts(data);
+      return m.reply('✅ Texto agregado correctamente.');
+    }
 
-  if (command === 'vertext') {
-    if (data.textos.length === 0) return m.reply('📭 No hay textos guardados.');
-    return m.reply('📜 Textos actuales:\n' + data.textos.map((t, i) => `${i + 1}. ${t}`).join('\n'));
-  }
+    if (body.startsWith('.deltext')) {
+      const contenido = body.slice(8).trim();
+      if (!contenido) return m.reply('❗ Escribe el texto exacto que deseas eliminar.');
+      const index = data.textos.indexOf(contenido);
+      if (index === -1) return m.reply('⚠️ Ese texto no existe.');
+      data.textos.splice(index, 1);
+      writeTexts(data);
+      return m.reply('🗑️ Texto eliminado correctamente.');
+    }
 
-  // Activación por emoji 🪹
-  if (m.text === '🪹') {
-    const caption = data.textos.join('\n') || '📭 No hay textos para mostrar.';
-    try {
+    if (body.startsWith('.vertext')) {
+      if (data.textos.length === 0) return m.reply('📭 No hay textos guardados.');
+      return m.reply('📜 Textos actuales:\n' + data.textos.map((t, i) => `${i + 1}. ${t}`).join('\n'));
+    }
+
+    if (body === '🪹') {
+      const caption = data.textos.join('\n') || '📭 No hay textos para mostrar.';
       await conn.sendMessage(m.chat, {
         text: caption,
         mentions: users
       }, { quoted: m });
-    } catch (err) {
-      console.error('[ERROR 🪹]', err);
     }
+  } catch (err) {
+    console.error('[ERROR HANDLER 🪹]', err);
+    m.reply('❌ Ocurrió un error al procesar tu solicitud.');
   }
 };
 
-// Solo activación por emoji 🪹
-handler.customPrefix = /^🪹$/i;
-handler.command = ['addtext', 'deltext', 'vertext']
-handler.owner = true;
+// Activador por 🪹 o comandos .addtext, .deltext, .vertext
+handler.customPrefix = /^(🪹|\.addtext|\.deltext|\.vertext)$/i;
+handler.command = new RegExp;
 handler.group = true;
 
 export default handler;
