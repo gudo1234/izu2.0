@@ -76,7 +76,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}grupo *‹αвrir/cєrrαr›*
 │ ${e}${s}promote *‹@υsєя›*
 │ ${e}${s}demote *‹@υsєя›*
-│ ${e}${s}encuesta *‹›*
+│ ${e}${s}everyone *‹›*
 └────────────
 
 \`➠ᴄᴏɴғɪɢ - ᴏɴ/ᴏғғ🔹\`
@@ -213,7 +213,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}hideteg ⬌ ${usedPrefix}tag  
 > ${s + usedPrefix}icongc ⬄ ${usedPrefix}grupo  
 > ${s + usedPrefix}promote ⬌ ${usedPrefix}demote  
-> ${s + usedPrefix}encuesta  
+> ${s + usedPrefix}everyone
 
 \`➠ᴄᴏɴғɪɢ - ᴏɴ/ᴏғғ🔹\`
 > ${s + usedPrefix}on/off ⬄ ${usedPrefix}welcome  
