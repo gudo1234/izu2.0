@@ -118,33 +118,46 @@ export default handler;*/
 import fs from 'fs';
 import path from 'path';
 
-// Usa ruta absoluta basada en el directorio actual del archivo
-const FILE_PATH = path.join(process.cwd(), 'textos.json');
+const FILE_PATH = path.resolve('./textos.json');
 
 // Asegura que el archivo exista
-function ensureFile() {
-  if (!fs.existsSync(FILE_PATH)) {
-    fs.writeFileSync(FILE_PATH, JSON.stringify({ textos: [] }, null, 2));
+function ensureFile(m) {
+  try {
+    if (!fs.existsSync(FILE_PATH)) {
+      console.log('[INFO] Archivo no existe, creando textos.json...');
+      fs.writeFileSync(FILE_PATH, JSON.stringify({ textos: [] }, null, 2));
+      console.log('[INFO] Archivo textos.json creado exitosamente.');
+    }
+  } catch (e) {
+    console.error('[ERROR - ensureFile()] No se pudo crear textos.json:', e);
+    m.reply(`❌ Error creando archivo: ${e.message}`);
   }
 }
 
-function readTexts() {
-  ensureFile();
+// Leer textos
+function readTexts(m) {
+  ensureFile(m);
   try {
-    const raw = fs.readFileSync(FILE_PATH);
-    return JSON.parse(raw);
+    const raw = fs.readFileSync(FILE_PATH, 'utf8');
+    const data = JSON.parse(raw);
+    console.log('[INFO] Datos leídos desde textos.json:', data);
+    return data;
   } catch (e) {
-    console.error('[ERROR] No se pudo leer el archivo textos.json:', e);
+    console.error('[ERROR - readTexts()] No se pudo leer o parsear textos.json:', e);
+    m.reply(`❌ Error leyendo archivo: ${e.message}`);
     return { textos: [] };
   }
 }
 
-function writeTexts(data) {
-  ensureFile();
+// Guardar textos
+function writeTexts(m, data) {
+  ensureFile(m);
   try {
     fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+    console.log('[INFO] Datos escritos correctamente en textos.json');
   } catch (e) {
-    console.error('[ERROR] No se pudo escribir en textos.json:', e);
+    console.error('[ERROR - writeTexts()] No se pudo escribir en textos.json:', e);
+    m.reply(`❌ Error guardando archivo: ${e.message}`);
   }
 }
 
@@ -155,13 +168,13 @@ const handler = async (m, { conn, participants }) => {
       .filter(id => id !== conn.user.jid);
 
     const body = m.text.trim();
-    const data = readTexts();
+    const data = readTexts(m);
 
     if (body.startsWith('.addtext')) {
       const contenido = body.slice(8).trim();
       if (!contenido) return m.reply('❗ Escribe el texto que deseas agregar.');
       data.textos.push(contenido);
-      writeTexts(data);
+      writeTexts(m, data);
       return m.reply('✅ Texto agregado correctamente.');
     }
 
@@ -171,7 +184,7 @@ const handler = async (m, { conn, participants }) => {
       const index = data.textos.indexOf(contenido);
       if (index === -1) return m.reply('⚠️ Ese texto no existe.');
       data.textos.splice(index, 1);
-      writeTexts(data);
+      writeTexts(m, data);
       return m.reply('🗑️ Texto eliminado correctamente.');
     }
 
@@ -187,9 +200,10 @@ const handler = async (m, { conn, participants }) => {
         mentions: users
       }, { quoted: m });
     }
+
   } catch (err) {
     console.error('[ERROR HANDLER 🪹]', err);
-    m.reply('❌ Ocurrió un error al procesar tu solicitud.');
+    m.reply(`❌ Ocurrió un error al procesar tu solicitud:\n${err.message}`);
   }
 };
 
