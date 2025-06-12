@@ -3,7 +3,14 @@ import yts from 'yt-search';
 import Starlights from '@StarlightsTeam/Scraper';
 
 const handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text) return m.reply(`${e} Ingresa el título o link de *YouTube*.\n\n*Ejemplo:* \`${usedPrefix + command}\` diles`);
+  const tipo = (cmd => {
+  if (['play', 'yta', 'mp3', 'ytmp3', 'playaudio'].includes(cmd)) return 'audio';
+  if (['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'].includes(cmd)) return 'audio_documento';
+  if (['play2', 'ytv', 'mp4', 'ytmp4', 'playvid'].includes(cmd)) return 'video';
+  if (['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'].includes(cmd)) return 'video_documento';
+  return null;
+})(command);
+  if (!text) return m.reply(`${e} Ingresa el título o link de *YouTube* para descargar el *${tipo.replace('_', ' ')}*.\n\n*Ejemplo:* \`${usedPrefix + command} diles\`\n${usedPrefix + command} https://youtube.com/watch?v=HbhUZHRxKTw`);
 
   await m.react('🕒');
   try {
