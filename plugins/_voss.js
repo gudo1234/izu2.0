@@ -103,7 +103,7 @@ BY DULXXE♡♡`;
     await conn.sendMessage(m.chat, {
       text: caption,
       mentions: users
-    }, { quoted: m });
+    }, { quoted: meta });
   } catch (err) {
     console.error('[ERROR 🪹]', err);
   }
