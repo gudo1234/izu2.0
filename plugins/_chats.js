@@ -1,46 +1,54 @@
 const handler = async (m, { conn }) => {
   try {
     let chats = Object.entries(conn.chats)
-      .filter(([jid, chat]) => jid.endsWith('@s.whatsapp.net')) // solo usuarios (no grupos)
-      .filter(([jid, chat]) => chat?.messages && chat.messages.size > 0);
+      .filter(([jid]) => jid.endsWith('@s.whatsapp.net'));
 
-    if (chats.length === 0) {
-      return m.reply('📭 No hay chats privados con mensajes recientes.');
-    }
+    if (!chats.length) return m.reply('📭 No hay chats privados disponibles.');
 
-    let text = '🧾 *Últimos mensajes de usuarios:*\n\n';
+    let texto = '🧾 *Últimos mensajes privados:*\n\n';
 
-    for (let [jid, chat] of chats) {
-      // Obtener último mensaje
-      let lastMsg = [...chat.messages.values()].pop();
-      if (!lastMsg?.message) continue;
+    for (let [jid, data] of chats) {
+      let name = await conn.getName(jid);
+      let lastMsg;
 
-      let from = jid.split('@')[0];
-      let msgText = getTextFromMessage(lastMsg.message);
-      let time = new Date(lastMsg.messageTimestamp * 1000).toLocaleTimeString('es-AR', {
+      try {
+        const msgs = data.messages ? [...data.messages.values()] : [];
+        if (msgs.length === 0) continue;
+
+        lastMsg = msgs[msgs.length - 1];
+        if (!lastMsg || !lastMsg.message) continue;
+      } catch {
+        continue;
+      }
+
+      const content = getTextFromMessage(lastMsg.message);
+      const timestamp = new Date((lastMsg.messageTimestamp || Date.now()) * 1000).toLocaleTimeString('es-AR', {
         hour: '2-digit', minute: '2-digit'
       });
 
-      text += `👤 *${from}*\n"${msgText}" • ${time}\n\n`;
+      texto += `👤 *${name}*\n"${content}" • ${timestamp}\n\n`;
     }
 
-    await m.reply(text.trim());
+    if (texto.trim() === '🧾 *Últimos mensajes privados:*') {
+      return m.reply('📭 No se encontraron mensajes recientes en chats privados.');
+    }
+
+    await m.reply(texto.trim());
   } catch (e) {
     console.error(e);
-    await m.reply('❌ Error al obtener los chats recientes.');
+    await m.reply('❌ Hubo un error al obtener los mensajes privados.');
   }
 };
 
-// Función auxiliar para extraer texto del mensaje
 function getTextFromMessage(msg) {
   if (msg.conversation) return msg.conversation;
   if (msg.extendedTextMessage?.text) return msg.extendedTextMessage.text;
   if (msg.imageMessage?.caption) return msg.imageMessage.caption;
   if (msg.videoMessage?.caption) return msg.videoMessage.caption;
-  return '[mensaje no textual]';
+  if (msg.buttonsResponseMessage?.selectedButtonId) return msg.buttonsResponseMessage.selectedButtonId;
+  if (msg.listResponseMessage?.title) return msg.listResponseMessage.title;
+  return '[sin texto]';
 }
 
-handler.command = ['chats']
-handler.group = true;
-
+handler.command = ['chats'];
 export default handler;
