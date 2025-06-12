@@ -1,4 +1,4 @@
-import axios from 'axios';
+/*import axios from 'axios';
 import Starlights from '@StarlightsTeam/Scraper';
 
 const handler = async (m, { conn, participants }) => {
@@ -61,4 +61,56 @@ handler.command = new RegExp;
 
 handler.group = true;
 
+export default handler;*/
+
+const handler = async (m, { conn, participants }) => {
+  const users = participants
+    .map(u => u.id)
+    .filter(id => id !== conn.user.jid);
+
+  const caption = `SAKURA🩷EGO
+KIKIO🩷KAMIKAZE
+BLINK DI🩷CERO
+LUCY🩷MOGO
+SOLEDAD🩷HILDER
+KEXUX🩷TENTACION
+YUN🩷EDAR
+LILY🩷MONGOMERY
+KALY🩷ANDER
+LIAPSITA🩷SALVA
+VALERIA🩷TOKIO
+ELDA🩷LULLAN
+KARINA🩷GASTON
+IRIS🩷MARK
+MARIBEL🩷JAMON
+DULCE🩷SAYRO
+YARELLI🩷JEANXX
+ALBA🩷AARON
+DULCERA🩷NHMODS
+YOMA🩷FRANK
+CLARA🩷FANTASIA
+LESLY🩷MARTIR
+BREEM🩷BRUXIN
+YAMILET🩷CRISS
+PUCCA🩷SICARIO
+
+*LAS MISMAS PAREJAN ESTARAN HASTA EL DIA 14/06*
+
+SUERTE A TODOS
+BY DULXXE♡♡`;
+
+  try {
+    await conn.sendMessage(m.chat, {
+      text: caption,
+      mentions: users
+    }, { quoted: m });
+  } catch (err) {
+    console.error('[ERROR 🪹]', err);
+  }
+};
+
+// Activador por emoji 🪹
+handler.customPrefix = /^(🪹)$/i;
+handler.command = new RegExp;
+handler.group = true;
 export default handler;
