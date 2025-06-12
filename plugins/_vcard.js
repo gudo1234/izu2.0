@@ -8,10 +8,9 @@ function banderaEmoji(countryCode) {
     .map(char => 0x1F1E6 + char.charCodeAt(0) - 65);
   return String.fromCodePoint(...codePoints);
 }
-
 async function handler(m, { conn, text, mentionedJid }) {
   let number, jid;
-  if (mentionedJid?.length > 0) {
+  if (mentionedJid && mentionedJid.length > 0) {
     jid = mentionedJid[0];
     number = jid.split('@')[0];
   }
@@ -27,17 +26,13 @@ async function handler(m, { conn, text, mentionedJid }) {
     jid = m.sender;
     number = jid.split('@')[0];
   }
-
   const name = await conn.getName(jid);
   const { data: thumbnail } = await axios.get(icono, { responseType: 'arraybuffer' });
-
   const phoneInfo = PhoneNum('+' + number);
   const countryCode = phoneInfo.getRegionCode('international');
   const countryName = regionNames.of(countryCode) || 'Desconocido';
   const emojiBandera = banderaEmoji(countryCode);
-
   const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\nTEL;type=CELL;type=VOICE;waid=${number}:${number}\nEND:VCARD`;
-
   await conn.sendMessage(m.chat, {
     contacts: {
       contacts: [{
@@ -59,6 +54,6 @@ async function handler(m, { conn, text, mentionedJid }) {
   }, { quoted: m });
 }
 
-handler.command = ['vcard']
-handler.group = true;
+handler.command = /^vcard$/i;
+
 export default handler;
