@@ -119,12 +119,20 @@ import fs from 'fs';
 
 const FILE_PATH = './textos.json';
 
+// Asegura que el archivo exista y tenga estructura básica
+function ensureFile() {
+  if (!fs.existsSync(FILE_PATH)) {
+    fs.writeFileSync(FILE_PATH, JSON.stringify({ textos: [] }, null, 2));
+  }
+}
+
 function readTexts() {
-  if (!fs.existsSync(FILE_PATH)) return { textos: [] };
+  ensureFile();
   return JSON.parse(fs.readFileSync(FILE_PATH));
 }
 
 function writeTexts(data) {
+  ensureFile();
   fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
 }
 
