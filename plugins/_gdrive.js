@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import mime from 'mime-types'; // Asegúrate de tener instalado: npm i mime-types
 
 let handler = async (m, { conn, args }) => {
   if (!args[0]) throw '🔗 Por favor, ingresa una URL de Google Drive.';
@@ -12,12 +11,11 @@ let handler = async (m, { conn, args }) => {
 
     const peso = formatBytes(res.sizeBytes);
     let nombre = res.fileName || 'archivo';
-    let tipo = res.mimetype || mime.lookup(nombre) || 'application/octet-stream';
+    let tipo = res.mimetype;
 
-    // Corregir mimetype si es genérico
-    if (tipo === 'application/octet-stream') {
-      const detectado = mime.lookup(nombre);
-      if (detectado) tipo = detectado;
+    // Si el tipo no es válido o es genérico, lo corregimos manualmente
+    if (!tipo || tipo === 'application/octet-stream') {
+      tipo = detectarMime(nombre); // <- función personalizada
     }
 
     if (peso.includes('GB') && parseFloat(peso) > 1.8) throw '📦 El archivo es muy grande para enviarlo.';
@@ -72,6 +70,34 @@ async function fdrivedl(url) {
   };
 }
 
+function detectarMime(fileName) {
+  const ext = fileName.split('.').pop().toLowerCase();
+  const tipos = {
+    pdf: 'application/pdf',
+    doc: 'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xls: 'application/vnd.ms-excel',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ppt: 'application/vnd.ms-powerpoint',
+    pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    zip: 'application/zip',
+    rar: 'application/vnd.rar',
+    txt: 'text/plain',
+    mp3: 'audio/mpeg',
+    mp4: 'video/mp4',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    apk: 'application/vnd.android.package-archive',
+    csv: 'text/csv',
+    json: 'application/json',
+    xml: 'application/xml',
+    html: 'text/html'
+  };
+  return tipos[ext] || 'application/octet-stream';
+}
+
 function formatBytes(bytes, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
@@ -79,8 +105,7 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + ['Bytes', 'KB', 'MB', 'GB', 'TB'][i];
 }
 
-//handler.command = ['drive', 'drivedl', 'dldrive', 'gdrive'];
-handler.command = ['mu']
+handler.command = ['drive', 'drivedl', 'dldrive', 'gdrive'];
 handler.group = true;
 
 export default handler;
