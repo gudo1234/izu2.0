@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { format } from 'util';
 
 let handler = async (m, { text, conn }) => {
-  if (!/^https?:\/\//.test(text)) return conn.reply(m.chat, 'Ejemplo:\nhttps://ejemplo.com', m);
+  if (!/^https?:\/\//.test(text)) return conn.reply(m.chat, `${e} *Ejemplo:* https://ejemplo.com`, m);
   m.react('🕒')
   let res = await fetch(text);
   
