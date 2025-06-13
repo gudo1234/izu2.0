@@ -1,35 +1,27 @@
-import fetch from 'node-fetch'
+let handler = async (m, { args, conn }) => {
+  let url = args[0]
+  if (!url) return m.reply('⚠️ Ingresa un enlace de Alphacoders')
 
-let handler = async (m, { text, conn }) => {
-  if (!/^https?:\/\//.test(text)) return m.reply('Ejemplo:\n.fetch https://giffiles.alphacoders.com/221/thumb-440-221903.mp4')
-
+  let direct
   try {
-    const res = await fetch(text, {
-      redirect: 'follow',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0 Safari/537.36',
-        'Referer': 'https://giffiles.alphacoders.com/'
-      }
-    })
+    // intentar detectar si es página o archivo
+    const res = await fetch(url, { method: 'HEAD' })
+    const contentType = res.headers.get('content-type')
+    if (contentType && contentType.includes('text/html')) {
+      // Transformar URL si es del tipo: gifs.alphacoders.com/229/229122.mp4
+      const match = url.match(/(\d{3})\/(\d+)\.mp4$/)
+      if (!match) throw '⚠️ No pude convertir el enlace.'
+      direct = `https://giffiles.alphacoders.com/${match[1]}/${match[2]}.mp4`
+    } else {
+      direct = url
+    }
 
-    const type = res.headers.get('content-type') || ''
-    const size = res.headers.get('content-length') || 0
-
-    if (/html/.test(type)) return m.reply('⚠️ El enlace no devuelve un archivo directo. Es una página HTML.')
-    if (size > 100 * 1024 * 1024) return m.reply(`❌ El archivo pesa ${(size / 1048576).toFixed(2)} MB, supera el límite.`)
-
-    const buffer = await res.buffer()
-    return conn.sendFile(m.chat, buffer, 'archivo.mp4', `📥 Archivo descargado desde:\n${text}`, m)
-    
-  } catch (err) {
-    console.error(err)
-    m.reply('❌ Error al obtener el archivo:\n' + err.message)
+    await conn.sendFile(m.chat, direct, 'video.mp4', '🎬 Aquí está tu video.', m)
+  } catch (e) {
+    console.error(e)
+    m.reply('❌ No se pudo descargar el video.')
   }
 }
 
-handler.help = ['fetch'].map(v => v + ' <link>')
-handler.tags = ['owner']
-handler.command = ['fetch', 'get']
-handler.rowner = true
-
+handler.command = ['alphacoders']
 export default handler
