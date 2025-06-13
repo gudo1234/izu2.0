@@ -12,15 +12,13 @@ let handler = async (m, { conn, args }) => {
     const peso = formatBytes(res.sizeBytes);
     let nombre = res.fileName || 'archivo';
     let tipo = res.mimetype;
-
-    // Si el tipo no es válido o es genérico, lo corregimos manualmente
     if (!tipo || tipo === 'application/octet-stream') {
-      tipo = detectarMime(nombre); // <- función personalizada
+      tipo = detectarMime(nombre);
     }
 
     if (peso.includes('GB') && parseFloat(peso) > 1.8) throw '📦 El archivo es muy grande para enviarlo.';
 
-    const texto = `📁 Archivo: ${nombre}\n${e} *Tamaño:* ${peso}\n📄 Tipo: ${tipo}`;
+    const texto = `📁 *Archivo:* ${nombre}\n${e} *Tamaño:* ${peso}\n> Enviando el archivo tipo *${tipo}* espere un momento...`;
     m.reply(texto);
 m.react('✅')
     await conn.sendMessage(m.chat, {
@@ -31,7 +29,7 @@ m.react('✅')
 
   } catch (e) {
     console.error(e);
-    throw '❗ Error al intentar descargar el archivo. Puede que el enlace esté dañado o tenga límite de descargas.';
+    throw `${e} Error al intentar descargar el archivo. Puede que el enlace esté dañado o tenga límite de descargas.`;
   }
 };
 
