@@ -3,7 +3,10 @@ import fetch from 'node-fetch';
 let handler = async (m, { conn, text }) => {
 
   if (!text) return m.reply(`${e} Por favor, ingresa una URL de Google Drive.`);
-  if (!text.match(/drive\.google\.com\/file/i)) return m.reply(`${e} La URL ingresada no es válida o es una carpeta.`);
+  
+  if (!/drive\.google\.com\/(file\/d\/|open\?id=|uc\?id=|folders\/)/i.test(text)) {
+    return m.reply(`${e} La URL ingresada no parece ser válida de Google Drive.`);
+  }
 
   m.react('🕒');
 
@@ -34,12 +37,13 @@ let handler = async (m, { conn, text }) => {
 
   } catch (err) {
     console.error(err);
-    m.reply(`${e} Error al intentar descargar el archivo. Puede que el enlace esté dañado o haya alcanzado el límite de descargas.`);
+    m.reply(`${e} Error al intentar descargar el archivo. Puede que el enlace esté dañado, sea privado o haya alcanzado el límite de descargas.`);
   }
 };
 
 async function fdrivedl(url) {
-  const id = (url.match(/\/?id=([a-zA-Z0-9_-]+)/i) || url.match(/\/d\/([a-zA-Z0-9_-]+)/))[1];
+  const idMatch = url.match(/(?:\/d\/|id=|uc\?id=|folders\/)([a-zA-Z0-9_-]{10,})/i);
+  const id = idMatch?.[1];
   if (!id) throw new Error('No se pudo extraer el ID del enlace.');
 
   const res = await fetch(`https://drive.google.com/uc?id=${id}&authuser=0&export=download`, {
@@ -110,5 +114,4 @@ function formatBytes(bytes, decimals = 2) {
 
 handler.command = ['drive', 'drivedl', 'dldrive', 'gdrive'];
 handler.group = true;
-
 export default handler;
