@@ -1,41 +1,46 @@
 import fetch from 'node-fetch';
 
-let handler = async (m, { conn, args, text }) => {
-  if (!text) return m.reply(`${e} Por favor, ingresa una URL de Google Drive.`;
-  m.react('🕒')
-  const url = args[0];
-  if (!url.match(/drive\.google\.com\/file/i)) throw `${e} La URL ingresada no es válida o es una carpeta.`;
+let handler = async (m, { conn, text }) => {
+
+  if (!text) return m.reply(`${e} Por favor, ingresa una URL de Google Drive.`);
+  if (!text.match(/drive\.google\.com\/file/i)) return m.reply(`${e} La URL ingresada no es válida o es una carpeta.`);
+
+  m.react('🕒');
 
   try {
-    const res = await fdrivedl(url);
+    const res = await fdrivedl(text);
 
     const peso = formatBytes(res.sizeBytes);
     let nombre = res.fileName || 'archivo';
     let tipo = res.mimetype;
+
     if (!tipo || tipo === 'application/octet-stream') {
       tipo = detectarMime(nombre);
     }
 
-    if (peso.includes('GB') && parseFloat(peso) > 1.8) throw '📦 El archivo es muy grande para enviarlo.';
+    if (peso.includes('GB') && parseFloat(peso) > 1.8) {
+      return m.reply('📦 El archivo es muy grande para enviarlo.');
+    }
 
-    const texto = `📁 *Archivo:* ${nombre}\n${e} *Tamaño:* ${peso}\n> Enviando el archivo tipo *${tipo}* espere un momento...`;
+    const texto = `📁 *Archivo:* ${nombre}\n${e} *Tamaño:* ${peso}\n> Enviando el archivo tipo *${tipo}*, espere un momento...`;
     m.reply(texto);
-m.react('✅')
+    m.react('✅');
+
     await conn.sendMessage(m.chat, {
       document: { url: res.downloadUrl },
       fileName: nombre,
       mimetype: tipo
     }, { quoted: m });
 
-  } catch (e) {
-    console.error(e);
-    throw `${e} Error al intentar descargar el archivo. Puede que el enlace esté dañado o tenga límite de descargas.`;
+  } catch (err) {
+    console.error(err);
+    m.reply(`${e} Error al intentar descargar el archivo. Puede que el enlace esté dañado o haya alcanzado el límite de descargas.`);
   }
 };
 
 async function fdrivedl(url) {
   const id = (url.match(/\/?id=([a-zA-Z0-9_-]+)/i) || url.match(/\/d\/([a-zA-Z0-9_-]+)/))[1];
-  if (!id) throw `${e} No se pudo extraer el ID del enlace.`;
+  if (!id) throw new Error('No se pudo extraer el ID del enlace.');
 
   const res = await fetch(`https://drive.google.com/uc?id=${id}&authuser=0&export=download`, {
     method: 'POST',
@@ -52,13 +57,13 @@ async function fdrivedl(url) {
   try {
     json = JSON.parse((await res.text()).slice(4));
   } catch {
-    throw `${e} No se pudo procesar la respuesta de Google Drive.`;
+    throw new Error('No se pudo procesar la respuesta de Google Drive.');
   }
 
-  if (!json.downloadUrl) throw `${e} Este archivo ha alcanzado el límite de descargas o es privado.`;
+  if (!json.downloadUrl) throw new Error('Este archivo ha alcanzado el límite de descargas o es privado.');
 
   const head = await fetch(json.downloadUrl);
-  if (!head.ok) throw `${e} No se pudo acceder al archivo.`;
+  if (!head.ok) throw new Error('No se pudo acceder al archivo.');
 
   return {
     downloadUrl: json.downloadUrl,
