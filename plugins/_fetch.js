@@ -1,58 +1,50 @@
-import fetch from 'node-fetch';
-import { format } from 'util';
+import fetch from 'node-fetch'
+import { format } from 'util'
 
-let handler = async (m, { conn, text }) => {
-  const e = '⚠️';
-
-  if (!text) return m.reply(`${e} Ingresa una URL para hacer fetch.\nEjemplo:\nhttps://pornhub.com`);
-  if (!/^https?:\/\//.test(text)) return m.reply(`${e} La URL debe comenzar con http o https.`);
-
-  try {
-    let _url = new URL(text);
-    let url = global.API(
-      _url.origin,
-      _url.pathname,
-      Object.fromEntries(_url.searchParams.entries()),
-      'APIKEY'
-    );
-
-    let res = await fetch(url);
-    let contentLength = parseInt(res.headers.get('content-length') || 0);
-
-    if (contentLength > 100 * 1024 * 1024) {
-      return m.reply(`${e} El contenido es demasiado grande para ser procesado (${formatBytes(contentLength)}).`);
-    }
-
-    let contentType = res.headers.get('content-type') || '';
-    if (!/text|json/.test(contentType)) {
-      return conn.sendFile(m.chat, url, 'archivo', `📦 Archivo: ${text}`, m);
-    }
-
-    let buffer = await res.buffer();
-    let resultado;
-
-    try {
-      resultado = format(JSON.parse(buffer.toString()));
-    } catch {
-      resultado = buffer.toString();
-    }
-
-    m.reply(resultado.slice(0, 65536));
-    
-  } catch (err) {
-    console.error(err);
-    m.reply(`${e} Error al procesar la URL: ${err.message}`);
-  }
-};
-
-function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + ['Bytes', 'KB', 'MB', 'GB', 'TB'][i];
+let handler = async (m, { text, conn }) => {
+if (!/^https?:\/\//.test(text)) return conn.reply(m.chat, 'Ejemplo:\nhttps://pornhub.com', m)
+let _url = new URL(text)
+let url = global.API(_url.origin, _url.pathname, Object.fromEntries(_url.searchParams.entries()), 'APIKEY')
+let res = await fetch(url)
+if (res.headers.get('content-length') > 100 * 1024 * 1024 * 1024) {
+return m.reply(`Content-Length: ${res.headers.get('content-length')}`)
 }
+if (!/text|json/.test(res.headers.get('content-type'))) return conn.sendFile(m.chat, url, 'file', text, m)
+let txt = await res.buffer()
+try {
+txt = format(JSON.parse(txt + ''))
+} catch (e) {
+txt = txt + ''
+} finally {
+m.reply(txt.slice(0, 65536) + '')
+}}
 
-handler.command = ['fetch', 'get'];
-handler.group = true;
+handler.help = ['fetch'].map(v => v + ' *( Link )*')
+handler.tags = ['owner']
+handler.command = ['fetch', 'get']
+handler.rowner = true 
 
-export default handler;
+export default handler
+
+global.APIs = {}
+global.APIKeys = {}
+    
+global.API = (name, path = "/", query = {}, apikeyqueryname) =>
+(name in global.APIs ? global.APIs[name] : name) +
+path +
+(query || apikeyqueryname
+? "?" +
+new URLSearchParams(
+Object.entries({
+...query,
+...(apikeyqueryname
+? {
+[apikeyqueryname]:
+global.APIKeys[
+name in global.APIs ? global.APIs[name] : name
+],
+}
+: {}),
+}),
+)
+: "");
