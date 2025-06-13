@@ -4,26 +4,26 @@ let handler = async (m, { text, conn }) => {
   if (!/^https?:\/\//.test(text)) return m.reply('Ejemplo:\n.fetch https://giffiles.alphacoders.com/221/thumb-440-221903.mp4')
 
   try {
-    let res = await fetch(text)
+    const res = await fetch(text, {
+      redirect: 'follow',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0 Safari/537.36',
+        'Referer': 'https://giffiles.alphacoders.com/'
+      }
+    })
 
-    let size = res.headers.get('content-length') || 0
-    if (size > 100 * 1024 * 1024) return m.reply(`El archivo es demasiado grande: ${(size / (1024 * 1024)).toFixed(2)} MB`)
+    const type = res.headers.get('content-type') || ''
+    const size = res.headers.get('content-length') || 0
 
-    let type = res.headers.get('content-type') || ''
-    if (!/text|json/.test(type)) {
-      return conn.sendFile(m.chat, text, 'archivo', `📥 Archivo desde: ${text}`, m)
-    }
+    if (/html/.test(type)) return m.reply('⚠️ El enlace no devuelve un archivo directo. Es una página HTML.')
+    if (size > 100 * 1024 * 1024) return m.reply(`❌ El archivo pesa ${(size / 1048576).toFixed(2)} MB, supera el límite.`)
 
-    // Si es texto o JSON, lo intentamos mostrar como texto plano
-    let txt = await res.buffer()
-    try {
-      txt = JSON.stringify(JSON.parse(txt.toString()), null, 2)
-    } catch (e) {
-      txt = txt.toString()
-    }
-    m.reply(txt.slice(0, 65536)) // máximo 65k caracteres
+    const buffer = await res.buffer()
+    return conn.sendFile(m.chat, buffer, 'archivo.mp4', `📥 Archivo descargado desde:\n${text}`, m)
+    
   } catch (err) {
-    m.reply('❌ Error al obtener el archivo:\n' + err)
+    console.error(err)
+    m.reply('❌ Error al obtener el archivo:\n' + err.message)
   }
 }
 
