@@ -1,111 +1,115 @@
-import fetch      from 'node-fetch';
-import cheerio    from 'cheerio';          // npm i cheerio
-import { extname, basename } from 'path';
+import fetch from 'node-fetch'
+import cheerio from 'cheerio'
+import { extname, basename } from 'path'
 
-/* ╭───────────────────────────────────────╮
-   │   tabla súper-rápida de MIME types    │
-   ╰───────────────────────────────────────╯ */
 const mimeFromExt = ext => ({
-  '7z':'application/x-7z-compressed','zip':'application/zip','rar':'application/vnd.rar',
-  'apk':'application/vnd.android.package-archive',
-  'mp4':'video/mp4','mkv':'video/x-matroska',
-  'mp3':'audio/mpeg','wav':'audio/wav','ogg':'audio/ogg','flac':'audio/flac',
-  'pdf':'application/pdf','doc':'application/msword',
-  'docx':'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'xls':'application/vnd.ms-excel','xlsx':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'ppt':'application/vnd.ms-powerpoint','pptx':'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'txt':'text/plain','html':'text/html','csv':'text/csv','json':'application/json',
-  'js':'application/javascript','py':'text/x-python','c':'text/x-c','cpp':'text/x-c++',
-  'exe':'application/vnd.microsoft.portable-executable'
-}[ext]);
+  '7z': 'application/x-7z-compressed',
+  'zip': 'application/zip',
+  'rar': 'application/vnd.rar',
+  'apk': 'application/vnd.android.package-archive',
+  'mp4': 'video/mp4',
+  'mkv': 'video/x-matroska',
+  'mp3': 'audio/mpeg',
+  'wav': 'audio/wav',
+  'ogg': 'audio/ogg',
+  'flac': 'audio/flac',
+  'pdf': 'application/pdf',
+  'doc': 'application/msword',
+  'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'xls': 'application/vnd.ms-excel',
+  'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'ppt': 'application/vnd.ms-powerpoint',
+  'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'txt': 'text/plain',
+  'html': 'text/html',
+  'csv': 'text/csv',
+  'json': 'application/json',
+  'js': 'application/javascript',
+  'py': 'text/x-python',
+  'c': 'text/x-c',
+  'cpp': 'text/x-c++',
+  'exe': 'application/vnd.microsoft.portable-executable'
+}[ext])
 
-const normalizeURL = url => url.replace(/\?.*$/,'');    // fuera fbclid o basura
+const normalizeURL = url => url.replace(/\?.*$/, '')
 
-/* ╭───────────────────────────────────────╮
-   │              el Handler              │
-   ╰───────────────────────────────────────╯ */
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) throw `${usedPrefix + command} <link de MediaFire>`;
+  if (!text) throw `${usedPrefix + command} <link de MediaFire>`
 
-  const url = normalizeURL(text.trim());
+  const url = normalizeURL(text.trim())
 
-  // ⏳  avisamos que arrancamos
-  await conn.sendMessage(m.chat, { react:{ text:'🕒', key:m.key }});
+  await conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key } })
 
-  /*──────────────────────────
-    1. ¿Es carpeta o archivo?
-    ──────────────────────────*/
-  let files = [];
+  let files = []
   if (/\/folder\//i.test(url)) {
-    files = await scrapeFolder(url);          // ⟵ magia HTML
-  } else {
-    const direct = await resolveDirect(url);  // ⟵ API agatz
-    if (direct) files.push(direct);
+    files = await scrapeMediaFireFolder(url)
+  } else if (/\/file\//i.test(url)) {
+    const file = await resolveMediaFireFile(url)
+    if (file) files.push(file)
   }
 
-  if (!files.length) throw 'No encontré ningún .mp4 ahí dentro.';
+  if (!files.length) throw 'No se encontraron archivos en la URL proporcionada.'
 
-  /*──────────────────────────
-    2. Enviamos cada video
-    ──────────────────────────*/
   for (const file of files) {
-    const ext  = extname(file.name).slice(1).toLowerCase();
-    const mime = mimeFromExt(ext) || 'application/octet-stream';
-    const cap  = `*Nombre:* ${file.name}\n*Peso:*   ${file.size}\n*Tipo:*   ${ext.toUpperCase()}`;
+    const ext = extname(file.name).slice(1).toLowerCase()
+    const mime = mimeFromExt(ext) || 'application/octet-stream'
+    const caption = `*Nombre:* ${file.name}\n*Peso:* ${file.size}\n*Tipo:* ${ext.toUpperCase()}`
 
-    await conn.sendMessage(m.chat,{
-      document:{ url:file.link },
-      fileName:file.name,
-      mimetype:mime,
-      caption: cap
-    },{ quoted:m });
+    await conn.sendMessage(m.chat, {
+      document: { url: file.link },
+      fileName: file.name,
+      mimetype: mime,
+      caption
+    }, { quoted: m })
   }
 
-  await conn.sendMessage(m.chat,{ react:{ text:'✅', key:m.key }});
-};
+  await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+}
 
-/* ╭──────────────────────────────╮
-   │  handler metadata (Baileys)  │
-   ╰──────────────────────────────╯ */
-handler.command = ['jj'];
-handler.group   = true;
-export default handler;
+handler.command = ['jj']
+handler.group = true
 
-/* ╭───────────────────────────────────────╮
-   │          helpers auxiliares           │
-   ╰───────────────────────────────────────╯ */
-async function resolveDirect(url){
-  try{
-    const api = `https://api.agatz.xyz/api/mediafire?url=${encodeURIComponent(url)}`;
-    const res = await fetch(api);
-    const json = await res.json();
-    const file = json?.data?.[0];
-    if (!file) return null;
-    return { name:file.nama, size:file.size, link:file.link };
-  }catch(e){
-    return null;
+export default handler
+
+// 🧠 Resolver enlace directo individual
+async function resolveMediaFireFile(fileUrl) {
+  try {
+    const res = await fetch(fileUrl)
+    const html = await res.text()
+    const $ = cheerio.load(html)
+    const link = $('a#downloadButton').attr('href')
+    const name = $('div.filename').text().trim()
+    const size = $('ul.dl-info > li:contains("Size")').text().split(':')[1]?.trim() || '???'
+    if (!link || !name) return null
+    return { name, size, link }
+  } catch {
+    return null
   }
 }
 
-async function scrapeFolder(folderURL){
-  try{
-    const html = await fetch(folderURL).then(r=>r.text());
-    const $ = cheerio.load(html);
+// 📂 Raspar carpeta completa de MediaFire
+async function scrapeMediaFireFolder(folderUrl) {
+  try {
+    const res = await fetch(folderUrl)
+    const html = await res.text()
+    const $ = cheerio.load(html)
+    const fileLinks = []
 
-    // MediaFire escribe data-id y aria-label en los links de descarga dentro de tablas
-    const rows = $('a[data-download-link][aria-label="Download file"]');
-
-    const list = [];
-    rows.each((_,el)=>{
-      const link = $(el).attr('href');
-      const name = basename(decodeURIComponent(link.split('?').shift()));
-      if (!name.toLowerCase().endsWith('.mp4')) return; // sólo mp4, como pidió el boss
-      const sizeTxt = $(el).closest('tr').find('.file_info span').first().text().trim() || '???';
-      list.push({ name, size:sizeTxt, link });
-    });
-
-    return list;
-  }catch(e){
-    return [];
-  }
+    $('a.folder_list_link').each((_, el) => {
+      const href = $(el).attr('href')
+      if (href && href.includes('/file/')) {
+        fileLinks.push(new URL(href, 'https://www.mediafire.com').href)
       }
+    })
+
+    const allFiles = []
+    for (const link of fileLinks) {
+      const file = await resolveMediaFireFile(link)
+      if (file) allFiles.push(file)
+    }
+
+    return allFiles
+  } catch {
+    return []
+  }
+}
