@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import cheerio from 'cheerio'
-import { extname, basename } from 'path'
+import { extname } from 'path'
 
 const mimeFromExt = ext => ({
   '7z': 'application/x-7z-compressed',
@@ -31,24 +31,22 @@ const mimeFromExt = ext => ({
   'exe': 'application/vnd.microsoft.portable-executable'
 }[ext])
 
-const normalizeURL = url => url.replace(/\?.*$/, '')
-
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) throw `${usedPrefix + command} <link de MediaFire>`
 
-  const url = normalizeURL(text.trim())
-
+  const url = text.trim()
   await conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key } })
 
   let files = []
+
   if (/\/folder\//i.test(url)) {
-    files = await scrapeMediaFireFolder(url)
+    files = await extractFilesFromFolder(url)
   } else if (/\/file\//i.test(url)) {
     const file = await resolveMediaFireFile(url)
     if (file) files.push(file)
   }
 
-  if (!files.length) throw 'No se encontraron archivos en la URL proporcionada.'
+  if (!files.length) throw '❌ No se encontraron archivos en la URL proporcionada.'
 
   for (const file of files) {
     const ext = extname(file.name).slice(1).toLowerCase()
@@ -66,50 +64,44 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
 }
 
+//handler.command = ['mf', 'mediafire']
 handler.command = ['jj']
 handler.group = true
-
 export default handler
 
-// 🧠 Resolver enlace directo individual
+// ✅ Detecta archivos desde carpetas
+async function extractFilesFromFolder(folderUrl) {
+  try {
+    const html = await fetch(folderUrl).then(res => res.text())
+
+    // Busca todos los links /file/...
+    const fileLinks = [...html.matchAll(/href="(\/file\/[^\"]+)"/g)]
+      .map(match => 'https://www.mediafire.com' + match[1])
+      .filter((v, i, a) => a.indexOf(v) === i) // eliminar duplicados
+
+    const files = []
+    for (const link of fileLinks) {
+      const file = await resolveMediaFireFile(link)
+      if (file) files.push(file)
+    }
+
+    return files
+  } catch (e) {
+    return []
+  }
+}
+
+// ✅ Obtiene nombre, tamaño y link directo
 async function resolveMediaFireFile(fileUrl) {
   try {
-    const res = await fetch(fileUrl)
-    const html = await res.text()
+    const html = await fetch(fileUrl).then(res => res.text())
     const $ = cheerio.load(html)
     const link = $('a#downloadButton').attr('href')
-    const name = $('div.filename').text().trim()
+    const name = $('div.filename').text().trim() || fileUrl.split('/').pop()
     const size = $('ul.dl-info > li:contains("Size")').text().split(':')[1]?.trim() || '???'
     if (!link || !name) return null
     return { name, size, link }
   } catch {
     return null
-  }
-}
-
-// 📂 Raspar carpeta completa de MediaFire
-async function scrapeMediaFireFolder(folderUrl) {
-  try {
-    const res = await fetch(folderUrl)
-    const html = await res.text()
-    const $ = cheerio.load(html)
-    const fileLinks = []
-
-    $('a.folder_list_link').each((_, el) => {
-      const href = $(el).attr('href')
-      if (href && href.includes('/file/')) {
-        fileLinks.push(new URL(href, 'https://www.mediafire.com').href)
-      }
-    })
-
-    const allFiles = []
-    for (const link of fileLinks) {
-      const file = await resolveMediaFireFile(link)
-      if (file) allFiles.push(file)
-    }
-
-    return allFiles
-  } catch {
-    return []
   }
 }
