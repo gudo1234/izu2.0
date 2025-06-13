@@ -1,27 +1,68 @@
-let handler = async (m, { args, conn }) => {
-  let url = args[0]
-  if (!url) return m.reply('⚠️ Ingresa un enlace de Alphacoders')
+import fetch from 'node-fetch'
+import { format } from 'util'
 
-  let direct
-  try {
-    // intentar detectar si es página o archivo
-    const res = await fetch(url, { method: 'HEAD' })
-    const contentType = res.headers.get('content-type')
-    if (contentType && contentType.includes('text/html')) {
-      // Transformar URL si es del tipo: gifs.alphacoders.com/229/229122.mp4
-      const match = url.match(/(\d{3})\/(\d+)\.mp4$/)
-      if (!match) throw '⚠️ No pude convertir el enlace.'
-      direct = `https://giffiles.alphacoders.com/${match[1]}/${match[2]}.mp4`
+let handler = async (m, { text, conn }) => {
+  if (!/^https?:\/\//.test(text)) return conn.reply(m.chat, 'Ejemplo:\nhttps://pornhub.com', m)
+  
+  let _url = new URL(text)
+  let url = global.API(
+    _url.origin,
+    _url.pathname,
+    Object.fromEntries(_url.searchParams.entries()),
+    'APIKEY'
+  )
+
+  let res = await fetch(url)
+
+  if (res.headers.get('content-length') > 100 * 1024 * 1024 * 1024) {
+    return m.reply(`Content-Length: ${res.headers.get('content-length')}`)
+  }
+
+  let contentType = res.headers.get('content-type') || ''
+
+  if (!/text|json/.test(contentType)) {
+    // Si termina en .mp4, envía como video
+    if (url.toLowerCase().endsWith('.mp4')) {
+      return conn.sendFile(m.chat, url, 'video.mp4', text, m, false, { mimetype: 'video/mp4' })
     } else {
-      direct = url
+      return conn.sendFile(m.chat, url, 'file', text, m)
     }
+  }
 
-    await conn.sendFile(m.chat, direct, 'video.mp4', '🎬 Aquí está tu video.', m)
+  let txt = await res.buffer()
+  try {
+    txt = format(JSON.parse(txt + ''))
   } catch (e) {
-    console.error(e)
-    m.reply('❌ No se pudo descargar el video.')
+    txt = txt + ''
+  } finally {
+    m.reply(txt.slice(0, 65536) + '')
   }
 }
 
-handler.command = ['alphacoders']
+handler.command = ['fetch', 'get']
+handler.group = true
+
 export default handler
+
+global.APIs = {}
+global.APIKeys = {}
+
+global.API = (name, path = "/", query = {}, apikeyqueryname) =>
+  (name in global.APIs ? global.APIs[name] : name) +
+  path +
+  (query || apikeyqueryname
+    ? "?" +
+      new URLSearchParams(
+        Object.entries({
+          ...query,
+          ...(apikeyqueryname
+            ? {
+                [apikeyqueryname]:
+                  global.APIKeys[
+                    name in global.APIs ? global.APIs[name] : name
+                  ],
+              }
+            : {}),
+        }),
+      )
+    : "")
