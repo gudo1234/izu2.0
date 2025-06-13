@@ -3,7 +3,7 @@ import { format } from 'util';
 
 let handler = async (m, { text, conn }) => {
   if (!/^https?:\/\//.test(text)) return conn.reply(m.chat, 'Ejemplo:\nhttps://ejemplo.com', m);
-  
+  m.react('🕒')
   let res = await fetch(text);
   
   if (res.headers.get('content-length') > 100 * 1024 * 1024 * 1024) {
@@ -23,13 +23,14 @@ let handler = async (m, { text, conn }) => {
     }
   } else if (text.toLowerCase().endsWith('.mp4') && contentType.startsWith('video')) {
     //Descarga el video en un buffer antes de mandarlo
+    m.react('✅')
     let buffer = await res.buffer();
 
-    return conn.sendFile(m.chat, buffer, 'video.mp4', text, m, false, { mimetype: 'video/mp4' });
+    return conn.sendFile(m.chat, buffer, 'video.mp4', text, m, null, rcanal, false, { mimetype: 'video/mp4' });
   } else {
     let buffer = await res.buffer();
 
-    return conn.sendFile(m.chat, buffer, 'file', text, m);
+    return conn.sendFile(m.chat, buffer, 'file', text, m, null, rcanal);
   }
 }
 
