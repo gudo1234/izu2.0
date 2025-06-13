@@ -150,8 +150,11 @@ let handler = async (m, { conn, text }) => {
         try {
           const info = await fdrivedl(archivo.url);
           const peso = formatBytes(info.sizeBytes);
-          const tipo = info.mimetype || detectarMime(info.fileName || `archivo_${archivo.id}`);
           const nombre = info.fileName || `archivo_${archivo.id}`;
+          // Detectar MIME si es genérico o ausente
+          const tipo = (info.mimetype && !info.mimetype.includes('octet-stream'))
+            ? info.mimetype
+            : detectarMime(nombre);
 
           await conn.sendMessage(m.chat, {
             document: { url: info.downloadUrl },
@@ -242,9 +245,11 @@ async function fdrivedl(url) {
 
   return {
     downloadUrl: json.downloadUrl,
-    fileName: json.fileName || 'archivo',
+    fileName: json.fileName?.trim() || `archivo_${id}`,
     sizeBytes: json.sizeBytes,
-    mimetype: head.headers.get('content-type') || 'application/octet-stream'
+    mimetype: (head.headers.get('content-type') || '').includes('octet-stream')
+      ? detectarMime(json.fileName || '')
+      : head.headers.get('content-type')
   };
 }
 
