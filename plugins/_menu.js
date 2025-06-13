@@ -122,6 +122,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}spotifydl *‹υяʟ›*
 │ ${e}${s}mega *‹υяʟ›*
 │ ${e}${s}terabox *‹υяʟ›*
+│ ${e}${s}gdrive *‹υяʟ›*
 └────────────
 
 \`✘ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮\`
@@ -236,7 +237,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}ytmp4 ⬄ ${usedPrefix}ytmp3doc  
 > ${s + usedPrefix}ytmp4doc ⬌ ${usedPrefix}spotify  
 > ${s + usedPrefix}spotifydl ⬄ ${usedPrefix}mega  
-> ${s + usedPrefix}terabox  
+> ${s + usedPrefix}terabox ⬌ ${usedPrefix}gdrive 
 
 \`✘ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮\`
 > ${s + usedPrefix}calendario ⬄ ${usedPrefix}toptt  
