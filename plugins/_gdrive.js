@@ -1,11 +1,8 @@
 import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text }) => {
-  const e = '⚠️';
-
   if (!text) return m.reply(`${e} Por favor, ingresa una URL de Google Drive.`);
 
-  // Detectar si es carpeta
   const carpetaMatch = text.match(/(?:folders\/|drive\/(?:mobile\/)?folders\/)([a-zA-Z0-9_-]+)/i);
   const carpetaID = carpetaMatch?.[1];
 
@@ -13,9 +10,7 @@ let handler = async (m, { conn, text }) => {
     m.react('🗂️');
 
     try {
-      const html = await fetch(`https://drive.google.com/drive/folders/${carpetaID}`).then(res => res.text());
-
-      // Buscar archivos dentro de la carpeta y subcarpetas (filtrando duplicados)
+      const html = await fetch(`https://drive.google.com/drive/folders/${carpetaID}`).then(res => res.text())
       const fileMatches = [...html.matchAll(/"https:\/\/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]{10,})/g)];
       const idsUnicos = [...new Set(fileMatches.map(v => v[1]))];
 
@@ -40,7 +35,7 @@ let handler = async (m, { conn, text }) => {
             fileName: nombre,
             mimetype: tipo
           }, { quoted: m });
-
+m.react('✅')
           await new Promise(r => setTimeout(r, 2000));
 
         } catch (err) {
@@ -76,14 +71,13 @@ let handler = async (m, { conn, text }) => {
 
     const texto = `📁 *Archivo:* ${nombre}\n${e} *Tamaño:* ${peso}\n> Enviando el archivo tipo *${tipo}*, espere un momento...`;
     m.reply(texto);
-    m.react('✅');
 
     await conn.sendMessage(m.chat, {
       document: { url: res.downloadUrl },
       fileName: nombre,
       mimetype: tipo
     }, { quoted: m });
-
+m.react('✅');
   } catch (err) {
     console.error(err);
     m.reply(`${e} Error al intentar descargar el archivo.`);
