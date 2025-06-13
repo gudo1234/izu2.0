@@ -71,7 +71,7 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
 ✦ *Publicado:* ${ago || 'N/A'}
 ✦ *Canal:* ${author?.name || 'Desconocido'}
 ✦ *Enlace:* ${url}\n\n${file}
-${forceDocByDuration ? '\n📎 *Este archivo se enviará como documento por superar los 20 minutos.*' : ''}
+${forceDocByDuration && !isAudioDoc && !isVideoDoc ? '\n📎 *Este archivo se enviará como documento por superar los 20 minutos.*' : ''}
 `.trim();
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
