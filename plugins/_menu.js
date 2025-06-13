@@ -174,6 +174,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}noticias *‹›*
 │ ${e}${s}githubsearch *‹τ×τ›*
 │ ${e}${s}fetch ‹υяʟ›
+│ ${e}${s}google *‹τ×τ›*
 └────────────
 
 \`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
@@ -264,7 +265,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}spotifysearch ⬌ ${usedPrefix}xnxxsearch  
 > ${s + usedPrefix}xvideosearch ⬄ ${usedPrefix}tiktoksearch  
 > ${s + usedPrefix}noticias ⬌ ${usedPrefix}githubsearch
-> ${s + usedPrefix}fetch
+> ${s + usedPrefix}fetch ⬄ ${usedPrefix}google
 
 \`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
 > ${s + usedPrefix}abrazar ⬄ ${usedPrefix}aburrido  
