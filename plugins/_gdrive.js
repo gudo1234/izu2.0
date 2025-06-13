@@ -1,21 +1,28 @@
 import fetch from 'node-fetch';
+import mime from 'mime-types'; // Asegúrate de tener instalado: npm i mime-types
 
 let handler = async (m, { conn, args }) => {
   if (!args[0]) throw '🔗 Por favor, ingresa una URL de Google Drive.';
   
-  let url = args[0];
-  if (!url.match(/drive\.google\.com\/file/i)) throw '❌ La URL ingresada no parece válida o es una carpeta de Drive.';
+  const url = args[0];
+  if (!url.match(/drive\.google\.com\/file/i)) throw '❌ La URL ingresada no es válida o es una carpeta.';
 
   try {
     const res = await fdrivedl(url);
 
     const peso = formatBytes(res.sizeBytes);
-    const tipo = res.mimetype || 'application/octet-stream';
-    const nombre = res.fileName || 'archivo';
+    let nombre = res.fileName || 'archivo';
+    let tipo = res.mimetype || mime.lookup(nombre) || 'application/octet-stream';
 
-    if (peso.includes('GB') && parseFloat(peso) > 1.8) throw '📦 El archivo es muy grande para ser enviado.';
+    // Corregir mimetype si es genérico
+    if (tipo === 'application/octet-stream') {
+      const detectado = mime.lookup(nombre);
+      if (detectado) tipo = detectado;
+    }
 
-    let texto = `📁 Archivo: ${nombre}\n📐 Tamaño: ${peso}\n📄 Tipo: ${tipo}`;
+    if (peso.includes('GB') && parseFloat(peso) > 1.8) throw '📦 El archivo es muy grande para enviarlo.';
+
+    const texto = `📁 Archivo: ${nombre}\n📐 Tamaño: ${peso}\n📄 Tipo: ${tipo}`;
     m.reply(texto);
 
     await conn.sendMessage(m.chat, {
@@ -31,10 +38,10 @@ let handler = async (m, { conn, args }) => {
 };
 
 async function fdrivedl(url) {
-  let id = (url.match(/\/?id=([a-zA-Z0-9_-]+)/i) || url.match(/\/d\/([a-zA-Z0-9_-]+)/))[1];
+  const id = (url.match(/\/?id=([a-zA-Z0-9_-]+)/i) || url.match(/\/d\/([a-zA-Z0-9_-]+)/))[1];
   if (!id) throw '❌ No se pudo extraer el ID del enlace.';
 
-  let res = await fetch(`https://drive.google.com/uc?id=${id}&authuser=0&export=download`, {
+  const res = await fetch(`https://drive.google.com/uc?id=${id}&authuser=0&export=download`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -72,7 +79,8 @@ function formatBytes(bytes, decimals = 2) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + ['Bytes', 'KB', 'MB', 'GB', 'TB'][i];
 }
 
-handler.command = ['drive', 'drivedl', 'dldrive', 'gdrive'];
+//handler.command = ['drive', 'drivedl', 'dldrive', 'gdrive'];
+handler.command = ['mu']
 handler.group = true;
 
 export default handler;
