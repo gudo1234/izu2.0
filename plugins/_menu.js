@@ -137,7 +137,6 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}ssweb ‹υяʟ›
 │ ${e}${s}vcard #
 │ ${e}${s}whamusic ‹rєρℓy›
-│ ${e}${s}par ...
 └────────────
 
 \`✔sᴛɪᴄᴋᴇʀ - ᴍᴀʀᴋᴇʀ/ʟᴏɢᴏ🧩\`
@@ -157,6 +156,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}stickers *‹τ×τ›*
 │ ${e}${s}aiimg *‹τ×τ›*
 │ ${e}${s}iqc *‹τ×τ›*
+│ ${e}${s}par ...
 └────────────
 
 \`✏ʙᴜsᴄᴀᴅᴏʀ - ᴡᴇʙ🔎\`
@@ -173,6 +173,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}tiktoksearch *‹τ×τ›*
 │ ${e}${s}noticias *‹›*
 │ ${e}${s}githubsearch *‹τ×τ›*
+│ ${e}${s}fetch ‹υяʟ›
 └────────────
 
 \`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
@@ -205,7 +206,7 @@ ${comandosNsfw}
 let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}code ⬄ ${usedPrefix}qr  
 > ${s + usedPrefix}deletesesion ⬌ ${usedPrefix}reglas  
-> ${s + usedPrefix}reporte ⬄ ${usedPrefix}owner  
+> ${s + usedPrefix}reporte ⬄ ${usedPrefix}owner
 
 \`✡ғᴜɴᴄɪóɴ ɢʀᴜᴘᴏ⚙️\`
 > ${s + usedPrefix}kick ⬄ ${usedPrefix}kicknum  
@@ -263,6 +264,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}spotifysearch ⬌ ${usedPrefix}xnxxsearch  
 > ${s + usedPrefix}xvideosearch ⬄ ${usedPrefix}tiktoksearch  
 > ${s + usedPrefix}noticias ⬌ ${usedPrefix}githubsearch
+> ${s + usedPrefix}fetch
 
 \`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
 > ${s + usedPrefix}abrazar ⬄ ${usedPrefix}aburrido  
