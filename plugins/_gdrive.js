@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 let handler = async (m, { conn, args }) => {
   if (!args[0]) throw `${e} Por favor, ingresa una URL de Google Drive.`;
-  
+  m.react('🕒')
   const url = args[0];
   if (!url.match(/drive\.google\.com\/file/i)) throw `${e} La URL ingresada no es válida o es una carpeta.`;
 
@@ -22,7 +22,7 @@ let handler = async (m, { conn, args }) => {
 
     const texto = `📁 Archivo: ${nombre}\n${e} *Tamaño:* ${peso}\n📄 Tipo: ${tipo}`;
     m.reply(texto);
-
+m.react('✅')
     await conn.sendMessage(m.chat, {
       document: { url: res.downloadUrl },
       fileName: nombre,
