@@ -119,49 +119,63 @@ export default handler;*/
 import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text }) => {
+  const e = '⚠️';
+
   if (!text) return m.reply(`${e} Por favor, ingresa una URL de Google Drive.`);
 
-  // Detectar carpeta
+  // Detectar si es carpeta
   const carpetaMatch = text.match(/(?:folders\/|drive\/(?:mobile\/)?folders\/)([a-zA-Z0-9_-]+)/i);
   const carpetaID = carpetaMatch?.[1];
 
   if (carpetaID) {
     m.react('🗂️');
+
     try {
       const html = await fetch(`https://drive.google.com/drive/folders/${carpetaID}`).then(res => res.text());
 
-      const archivos = [...html.matchAll(/"([a-zA-Z0-9_-]{10,})","(.*?)","[a-zA-Z0-9_\-]+","\w+",\d+,\d+,null,null,null,,null,null,null,false/g)];
+      // Extraer todos los IDs de archivos únicos del HTML
+      const fileMatches = [...html.matchAll(/\/file\/d\/([a-zA-Z0-9_-]{10,})/g)];
+      const idsUnicos = [...new Set(fileMatches.map(v => v[1]))];
 
-      if (!archivos.length) return m.reply(`${e} No se pudieron extraer archivos. La carpeta podría ser privada.`);
+      if (!idsUnicos.length) return m.reply(`${e} No se encontraron archivos en esta carpeta.`);
 
-      const encontrados = archivos.map(m => ({
-        id: m[1],
-        nombre: m[2].replace(/\\u003c|\\u003e|\\n|\\|"/g, '')
+      const encontrados = idsUnicos.map(id => ({
+        id,
+        url: `https://drive.google.com/file/d/${id}`
       }));
 
       m.reply(`📂 Se encontraron *${encontrados.length}* archivos. Enviando uno por uno...`);
 
       for (const archivo of encontrados) {
-        const info = await fdrivedl(`https://drive.google.com/file/d/${archivo.id}`);
-        const peso = formatBytes(info.sizeBytes);
-        let tipo = info.mimetype || detectarMime(archivo.nombre);
-        await conn.sendMessage(m.chat, {
-          document: { url: info.downloadUrl },
-          fileName: archivo.nombre,
-          mimetype: tipo
-        }, { quoted: m });
-        await new Promise(r => setTimeout(r, 2000)); // espera para evitar bloqueo
+        try {
+          const info = await fdrivedl(archivo.url);
+          const peso = formatBytes(info.sizeBytes);
+          const tipo = info.mimetype || detectarMime(info.fileName || `archivo_${archivo.id}`);
+          const nombre = info.fileName || `archivo_${archivo.id}`;
+
+          await conn.sendMessage(m.chat, {
+            document: { url: info.downloadUrl },
+            fileName: nombre,
+            mimetype: tipo
+          }, { quoted: m });
+
+          await new Promise(r => setTimeout(r, 2000)); // esperar para evitar bloqueos
+
+        } catch (err) {
+          console.error(`❌ Error al enviar ${archivo.url}:`, err);
+          await m.reply(`${e} No se pudo descargar el archivo con ID: ${archivo.id}`);
+        }
       }
 
     } catch (err) {
       console.error(err);
-      return m.reply(`${e} Error al procesar la carpeta. Puede que sea privada o haya cambiado el formato.`);
+      return m.reply(`${e} Error al procesar la carpeta. Puede que sea privada o que el formato haya cambiado.`);
     }
 
     return;
   }
 
-  // Detectar archivo individual
+  // Si no es carpeta, verificar si es archivo individual
   if (!/drive\.google\.com\/(file\/d\/|open\?id=|uc\?id=)/i.test(text)) {
     return m.reply(`${e} La URL ingresada no parece ser válida de un archivo individual de Google Drive.`);
   }
@@ -170,7 +184,6 @@ let handler = async (m, { conn, text }) => {
 
   try {
     const res = await fdrivedl(text);
-
     const peso = formatBytes(res.sizeBytes);
     let nombre = res.fileName || 'archivo';
     let tipo = res.mimetype;
