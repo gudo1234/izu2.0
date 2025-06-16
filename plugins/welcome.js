@@ -20,12 +20,12 @@ let tag = name || ''
   let vn7 = './media/bloody.mp3'; //welcome
   let vn8 = './media/sad.mp3'; // bye
   let vn9 = './media/cardigansad.mp3' // bye
-  let vn10 = './media/iwas.mp3'
-  let vn11 = './media/juntos.mp3'
-  let vn12 = './media/space.mp3'
-  let vn13 = './media/stellar.mp3'
-  let vn14 = './media/theb.mp3'
-  let vn15 = './media/alanspectre.mp3'
+  let vn10 = './media/iwas.mp3' // bye 
+  let vn11 = './media/juntos.mp3' // bye 
+  let vn12 = './media/space.mp3' // bye
+  let vn13 = './media/stellar.mp3' // bye
+  let vn14 = './media/theb.mp3' // bye
+  let vn15 = './media/alanspectre.mp3' // bye
   let or = ['stiker', 'audio', 'texto', 'gifPlayback'];
   let media = or[Math.floor(Math.random() * 4)];
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
@@ -99,7 +99,7 @@ if (media === 'texto') {
  await conn.sendMessage(m.chat, {
         text: wel, 
         contextInfo: {
-            mentionedJid: [m.messageStubParameters[0]], // Asegúrate de incluir al nuevo usuario aquí
+            mentionedJid: [m.messageStubParameters[0]],
             groupMentions: [],
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
@@ -187,7 +187,7 @@ if (media === 'texto') {
   await conn.sendMessage(m.chat, { 
         text: b, 
         contextInfo: {
-            mentionedJid: [m.messageStubParameters[0]], // Asegúrate de incluir al nuevo usuario aquí
+            mentionedJid: [m.messageStubParameters[0]],
             groupMentions: [],
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
