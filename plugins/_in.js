@@ -108,7 +108,7 @@ sourceUrl: args[0] ? args[0] : inviteCode ? `https://chat.whatsapp.com/${inviteC
 mediaType: 1,
 showAdAttribution: false,
 renderLargerThumbnail: false
-}}}, { quoted: fkontak })
+}}}, { quoted: m })
 } else {
 // Manejo de enlaces de canales
 let newsletterInfo
@@ -134,7 +134,7 @@ sourceUrl: args[0],
 mediaType: 1,
 showAdAttribution: false,
 renderLargerThumbnail: false
-}}}, { quoted: fkontak })}
+}}}, { quoted: m })}
 newsletterInfo.id ? conn.sendMessage(m.chat, { text: newsletterInfo.id }, { quoted: null }) : ''
 } catch (e) {
 m.reply(e)
