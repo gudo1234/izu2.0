@@ -137,7 +137,8 @@ renderLargerThumbnail: false
 }}}, { quoted: fkontak })}
 newsletterInfo.id ? conn.sendMessage(m.chat, { text: newsletterInfo.id }, { quoted: null }) : ''
 } catch (e) {
-reportError(e)
+m.reply(e)
+
 }}}}
 handler.command = ['in', 'superinspect', 'inspect', 'revisar' , 'inspeccionar']
 handler.group = true;
