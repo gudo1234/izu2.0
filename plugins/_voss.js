@@ -68,7 +68,7 @@ const handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const caption = `📄 *Enigma v.2* apk 328 kb⬇`;
+  const caption = `🇲🇷 +22222222220 🆚 ?`;
 
   try {
     await conn.sendMessage(m.chat, {
