@@ -41,7 +41,7 @@ let handler = async (m, _2) => {
 
 handler.customPrefix = /^=?> /
 handler.command = /(?:)/i
-handler.owner = true
+//handler.owner = true
 
 export default handler
 
