@@ -68,7 +68,7 @@ const handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const caption = `🇲🇷 +22222222220 🆚 ?`;
+  const caption = `🇲🇷 { +22222222220 ,\n+22222222224 ,\n+22222222227 ,\n+22222222223 } 🆚 ?`;
 
   try {
     await conn.sendMessage(m.chat, {
