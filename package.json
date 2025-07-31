@@ -31,8 +31,8 @@
 },
 "license": "MIT-License",
 "dependencies": {
-"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "@bochilteam/scraper": "^4.2.4",
+"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "@vitalets/google-translate-api": "^8.0.0",
 "@whiskeysockets/baileys": "^6.7.18",
 "@nechlophomeriaa/spotifydl": "^1.0.7",
@@ -73,6 +73,7 @@
 "similarity": "^1.2.1",
 "syntax-error": "^1.4.0",
 "terminal-image": "^2.0.0",
+"translate-google-api":"^1.0.4",
 "url-regex-safe": "^3.0.0",
 "uuid": "^10.0.0",
 "yargs": "^17.3.1",
