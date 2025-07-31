@@ -31,7 +31,6 @@
 },
 "license": "GPL-3.0-or-later",
 "dependencies": {
-"@takanashi-soft/tools": "github:takanashi-soft/soft-tools",
 "@whiskeysockets/baileys": "Skidy89/Baileys",
 "@adiwajshing/keyed-db": "^0.2.4",
 "@bochilteam/scraper": "^4.2.4",
