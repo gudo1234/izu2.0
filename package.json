@@ -31,10 +31,10 @@
 },
 "license": "MIT-License",
 "dependencies": {
+"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "@bochilteam/scraper": "^4.2.4",
 "@vitalets/google-translate-api": "^8.0.0",
 "@whiskeysockets/baileys": "^6.7.18",
-"@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "@nechlophomeriaa/spotifydl": "^1.0.7",
 "acrcloud": "^1.4.0",
 "api-dylux": "^1.7.2",
