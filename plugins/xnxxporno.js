@@ -51,7 +51,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
   𖤐 \`XNXX EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
-✦ *Título:* ${title}`, m, null, rcanal);
+✦ *Título:* ${title}`, m);
     global.videoListXXX.push(vids_);
   } catch (err) {
     return conn.reply(m.chat, `${e} Ocurrió un error: ${err.message}`, m);
