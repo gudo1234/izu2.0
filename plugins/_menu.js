@@ -408,9 +408,9 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
         externalAdReply: {
           title: botname,
           body: textbot,
-          thumbnailUrl: redes,
+          //thumbnailUrl: redes,
           //thumbnail,
-          sourceUrl: redes,
+          //sourceUrl: redes,
           mediaType: 1,
           showAdAttribution: true,
         },
