@@ -405,7 +405,7 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
           serverMessageId: -1,
         },
         forwardingScore: false,
-        externalAdReply: {
+        //externalAdReply: {
           //title: botname,
           //body: textbot,
           //thumbnailUrl: redes,
