@@ -76,7 +76,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 > 🕒 Se está preparando el *${tipoArchivo}*...${durationMinutes > 20 && sendAsDocument ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*` : ''}
 `.trim();
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
 
     let fileData;
     try {
