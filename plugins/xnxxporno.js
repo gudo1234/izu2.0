@@ -51,7 +51,7 @@ const handler = async (m, { text, usedPrefix, command }) => {
     await conn.sendFile(m.chat, dl_url, title + '.mp4', `╭───── • ─────╮
   𖤐 \`XNXX EXTRACTOR\` 𖤐
 ╰───── • ─────╯
-✦ *Título:* ${title}`, m);
+✦ *Título:* ${title}`, m, null, rcanal);
     global.videoListXXX.push(vids_);
   } catch (err) {
     return conn.reply(m.chat, `${e} Ocurrió un error: ${err.message}`, m);
