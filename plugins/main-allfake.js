@@ -154,7 +154,7 @@ global.icono = [
 ].getRandom()
 
 const thumbnail = await (await fetch(icono)).buffer()
-global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: true, title: wm, body: textbot, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: redes, sourceUrl: redes, thumbnail, mediaType: 1, renderLargerThumbnail: false }, }, }}
+global.rcanal = { contextInfo: { isForwarded: true, forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, serverMessageId: 100, newsletterName: channelRD.name, }, externalAdReply: { showAdAttribution: false, title: wm, body: textbot, mediaUrl: null, description: null, previewType: "PHOTO", thumbnailUrl: redes, sourceUrl: redes, thumbnail, mediaType: 1, renderLargerThumbnail: false }, }, }}
 
 export default handler
 
