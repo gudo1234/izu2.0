@@ -405,14 +405,14 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
           serverMessageId: -1,
         },
         forwardingScore: false,
-        //externalAdReply: {
-          //title: botname,
-          //body: textbot,
-          //thumbnailUrl: redes,
-          //thumbnail,
-          //sourceUrl: redes,
-          //mediaType: 1,
-          //showAdAttribution: true,
+        externalAdReply: {
+          title: botname,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail,
+          sourceUrl: redes,
+          mediaType: 1,
+          showAdAttribution: false,
         },
       },
     }, { quoted: m })
