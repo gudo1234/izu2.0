@@ -47,10 +47,10 @@ const handler = async (m, { text, usedPrefix, command }) => {
     const { title, dl_url } = await Starlights.xnxxdl(firstVideoLink);
 
     await m.react('✅');
+    m.chat('Espera...')
     await conn.sendFile(m.chat, dl_url, title + '.mp4', `╭───── • ─────╮
   𖤐 \`XNXX EXTRACTOR\` 𖤐
 ╰───── • ─────╯
-
 ✦ *Título:* ${title}`, m);
     global.videoListXXX.push(vids_);
   } catch (err) {
