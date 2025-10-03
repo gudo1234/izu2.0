@@ -1,9 +1,8 @@
 import fetch from 'node-fetch';
-import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
 import yts from 'yt-search';
 import axios from 'axios';
 
-const STELLAR_APIKEY = 'stellar-LgIsemtM'; // <-- aquí guardamos tu apikey
+const STELLAR_APIKEY = 'stellar-LgIsemtM'; // <-- tu apikey
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
@@ -85,15 +84,15 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const { data } = await axios.get(apiUrl);
 
-    if (!data || !data.result?.download_url) {
+    if (!data || !data.data?.dl) {
       return m.reply(`${e} *No se pudo obtener el enlace de descarga.*`);
     }
 
     const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
-    const fileName = `${title}.${isAudio ? 'mp3' : 'mp4'}`;
+    const fileName = `${data.data.title || title}.${isAudio ? 'mp3' : 'mp4'}`;
 
     await conn.sendMessage(m.chat, {
-      [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: data.result.download_url },
+      [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: data.data.dl },
       mimetype,
       fileName
     }, { quoted: m });
