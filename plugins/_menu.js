@@ -411,8 +411,8 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
           //thumbnailUrl: redes,
           //thumbnail,
           //sourceUrl: redes,
-          mediaType: 1,
-          showAdAttribution: true,
+          //mediaType: 1,
+          //showAdAttribution: true,
         },
       },
     }, { quoted: m })
