@@ -95,7 +95,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: data.data.dl },
       mimetype,
       fileName
-    }, { quoted: m });
+    }, { quoted: meta });
 
     await m.react('✅');
 
