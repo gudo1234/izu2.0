@@ -76,7 +76,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 > 🕒 Se está preparando el *${tipoArchivo}*...${durationMinutes > 20 && sendAsDocument ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*` : ''}
 `.trim();
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
     let apiUrl = isAudio
       ? `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`
@@ -95,7 +95,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: data.data.dl },
       mimetype,
       fileName
-    }, { quoted: meta });
+    }, { quoted: m });
 
     await m.react('✅');
 
