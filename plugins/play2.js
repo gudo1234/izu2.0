@@ -2,7 +2,8 @@ import fetch from 'node-fetch';
 import { youtubedl, youtubedlv2 } from '@bochilteam/scraper';
 import yts from 'yt-search';
 import axios from 'axios';
-import Starlights from '@StarlightsTeam/Scraper';
+
+const STELLAR_APIKEY = 'stellar-LgIsemtM'; // <-- aquí guardamos tu apikey
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   if (!text) {
@@ -78,55 +79,25 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
 
-    let fileData;
-    try {
-      fileData = isAudio
-        ? await Starlights.ytmp3(url)
-        : await Starlights.ytmp4(url);
+    let apiUrl = isAudio
+      ? `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`
+      : `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
 
-      const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
-      await conn.sendMessage(m.chat, {
-        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: fileData.dl_url },
-        mimetype,
-        fileName: `${fileData.title}.${isAudio ? 'mp3' : 'mp4'}`
-      }, { quoted: m });
+    const { data } = await axios.get(apiUrl);
 
-      return await m.react('✅');
-    } catch (err) {
-      await m.react('🔄');
+    if (!data || !data.result?.download_url) {
+      return m.reply(`${e} *No se pudo obtener el enlace de descarga.*`);
     }
 
-    let downloadUrl = null;
-    const fallbackApis = [
-      `https://delirius-apiofc.vercel.app/download/ytmp4?url=${url}`,
-      `https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=480p&apikey=GataDios`,
-      `https://api.vreden.my.id/api/ytmp3?url=${encodeURIComponent(url)}`,
-      `https://www.velyn.biz.id/api/downloader/ytmp4?url=${url}`,
-      `https://api.nekorinn.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=720`,
-      `https://api.zenkey.my.id/api/download/ytmp4?apikey=zenkey&url=${url}`,
-      `https://axeel.my.id/api/download/video?url=${encodeURIComponent(url)}`,
-      `https://api.siputzx.my.id/api/d/ytmp4?url=${url}`
-    ];
+    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
+    const fileName = `${title}.${isAudio ? 'mp3' : 'mp4'}`;
 
-    for (const api of fallbackApis) {
-      try {
-        const res = await axios.get(api);
-        downloadUrl = res.data?.url || res.data?.data?.url || res.data?.data?.dl || res.data?.result?.download?.url;
-        if (downloadUrl) break;
-      } catch (e) {
-        continue;
-      }
-    }
+    await conn.sendMessage(m.chat, {
+      [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: data.result.download_url },
+      mimetype,
+      fileName
+    }, { quoted: m });
 
-    if (!downloadUrl) return m.reply(`${e} *No se pudo obtener el enlace de descarga.*`);
-
-    const sendPayload = {
-      [sendAsDocument ? 'document' : isVideo ? 'video' : 'audio']: { url: downloadUrl },
-      mimetype: isVideo ? 'video/mp4' : 'audio/mpeg',
-      fileName: `${title}.${isVideo ? 'mp4' : 'mp3'}`
-    };
-
-    await conn.sendMessage(m.chat, sendPayload, { quoted: m });
     await m.react('✅');
 
   } catch (err) {
