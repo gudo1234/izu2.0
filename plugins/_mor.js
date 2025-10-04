@@ -35,7 +35,6 @@ let handler = async (m, { conn }) => {
       ptt: true,
       mimetype: 'audio/mpeg',
       fileName: 'welcome.mp3',
-      seconds: 4556,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
           newsletterJid: channelRD.id,
@@ -51,7 +50,7 @@ let handler = async (m, { conn }) => {
           thumbnailUrl: redes, // se mantiene tu variable original
           thumbnail: im,
           sourceUrl: redes,
-          showAdAttribution: true
+          showAdAttribution: false
         }
       }
     },
