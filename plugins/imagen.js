@@ -71,7 +71,7 @@ async function luminsesi(content, username, prompt) {
         }*/
 
 import { googleImage } from '../lib/googleMedia.js'
-import { info } from '../config.js'
+import { info } from '../settings.js'
 
 let handler = async (m, { conn, text, usedPrefix, command, userdb }) => {
   // Palabras prohibidas
