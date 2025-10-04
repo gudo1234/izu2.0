@@ -69,19 +69,35 @@ let tag = name || ''
 }
 
 if (media === 'audio') {
-await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRandom()}, 
-    contextInfo: { forwardedNewsletterMessageInfo: { 
-    newsletterJid: channelRD.id, 
-    serverMessageId: '', 
-    newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `❤️WELCOME ${tag}`, 
-    "body": 'IzuBot te da la bienvenida', 
-    "previewType": "PHOTO", 
-    "thumbnailUrl": redes,
-    thumbnail: im,
-    "sourceUrl": redes, 
-    "showAdAttribution": true}}, 
-     seconds: 4556, ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
+await conn.sendMessage(
+  m.chat,
+  { 
+    audio: { url: [vn, vn2, vn4, vn5, vn7].getRandom() }, 
+    contextInfo: { 
+      forwardedNewsletterMessageInfo: { 
+        newsletterJid: channelRD.id, 
+        serverMessageId: '', 
+        newsletterName: channelRD.name 
+      }, 
+      forwardingScore: false, 
+      isForwarded: true, 
+      mentionedJid: [m.messageStubParameters[0]], 
+      externalAdReply: { 
+        title: `❤️WELCOME ${tag}`, 
+        body: 'IzuBot te da la bienvenida', 
+        previewType: "PHOTO", 
+        thumbnailUrl: redes,
+        thumbnail: im,
+        sourceUrl: redes, 
+        showAdAttribution: false
+      }
+    },
+    ptt: true, 
+    mimetype: 'audio/mpeg', 
+    fileName: `error.mp3`
+  }, 
+  { quoted: m, ephemeralExpiration: 24 * 60 * 60 }
+);
 
 if (media === 'texto') {
   let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
