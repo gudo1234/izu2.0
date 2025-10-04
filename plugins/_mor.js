@@ -15,8 +15,6 @@ let handler = async (m, { conn }) => {
     './media/theb.mp3',
     './media/alanspectre.mp3'
   ]
-  const channelRD = { id: '120363025246446733@newsletter', name: 'IzuBot Channel' }
-
   // Intentar obtener la foto de perfil
   let pp
   try {
@@ -44,9 +42,9 @@ let handler = async (m, { conn }) => {
         forwardingScore: 999,
         isForwarded: true,
         externalAdReply: {
-          title: '❤️ WELCOME',
+          title: '🇭🇳 WELCOME',
           body: 'IzuBot te da la bienvenida',
-          previewType: 'PHOTO',
+          //previewType: 'PHOTO',
           thumbnailUrl: redes, // se mantiene tu variable original
           thumbnail: im,
           sourceUrl: redes,
