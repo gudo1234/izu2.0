@@ -40,7 +40,6 @@ let handler = async (m, { conn }) => {
           serverMessageId: '',
           newsletterName: channelRD.name
         },
-        forwardingScore: 999,
         isForwarded: true,
         externalAdReply: {
           title: '🏍️🤣🗿 WELCOME',
