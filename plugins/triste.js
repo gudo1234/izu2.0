@@ -10,6 +10,12 @@ let handler = async (m, { conn }) => {
   let vn9 = './media/stellar.mp3'
   let vn10 = './media/theb.mp3'
   let vn11 = './media/alanspectre.mp3'
+  conn.sendFile(m.chat, vn, 'carro.mp3', null, m, true, {
+  type: 'audioMessage', 
+  ptt: true,
+  quoted: m,
+  ephemeralExpiration: 24 * 60 * 60
+});
   await conn.sendMessage(m.chat, {
     audio: { url: [vn, vn2, vn3, vn4, vn5, vn6, vn7, vn8, vn9, vn10, vn11].getRandom() },
     ptt: true,
