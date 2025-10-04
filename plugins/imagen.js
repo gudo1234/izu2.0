@@ -99,8 +99,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
     await conn.sendFile(m.chat, img, 'Thumbnail.jpg', caption, m, null, { contextInfo: { forwardingScore: 999, isForwarded: true } })
   } catch (e) {
-    console.error(e)
-    await conn.sendMessage(m.chat, { text: '⚠️ Error al buscar imágenes, intenta más tarde.' }, { quoted: m })
+    console.error('[❌ ERROR EN BUSCADOR DE IMAGENES]', e)
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: `⚠️ *Ocurrió un error al buscar la imagen:*\n\n📄 *Mensaje:* ${e.message}\n📍 *Línea:* ${e.stack?.split('\n')[1] || 'Desconocida'}`,
+      },
+      { quoted: m }
+    )
   }
 }
 
