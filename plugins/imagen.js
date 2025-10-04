@@ -70,63 +70,67 @@ async function luminsesi(content, username, prompt) {
   }
         }*/
 
-import axios from 'axios'
-import fetch from 'node-fetch'
+import { googleImage } from '../lib/googleMedia.js'
+import { owner, info, temp, newsletterID, sBroadCastID, groupID, media } from '../config.js'
+import {getCommandVariants} from '../lib/functions.js'
+let confirmations = {}
+let handler = async (m, {conn, info, start, text, usedPrefix, command, userdb, senderJid}) => {
+const forbiddenWords = [
+// Agrega aquí las palabras que deseas filtrar
+'lame', 'chupa', 'kaka', 'caca', 'bobo', 'boba', 'loco', 'loca', // ... y así sucesivamente
+];
+if (!text) {
+let resp = `${e} Realiza una búsqueda de imágen de Google.\n\nEjemplo: *${usedPrefix + command} Minecraft*`
 
-const STELLAR_APIKEY = 'stellar-LgIsemtM' // tu apikey
+return conn.sendWritingText(m.chat, resp, userdb, m)
+}
+let prohibidas = /(lame|chupa|kaka|caca|bobo|boba|loco|loca|chupapolla|estupid(o|a|os)|poll(a|as)|idiota|maricon|chucha|v(erga|rga)|naco|zorra|zorro|zorras|zorros|pito|huev(on|ona|ones)|rctmre|mrd|ctm|csm|cp|hldv|ptm|baboso|babosa|babosos|babosas|feo|fea|feos|feas|web(o|os)|mamawebos|c(a|á)ll(a|ese|ate)|chupame|bolas|qliao|imb(e|é)c(il|iles)|kbrones|cabron|capullo|carajo|gore|gorre|gorreo|gordo|gorda|gordos|gordas|sapo|sapa|mierda|cerdo|cerda|puerco|puerca|perra|perro|joden|jodemos|joder|joderan|dumb|fuck|shit|bullshit|cunt|cum|semen|bitch|motherfucker|foker|fucking|g0re|g0r3|g.o.r.e|sap0|sap4|malparido|malparida|malparidos|malparidas|m4lp4rid0|m4lp4rido|m4lparido|malp4rido|m4lparid0|malp4rid0|chocha|chupala|chup4la|chup4l4|chupalo|chup4lo|chup4l0|chupal0|chupon|chupameesta|sabandija|hijodelagranputa|hijodeputa|hijadeputa|hijadelagranputa|kbron|kbrona|cajetuda|laconchadedios|put((o|a)|(i|1(t(a|o|4|0)))madre)|ptm|kk|culo|pussy|hentai|nepe|pene|p3ne|p3n3|pen3|p.e.n.e|pvt0|puto|pvto|put0|Hijodelagransetentamilparesdeputa|Chingadamadre|coño|c0ño|coñ0|c0ñ0|merda|mamon|caca|polla|porno|porn|gore|cum|semen|puta|puto|culo|putita|putito|puta|puto|pussy|hentai|pene|coño|asesinato|zoofilia|mia khalifa|desnudo|desnuda|cuca|chocha|muertos|pornhub|xnxx|xvideos|teta|vagina|marsha may|misha cross|sexmex|furry|furro|furra|xxx|rule|rule34|panocha|pedofilia|necrofilia|pinga|horny|ass|nude|popo|nsfw|femdom|futanari|erofeet|sexo|sex|yuri|ero|ecchi|blowjob|anal|ahegao)/ig.test(text.toLowerCase())
+if (prohibidas) return 
+const palabrasComunes = /(\b(de|un(a)?|los|las|y|o|en|con|por|para)\b\s*)+/ig;
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const e = '⚠️'
+const textoFiltrado = text.replace(palabrasComunes, "").trim();
+console.log();
 
-  if (!text) {
-    return conn.reply(
-      m.chat,
-      `${e} Proporciona una búsqueda para enviar imágenes de la web.\n\n` +
-      `*Ejemplo:* \`${usedPrefix + command} gatos\``,
-      m
-    )
-  }
-
-  await m.react('🕒')
-
-  try {
-    const url = `https://api.stellarwa.xyz/buscar/googleimagen?consulta=${encodeURIComponent(text)}&apikey=${STELLAR_APIKEY}`
-    const res = await axios.get(url, { timeout: 20000 })
-
-    console.log('🔍 Respuesta completa de Stellar:', res.data)
-
-    const results = res.data?.result || res.data?.data || []
-    if (!Array.isArray(results) || results.length === 0) {
-      await m.react('❌')
-      return m.reply(`${e} No se encontraron imágenes para "${text}".`)
-    }
-
-    await m.react('✅')
-    const limit = Math.min(results.length, 5)
-
-    for (let i = 0; i < limit; i++) {
-      const imgUrl = results[i]
-      const imgBuffer = await fetch(imgUrl).then(r => r.buffer())
-      await conn.sendMessage(
-        m.chat,
-        {
-          image: imgBuffer,
-          caption: i === 0 ? `🖼️ Resultados de búsqueda para: *${text}*` : undefined,
-        },
-        { quoted: m }
-      )
-    }
-  } catch (err) {
-    console.error('❌ Error en la API Stellar:', err.response?.data || err.message)
-    await m.react('❌')
-    return m.reply(
-      `${e} Error al buscar imágenes.\n\n` +
-      `Detalles: ${err.response?.status || 'Sin código'} - ${err.response?.data?.message || err.message}`
-    )
-  }
+const res = await googleImage(textoFiltrado)
+let image = await res.getRandom()
+let link = image
+let captionn = `🔎 *RESULTADO DE:* ${text}\n🔗 *LINK ${link}\n🌎 *BUSCADOR:* Google`
+confirmations[m.chat] = {
+sender: m.sender,
+query: text,
+usedPrefix,
+command,
+timeout: setTimeout(() => {
+delete confirmations[m.sender];
+}, 60 * 1000),
+};
+const messageObj = {
+text: captionn,
+footer: info.nbcde
+}
+const buttons = [['🔄 SIGUIENTE 🔄', 'siguiente']]
+if (start.buttons) {
+return conn.sendButton(m.chat, messageObj, {url: image}, buttons, userdb, m)
+} else {
+captionn += `\n\nPara 🔄 SIGUIENTE 🔄 usa: *${usedPrefix}imagen ${text}*`
+return conn.sendMessage(m.chat, { image:{url: image}, caption: captionn}, {quoted: m, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100}, info.nbcde , link, m)
+}
+}
+handler.before = async function before(m, {conn, info, start, userdb, senderJid}) {
+const confirmation = confirmations[m.chat];
+if (!confirmation) return;
+console.log('imagenBefore: ', m.message, m.message.buttonsResponseMessage?.selectedId)
+const response = (m.message.templateButtonReplyMessage?.selectedId ? m.message.templateButtonReplyMessage.selectedId : m.text).toLowerCase();
+if (response === 'siguiente') {
+clearTimeout(confirmation.timeout);
+return handler(m, {conn, info, start, text: confirmation.query, usedPrefix: confirmation.usedPrefix, command: confirmation.command, userdb, senderJid})
+}
 }
 
-handler.command = ['imagenes', 'images', 'imagen', 'image']
-handler.group = true
+handler.command = ['gimage', 'image', 'imagen']
+/*handler.menu = [
+{title: "📥 IMAGEN", description: `solicita imagenes usando:\n${Array.isArray(handler.command) ? handler.command.map(hc => ` #${hc} <texto>`).join('\n') : getCommandVariants(handler.command).map(hc => ` #${hc} <texto>`).join('\n')}`, id: `imagen`}, 
+];*/
+handler.group = true;
 
 export default handler
