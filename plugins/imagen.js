@@ -76,7 +76,6 @@ import fetch from 'node-fetch'
 const STELLAR_APIKEY = 'stellar-LgIsemtM' // tu apikey
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const username = conn.getName(m.sender)
   const e = '⚠️'
 
   // 📝 Validación: texto vacío
@@ -89,7 +88,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     )
   }
 
-  // 🧠 Paso 1: verificación IA de búsqueda sensible
+  // 🧠 Paso 1: moderación (opcional)
   const moderationPrompt = `
 Eres un moderador de IA. Analiza si el texto contiene contenido prohibido.
 Responde solo con "sí" o "no".
@@ -109,23 +108,23 @@ Texto: "${text}"
     return m.reply('⚠️ Error al verificar la búsqueda.')
   }
 
-  // 🔍 Paso 2: buscar imágenes desde Stellar
+  // 🔍 Paso 2: búsqueda de imágenes con la API de Stellar
   await m.react('🕒')
 
   try {
-    const apiURL = `https://api.stellarwa.xyz/search/googleimagen?query=${encodeURIComponent(text)}&apikey=${STELLAR_APIKEY}`
+    const apiURL = `https://api.stellarwa.xyz/buscar/googleimagen?consulta=${encodeURIComponent(text)}&apikey=${STELLAR_APIKEY}`
     const res = await axios.get(apiURL)
 
-    // Compatibilidad con posibles formatos de respuesta
-    const results = res.data?.data || res.data?.result || []
+    // Adaptación al formato actual de la API
+    const results = res.data?.result || res.data?.data || []
     if (!Array.isArray(results) || results.length === 0) {
       await m.react('❌')
       return m.reply(`${e} No se encontraron imágenes para "${text}".`)
     }
 
     await m.react('✅')
-    const limit = Math.min(results.length, 9)
 
+    const limit = Math.min(results.length, 9)
     for (let i = 0; i < limit; i++) {
       const imgUrl = results[i]
       try {
@@ -139,11 +138,11 @@ Texto: "${text}"
           { quoted: m }
         )
       } catch (err) {
-        console.error(`Error al enviar imagen ${i + 1}:`, err)
+        console.error(`Error al enviar imagen ${i + 1}:`, err.message)
       }
     }
   } catch (error) {
-    console.error('Error al obtener imágenes de Stellar:', error)
+    console.error('Error al obtener imágenes de Stellar:', error?.response?.data || error.message)
     m.reply('⚠️ Error al buscar imágenes, intenta más tarde.')
   }
 }
