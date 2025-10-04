@@ -39,7 +39,7 @@ let handler = async (m, { conn }) => {
           serverMessageId: '',
           newsletterName: channelRD.name
         },
-        isForwarded: false,
+        isForwarded: true,
         externalAdReply: {
           title: '🇭🇳 WELCOME',
           body: 'IzuBot te da la bienvenida',
