@@ -1,18 +1,20 @@
-aQimport fetch from 'node-fetch'
+import fetch from 'node-fetch'
 
 let handler = async (m, { conn }) => {
   // Audios disponibles
-  let vn = './media/prueba.mp3' //canwe kis forever
-  let vn2 = './media/prueba2.mp3' //death bed
-  let vn3 = './media/snow.mp3' //snow fall
-  let vn4 = './media/sad.mp3' //sad tortuga 
-  let vn5 = './media/cardigansad.mp3' // sad luka
-  let vn6 = './media/iwas.mp3'
-  let vn7 = './media/juntos.mp3'
-  let vn8 = './media/space.mp3'
-  let vn9 = './media/stellar.mp3'
-  let vn10 = './media/theb.mp3'
-  let vn11 = './media/alanspectre.mp3'
+  const audios = [
+    './media/prueba.mp3',
+    './media/prueba2.mp3',
+    './media/snow.mp3',
+    './media/sad.mp3',
+    './media/cardigansad.mp3',
+    './media/iwas.mp3',
+    './media/juntos.mp3',
+    './media/space.mp3',
+    './media/stellar.mp3',
+    './media/theb.mp3',
+    './media/alanspectre.mp3'
+  ]
   // Intentar obtener la foto de perfil
   let pp
   try {
@@ -27,25 +29,27 @@ let handler = async (m, { conn }) => {
   await conn.sendMessage(
     m.chat,
     {
-      audio: { url:[vn, vn2, vn4, vn5, vn7].getRandom() },
+      audio: { url: audios[Math.floor(Math.random() * audios.length)] },
       ptt: true,
       mimetype: 'audio/mpeg',
       fileName: 'welcome.mp3',
+      seconds: 4556,
       contextInfo: {
         forwardedNewsletterMessageInfo: {
           newsletterJid: channelRD.id,
           serverMessageId: '',
           newsletterName: channelRD.name
         },
+        forwardingScore: 999,
         isForwarded: true,
         externalAdReply: {
-          title: '🇭🇳 WELCOME',
+          title: '🏍️🤣🗿 WELCOME',
           body: 'IzuBot te da la bienvenida',
-          //previewType: 'PHOTO',
+          previewType: 'PHOTO',
           thumbnailUrl: redes, // se mantiene tu variable original
           thumbnail: im,
           sourceUrl: redes,
-          showAdAttribution: false
+          showAdAttribution: true
         }
       }
     },
