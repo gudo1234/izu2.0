@@ -426,7 +426,7 @@ if (plugin.level > _user.level) {
 conn.reply(m.chat, `❮✦❯ Se requiere el nivel: *${plugin.level}*\n\n• Tu nivel actual es: *${_user.level}*\n\n• Usa este comando para subir de nivel:\n*${usedPrefix}levelup*`, m)       
 continue
 }
-/*let extra = {
+let extra = {
 match,
 usedPrefix,
 noPrefix,
@@ -448,8 +448,8 @@ isPrems,
 chatUpdate,
 __dirname: ___dirname,
 __filename
-}*/
-const extra = { 
+}
+/*const extra = { 
             match: null, 
             usedPrefix: prefHit, 
             noPrefix: body, 
@@ -476,7 +476,7 @@ const extra = {
             role: m.role, 
             parseUserTargets, 
             getUserInfo 
-          }
+          }*/
 
 try {
 await plugin.call(this, m, extra)
