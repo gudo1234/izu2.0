@@ -69,3 +69,39 @@ async function luminsesi(content, username, prompt) {
     throw error
   }
         }*/
+
+import fetch from 'node-fetch'
+
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  try {
+    // Filtro de palabras prohibidas
+    const prohibidas = /(porno|sex|puta|puto|polla|xxx|xnxx|xvideos|hentai|desnudo|desnuda|zoofilia|pedo|necrofilia|vagina|pene|porn|culo|ass|nude|rule34|sexo|ahegao|anal|futanari|blowjob|gore|mierda|mamada)/i
+    if (!text) return conn.sendMessage(m.chat, { text: `📷 Ingresa el tema a buscar.\n\nEjemplo: *${usedPrefix + command} Gatos bonitos*` }, { quoted: m })
+    if (prohibidas.test(text.toLowerCase())) return conn.sendMessage(m.chat, { text: '⚠️ No se permiten búsquedas con contenido inapropiado.' }, { quoted: m })
+
+    // API de Stellar
+    const url = `https://api.stellarwa.xyz/search/googleimagen?query=${encodeURIComponent(text)}&apikey=stellar-LgIsemtM`
+    const res = await fetch(url)
+
+    if (!res.ok) throw new Error(`Error ${res.status} en la API de Stellar.`)
+
+    const buffer = await res.buffer()
+    const caption = `🔎 *Resultado de:* ${text}\n🌎 *Fuente:* Google Images (Stellar API)`
+
+    await conn.sendMessage(m.chat, { image: buffer, caption }, { quoted: m })
+  } catch (e) {
+    console.error('[❌ ERROR EN COMANDO IMAGEN STELLAR]', e)
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: `⚠️ *Ocurrió un error al obtener la imagen:*\n\n📄 *Mensaje:* ${e.message}\n📍 *Línea:* ${e.stack?.split('\n')[1] || 'Desconocida'}`,
+      },
+      { quoted: m }
+    )
+  }
+}
+
+handler.command = ['imagen', 'image', 'gimage', 'foto']
+handler.group = true
+
+export default handler
