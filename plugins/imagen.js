@@ -79,7 +79,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   const username = conn.getName(m.sender)
   const e = '⚠️'
 
-  // Mensaje si no hay texto
+  // 📝 Validación: texto vacío
   if (!text) {
     return conn.reply(
       m.chat,
@@ -89,16 +89,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     )
   }
 
-  // 🧠 Paso 1: detección de búsqueda no permitida
+  // 🧠 Paso 1: verificación IA de búsqueda sensible
   const moderationPrompt = `
-Eres un moderador de IA. Tu tarea es analizar la búsqueda del usuario y responder únicamente con "sí" o "no".
-La respuesta será "sí" si contiene contenido prohibido o delicado como:
-- pornografía, desnudos o erotismo
-- violencia explícita, armas, sangre
-- odio, racismo, drogas o lenguaje ofensivo
+Eres un moderador de IA. Analiza si el texto contiene contenido prohibido.
+Responde solo con "sí" o "no".
+Prohibido: pornografía, erotismo, desnudos, violencia, armas, drogas, racismo, odio o lenguaje ofensivo.
 
-Texto a evaluar: "${text}"
-Responde solo con: sí o no.
+Texto: "${text}"
+¿Contiene contenido sensible?
 `
 
   try {
@@ -108,23 +106,27 @@ Responde solo con: sí o no.
     }
   } catch (err) {
     console.error('Error al verificar contenido sensible:', err)
-    return m.reply('Ocurrió un error al verificar la búsqueda.')
+    return m.reply('⚠️ Error al verificar la búsqueda.')
   }
 
-  // 🖼️ Paso 2: obtener imágenes desde la API Stellar
-  m.react('🕒')
+  // 🔍 Paso 2: buscar imágenes desde Stellar
+  await m.react('🕒')
+
   try {
     const apiURL = `https://api.stellarwa.xyz/search/googleimagen?query=${encodeURIComponent(text)}&apikey=${STELLAR_APIKEY}`
     const res = await axios.get(apiURL)
 
-    if (!res.data?.data || !Array.isArray(res.data.data) || res.data.data.length === 0) {
+    // Compatibilidad con posibles formatos de respuesta
+    const results = res.data?.data || res.data?.result || []
+    if (!Array.isArray(results) || results.length === 0) {
+      await m.react('❌')
       return m.reply(`${e} No se encontraron imágenes para "${text}".`)
     }
 
-    const results = res.data.data.slice(0, 9) // máximo 9 resultados
-    m.react('✅')
+    await m.react('✅')
+    const limit = Math.min(results.length, 9)
 
-    for (let i = 0; i < results.length; i++) {
+    for (let i = 0; i < limit; i++) {
       const imgUrl = results[i]
       try {
         const imgBuffer = await fetch(imgUrl).then(r => r.buffer())
@@ -151,17 +153,12 @@ handler.group = true
 
 export default handler
 
-// 🌟 Función auxiliar: consulta a la IA de Stellar para moderación o análisis
+// 🌟 IA de Stellar para moderación
 async function stellarAI(prompt) {
   try {
-    const response = await axios.get(
-      `https://api.stellarwa.xyz/ai/chatgpt?text=${encodeURIComponent(prompt)}&apikey=${STELLAR_APIKEY}`
-    )
-    return (
-      response.data?.result ||
-      response.data?.data ||
-      'no'
-    )
+    const url = `https://api.stellarwa.xyz/ai/chatgpt?text=${encodeURIComponent(prompt)}&apikey=${STELLAR_APIKEY}`
+    const res = await axios.get(url)
+    return res.data?.result || res.data?.data || 'no'
   } catch (error) {
     console.error('Error en Stellar AI:', error?.response?.data || error.message)
     throw error
