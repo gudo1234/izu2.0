@@ -2,7 +2,6 @@ import { createCanvas } from 'canvas';
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
-import axios from 'axios';
 import PhoneNum from 'awesome-phonenumber';
 
 const banderaEmoji = (countryCode) => {
@@ -21,22 +20,24 @@ const handler = async (m, { conn }) => {
     const country = regionNames.of(countryCode) || 'Desconocido';
     const flag = banderaEmoji(countryCode);
 
-    const tz = 'America/Argentina/Buenos_Aires';
+    // === ZONA HORARIA ===
+    const tz = 'America/Tegucigalpa'; // Honduras
     const today = moment().tz(tz);
     const month = today.format('MMMM');
     const year = today.format('YYYY');
     const currentDay = today.date();
     const startOfMonth = today.clone().startOf('month');
     const daysInMonth = today.daysInMonth();
-    const startDay = startOfMonth.day();
+
+    // Ajustar para que empiece en domingo (0)
+    let startDay = startOfMonth.day(); // 0 = domingo ... 6 = sábado
 
     const width = 800;
     const height = 700;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // === ESTILOS DEFINIDOS AQUÍ ===
-
+    // === ESTILOS ===
     function estiloDegradado(ctx, width, height) {
       const gradient = ctx.createLinearGradient(0, 0, 0, height);
       gradient.addColorStop(0, '#4facfe');
@@ -92,6 +93,7 @@ const handler = async (m, { conn }) => {
     const randomStyle = styles[Math.floor(Math.random() * styles.length)];
     randomStyle(ctx, width, height);
 
+    // Render calendario
     renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay);
 
     // Mostrar país y bandera
@@ -105,7 +107,13 @@ const handler = async (m, { conn }) => {
     fs.writeFileSync(file, buffer);
 
     try {
-      await conn.sendFile(m.chat, fs.readFileSync(file), "calendario.jpg", `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`, m, null, rcanal);
+      await conn.sendFile(
+        m.chat,
+        fs.readFileSync(file),
+        "calendario.jpg",
+        `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`,
+        m
+      );
     } finally {
       fs.unlinkSync(file);
     }
@@ -118,7 +126,7 @@ const handler = async (m, { conn }) => {
 handler.command = ['calendario'];
 export default handler;
 
-// === FUNCIÓN BASE PARA RENDER CALENDARIO ===
+// === FUNCIÓN PARA RENDERIZAR EL CALENDARIO ===
 function renderCalendarioBase(ctx, width, month, year, daysInMonth, startDay, currentDay) {
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 36px sans-serif';
