@@ -81,7 +81,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
     thumbnail: im, 
     "sourceUrl": redes, 
     "showAdAttribution": false}}, 
-     seconds: 4556, ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
+     seconds: 4556, ptt: false, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
     
 if (media === 'texto') {
   let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
@@ -181,7 +181,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6, vn8, vn9, vn10, vn11, 
     thumbnail: im, 
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
-     seconds: 4556, ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
+     seconds: 4556, ptt: false, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
 
 if (media === 'texto') {
   await conn.sendMessage(m.chat, { 
