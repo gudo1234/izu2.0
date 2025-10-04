@@ -29,7 +29,11 @@ let handler = async (m, { conn }) => {
     }
 
     txt += `\n\n🧭 *Hora actual:* ${hour}`;
-    await conn.sendFile(m.chat, imageUrl, `thumbnail.mp4`, txt, m, null, rcanal)
+
+    // 🔹 Solo agrego esta línea para evitar el error
+    const imageUrl = 'https://qu.ax/afzMH.jpg'; // Puedes cambiarla por la que desees
+
+    await conn.sendFile(m.chat, imageUrl, `thumbnail.mp4`, txt, m, null, rcanal);
 };
 
 handler.command = ['calendario'];
