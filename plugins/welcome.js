@@ -69,35 +69,41 @@ let tag = name || ''
 }
 
 if (media === 'audio') {
-await conn.sendMessage(
+await conn.sendFile(
   m.chat,
-  { 
-    audio: { url: [vn, vn2, vn4, vn5, vn7].getRandom() }, 
-    contextInfo: { 
-      forwardedNewsletterMessageInfo: { 
-        newsletterJid: channelRD.id, 
-        serverMessageId: '', 
-        newsletterName: channelRD.name 
-      }, 
-      forwardingScore: false, 
-      isForwarded: true, 
-      mentionedJid: [m.messageStubParameters[0]], 
-      externalAdReply: { 
-        title: `❤️WELCOME ${tag}`, 
-        body: 'IzuBot te da la bienvenida', 
-        previewType: "PHOTO", 
+  [vn, vn2, vn4, vn5, vn7].getRandom(), // archivo de audio aleatorio
+  'carro.mp3', // nombre del archivo
+  null, // sin texto adicional
+  m, // mensaje citado
+  true, // marcar como mensaje PTT (nota de voz)
+  {
+    type: 'audioMessage',
+    mimetype: 'audio/mpeg',
+    ptt: true,
+    quoted: m, // cita el mensaje del usuario
+    ephemeralExpiration: 24 * 60 * 60, // 24 horas
+    contextInfo: {
+      forwardingScore: 1,
+      isForwarded: true,
+      mentionedJid: [m.sender], // menciona al usuario que ejecutó el comando
+      externalAdReply: {
+        title: `🔥 WELCOME ${tag}`,
+        body: 'IzuBot te da la bienvenida',
+        mediaType: 1,
+        previewType: 'PHOTO',
         thumbnailUrl: redes,
         thumbnail: im,
-        sourceUrl: redes, 
+        sourceUrl: redes,
         showAdAttribution: false
+      },
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: channelRD.id,
+        serverMessageId: '',
+        newsletterName: channelRD.name
       }
-    },
-    ptt: true, 
-    mimetype: 'audio/mpeg', 
-    fileName: `error.mp3`
-  }, 
-  { quoted: m, ephemeralExpiration: 24*60*100 }
-);
+    }
+  }
+)
 
 if (media === 'texto') {
   let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
