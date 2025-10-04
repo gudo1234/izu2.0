@@ -96,7 +96,7 @@ await conn.sendMessage(
     mimetype: 'audio/mpeg', 
     fileName: `error.mp3`
   }, 
-  { quoted: m, ephemeralExpiration: 24 * 60 * 60 }
+  { quoted: m, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100 }
 );
 
 if (media === 'texto') {
