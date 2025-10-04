@@ -58,7 +58,7 @@ let tag = name || ''
             'isForwarded': false,
             externalAdReply: {
                 showAdAttribution: false,
-                title: `💫 WELCOME ${c}`,
+                title: `💫 WELCOME ${tag}`,
                 body: 'IzuBot te da la bienvenida',
                 mediaType: 1,
                 sourceUrl: redes,
@@ -75,7 +75,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `❤️WELCOME ${c}`, 
+    "title": `❤️WELCOME ${tag}`, 
     "body": 'IzuBot te da la bienvenida', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
@@ -158,7 +158,7 @@ await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
             'isForwarded': false,
             externalAdReply: {
                 showAdAttribution: false,
-                title: `👋🏻ADIOS ${c}`,
+                title: `👋🏻ADIOS ${tag}`,
                 body: 'Esperemos que no vuelva -_-',
                 mediaType: 1,
                 sourceUrl: redes,
@@ -175,7 +175,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6, vn8, vn9, vn10, vn11, 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `${e} ADIOS ${c}`, 
+    "title": `${e} ADIOS ${tag}`, 
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
