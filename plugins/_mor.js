@@ -26,7 +26,6 @@ import fetch from 'node-fetch'
     "sourceUrl": redes, 
     "showAdAttribution": true}}, 
      seconds: 4556, ptt: true, mimetype: 'audio/mpeg', fileName: `error.mp3` }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100})};
-}
 
 handler.customPrefix = /🇭🇳/
 handler.command = new RegExp
