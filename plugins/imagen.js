@@ -51,7 +51,7 @@ Responde solo con "PERMITIDO" si es una búsqueda segura, o "PROHIBIDO" si conti
     const first = await fetch(images[0])
     const buffer1 = await first.buffer()
 
-    const caption = `${e} *Resultado de:* ${text}\n> 🌎 *Fuente:* Google Imágenes (Stellar API)`
+    const caption = `${e} Se muestran resultados de: *${text}*\n> 🌎 *Fuente:* Google Imágenes`
     await conn.sendFile(m.chat, buffer1, 'imagen1.jpg', caption, m, null, rcanal)
 
     // 📤 Enviar las siguientes 4 imágenes sin caption
