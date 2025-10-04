@@ -154,8 +154,6 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}ttp ‹τ×τ›
 │ ${e}${s}tweet ‹τ×τ›
 │ ${e}${s}stickers *‹τ×τ›*
-│ ${e}${s}aiimg *‹τ×τ›*
-│ ${e}${s}iqc *‹τ×τ›*
 │ ${e}${s}par ...
 └────────────
 
@@ -255,8 +253,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}bratvid ⬌ ${usedPrefix}fakengl  
 > ${s + usedPrefix}wm ⬄ ${usedPrefix}take  
 > ${s + usedPrefix}ttp ⬌ ${usedPrefix}tweet  
-> ${s + usedPrefix}stickers ⬄ ${usedPrefix}aiimg  
-> ${s + usedPrefix}iqc ⬌ ${s + usedPrefix}par  
+> ${s + usedPrefix}stickers ⬄ ${usedPrefix}par
 
 \`✏ʙᴜsᴄᴀᴅᴏʀ - ᴡᴇʙ🔎\`
 > ${s + usedPrefix}chatgpt ⬄ ${usedPrefix}ia  
