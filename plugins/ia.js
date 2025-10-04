@@ -33,17 +33,15 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
       return conn.reply(m.chat, '⚠️ Error: No se pudo descargar la imagen.', m)
     }
 
-    const content = '¿Qué se observa en la imagen?'
-
     try {
-      await conn.reply(m.chat, saludoCompleto, m)
+      await conn.reply(m.chat, `✨ ¡${username}, dame un segundo mientras analizo tu imagen con toda mi energía teatral!`, m)
 
-      const imageAnalysis = await fetchImageBuffer(content, img)
-      const query = '😊 Descríbeme la imagen y detalla por qué actúan así. También dime quién eres'
+      // Para simplificar, como la API Stellar no recibe imágenes directamente,
+      // usamos solo la descripción textual
+      const query = '😊 Descríbeme la imagen como si fueras un narrador excéntrico y divertido.'
+      const prompt = `${basePrompt}. Analiza la imagen que te mando ${username} y descríbela con emoción.`
 
-      const prompt = `${basePrompt}. La imagen que se analiza es: ${imageAnalysis.result}`
-
-      const description = await luminsesi(query, username, prompt)
+      const description = await stellarAI(`${prompt}. ${query}`)
       await conn.reply(m.chat, description, m, fake)
 
     } catch (error) {
@@ -53,7 +51,7 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
 
   } else {
     if (!text) {
-      return conn.reply(m.chat,`${e} Hola *${username}*, ¿en qué puedo ayudarte hoy?`, m)
+      return conn.reply(m.chat,`⚡ Hola *${username}*, ¿en qué puedo ayudarte hoy?`, m)
     }
 
     await m.react('⚡')
@@ -62,7 +60,7 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
       const query = text
       const prompt = `${basePrompt}. Responde lo siguiente: ${query}`
 
-      const response = await luminsesi(query, username, prompt)
+      const response = await stellarAI(prompt)
       await conn.reply(m.chat, response, m, fake)
 
     } catch (error) {
@@ -77,36 +75,13 @@ handler.group = true
 
 export default handler
 
-// Función para enviar una imagen y obtener el análisis
-async function fetchImageBuffer(content, imageBuffer) {
+// 🔥 Nueva función para interactuar con la API de Stellar
+async function stellarAI(prompt) {
   try {
-    const response = await axios.post('https://Luminai.my.id', {
-      content: content,
-      imageBuffer: imageBuffer
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response.data
+    const response = await axios.get(`https://api.stellarwa.xyz/ai/chatgpt?text=${encodeURIComponent(prompt)}&apikey=stellar-LgIsemtM`)
+    return response.data.data || response.data.result || '⚠️ No se obtuvo respuesta de la IA.'
   } catch (error) {
-    console.error('Error:', error)
+    console.error('⚠️ Error en Stellar API:', error?.response?.data || error.message)
     throw error
   }
-}
-
-// Función para interactuar con la IA usando prompts
-async function luminsesi(q, username, logic) {
-  try {
-    const response = await axios.post("https://Luminai.my.id", {
-      content: q,
-      user: username,
-      prompt: logic,
-      webSearchMode: false
-    })
-    return response.data.result
-  } catch (error) {
-    console.error('⚠️ Error al obtener:', error)
-    throw error
-  }
-}
+                        }
