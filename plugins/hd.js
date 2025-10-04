@@ -47,8 +47,8 @@ let handler = async (m, { conn }) => {
     if (!enhancedBuffer) {
       return m.reply(`${e} No se pudo obtener la imagen mejorada.`);
     }
-
-    await conn.sendMessage(m.chat, { image: enhancedBuffer }, { quoted: m });
+await conn.sendFile(m.chat, enhancedBuffer, "Thumbnail.jpg", `${e} Imágen.jpg en HD`, m, null, rcanal)
+   //await conn.sendMessage(m.chat, { image: enhancedBuffer }, { quoted: m });
 
   } catch (err) {
     console.error(err);
