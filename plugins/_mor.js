@@ -26,7 +26,7 @@ let handler = async (m, { conn }) => {
   const im = await (await fetch(pp)).buffer()
 
   // Enviar nota de voz
-  await conn.sendMessage(
+  await conn.sendFile(
     m.chat,
     {
       audio: { url: audios[Math.floor(Math.random() * audios.length)] },
