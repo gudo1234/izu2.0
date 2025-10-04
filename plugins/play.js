@@ -107,7 +107,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 }
 `.trim();
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
     // API principal
     let apiUrl = isAudio
