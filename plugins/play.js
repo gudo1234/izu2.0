@@ -5,9 +5,26 @@ import axios from 'axios';
 const STELLAR_APIKEY = 'stellar-LgIsemtM'; // <-- tu apikey
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
+  const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
+  const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
+  const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
+  const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
+
+  // Si el usuario no escribió nada -> mostrar ejemplos diferentes
   if (!text) {
-    return m.reply(`${e} Usa el comando correctamente:\n\n🔎 _Ejemplo de uso:_ \n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`);
+    let ejemplo = '';
+    if (normalAudioCommands.includes(command)) {
+      ejemplo = `🎵 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el audio._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`;
+    } else if (docAudioCommands.includes(command)) {
+      ejemplo = `📄 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el audio en documento._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`;
+    } else if (normalVideoCommands.includes(command)) {
+      ejemplo = `🎥 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el video._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`;
+    } else if (docVideoCommands.includes(command)) {
+      ejemplo = `📄 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el video en documento._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`;
+    }
+    return m.reply(ejemplo);
   }
+
   await m.react('🕒');
   try {
     const query = args.join(' ');
@@ -37,11 +54,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const durationSeconds = durationToSeconds(timestamp || '0:00');
     const durationMinutes = durationSeconds / 60;
 
-    const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
-    const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
-    const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
-    const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
-
     let sendAsDocument = false;
     let isAudio = false;
     let isVideo = false;
@@ -62,6 +74,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const tipoArchivo = isAudio
       ? (sendAsDocument ? 'audio (documento)' : 'audio')
       : (sendAsDocument ? 'video (documento)' : 'video');
+
     const caption = `
 ╭───── • ─────╮
   𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
@@ -73,7 +86,11 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ✦ *📅 Publicado:* ${ago || 'N/A'}
 ✦ *🔗 Link:* ${url}
 
-> 🕒 Se está preparando el *${tipoArchivo}*...${durationMinutes > 20 && sendAsDocument ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*` : ''}
+> 🕒 Se está preparando el *${tipoArchivo}*...${
+  durationMinutes > 20 && !docAudioCommands.includes(command) && !docVideoCommands.includes(command) 
+    ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*` 
+    : ''
+}
 `.trim();
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
