@@ -112,8 +112,7 @@ const handler = async (m, { conn }) => {
         fs.readFileSync(file),
         "calendario.jpg",
         `🗓 *Calendario de ${month.charAt(0).toUpperCase() + month.slice(1)} ${year}*`,
-        m
-      );
+        m, null, rcanal);
     } finally {
       fs.unlinkSync(file);
     }
