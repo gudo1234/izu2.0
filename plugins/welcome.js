@@ -69,39 +69,37 @@ let tag = name || ''
 }
 
 if (media === 'audio') {
-await conn.sendFile(
-  m.chat,
-  [vn, vn2, vn4, vn5, vn7].getRandom(), // archivo de audio aleatorio
-  'carro.mp3', // nombre del archivo
-  null, // sin texto adicional
-  m, // mensaje citado
-  true, // marcar como mensaje PTT (nota de voz)
-  {
-    type: 'audioMessage',
-    mimetype: 'audio/mpeg',
-    ptt: true,
-    quoted: m, // cita el mensaje del usuario
-    ephemeralExpiration: 24 * 60 * 60, // 24 horas
-    contextInfo: {
-      forwardingScore: 1,
-      isForwarded: true,
-      mentionedJid: [m.sender], // menciona al usuario que ejecutó el comando
+await conn.sendMessage(
+  m.chat, 
+  { 
+    audio: { url: [vn, vn2, vn4, vn5, vn7].getRandom() },
+    mimetype: 'audio/ogg; codecs=opus',
+    fileName: 'error.opus',
+    ptt: true, // ahora sí es válido
+    contextInfo: { 
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: channelRD.id,
+        serverMessageId: '',
+        newsletterName: channelRD.name
+      },
+      forwardingScore: 1, 
+      isForwarded: true, 
+      mentionedJid: [m.messageStubParameters[0]], 
       externalAdReply: {
-        title: `🔥 WELCOME ${tag}`,
+        title: `❤️WELCOME ${tag}`,
         body: 'IzuBot te da la bienvenida',
-        mediaType: 1,
         previewType: 'PHOTO',
         thumbnailUrl: redes,
         thumbnail: im,
         sourceUrl: redes,
         showAdAttribution: false
-      },
-      forwardedNewsletterMessageInfo: {
-        newsletterJid: channelRD.id,
-        serverMessageId: '',
-        newsletterName: channelRD.name
       }
     }
+  }, 
+  { 
+    quoted: m, 
+    ephemeralExpiration: 2460100, 
+    disappearingMessagesInChat: 2460100 
   }
 )
 
