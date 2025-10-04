@@ -30,10 +30,11 @@ let tag = name || ''
   let media = or[Math.floor(Math.random() * 4)];
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
   let stiker2 = await sticker(imagen8, false, global.packname, global.author) //welcome
-  //let a = `🎉 _Welcome_ *@${m.messageStubParameters[0].split`@`[0]}*`
-  //let b = `✋🏻 Adiós *@${m.messageStubParameters[0].split`@`[0]}*`
-  let a = `🎉 _Welcome_ *${tag}*`
-  let b = `✋🏻 Adiós *${tag}*`
+  let a = `🎉 _Welcome_ *@${m.messageStubParameters[0].split`@`[0]}*`
+  let b = `✋🏻 Adiós *@${m.messageStubParameters[0].split`@`[0]}*`
+  let yes = `+${m.messageStubParameters[0].split`@`[0]}`
+  //let a = `🎉 _Welcome_ *${tag}*`
+  //let b = `✋🏻 Adiós *${tag}*`
   //😍mi desmadre
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono )
   let im = await (await fetch(`${pp}`)).buffer()
@@ -57,7 +58,7 @@ let tag = name || ''
             'isForwarded': false,
             externalAdReply: {
                 showAdAttribution: false,
-                title: `💫 WELCOME ${tag}`,
+                title: `💫 WELCOME ${yes}`,
                 body: 'IzuBot te da la bienvenida',
                 mediaType: 1,
                 sourceUrl: redes,
@@ -74,7 +75,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `❤️WELCOME ${tag}`, 
+    "title": `❤️WELCOME ${yes}`, 
     "body": 'IzuBot te da la bienvenida', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
@@ -86,7 +87,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn, vn2, vn4, vn5, vn7].getRando
 if (media === 'texto') {
   let wel = `🌟 *(⊃･ᴗ･)⊃* \`𖹭︩︪ᴡᴇʟᴄᴏᴍᴇ𖹭︩︪\`
 ╭━━━━━━━━━━❤︎₊᪲
-┃ _¡Hola!_ *${tag}*
+┃ _¡Hola!_ *@${m.messageStubParameters[0].split`@`[0]}*
 ┃ ⇝ Bıεŋvεŋıɖσ(a) a:
 ┃ *${groupMetadata.subject}*
 ┃
@@ -157,7 +158,7 @@ await conn.sendFile(m.chat, stiker, 'sticker.webp', '', null, true, {
             'isForwarded': false,
             externalAdReply: {
                 showAdAttribution: false,
-                title: `👋🏻ADIOS ${tag}`,
+                title: `👋🏻ADIOS ${yes}`,
                 body: 'Esperemos que no vuelva -_-',
                 mediaType: 1,
                 sourceUrl: redes,
@@ -174,7 +175,7 @@ await conn.sendMessage(m.chat, { audio: { url: [vn3, vn6, vn8, vn9, vn10, vn11, 
     newsletterJid: channelRD.id, 
     serverMessageId: '', 
     newsletterName: channelRD.name }, forwardingScore: false, isForwarded: true, mentionedJid: [m.messageStubParameters[0]], "externalAdReply": { 
-    "title": `${e} ADIOS ${tag}`, 
+    "title": `${e} ADIOS ${yes}`, 
     "body": 'Esperemos que no vuelva -_-', 
     "previewType": "PHOTO", 
     "thumbnailUrl": redes,
