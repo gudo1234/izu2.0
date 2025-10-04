@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+aQimport fetch from 'node-fetch'
 
 let handler = async (m, { conn }) => {
   // Audios disponibles
@@ -24,7 +24,7 @@ let handler = async (m, { conn }) => {
   const im = await (await fetch(pp)).buffer()
 
   // Enviar nota de voz
-  await conn.sendFile(
+  await conn.sendMessage(
     m.chat,
     {
       audio: [vn, vn2, vn4, vn5, vn7].getRandom(),
