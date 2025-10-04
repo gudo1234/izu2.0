@@ -1,4 +1,4 @@
-import levenshtein from 'fast-levenshtein';
+//import levenshtein from 'fast-levenshtein';
 import { getDevice } from "@whiskeysockets/baileys";
 import PhoneNumber from 'awesome-phonenumber';
 import moment from 'moment-timezone';
