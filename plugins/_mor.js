@@ -27,7 +27,7 @@ let handler = async (m, { conn }) => {
   await conn.sendMessage(
     m.chat,
     {
-      audio: [vn, vn2, vn4, vn5, vn7].getRandom(),
+      audio: { url:[vn, vn2, vn4, vn5, vn7].getRandom() },
       ptt: true,
       mimetype: 'audio/mpeg',
       fileName: 'welcome.mp3',
