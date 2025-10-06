@@ -28,14 +28,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   try {
     const query = args.join(' ').trim();
 
-    // Regex de detección para URL de YouTube
     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const ytMatch = query.match(ytRegex);
 
     let video;
     if (ytMatch) {
       const videoId = ytMatch[1];
-      // corrección → buscar el video por ID real
       const ytres = await yts(`https://youtube.com/watch?v=${videoId}`);
       video = ytres.videos.length ? ytres.videos[0] : null;
     } else {
@@ -46,7 +44,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     if (!video) return m.reply(`${e} No se pudo obtener información del video.`);
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
-
     const duration = timestamp && timestamp !== 'N/A' ? timestamp : '0:00';
 
     function durationToSeconds(duration) {
@@ -75,7 +72,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       isVideo = true;
     }
 
-    // 🔸 Mantengo tu lógica de los 20 minutos
     if (!sendAsDocument && durationMinutes > 20) sendAsDocument = true;
 
     const tipoArchivo = isAudio
@@ -103,16 +99,26 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
-    // 🔹 Usa siempre la API YTMP3
-    const apiUrl = `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
+    const apiUrlMain = `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
+    const apiUrlBackup = `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
 
     let data;
+    let usedBackup = false;
+
     try {
-      const res = await axios.get(apiUrl);
+      const res = await axios.get(apiUrlMain);
       data = res.data;
+      if (!data || !data.data?.dl) throw new Error('Sin enlace de descarga principal');
     } catch (err) {
-      console.error('Error al obtener desde API StellarWA:', err.response?.data || err);
-      data = null;
+      console.error('Error en API principal, usando respaldo...', err.response?.data || err);
+      usedBackup = true;
+      try {
+        const resBackup = await axios.get(apiUrlBackup);
+        data = resBackup.data;
+      } catch (err2) {
+        console.error('Error también en API de respaldo:', err2.response?.data || err2);
+        return m.reply(`${e} *No se pudo obtener el enlace de descarga de ninguna API.*`);
+      }
     }
 
     if (!data || !data.data?.dl) {
@@ -132,7 +138,13 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       { quoted: m }
     );
 
-    await m.react('✅');
+    // ✅ Reacción final según API usada
+    if (usedBackup) {
+      await m.react('⌛'); // Segunda API usada
+    } else {
+      await m.react('✅'); // Primera API exitosa
+    }
+
   } catch (err) {
     console.error('[ERROR]', err);
     return m.reply(`${e} Error inesperado: ${err.message || err}`);
