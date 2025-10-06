@@ -44,8 +44,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     `*📄 Nombre:* ${file.title}\n` +
                     `*📁 Peso:* ${file.peso}\n` +
                     `*📅 Fecha:* ${file.fecha}\n` +
-                    `*📑 Tipo:* ${ext.toUpperCase()}\n\n` +
-                    `> 📤 Enviado mediante *Stellar API*`
+                    `*📑 Tipo:* ${ext.toUpperCase()}`
 
     // 📄 Enviar archivo como documento
     await conn.sendMessage(m.chat, {
