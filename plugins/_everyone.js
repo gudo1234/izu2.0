@@ -81,7 +81,7 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 }
 
 handler.command = ['everyone']
-//handler.admin = true
+ handler.admin = true
 handler.group = true
 
 export default handler
