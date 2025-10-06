@@ -1,72 +1,53 @@
 import axios from 'axios'
 
-const mimeFromExt = ext => ({
-  '7z'   : 'application/x-7z-compressed',
-  'zip'  : 'application/zip',
-  'rar'  : 'application/vnd.rar',
-  'apk'  : 'application/vnd.android.package-archive',
-  'mp4'  : 'video/mp4',
-  'mkv'  : 'video/x-matroska',
-  'mp3'  : 'audio/mpeg',
-  'wav'  : 'audio/wav',
-  'ogg'  : 'audio/ogg',
-  'flac' : 'audio/flac',
-  'pdf'  : 'application/pdf',
-  'doc'  : 'application/msword',
-  'docx' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'xls'  : 'application/vnd.ms-excel',
-  'xlsx' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'ppt'  : 'application/vnd.ms-powerpoint',
-  'pptx' : 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-  'txt'  : 'text/plain',
-  'html' : 'text/html',
-  'csv'  : 'text/csv',
-  'json' : 'application/json',
-  'js'   : 'application/javascript',
-  'py'   : 'text/x-python',
-  'c'    : 'text/x-c',
-  'cpp'  : 'text/x-c++',
-  'exe'  : 'application/vnd.microsoft.portable-executable'
-}[ext])
-
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) throw `✳️ Usa el comando correctamente:\n${usedPrefix + command} <link de MediaFire>`
+  const username = `${conn.getName(m.sender)}`
+  const apiKey = 'stellar-LgIsemtM' // tu API Key Stellar
 
-  // Validar que el link sea de MediaFire
+  if (!text) {
+    return conn.sendMessage(m.chat, {
+      text: `📁 Hola *${username}*, necesito un enlace de *MediaFire*.\n\nEjemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
+    }, { quoted: m })
+  }
+
+  // Validación de enlace MediaFire
   const mediafireRegex = /https?:\/\/(www\.)?mediafire\.com\/file\/[a-zA-Z0-9]+/i
-  if (!mediafireRegex.test(text)) throw '⚠️ Ingresa un enlace válido de *MediaFire*.'
-
-  await conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key } })
+  if (!mediafireRegex.test(text)) {
+    return conn.sendMessage(m.chat, {
+      text: `⚠️ El enlace proporcionado no parece ser de *MediaFire*.\nPor favor, revisa el formato.`
+    }, { quoted: m })
+  }
 
   try {
-    const apiUrl = `https://api.stellarwa.xyz/dow/mediafire?url=${encodeURIComponent(text)}`
-    const { data: json } = await axios.get(apiUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-        'Accept': 'application/json'
-      },
-      timeout: 25000
+    m.react('🕒')
+
+    // 📡 Petición a la API Stellar
+    const url = `https://api.stellarwa.xyz/dow/mediafire?url=${encodeURIComponent(text)}&apikey=${apiKey}`
+    const { data: res } = await axios.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+      timeout: 20000
     })
 
-    // Mostrar en consola por depuración
-    console.log('📥 Respuesta de Stellar API:', json)
+    // 🧩 Validar estructura
+    if (!res || !res.status || !res.data || !res.data.dl) {
+      console.log('[API STELLAR RESPUESTA]', res)
+      throw new Error('La API no devolvió información válida del archivo.')
+    }
 
-    // Validar estructura
-    if (!json || json.status !== true || !json.data || !json.data.dl)
-      throw new Error('Respuesta inválida de la API Stellar.')
-
-    const file = json.data
+    const file = res.data
     const extMatch = file.title.match(/\.(\w+)$/i)
-    const ext = extMatch ? extMatch[1].toLowerCase() : 'zip'
-    const mime = mimeFromExt(ext) || file.tipo || 'application/octet-stream'
+    const ext = extMatch ? extMatch[1].toLowerCase() : 'bin'
+    const mime = file.tipo || `application/${ext}`
 
+    // 📝 Descripción
     const caption = `📦 *Archivo encontrado*\n\n` +
                     `*📄 Nombre:* ${file.title}\n` +
                     `*📁 Peso:* ${file.peso}\n` +
                     `*📅 Fecha:* ${file.fecha}\n` +
-                    `*📑 Tipo:* ${ext.toUpperCase()}`
+                    `*📑 Tipo:* ${ext.toUpperCase()}\n\n` +
+                    `> 📤 Enviado mediante *Stellar API*`
 
-    // Enviar archivo
+    // 📄 Enviar archivo como documento
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
       fileName: file.title,
@@ -74,11 +55,17 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       caption
     }, { quoted: m })
 
-    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+    m.react('✅')
+
   } catch (err) {
-    console.error('❌ Error en MediaFire:', err?.response?.data || err)
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    throw `⚠️ No se pudo procesar el enlace.\n\nDetalles: ${err.message || err}`
+    console.error('[❌ ERROR EN MEDIAFIRE]', err)
+    m.react('❌')
+
+    let msg = '⚠️ *Error al procesar el enlace de MediaFire.*'
+    if (err.response) msg += `\n\n📡 *Estado HTTP:* ${err.response.status}`
+    if (err.message) msg += `\n📄 *Detalle:* ${err.message}`
+
+    return conn.sendMessage(m.chat, { text: msg }, { quoted: m })
   }
 }
 
