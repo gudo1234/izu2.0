@@ -104,7 +104,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
     // 🔹 Usa siempre la API YTMP3
-    const apiUrl = `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
+    const apiUrl = `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
 
     let data;
     try {
