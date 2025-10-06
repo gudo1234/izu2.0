@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import yts from 'yt-search';
 import axios from 'axios';
 
-const STELLAR_APIKEY = 'stellar-LgIsemtM'; // tu apikey
+const STELLAR_APIKEY = 'stellar-LgIsemtM';
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
@@ -10,7 +10,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
   const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
 
-  // Mensajes de ayuda si no hay texto
   if (!text) {
     let ejemplo = '';
     if (normalAudioCommands.includes(command)) {
@@ -29,22 +28,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   try {
     const query = args.join(' ').trim();
 
-    // Detección de todos los tipos de URL de YouTube
+    // Regex de detección para URL de YouTube
     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const ytMatch = query.match(ytRegex);
 
     let video;
     if (ytMatch) {
       const videoId = ytMatch[1];
-      // Buscar por ID correctamente
-      const { videos } = await yts({ videoId });
-      video = videos?.length ? videos[0] : null;
-
-      // Si no devuelve resultado, usar una búsqueda manual
-      if (!video) {
-        const ytres = await yts(`https://youtube.com/watch?v=${videoId}`);
-        video = ytres.videos[0];
-      }
+      // corrección → buscar el video por ID real
+      const ytres = await yts(`https://youtube.com/watch?v=${videoId}`);
+      video = ytres.videos.length ? ytres.videos[0] : null;
     } else {
       const ytres = await yts(query);
       video = ytres.videos[0];
@@ -82,6 +75,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       isVideo = true;
     }
 
+    // 🔸 Mantengo tu lógica de los 20 minutos
     if (!sendAsDocument && durationMinutes > 20) sendAsDocument = true;
 
     const tipoArchivo = isAudio
@@ -109,7 +103,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
-    // API principal
+    // Selección de endpoint según tipo
     let apiUrl = isAudio
       ? `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`
       : `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(url)}&apikey=${STELLAR_APIKEY}`;
@@ -118,7 +112,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     try {
       const res = await axios.get(apiUrl);
       data = res.data;
-    } catch {
+    } catch (err) {
+      console.error('Error al obtener desde API StellarWA:', err.response?.data || err);
       data = null;
     }
 
