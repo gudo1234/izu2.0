@@ -73,7 +73,7 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 		if (!fancyQuoted && m.quoted) fancyQuoted = m.quoted
 		else if (!fancyQuoted) fancyQuoted = m
 
-		await conn.sendMessage(m.chat, payload, { quoted: rcanal })
+		await conn.sendMessage(m.chat, payload, { quoted: null })
 	} catch (error) {
 		console.error('Error en comando .everyone:', error)
 		await m.reply('⚠️ Ocurrió un error al ejecutar el comando.')
