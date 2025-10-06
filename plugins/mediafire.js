@@ -1,12 +1,11 @@
 import axios from 'axios'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const username = `${conn.getName(m.sender)}`
   const apiKey = 'stellar-LgIsemtM' // tu API Key Stellar
 
   if (!text) {
     return conn.sendMessage(m.chat, {
-      text: `📁 Hola *${username}*, necesito un enlace de *MediaFire*.\n\nEjemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
+      text: `${e} Necesito un enlace de *MediaFire*.\n\nEjemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
     }, { quoted: m })
   }
 
