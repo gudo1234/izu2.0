@@ -44,10 +44,10 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 		const groupJid = m.chat
 		const groupName = text?.trim() || groupMetadata?.subject || 'everyone'
 
-		const header = ''
+		//const header = ''
 		const groupMentionTag = `@${groupJid}`
-		const membersHeader = ''
-		const listaUsuarios = users.length
+		//const membersHeader = ''
+		//const listaUsuarios = users.length
 			? users.map(id => ``).join('\n')
 			: 'No hay usuarios para mencionar.'
 
