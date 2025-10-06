@@ -44,15 +44,15 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 		const groupJid = m.chat
 		const groupName = text?.trim() || groupMetadata?.subject || 'everyone'
 
-		//const header = ''
+		const header = '乂 M E N S A J E 乂'
 		const groupMentionTag = `@${groupJid}`
-		//const membersHeader = ''
-		//const listaUsuarios = users.length
-			? users.map(id => ``).join('\n')
+		const membersHeader = '乂 M I E M B R O S 乂'
+		const listaUsuarios = users.length
+			? users.map(id => `@${id.split('@')[0]}`).join('\n')
 			: 'No hay usuarios para mencionar.'
 
-		const message = `${header}\n${groupMentionTag}\n\n${membersHeader} (${users.length})\n${listaUsuarios}`
-
+		//const message = `${header}\n${groupMentionTag}\n\n${membersHeader} (${users.length})\n${listaUsuarios}`
+        const message = `@${groupJid}`
 		const style = typeof rcanalr === 'object' ? rcanalr : (typeof rcanal === 'object' ? rcanal : {})
 		const externalAdReply = style?.contextInfo?.externalAdReply
 
@@ -73,7 +73,7 @@ let handler = async (m, { conn, text, participants, groupMetadata }) => {
 		if (!fancyQuoted && m.quoted) fancyQuoted = m.quoted
 		else if (!fancyQuoted) fancyQuoted = m
 
-		await conn.sendMessage(m.chat, payload, { quoted: null })
+		await conn.sendMessage(m.chat, payload, { quoted: rcanal })
 	} catch (error) {
 		console.error('Error en comando .everyone:', error)
 		await m.reply('⚠️ Ocurrió un error al ejecutar el comando.')
