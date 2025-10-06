@@ -72,7 +72,7 @@ handler.group   = true;
 
 export default handler;*/
 
-import fetch from 'node-fetch'
+import axios from 'axios'
 
 const mimeFromExt = ext => ({
   '7z'   : 'application/x-7z-compressed',
@@ -106,15 +106,17 @@ const mimeFromExt = ext => ({
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) throw `✳️ Usa el comando correctamente:\n${usedPrefix + command} <link de MediaFire>`
 
-  // Reacción de carga
-  await conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key }})
+  // Validar URL de MediaFire
+  const mediafireRegex = /https?:\/\/(www\.)?mediafire\.com\/file\/[a-zA-Z0-9]+/i
+  if (!mediafireRegex.test(text)) throw '⚠️ Por favor ingresa un enlace válido de *MediaFire*.'
+
+  await conn.sendMessage(m.chat, { react: { text: '🕒', key: m.key } })
 
   try {
     const apiUrl = `https://api.stellarwa.xyz/dow/mediafire?url=${encodeURIComponent(text)}`
-    const res = await fetch(apiUrl)
-    const json = await res.json()
+    const { data: json } = await axios.get(apiUrl, { timeout: 20000 })
 
-    if (!json.status || !json.data) throw '⚠️ No se pudo obtener la información del archivo.'
+    if (!json.status || !json.data) throw new Error('No se pudo obtener la información del archivo.')
 
     const file = json.data
     const extMatch = file.title.match(/\.(\w+)$/i)
@@ -127,7 +129,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
                     `*📅 Fecha:* ${file.fecha}\n` +
                     `*📑 Tipo:* ${ext.toUpperCase()}`
 
-    // Enviar el archivo como documento
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
       fileName: file.title,
@@ -135,11 +136,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       caption
     }, { quoted: m })
 
-    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key }})
+    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
   } catch (err) {
-    console.error(err)
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key }})
-    throw `⚠️ Error al procesar el enlace.\n\nDetalles: ${err.message || err}`
+    console.error('❌ Error en el comando MediaFire:', err)
+    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+    throw `⚠️ No se pudo procesar el enlace.\n\nDetalles: ${err.message || err}`
   }
 }
 
