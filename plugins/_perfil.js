@@ -15,32 +15,20 @@ function banderaEmoji(countryCode) {
 }
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  let targetNumber
+  let target = m.quoted?.sender || m.mentionedJid?.[0] || text
   let own = false
 
-  // 🧩 Detección del número o usuario objetivo
-  if (m.quoted) {
-    targetNumber = m.quoted.sender
-  } else if (m.mentionedJid?.length) {
-    targetNumber = m.mentionedJid[0]
-  } else if (text) {
-    const cleaned = text.replace(/[^0-9]/g, '')
-    if (!cleaned) throw '⚠️ Ingresa un número válido o responde a un mensaje.'
-    targetNumber = cleaned + '@s.whatsapp.net'
-  } else {
-    targetNumber = m.sender
+  if (!target) {
+    target = m.sender
     own = true
+  } else {
+    target = target.replace(/\D/g, '') + '@s.whatsapp.net'
+    const exists = await conn.onWhatsApp(target)
+    if (!exists[0]?.exists) throw 'Este usuario no existe, asegúrate de escribir bien el número.'
   }
 
-  // 📞 Verificar existencia correcta
-  const jidClean = targetNumber.replace(/@s\.whatsapp\.net$/, '')
-  const exists = await conn.onWhatsApp(jidClean + '@s.whatsapp.net')
-  if (!exists?.[0]?.exists)
-    throw 'Este usuario no existe, asegúrate de escribir bien el número.'
-
-  // 🔹 Extraer información
-  const number = jidClean
-  const name = await conn.getName(targetNumber)
+  const number = target.split('@')[0]
+  const name = await conn.getName(target)
   const phoneInfo = PhoneNum('+' + number)
   const countryCode = phoneInfo.getRegionCode('international')
   const country = regionNames.of(countryCode) || 'Desconocido'
@@ -48,7 +36,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   const formatNum = phoneInfo.getNumber('international')
   const url = 'https://wa.me/' + number
 
-  // 🌎 País y hora local
+  // Info de país
   let capital = 'Desconocida'
   let fechaLocal = 'No disponible'
   try {
@@ -56,17 +44,18 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const data = res.data[0]
     capital = data.capital?.[0] || 'Desconocida'
     const zona = data.timezones?.[0]
-    if (zona) fechaLocal = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
-  } catch (err) {
-    console.log('Error país:', err.message)
+    if (zona) {
+      fechaLocal = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
+    }
+  } catch (e) {
+    console.error('Error obteniendo país:', e)
   }
 
-  // 🖼️ Imagen, bio y business
-  let img = await conn.profilePictureUrl(targetNumber, 'image').catch(_ => icono)
-  let bio = await conn.fetchStatus(targetNumber).catch(_ => null)
-  let business = await conn.getBusinessProfile(targetNumber).catch(_ => null)
+  // Imagen y bio
+  let img = await conn.profilePictureUrl(target, 'image').catch(_ => icono )
+  let bio = await conn.fetchStatus(target).catch(_ => null)
+  let business = await conn.getBusinessProfile(target).catch(_ => null)
 
-  // 🧾 Construcción del mensaje
   let caption = `${e} *Información de WhatsApp*\n\n`
   caption += `*Nombre:* ${name || '-'}\n`
   caption += `*Número:* ${formatNum}\n`
@@ -81,7 +70,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (business) {
     caption += `\n⚡ *Cuenta Business:*\n`
-    caption += `*ID:* ${business.wid || '-'}\n`
+    caption += `*ID:* ${business.wid}\n`
     caption += `*Sitio Web:* ${business.website || '-'}\n`
     caption += `*Email:* ${business.email || '-'}\n`
     caption += `*Categoría:* ${business.category || '-'}\n`
@@ -89,16 +78,14 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Zona horaria:* ${business.business_hours?.timezone || '-'}\n`
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
-
-  await m.react('🔥')
+  m.react('🔥')
   await conn.sendMessage(m.chat, {
     image: { url: img },
     caption,
-    mentions: [targetNumber]
+    mentions: [target]
   }, { quoted: m })
 }
 
-handler.command = ['wastalk', 'perfil', 'ava']
-handler.group = true
-
+handler.command = ['wastalk', 'perfil', 'ava'];
+handler.group = true;
 export default handler
