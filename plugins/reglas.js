@@ -41,7 +41,7 @@ let handler = async (m, { conn }) => {
         thumbnail,
         sourceUrl: redes,
         mediaType: 1,
-        showAdAttribution: true,
+        showAdAttribution: false,
         renderLargerThumbnail: true,
       },
     },
