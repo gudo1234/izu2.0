@@ -15,18 +15,28 @@ function banderaEmoji(countryCode) {
 }
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  let target = m.quoted?.sender || m.mentionedJid?.[0] || text
+  let target
   let own = false
 
-  if (!target) {
+  // 🔹 Detectar objetivo
+  if (m.quoted) {
+    target = m.quoted.sender
+  } else if (m.mentionedJid && m.mentionedJid.length > 0) {
+    target = m.mentionedJid[0]
+  } else if (text) {
+    const num = text.replace(/[^0-9]/g, '')
+    if (num.length < 5) throw '⚠️ Ingresa un número válido o responde a un mensaje.'
+    target = num + '@s.whatsapp.net'
+  } else {
     target = m.sender
     own = true
-  } else {
-    target = target.replace(/\D/g, '') + '@s.whatsapp.net'
-    const exists = await conn.onWhatsApp(target)
-    if (!exists[0]?.exists) throw 'Este usuario no existe, asegúrate de escribir bien el número.'
   }
 
+  // 🔹 Verificar existencia
+  const exists = await conn.onWhatsApp(target)
+  if (!exists?.[0]?.exists) throw 'Este usuario no existe, asegúrate de escribir bien el número.'
+
+  // 🔹 Información básica
   const number = target.split('@')[0]
   const name = await conn.getName(target)
   const phoneInfo = PhoneNum('+' + number)
@@ -36,7 +46,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   const formatNum = phoneInfo.getNumber('international')
   const url = 'https://wa.me/' + number
 
-  // Info de país
+  // 🔹 País y zona horaria
   let capital = 'Desconocida'
   let fechaLocal = 'No disponible'
   try {
@@ -44,15 +54,13 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const data = res.data[0]
     capital = data.capital?.[0] || 'Desconocida'
     const zona = data.timezones?.[0]
-    if (zona) {
-      fechaLocal = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
-    }
-  } catch (e) {
-    console.error('Error obteniendo país:', e)
+    if (zona) fechaLocal = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
+  } catch (err) {
+    console.log('Error obteniendo país:', err.message)
   }
 
-  // Imagen y bio
-  let img = await conn.profilePictureUrl(target, 'image').catch(_ => icono )
+  // 🔹 Imagen, estado y business
+  let img = await conn.profilePictureUrl(target, 'image').catch(_ => icono)
   let bio = await conn.fetchStatus(target).catch(_ => null)
   let business = await conn.getBusinessProfile(target).catch(_ => null)
 
@@ -70,7 +78,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (business) {
     caption += `\n⚡ *Cuenta Business:*\n`
-    caption += `*ID:* ${business.wid}\n`
+    caption += `*ID:* ${business.wid || '-'}\n`
     caption += `*Sitio Web:* ${business.website || '-'}\n`
     caption += `*Email:* ${business.email || '-'}\n`
     caption += `*Categoría:* ${business.category || '-'}\n`
@@ -78,7 +86,9 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     caption += `*Zona horaria:* ${business.business_hours?.timezone || '-'}\n`
     caption += `*Descripción:* ${business.description || '-'}\n`
   }
-  m.react('🔥')
+
+  await m.react('🔥')
+
   await conn.sendMessage(m.chat, {
     image: { url: img },
     caption,
@@ -86,6 +96,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }, { quoted: m })
 }
 
-handler.command = ['wastalk', 'perfil', 'ava'];
-handler.group = true;
+handler.command = ['wastalk', 'perfil', 'ava']
+handler.group = true
+
 export default handler
