@@ -15,30 +15,32 @@ function banderaEmoji(countryCode) {
 }
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  let target
+  let targetNumber
   let own = false
 
-  // 🔹 Detectar objetivo
+  // 🧩 Detección del número o usuario objetivo
   if (m.quoted) {
-    target = m.quoted.sender
-  } else if (m.mentionedJid && m.mentionedJid.length > 0) {
-    target = m.mentionedJid[0]
+    targetNumber = m.quoted.sender
+  } else if (m.mentionedJid?.length) {
+    targetNumber = m.mentionedJid[0]
   } else if (text) {
-    const num = text.replace(/[^0-9]/g, '')
-    if (num.length < 5) throw '⚠️ Ingresa un número válido o responde a un mensaje.'
-    target = num + '@s.whatsapp.net'
+    const cleaned = text.replace(/[^0-9]/g, '')
+    if (!cleaned) throw '⚠️ Ingresa un número válido o responde a un mensaje.'
+    targetNumber = cleaned + '@s.whatsapp.net'
   } else {
-    target = m.sender
+    targetNumber = m.sender
     own = true
   }
 
-  // 🔹 Verificar existencia
-  const exists = await conn.onWhatsApp(target)
-  if (!exists?.[0]?.exists) throw 'Este usuario no existe, asegúrate de escribir bien el número.'
+  // 📞 Verificar existencia correcta
+  const jidClean = targetNumber.replace(/@s\.whatsapp\.net$/, '')
+  const exists = await conn.onWhatsApp(jidClean + '@s.whatsapp.net')
+  if (!exists?.[0]?.exists)
+    throw 'Este usuario no existe, asegúrate de escribir bien el número.'
 
-  // 🔹 Información básica
-  const number = target.split('@')[0]
-  const name = await conn.getName(target)
+  // 🔹 Extraer información
+  const number = jidClean
+  const name = await conn.getName(targetNumber)
   const phoneInfo = PhoneNum('+' + number)
   const countryCode = phoneInfo.getRegionCode('international')
   const country = regionNames.of(countryCode) || 'Desconocido'
@@ -46,7 +48,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   const formatNum = phoneInfo.getNumber('international')
   const url = 'https://wa.me/' + number
 
-  // 🔹 País y zona horaria
+  // 🌎 País y hora local
   let capital = 'Desconocida'
   let fechaLocal = 'No disponible'
   try {
@@ -56,14 +58,15 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const zona = data.timezones?.[0]
     if (zona) fechaLocal = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
   } catch (err) {
-    console.log('Error obteniendo país:', err.message)
+    console.log('Error país:', err.message)
   }
 
-  // 🔹 Imagen, estado y business
-  let img = await conn.profilePictureUrl(target, 'image').catch(_ => icono)
-  let bio = await conn.fetchStatus(target).catch(_ => null)
-  let business = await conn.getBusinessProfile(target).catch(_ => null)
+  // 🖼️ Imagen, bio y business
+  let img = await conn.profilePictureUrl(targetNumber, 'image').catch(_ => icono)
+  let bio = await conn.fetchStatus(targetNumber).catch(_ => null)
+  let business = await conn.getBusinessProfile(targetNumber).catch(_ => null)
 
+  // 🧾 Construcción del mensaje
   let caption = `${e} *Información de WhatsApp*\n\n`
   caption += `*Nombre:* ${name || '-'}\n`
   caption += `*Número:* ${formatNum}\n`
@@ -88,11 +91,10 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 
   await m.react('🔥')
-
   await conn.sendMessage(m.chat, {
     image: { url: img },
     caption,
-    mentions: [target]
+    mentions: [targetNumber]
   }, { quoted: m })
 }
 
