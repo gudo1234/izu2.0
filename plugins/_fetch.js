@@ -3,47 +3,36 @@ import { format } from 'util'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
-    return conn.reply(m.chat, `⚠️ Ejemplo: *${usedPrefix + command}* https://ejemplo.com`, m)
+    return conn.reply(m.chat, `⚠️ Ejemplo: *${usedPrefix + command}* https://hdyc.online/graduacion/`, m)
 
   m.react('🕒')
+
   try {
     const res = await fetch(text)
+    const html = await res.text()
     const contentType = res.headers.get('content-type') || ''
-    const contentLength = res.headers.get('content-length') || 0
 
-    // Evitar archivos extremadamente grandes
-    if (Number(contentLength) > 200 * 1024 * 1024)
-      return m.reply(`⚠️ El archivo es demasiado grande (${(contentLength / 1024 / 1024).toFixed(1)} MB)`)
+    // Buscar enlaces directos a .mp4 dentro del HTML
+    const videoMatch = html.match(/https?:\/\/[^\s"']+\.mp4[^\s"']*/i)
 
-    // Si es texto o JSON, mostrar el contenido como texto
-    if (/text|json/.test(contentType)) {
-      let txt = await res.text()
-      try {
-        txt = format(JSON.parse(txt))
-      } catch {
-        txt = txt.toString()
-      }
-      return m.reply(txt.slice(0, 65536))
+    if (videoMatch) {
+      const videoUrl = videoMatch[0]
+      const videoRes = await fetch(videoUrl)
+      const buffer = await videoRes.buffer()
+
+      m.react('✅')
+      return conn.sendFile(m.chat, buffer, 'video.mp4', videoUrl, m, null, false, { mimetype: 'video/mp4' })
     }
 
-    // Si es video o audio, enviarlo como mp4
-    if (/video|audio/.test(contentType) || text.includes('hdyc.online')) {
+    // Si no encuentra el .mp4, pero el tipo es video
+    if (/video|audio/.test(contentType)) {
       const buffer = await res.buffer()
       m.react('✅')
-      return conn.sendFile(m.chat, buffer, 'video.mp4', '', m, null, false, { mimetype: 'video/mp4' })
+      return conn.sendFile(m.chat, buffer, 'video.mp4', text, m, null, false, { mimetype: 'video/mp4' })
     }
 
-    // Si es imagen, detectarla y enviar como archivo normal
-    if (/image/.test(contentType)) {
-      const buffer = await res.buffer()
-      m.react('✅')
-      return conn.sendFile(m.chat, buffer, 'imagen.jpg', '', m, null, false, { mimetype: 'image/jpeg' })
-    }
-
-    // Cualquier otro tipo de archivo
-    const buffer = await res.buffer()
-    m.react('✅')
-    return conn.sendFile(m.chat, buffer, 'archivo', '', m)
+    // Si no hay video, mostrar parte del HTML
+    return m.reply(html.slice(0, 1024) + '...')
   } catch (e) {
     console.error(e)
     m.reply(`❌ Error: ${e.message}`)
