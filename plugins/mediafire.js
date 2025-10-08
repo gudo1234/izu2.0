@@ -31,7 +31,7 @@ const mimeFromExt = ext => ({
 }[ext])
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const apiKey = 'stellar-LgIsemtM' // tu API Key Stellar
+  //const apiKey = 'stellar-LgIsemtM' // tu API Key Stellar
 
   if (!text) {
     return conn.sendMessage(m.chat, {
