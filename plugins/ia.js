@@ -70,7 +70,7 @@ Lenguaje: Español coloquial, exagerado, pero cercano.`
   }
 }
 
-handler.command = ['ia', 'chatgpt', 'gpt', 'gemini']
+handler.command = ['ia', 'chatgpt', 'gpt', 'gemini', 'bot', 'meta']
 handler.group = true
 
 export default handler
@@ -78,7 +78,7 @@ export default handler
 // 🔥 Nueva función para interactuar con la API de Stellar
 async function stellarAI(prompt) {
   try {
-    const response = await axios.get(`https://api.stellarwa.xyz/ai/chatgpt?text=${encodeURIComponent(prompt)}&apikey=stellar-LgIsemtM`)
+    const response = await axios.get(`https://api.stellarwa.xyz/ai/chatgpt?text=${encodeURIComponent(prompt)}&apikey=${apiKey}`)
     return response.data.data || response.data.result || '⚠️ No se obtuvo respuesta de la IA.'
   } catch (error) {
     console.error('⚠️ Error en Stellar API:', error?.response?.data || error.message)
