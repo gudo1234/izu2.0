@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   const username = `${conn.getName(m.sender)}`
-  const apiKey = 'stellar-LgIsemtM'
+  //const apiKey = 'stellar-LgIsemtM'
 
   if (!text) {
     return conn.sendMessage(m.chat, {
