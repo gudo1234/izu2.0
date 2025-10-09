@@ -13,7 +13,7 @@ let handler = async (m, { conn }) => {
 │ *ɢʀᴜᴘᴏs ᴜɴɪᴅᴏs:* ‹${groupsIn.length}›
 │ *ᴛɪᴇᴍᴘᴏ ᴀᴄᴛɪᴠᴏ:* ‹${uptime}›
 └────────────`
-
+m.react('🖥️')
   await conn.sendMessage(m.chat, {
     text: txt,
     footer: textbot,
