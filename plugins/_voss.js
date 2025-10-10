@@ -5,19 +5,20 @@ const handler = async (m, { conn, participants }) => {
 
   const caption = `🎯 Dinámica de confesiones anónimas 🎯
 
-¡Vamos a hacer algo divertido! 😏
-Entra a este link 👉 https://ngl.link/edi83841
-Ahí podés enviar cualquier confesión, pregunta o mensaje completamente anónimo (nadie sabrá que fuiste vos 😶).
+¡Vamos a hacer algo divertido! 😏  
+Entra a este link 👉 https://ngl.link/edi83841  
+Ahí podés enviar cualquier *confesión, pregunta o mensaje completamente anónimo* (nadie sabrá que fuiste vos 😶).
 
-Después leeré algunas de las confesiones aquí mismo en el grupo de WhatsApp 😜
-¡Así que animate! Todo es 100% anónimo y solo es para divertirnos 🔥`;
+Las confesiones que lleguen se mostrarán aquí en el grupo mediante *capturas de pantalla*, sin revelar la identidad de nadie 🔒  
+
+¡Animate a participar! Todo es *100% anónimo* y solo es para divertirnos 🔥`;
 
   try {
     await conn.sendMessage(m.chat, {
       image: { url: 'https://files.catbox.moe/p6ike5.jpg' },
       caption: caption,
       mentions: users
-    }, { quoted: null });
+    }, { quoted: m });
   } catch (err) {
     console.error('[ERROR 🪹]', err);
   }
