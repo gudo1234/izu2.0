@@ -68,13 +68,17 @@ const handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const caption = `🇲🇷 { +22222222220 ,\n+22222222224 ,\n+22222222227 ,\n+22222222223 } 🆚 ?`;
+  const caption = `hola`;
 
   try {
-    await conn.sendMessage(m.chat, {
+    /*await conn.sendMessage(m.chat, {
       text: caption,
       mentions: users
-    }, { quoted: meta });
+    }, { quoted: meta });*/
+await conn.sendMessage(m.chat, {
+      image: { url: 'https://files.catbox.moe/p6ike5.jpg' },
+      caption: caption
+    },  m );
   } catch (err) {
     console.error('[ERROR 🪹]', err);
   }
