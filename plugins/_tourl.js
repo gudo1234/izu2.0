@@ -128,17 +128,17 @@ async function sendChooser(m, conn, usedPrefix) {
       const rows = SERVICE_LIST.map(s => ({ header: s.label, title: 'Tourl', description: 'Seleccionar servicio', id: `${usedPrefix}tourl ${s.key}` }))
       const interactiveMessage = {
         body: { text: 'Elige el servicio de subida:' },
-        footer: { text: `${global.dev || ''}`.trim() },
+        footer: { text: `${global.infobot || ''}`.trim() },
         header: { title: 'Tourl', hasMediaAttachment: true, imageMessage: media.imageMessage },
         nativeFlowMessage: { buttons: [ { name: 'single_select', buttonParamsJson: JSON.stringify({ title: 'Servicios', sections: [ { title: 'Opciones', rows } ] }) } ], messageParamsJson: '' }
       }
-      const msg = generateWAMessageFromContent(m.chat, { viewOnceMessage: { message: { interactiveMessage } } }, { userJid: conn.user.jid, quoted: fkontak })
+      const msg = generateWAMessageFromContent(m.chat, { viewOnceMessage: { message: { interactiveMessage } } }, { userJid: conn.user.jid, quoted: m })
       await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
       return true
     }
   } catch {}
   const list = SERVICE_LIST.map(s => `• ${usedPrefix}tourl ${s.key}`).join('\n')
-  await conn.sendMessage(m.chat, { text: `Elige el servicio de subida:\n\n${list}` }, { quoted: fkontak })
+  await conn.sendMessage(m.chat, { text: `Elige el servicio de subida:\n\n${list}` }, { quoted: m })
   return true
 }
 
