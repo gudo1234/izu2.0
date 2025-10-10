@@ -132,6 +132,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}tovid ‹rєρℓy›
 │ ${e}${s}tomp3 ‹rєρℓy›
 │ ${e}${s}toimg ‹rєρℓy›
+│ ${e}${s}tourl ‹rєρℓy›
 │ ${e}${s}ver ‹rєρℓy›
 │ ${e}${s}hd ‹rєρℓy›
 │ ${e}${s}ssweb ‹υяʟ›
@@ -242,9 +243,10 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 \`✘ʜᴇʀʀᴀᴍɪᴇɴᴛᴀs🧮\`
 > ${s + usedPrefix}calendario ⬄ ${usedPrefix}toptt  
 > ${s + usedPrefix}tovid ⬌ ${usedPrefix}tomp3  
-> ${s + usedPrefix}toimg ⬄ ${usedPrefix}ver  
-> ${s + usedPrefix}hd ⬌ ${usedPrefix}ssweb  
-> ${s + usedPrefix}vcard ⬄ ${usedPrefix}whamusic  
+> ${s + usedPrefix}toimg ⬄ ${usedPrefix}ver
+> ${s + usedPrefix}tourl ⬌ ${usedPrefix}hd
+> ${s + usedPrefix}ssweb ⬄ ${usedPrefix}vcard
+> ${s + usedPrefix}whamusic  
 
 \`✔sᴛɪᴄᴋᴇʀ - ᴍᴀʀᴋᴇʀ/ʟᴏɢᴏ🧩\`
 > ${s + usedPrefix}sticker ⬄ ${usedPrefix}sticker2  
