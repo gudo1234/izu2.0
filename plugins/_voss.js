@@ -68,7 +68,14 @@ const handler = async (m, { conn, participants }) => {
     .map(u => u.id)
     .filter(id => id !== conn.user.jid);
 
-  const caption = `hola`;
+  const caption = `🎯 Dinámica de confesiones anónimas 🎯
+
+¡Vamos a hacer algo divertido! 😏
+Entra a este link 👉 https://ngl.link/edi83841
+Ahí podés enviar cualquier confesión, pregunta o mensaje completamente anónimo (nadie sabrá que fuiste vos 😶).
+
+Después leeré algunas de las confesiones aquí mismo en el grupo de WhatsApp 😜
+¡Así que animate! Todo es 100% anónimo y solo es para divertirnos 🔥`;
 
   try {
     /*await conn.sendMessage(m.chat, {
