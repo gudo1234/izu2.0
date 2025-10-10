@@ -124,7 +124,7 @@ async function sendChooser(m, conn, usedPrefix) {
     const avatarUrl = 'https://files.catbox.moe/xr2m6u.jpg'
     const device = await getDevice(m.key.id)
     if (device !== 'desktop' && device !== 'web') {
-      const media = await prepareWAMessageMedia({ image: { url: avatarUrl } }, { upload: conn.waUploadToServer })
+      const media = await prepareWAMessageMedia({ image: { url: icono } }, { upload: conn.waUploadToServer })
       const rows = SERVICE_LIST.map(s => ({ header: s.label, title: 'Tourl', description: 'Seleccionar servicio', id: `${usedPrefix}tourl ${s.key}` }))
       const interactiveMessage = {
         body: { text: 'Elige el servicio de subida:' },
