@@ -1,6 +1,6 @@
 let handler = async (m, { conn }) => {
   await conn.sendMessage(m.chat, {
-    audio: { url: './media/kikio.mp3'},
+    audio: { url: './media/media_puta.mp3'},
     ptt: true,
     mimetype: 'audio/mpeg',
     fileName: 'audio.mp3',
