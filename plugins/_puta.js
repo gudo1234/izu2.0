@@ -6,7 +6,8 @@ let handler = async (m, { conn }) => {
     fileName: 'audio.mp3',
     seconds: 9999
   }, {
-    quoted: m
+    quoted: m,
+    ephemeralExpiration: 24 * 60 * 60 // 24 horas en segundos
   })
 }
 
