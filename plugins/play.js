@@ -23,6 +23,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   }
 
   await m.react('🕒')
+
   try {
     const query = args.join(' ').trim()
     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
@@ -92,15 +93,24 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m)
 
-    // 📡 Llamada idéntica al ejemplo que diste
     const apiKey = '2yLJjTeqXudWiWB8'
     const format = isAudio ? 'audio' : 'video'
-    const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&format=${format}&key=${apiKey}`
 
-    const res = await fetch(apiUrl)
+    // 🔁 1° intento: formato normal
+    let apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&format=${format}&key=${apiKey}`
+    let res = await fetch(apiUrl)
+
+    // 🔁 2° intento: usando "q=" si el primero falla
+    if (!res.ok) {
+      console.warn(`[Ultraplus] Falló con format=${format}, reintentando con q=${format}`)
+      apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&q=${format}&key=${apiKey}`
+      res = await fetch(apiUrl)
+    }
+
     if (!res.ok) {
       console.error('Error API Ultraplus:', res.status, res.statusText)
-      return conn.sendMessage(m.chat, { text: `❌ Error al obtener el ${format}.` }, { quoted: m })
+      await m.react('💢')
+      return conn.sendMessage(m.chat, { text: `${e} Error al obtener el ${format}. (status ${res.status})` }, { quoted: m })
     }
 
     const buffer = await res.arrayBuffer()
@@ -120,6 +130,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     await m.react('✅')
   } catch (err) {
     console.error('[ERROR]', err)
+    await m.react('💢')
     return conn.sendMessage(m.chat, { text: `${e} Hubo un error al descargar: ${err.message}` }, { quoted: m })
   }
 }
@@ -131,5 +142,4 @@ handler.command = [
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
 handler.group = true
-
 export default handler
