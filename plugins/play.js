@@ -1,32 +1,58 @@
 import axios from 'axios'
 
-let handler = async (m, { conn, text }) => {
-  if (!text) return m.reply('🚫 Ingresa un enlace de YouTube válido.')
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  const username = conn.getName(m.sender)
+
+  if (!text) {
+    return conn.sendMessage(m.chat, {
+      text: `🎵 Hola *${username}*, necesito el enlace de YouTube.\n\nEjemplo:\n*${usedPrefix + command} https://youtube.com/watch?v=UWV41yEiGq0*`
+    }, { quoted: m })
+  }
 
   try {
-    const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(text)}&type=audio&key=2yLJjTeqXudWiWB8`
+    m.react('⏳')
 
-    const { data } = await axios.get(apiUrl)
-    if (!data || !data.status) throw new Error('Sin datos válidos en la API')
+    // 🔗 Petición a la API ultraplus
+    const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(text)}&key=2yLJjTeqXudWiWB8`
 
-    const dlUrl = data.result?.url || data.url || null
-    if (!dlUrl) throw new Error('No se obtuvo enlace de descarga')
+    const response = await axios.get(apiUrl)
+    const result = response.data
+
+    // La API devuelve una estructura, pero el audio directo está en `result.audio` o `result.url`
+    const audioUrl = result.audio || result.url || result.result || result.data?.audio
+
+    if (!audioUrl) throw new Error('No se encontró el enlace de audio.')
+
+    const caption = `🎧 *Descargado desde YouTube*\n\n📌 *Título:* ${result.title || 'Desconocido'}\n⏱️ *Duración:* ${result.duration || 'N/A'}\n\n> Enviado por ${conn.user.name}`
 
     await conn.sendMessage(m.chat, {
-      audio: { url: dlUrl },
-      mimetype: 'audio/mp4',
-      ptt: true
+      audio: { url: audioUrl },
+      mimetype: 'audio/mpeg',
+      fileName: `${result.title || 'audio'}.mp3`,
+      contextInfo: {
+        externalAdReply: {
+          title: result.title || 'Audio de YouTube',
+          body: 'Descargado con UltraPlus API',
+          thumbnailUrl: result.thumbnail || '',
+          sourceUrl: text,
+          mediaType: 2,
+          showAdAttribution: true
+        }
+      }
     }, { quoted: m })
 
-    await m.react('✅')
-  } catch (e) {
-    console.error(e.response?.data || e.message)
-    m.reply(`❌ Error inesperado: ${e.response?.status || e.message}`)
+    m.react('✅')
+
+  } catch (err) {
+    console.error(err)
+    m.react('❌')
+    await conn.sendMessage(m.chat, {
+      text: `❌ *Error al obtener el audio:*\n${err.message}`
+    }, { quoted: m })
   }
 }
 
-handler.help = ['ytptt']
-handler.tags = ['downloader']
-handler.command = ['play']
+handler.command = ['play', 'ytmp3', 'audio']
+handler.group = true
 
 export default handler
