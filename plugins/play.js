@@ -78,43 +78,44 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const caption = `
 ╭───── • ─────╮
-𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
+𖤐 YOUTUBE EXTRACTOR 𖤐
 ╰───── • ─────╯
 
-✦ 🎵 *Título:* ${title || 'Desconocido'}
-✦ 📺 *Canal:* ${author?.name || 'Desconocido'}
-✦ ⏱️ *Duración:* ${timestamp || 'N/A'}
-✦ 👀 *Vistas:* ${views?.toLocaleString() || 'N/A'}
-✦ 📅 *Publicado:* ${ago || 'N/A'}
-✦ 🔗 *Link:* ${url}
+✦ 🎵 Título: ${title || 'Desconocido'}
+✦ 📺 Canal: ${author?.name || 'Desconocido'}
+✦ ⏱️ Duración: ${timestamp || 'N/A'}
+✦ 👀 Vistas: ${views?.toLocaleString() || 'N/A'}
+✦ 📅 Publicado: ${ago || 'N/A'}
+✦ 🔗 Link: ${url}
 
-> 🕒 Se está preparando el *${tipoArchivo}*...${
-  durationMinutes > 20 && !docAudioCommands.includes(command) && !docVideoCommands.includes(command)
-    ? `\n\n⚠️ *Se enviará como documento por superar los 20 minutos.*`
-    : ''
-}
+> 🕒 Se está preparando el ${tipoArchivo}...${
+      durationMinutes > 20 &&
+      !docAudioCommands.includes(command) &&
+      !docVideoCommands.includes(command)
+        ? `\n\n⚠️ *Se enviará como documento por superar los 20 minutos.*`
+        : ''
+    }
 `.trim();
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
 
-    const mediaType = isAudio ? 'audio' : 'video';
-    const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}=${mediaType}&key=${apiKey}`;
+    // 📦 URL directa del archivo usando la API UltraPlus
+    const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(
+      url
+    )}=${isAudio ? 'audio' : 'video'}&key=${apiKey}`;
 
-    const res = await axios.get(apiUrl);
-    const data = res.data;
+    // Solo comprobamos que la URL responde (sin parsear JSON)
+    const res = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+    if (!res || res.status !== 200)
+      return m.reply('❌ No se pudo obtener el archivo desde UltraPlus.');
 
-    if (!data || !data.result || !data.result.url) {
-      return m.reply('❌ No se pudo obtener el enlace de descarga desde la API.');
-    }
-
-    const downloadUrl = data.result.url;
-    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
     const fileName = `${title}.${isAudio ? 'mp3' : 'mp4'}`;
+    const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
 
     await conn.sendMessage(
       m.chat,
       {
-        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: downloadUrl },
+        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: res.data,
         mimetype,
         fileName,
       },
@@ -124,16 +125,28 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     await m.react('✅');
   } catch (err) {
     console.error('[ERROR]', err);
-    return m.reply(`⚠️ Error inesperado: ${err.message || err}`);
+    return m.reply(`❌ Error inesperado: ${err.message || err}`);
   }
 };
 
 handler.command = [
-  'play', 'yta', 'mp3', 'ytmp3',
-  'play3', 'ytadoc', 'mp3doc', 'ytmp3doc',
-  'play2', 'ytv', 'mp4', 'ytmp4',
-  'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
+  'play',
+  'yta',
+  'mp3',
+  'ytmp3',
+  'play3',
+  'ytadoc',
+  'mp3doc',
+  'ytmp3doc',
+  'play2',
+  'ytv',
+  'mp4',
+  'ytmp4',
+  'play4',
+  'ytvdoc',
+  'mp4doc',
+  'ytmp4doc',
 ];
-
 handler.group = true;
+
 export default handler;
