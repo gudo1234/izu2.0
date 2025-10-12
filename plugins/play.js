@@ -1,19 +1,18 @@
-import fetch from 'node-fetch'
+import axios from 'axios'
 
 let handler = async (m, { conn, text }) => {
   if (!text) return m.reply('🚫 Ingresa un enlace de YouTube válido.')
 
   try {
     let apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(text)}&key=2yLJjTeqXudWiWB8`
+    let { status } = await axios.get(apiUrl)
 
-    let res = await fetch(apiUrl)
-    if (!res.ok) throw new Error(`Error HTTP ${res.status}`)
+    if (status !== 200) throw new Error(`Error HTTP ${status}`)
 
-    // Devuelve directamente el audio
     await conn.sendMessage(m.chat, {
       audio: { url: apiUrl },
       mimetype: 'audio/mp4',
-      ptt: true  // nota de voz
+      ptt: true // nota de voz
     }, { quoted: m })
 
   } catch (e) {
@@ -22,6 +21,8 @@ let handler = async (m, { conn, text }) => {
   }
 }
 
+handler.help = ['ytptt']
+handler.tags = ['downloader']
 handler.command = ['play']
 
 export default handler
