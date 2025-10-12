@@ -1,25 +1,23 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
-import axios from 'axios'
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
   const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
   const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3']
   const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4']
-
   const e = '❌'
 
   if (!text) {
     let ejemplo = ''
     if (normalAudioCommands.includes(command)) {
-      ejemplo = `🎵 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el audio._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
+      ejemplo = `🎵 _Ingrese texto o enlace de YouTube para descargar el audio._\n\n🔎 Ejemplo:\n${usedPrefix + command} diles\n${usedPrefix + command} https://youtube.com/watch?v=E0hGQ4tEJhI`
     } else if (docAudioCommands.includes(command)) {
-      ejemplo = `📄 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el audio en documento._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
+      ejemplo = `📄 _Ingrese texto o enlace de YouTube para descargar el audio en documento._\n\n🔎 Ejemplo:\n${usedPrefix + command} diles`
     } else if (normalVideoCommands.includes(command)) {
-      ejemplo = `🎥 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el video._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
+      ejemplo = `🎥 _Ingrese texto o enlace de YouTube para descargar el video._\n\n🔎 Ejemplo:\n${usedPrefix + command} diles`
     } else if (docVideoCommands.includes(command)) {
-      ejemplo = `📄 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el video en documento._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
+      ejemplo = `📄 _Ingrese texto o enlace de YouTube para descargar el video en documento._\n\n🔎 Ejemplo:\n${usedPrefix + command} diles`
     }
     return m.reply(ejemplo)
   }
@@ -29,8 +27,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const query = args.join(' ').trim()
     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     const ytMatch = query.match(ytRegex)
-
     let video
+
     if (ytMatch) {
       const videoId = ytMatch[1]
       const ytres = await yts(`https://youtube.com/watch?v=${videoId}`)
@@ -45,8 +43,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const { title, thumbnail, timestamp, views, ago, url, author } = video
     const duration = timestamp && timestamp !== 'N/A' ? timestamp : '0:00'
 
-    function durationToSeconds(duration) {
-      const parts = duration.split(':').map(Number)
+    function durationToSeconds(d) {
+      const parts = d.split(':').map(Number)
       if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
       if (parts.length === 2) return parts[0] * 60 + parts[1]
       return 0
@@ -82,22 +80,19 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
-✦ *🎵 Título:* ${title || 'Desconocido'}
-✦ *📺 Canal:* ${author?.name || 'Desconocido'}
-✦ *⏱️ Duración:* ${timestamp || 'N/A'}
-✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
-✦ *📅 Publicado:* ${ago || 'N/A'}
+✦ *🎵 Título:* ${title}
+✦ *📺 Canal:* ${author?.name}
+✦ *⏱️ Duración:* ${timestamp}
+✦ *👀 Vistas:* ${views?.toLocaleString()}
+✦ *📅 Publicado:* ${ago}
 ✦ *🔗 Link:* ${url}
 
-> 🕒 Se está preparando el *${tipoArchivo}*...
-${durationMinutes > 20 && !docAudioCommands.includes(command) && !docVideoCommands.includes(command)
-  ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*`
-  : ''
-}
+> 🕒 Preparando *${tipoArchivo}*...
 `.trim()
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m)
 
+    // 📡 Llamada idéntica al ejemplo que diste
     const apiKey = '2yLJjTeqXudWiWB8'
     const format = isAudio ? 'audio' : 'video'
     const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&format=${format}&key=${apiKey}`
@@ -105,7 +100,7 @@ ${durationMinutes > 20 && !docAudioCommands.includes(command) && !docVideoComman
     const res = await fetch(apiUrl)
     if (!res.ok) {
       console.error('Error API Ultraplus:', res.status, res.statusText)
-      return m.reply(`${e} *Error al obtener el ${format} desde la API.*`)
+      return conn.sendMessage(m.chat, { text: `❌ Error al obtener el ${format}.` }, { quoted: m })
     }
 
     const buffer = await res.arrayBuffer()
@@ -125,7 +120,7 @@ ${durationMinutes > 20 && !docAudioCommands.includes(command) && !docVideoComman
     await m.react('✅')
   } catch (err) {
     console.error('[ERROR]', err)
-    return m.reply(`${e} Error inesperado: ${err.message || err}`)
+    return conn.sendMessage(m.chat, { text: `${e} Hubo un error al descargar: ${err.message}` }, { quoted: m })
   }
 }
 
@@ -135,6 +130,6 @@ handler.command = [
   'play2', 'ytv', 'mp4', 'ytmp4',
   'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
-
 handler.group = true
+
 export default handler
