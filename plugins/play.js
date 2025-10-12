@@ -99,8 +99,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
-    const apiUrlMain = `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
-    const apiUrlBackup = `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
+    const apiUrlMain = `https://api.stellarwa.xyz/dow/ytmp3v2?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
+    const apiUrlBackup = `https://api.stellarwa.xyz/dow/ytmp4v2?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
 
     let data;
     let usedBackup = false;
