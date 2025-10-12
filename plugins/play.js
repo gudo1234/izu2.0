@@ -2,8 +2,6 @@ import fetch from 'node-fetch';
 import yts from 'yt-search';
 import axios from 'axios';
 
-//const STELLAR_APIKEY = 'stellar-LgIsemtM';
-
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc'];
   const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
@@ -41,7 +39,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       video = ytres.videos[0];
     }
 
-    if (!video) return m.reply(`${e} No se pudo obtener información del video.`);
+    if (!video) return m.reply(`❌ No se pudo obtener información del video.`);
 
     const { title, thumbnail, timestamp, views, ago, url, author } = video;
     const duration = timestamp && timestamp !== 'N/A' ? timestamp : '0:00';
@@ -80,74 +78,53 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const caption = `
 ╭───── • ─────╮
-  𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
+𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
 ╰───── • ─────╯
 
-✦ *🎵 Título:* ${title || 'Desconocido'}
-✦ *📺 Canal:* ${author?.name || 'Desconocido'}
-✦ *⏱️ Duración:* ${timestamp || 'N/A'}
-✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
-✦ *📅 Publicado:* ${ago || 'N/A'}
-✦ *🔗 Link:* ${url}
+✦ 🎵 *Título:* ${title || 'Desconocido'}
+✦ 📺 *Canal:* ${author?.name || 'Desconocido'}
+✦ ⏱️ *Duración:* ${timestamp || 'N/A'}
+✦ 👀 *Vistas:* ${views?.toLocaleString() || 'N/A'}
+✦ 📅 *Publicado:* ${ago || 'N/A'}
+✦ 🔗 *Link:* ${url}
 
 > 🕒 Se está preparando el *${tipoArchivo}*...${
   durationMinutes > 20 && !docAudioCommands.includes(command) && !docVideoCommands.includes(command)
-    ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*`
+    ? `\n\n⚠️ *Se enviará como documento por superar los 20 minutos.*`
     : ''
 }
 `.trim();
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal);
 
-    const apiUrlMain = `https://api.stellarwa.xyz/dow/ytmp3v2?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
-    const apiUrlBackup = `https://api.stellarwa.xyz/dow/ytmp4v2?url=${encodeURIComponent(url)}&apikey=${apiKey}`;
+    const mediaType = isAudio ? 'audio' : 'video';
+    const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}=${mediaType}&key=${apiKey}`;
 
-    let data;
-    let usedBackup = false;
+    const res = await axios.get(apiUrl);
+    const data = res.data;
 
-    try {
-      const res = await axios.get(apiUrlMain);
-      data = res.data;
-      if (!data || !data.data?.dl) throw new Error('Sin enlace de descarga principal');
-    } catch (err) {
-      console.error('Error en API principal, usando respaldo...', err.response?.data || err);
-      usedBackup = true;
-      try {
-        const resBackup = await axios.get(apiUrlBackup);
-        data = resBackup.data;
-      } catch (err2) {
-        console.error('Error también en API de respaldo:', err2.response?.data || err2);
-        return m.reply(`${e} *No se pudo obtener el enlace de descarga de ninguna API.*`);
-      }
+    if (!data || !data.result || !data.result.url) {
+      return m.reply('❌ No se pudo obtener el enlace de descarga desde la API.');
     }
 
-    if (!data || !data.data?.dl) {
-      return m.reply(`${e} *No se pudo obtener el enlace de descarga.*`);
-    }
-
+    const downloadUrl = data.result.url;
     const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4';
-    const fileName = `${data.data.title || title}.${isAudio ? 'mp3' : 'mp4'}`;
+    const fileName = `${title}.${isAudio ? 'mp3' : 'mp4'}`;
 
     await conn.sendMessage(
       m.chat,
       {
-        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: data.data.dl },
+        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: downloadUrl },
         mimetype,
         fileName,
       },
       { quoted: m }
     );
 
-    // ✅ Reacción final según API usada
-    if (usedBackup) {
-      await m.react('⌛'); // Segunda API usada
-    } else {
-      await m.react('✅'); // Primera API exitosa
-    }
-
+    await m.react('✅');
   } catch (err) {
     console.error('[ERROR]', err);
-    return m.reply(`${e} Error inesperado: ${err.message || err}`);
+    return m.reply(`⚠️ Error inesperado: ${err.message || err}`);
   }
 };
 
