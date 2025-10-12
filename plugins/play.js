@@ -7,6 +7,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'];
   const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3'];
   const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4'];
+  const apiKey = '2yLJjTeqXudWiWB8';
 
   if (!text) {
     let ejemplo = '';
@@ -25,8 +26,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   await m.react('🕒');
   try {
     const query = args.join(' ').trim();
-
-    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const ytRegex =
+      /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const ytMatch = query.match(ytRegex);
 
     let video;
@@ -73,8 +74,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     if (!sendAsDocument && durationMinutes > 20) sendAsDocument = true;
 
     const tipoArchivo = isAudio
-      ? (sendAsDocument ? 'audio (documento)' : 'audio')
-      : (sendAsDocument ? 'video (documento)' : 'video');
+      ? sendAsDocument
+        ? 'audio (documento)'
+        : 'audio'
+      : sendAsDocument
+      ? 'video (documento)'
+      : 'video';
 
     const caption = `
 ╭───── • ─────╮
@@ -99,13 +104,13 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m);
 
-    // 📦 URL directa del archivo usando la API UltraPlus
+    // ✅ URL directa corregida (type=audio o type=video)
     const apiUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(
       url
-    )}=${isAudio ? 'audio' : 'video'}&key=${apiKey}`;
+    )}&type=${isAudio ? 'audio' : 'video'}&key=${apiKey}`;
 
-    // Solo comprobamos que la URL responde (sin parsear JSON)
     const res = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+
     if (!res || res.status !== 200)
       return m.reply('❌ No se pudo obtener el archivo desde UltraPlus.');
 
