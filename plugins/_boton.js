@@ -64,7 +64,7 @@ rows: [
   },
   ],
   headerType: 1,
-  viewOnce: true
+  viewOnce: false
 })
 
 }
