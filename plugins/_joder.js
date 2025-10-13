@@ -6,9 +6,9 @@ const handler = async (m, { conn, participants }) => {
   try {
     await conn.sendMessage(m.chat, {
       video: { url: 'https://files.catbox.moe/f5e14a.mp4' },
-      caption: '🤨',
+      caption: '🤨 cómo así lidel',
       mentions: users
-    }, { quoted: m });
+    }, { quoted: null });
   } catch (err) {
     console.error('[ERROR 🎬]', err);
   }
