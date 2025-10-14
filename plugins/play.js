@@ -41,21 +41,21 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     // ⚙️ Solo muestra el aviso si NO pidió documento y el video supera 20 min
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
-      ? `\n${e} Se enviará como documento por superar 20 minutos.`
+      ? `\n‣ Se enviará como documento por superar 20 minutos.`
       : ''
 
     const caption = `
 ╭──── • ────╮
   🎧 *YOUTUBE EXTRACTOR*
 ╰──── • ────╯
-🎵 *Título:* ${title}
-📺 *Canal:* ${author?.name}
-⏱️ *Duración:* ${duration}
-👀 *Vistas:* ${views?.toLocaleString()}
-📅 *Publicado:* ${ago}
-🔗 *Link:* ${url}
+> 🎵 *Título:* ${title}
+> 📺 *Canal:* ${author?.name}
+> ⏱️ *Duración:* ${duration}
+> 👀 *Vistas:* ${views?.toLocaleString()}
+> 📅 *Publicado:* ${ago}
+> 🔗 *Link:* ${url}
 
-> ⏳ Preparando ${type}...${aviso}
+⏳ _Preparando ${type}..._${aviso}
 `.trim()
 
     await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal)
