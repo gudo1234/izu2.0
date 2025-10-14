@@ -100,7 +100,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     }
 `.trim()
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m)
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal)
 
     // 🧩 API principal (video/mp4) y respaldo (audio/mp3)
     const apiMain = `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
@@ -121,7 +121,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         data = resBackup.data
       } catch (err2) {
         console.error('❌ Error también en API de respaldo:', err2.response?.data || err2)
-        return m.reply('❌ No se pudo obtener el enlace de descarga de ninguna API.')
+        return m.reply(`${e} No se pudo obtener el enlace de descarga de ninguna API.`)
       }
     }
 
@@ -130,7 +130,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const dlTitle = result?.title || title
     const dlDuration = result?.duration ? `${Math.floor(result.duration / 60)}:${(result.duration % 60).toString().padStart(2, '0')}` : timestamp
 
-    if (!dlUrl) return m.reply('❌ No se encontró el enlace de descarga.')
+    if (!dlUrl) return m.reply(`${e} No se encontró el enlace de descarga.`)
 
     const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
     const fileName = `${dlTitle}.${isAudio ? 'mp3' : 'mp4'}`
@@ -140,8 +140,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       {
         [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: dlUrl },
         mimetype,
-        fileName,
-        caption: `✅ *Descargado correctamente*\n🎵 *Título:* ${dlTitle}\n⏱️ *Duración:* ${dlDuration}`
+        fileName
       },
       { quoted: m }
     )
