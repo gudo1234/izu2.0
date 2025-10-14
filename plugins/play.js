@@ -15,7 +15,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       : normalVideo.includes(command)
       ? 'video'
       : 'video en documento'
-    return m.reply(`💡 _Ingresa texto o enlace de YouTube para descargar ${tipo}._\n\n📌 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+    return m.reply(`${e} _Ingresa texto o enlace de YouTube para descargar el ${tipo}._\n\n📌 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
   }
 
   await m.react('🕒')
@@ -39,6 +39,11 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const isAudio = [...docAudio, ...normalAudio].includes(command)
     const type = isAudio ? (sendDoc ? 'audio (doc)' : 'audio') : (sendDoc ? 'video (doc)' : 'video')
 
+    // ⚙️ Solo muestra el aviso si NO pidió documento y el video supera 20 min
+    const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
+      ? `\n${e} Se enviará como documento por superar 20 minutos.`
+      : ''
+
     const caption = `
 ╭──── • ────╮
   🎧 *YOUTUBE EXTRACTOR*
@@ -50,10 +55,10 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 📅 *Publicado:* ${ago}
 🔗 *Link:* ${url}
 
-> ⏳ Preparando ${type}...${mins > 20 ? '\n⚠️ Se enviará como documento por superar 20 minutos.' : ''}
+> ⏳ Preparando ${type}...${aviso}
 `.trim()
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m)
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal)
 
     // API principal y respaldo
     const main = `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
@@ -78,8 +83,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     await conn.sendMessage(m.chat, {
       [sendDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: data.download },
       mimetype,
-      fileName,
-      caption: `✅ *${data.title || title}*\n⏱️ Duración: ${Math.floor(data.duration / 60)}:${(data.duration % 60).toString().padStart(2, '0')}`
+      fileName
+      //caption: `✅ *${data.title || title}*\n⏱️ Duración: ${Math.floor(data.duration / 60)}:${(data.duration % 60).toString().padStart(2, '0')}`
     }, { quoted: m })
 
     await m.react(usedBackup ? '⌛' : '✅')
