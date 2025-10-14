@@ -1,154 +1,91 @@
-import fetch from 'node-fetch'
 import yts from 'yt-search'
 import axios from 'axios'
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
-  const docAudioCommands = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
-  const docVideoCommands = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
-  const normalAudioCommands = ['play', 'yta', 'mp3', 'ytmp3']
-  const normalVideoCommands = ['play2', 'ytv', 'mp4', 'ytmp4']
+  const docAudio = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
+  const docVideo = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
+  const normalAudio = ['play', 'yta', 'mp3', 'ytmp3']
+  const normalVideo = ['play2', 'ytv', 'mp4', 'ytmp4']
 
   if (!text) {
-    let ejemplo = ''
-    if (normalAudioCommands.includes(command)) {
-      ejemplo = `🎵 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el audio._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
-    } else if (docAudioCommands.includes(command)) {
-      ejemplo = `📄 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el audio en documento._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
-    } else if (normalVideoCommands.includes(command)) {
-      ejemplo = `🎥 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el video._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
-    } else if (docVideoCommands.includes(command)) {
-      ejemplo = `📄 _Asegúrese de ingresar un texto o un URL de YouTube para descargar el video en documento._\n\n🔎 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtube.com/watch?v=E0hGQ4tEJhI`
-    }
-    return m.reply(ejemplo)
+    const tipo = normalAudio.includes(command)
+      ? 'audio'
+      : docAudio.includes(command)
+      ? 'audio en documento'
+      : normalVideo.includes(command)
+      ? 'video'
+      : 'video en documento'
+    return m.reply(`💡 _Ingresa texto o enlace de YouTube para descargar ${tipo}._\n\n📌 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
   }
 
   await m.react('🕒')
+
   try {
-    const query = args.join(' ').trim()
+    const query = args.join(' ')
     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     const ytMatch = query.match(ytRegex)
+    const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
-    let video
-    if (ytMatch) {
-      const videoId = ytMatch[1]
-      const ytres = await yts(`https://youtube.com/watch?v=${videoId}`)
-      video = ytres.videos.length ? ytres.videos[0] : null
-    } else {
-      const ytres = await yts(query)
-      video = ytres.videos[0]
-    }
+    const yt = await yts(search)
+    const v = yt.videos[0]
+    if (!v) return m.reply('❌ No se encontró el video.')
 
-    if (!video) return m.reply('❌ No se pudo obtener información del video.')
+    const { title, thumbnail, timestamp, views, ago, url, author } = v
+    const duration = timestamp || '0:00'
 
-    const { title, thumbnail, timestamp, views, ago, url, author } = video
-    const duration = timestamp && timestamp !== 'N/A' ? timestamp : '0:00'
-
-    function durationToSeconds(duration) {
-      const parts = duration.split(':').map(Number)
-      if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2]
-      if (parts.length === 2) return parts[0] * 60 + parts[1]
-      return 0
-    }
-
-    const durationSeconds = durationToSeconds(duration)
-    const durationMinutes = durationSeconds / 60
-
-    let sendAsDocument = false
-    let isAudio = false
-    let isVideo = false
-
-    if (docAudioCommands.includes(command)) {
-      isAudio = true
-      sendAsDocument = true
-    } else if (docVideoCommands.includes(command)) {
-      isVideo = true
-      sendAsDocument = true
-    } else if (normalAudioCommands.includes(command)) {
-      isAudio = true
-    } else if (normalVideoCommands.includes(command)) {
-      isVideo = true
-    }
-
-    if (!sendAsDocument && durationMinutes > 20) sendAsDocument = true
-
-    const tipoArchivo = isAudio
-      ? sendAsDocument
-        ? 'audio (documento)'
-        : 'audio'
-      : sendAsDocument
-        ? 'video (documento)'
-        : 'video'
+    const toSeconds = t => t.split(':').reduce((acc, n) => acc * 60 + +n, 0)
+    const mins = toSeconds(duration) / 60
+    const sendDoc = mins > 20 || docAudio.includes(command) || docVideo.includes(command)
+    const isAudio = [...docAudio, ...normalAudio].includes(command)
+    const type = isAudio ? (sendDoc ? 'audio (doc)' : 'audio') : (sendDoc ? 'video (doc)' : 'video')
 
     const caption = `
-╭───── • ─────╮
-  𖤐 \`YOUTUBE EXTRACTOR\` 𖤐
-╰───── • ─────╯
+╭──── • ────╮
+  🎧 *YOUTUBE EXTRACTOR*
+╰──── • ────╯
+🎵 *Título:* ${title}
+📺 *Canal:* ${author?.name}
+⏱️ *Duración:* ${duration}
+👀 *Vistas:* ${views?.toLocaleString()}
+📅 *Publicado:* ${ago}
+🔗 *Link:* ${url}
 
-✦ *🎵 Título:* ${title || 'Desconocido'}
-✦ *📺 Canal:* ${author?.name || 'Desconocido'}
-✦ *⏱️ Duración:* ${timestamp || 'N/A'}
-✦ *👀 Vistas:* ${views?.toLocaleString() || 'N/A'}
-✦ *📅 Publicado:* ${ago || 'N/A'}
-✦ *🔗 Link:* ${url}
-
-> 🕒 Se está preparando el *${tipoArchivo}*...${
-      durationMinutes > 20 &&
-      !docAudioCommands.includes(command) &&
-      !docVideoCommands.includes(command)
-        ? `\n\n${e} *Se enviará como documento por superar los 20 minutos.*`
-        : ''
-    }
+> ⏳ Preparando ${type}...${mins > 20 ? '\n⚠️ Se enviará como documento por superar 20 minutos.' : ''}
 `.trim()
 
-    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m, null, rcanal)
+    await conn.sendFile(m.chat, thumbnail, 'thumb.jpg', caption, m)
 
-    // 🧩 API principal (video/mp4) y respaldo (audio/mp3)
-    const apiMain = `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
-    const apiBackup = `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
-
-    let data
-    let usedBackup = false
+    // API principal y respaldo
+    const main = `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
+    const backup = `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
+    let data, usedBackup = false
 
     try {
-      const res = await axios.get(apiMain)
-      data = res.data
-      if (!data || !data.result?.download) throw new Error('Sin enlace principal')
-    } catch (err) {
-      console.error('⚠️ Error en API principal, usando respaldo...', err.response?.data || err)
+      const res = await axios.get(main)
+      data = res.data.result
+      if (!data?.download) throw new Error('Sin enlace principal')
+    } catch {
       usedBackup = true
-      try {
-        const resBackup = await axios.get(apiBackup)
-        data = resBackup.data
-      } catch (err2) {
-        console.error('❌ Error también en API de respaldo:', err2.response?.data || err2)
-        return m.reply(`${e} No se pudo obtener el enlace de descarga de ninguna API.`)
-      }
+      const res = await axios.get(backup)
+      data = res.data.result
     }
 
-    const result = data?.result
-    const dlUrl = result?.download
-    const dlTitle = result?.title || title
-    const dlDuration = result?.duration ? `${Math.floor(result.duration / 60)}:${(result.duration % 60).toString().padStart(2, '0')}` : timestamp
+    if (!data?.download) return m.reply('❌ No se pudo obtener el enlace de descarga.')
 
-    if (!dlUrl) return m.reply(`${e} No se encontró el enlace de descarga.`)
-
+    const fileName = `${data.title || title}.${isAudio ? 'mp3' : 'mp4'}`
     const mimetype = isAudio ? 'audio/mpeg' : 'video/mp4'
-    const fileName = `${dlTitle}.${isAudio ? 'mp3' : 'mp4'}`
 
-    await conn.sendMessage(
-      m.chat,
-      {
-        [sendAsDocument ? 'document' : isAudio ? 'audio' : 'video']: { url: dlUrl },
-        mimetype,
-        fileName
-      },
-      { quoted: m }
-    )
+    await conn.sendMessage(m.chat, {
+      [sendDoc ? 'document' : isAudio ? 'audio' : 'video']: { url: data.download },
+      mimetype,
+      fileName,
+      caption: `✅ *${data.title || title}*\n⏱️ Duración: ${Math.floor(data.duration / 60)}:${(data.duration % 60).toString().padStart(2, '0')}`
+    }, { quoted: m })
 
     await m.react(usedBackup ? '⌛' : '✅')
   } catch (err) {
-    console.error('[ERROR]', err)
-    return m.reply(`❌ Error inesperado: ${err.message || err}`)
+    console.error(err)
+    m.reply(`❌ Error: ${err.message}`)
   }
 }
 
