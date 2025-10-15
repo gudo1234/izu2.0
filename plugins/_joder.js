@@ -16,7 +16,7 @@ let caption = `Ayuda el Narco✅ = 🇲🇽 *Seré un villano no un monstruo*\n\
   }
 };
 
-handler.customPrefix = /^(🚀)$/i;
+handler.customPrefix = /^(🎃)$/i;
 handler.command = new RegExp;
 handler.group = true;
 export default handler;
