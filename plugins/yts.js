@@ -6,13 +6,13 @@ let tempSearchResults = {}
 
 let handler = async (m, { conn, command, args, usedPrefix }) => {
   let text = args.join(" ")
-  if (!text) return m.reply(`${e} Por favor, ingresa una petición para buscar en Youtube.\n\n*Ejemplo:* ${usedPrefix + command} Bad Bunny`)
+  if (!text) return m.reply(`❗ Ingresa una búsqueda o enlace de YouTube.\n\n📌 Ejemplo:\n*${usedPrefix + command}* bad bunny un preview`)
   await m.react('🕓')
 
   try {
     const search = await yts(text)
     const videos = search.videos.slice(0, 20)
-    if (!videos.length) return m.reply(`${e} No se encontraron resultados.`)
+    if (!videos.length) return m.reply(`❌ No se encontraron resultados.`)
 
     let list = `╭───── • ─────╮
 ✩ \`Youtube Search\` ✩
@@ -21,24 +21,22 @@ let handler = async (m, { conn, command, args, usedPrefix }) => {
 📥 *Resultados:* ${videos.length}
 ╰───── • ─────╯
 
-📌 *¿Cómo descargar?*  
-❖ Cada resultado tiene un número (#1, #2, #3...).  
-Responde a este mensaje usando ese número para elegir qué descargar:
+📌 *Cómo descargar:*  
+Responde a este mensaje usando el número del video:
 
-━━━━━━━━━━━━━
-✑ \`a 1\` o \`audio 1\` → Audio
-✑ \`v 1\` o \`video 1\` → Video
-⁌ \`d 1 a\` o \`documento 1 audio\` → Documento de Audio
-⁌ \`d 1 v\` o \`documento 1 video\` → Documento de Video
-━━━━━━━━━━━━━`
+──────────────────
+✦ \`a 1\` o \`audio 1\` → Descargar audio  
+✦ \`v 1\` o \`video 1\` → Descargar video  
+✦ \`d 1 a\` o \`documento 1 audio\` → Audio en documento  
+✦ \`d 1 v\` o \`documento 1 video\` → Video en documento  
+──────────────────`
 
     for (let i = 0; i < videos.length; i++) {
-      let vid = videos[i]
-      list += `\n\n*#${i + 1}.* _${vid.title}_
-⌚ ${vid.timestamp} | ${vid.ago}
-👤 ${vid.author.name}
-🔗 ${vid.url}
-_______________`
+      let v = videos[i]
+      list += `\n\n*#${i + 1}.* _${v.title}_
+⌚ ${v.timestamp} | ${v.ago}
+👤 ${v.author.name}
+🔗 ${v.url}`
     }
 
     const thumb = await (await fetch(videos[0].thumbnail)).buffer()
@@ -46,33 +44,28 @@ _______________`
       text: list,
       contextInfo: {
         externalAdReply: {
-          title: wm,
-          body: textbot,
-          thumbnailUrl: redes,
+          title: 'YouTube Searcher',
+          body: 'Elige qué descargar respondiendo con el número',
           thumbnail: thumb,
-          sourceUrl: redes,
+          sourceUrl: videos[0].url,
           mediaType: 1,
           renderLargerThumbnail: true
         }
       }
     }, { quoted: m })
 
-    tempSearchResults[sentMsg.key.id] = {
-      videos,
-      _msg: sentMsg
-    }
-
+    tempSearchResults[sentMsg.key.id] = { videos, _msg: sentMsg }
     await m.react('✅')
   } catch (e) {
     console.error(e)
-    await m.reply(`Error en la búsqueda:\n${e.message}`)
+    await m.reply(`❌ Error en la búsqueda:\n${e.message}`)
     await m.react('❌')
   }
 }
 
+// Maneja las respuestas
 handler.before = async (m, { conn }) => {
   if (!m.quoted || !m.quoted.id) return
-
   const data = tempSearchResults[m.quoted.id]
   if (!data) return
 
@@ -88,11 +81,11 @@ handler.before = async (m, { conn }) => {
   if (!videos || !videos[index]) return m.reply('❌ Número inválido.')
 
   const video = videos[index]
-  const url = video.url
-  const title = video.title
-  const durationSeconds = video.seconds
-  const quotedMsg = data._msg || m.quoted
+  const { title, timestamp, views, ago, url, author } = video
+  const duration = timestamp || '0:00'
 
+  const toSeconds = t => t.split(':').reduce((acc, n) => acc * 60 + +n, 0)
+  const mins = toSeconds(duration) / 60
   let format = 'audio'
   let asDocument = false
 
@@ -104,49 +97,47 @@ handler.before = async (m, { conn }) => {
     if (['audio', 'a'].includes(type2)) format = 'audio'
   }
 
+  // si supera 20 minutos => documento
+  if (!asDocument && mins > 20) asDocument = true
+
+  const typeDesc = format === 'audio' ? (asDocument ? 'audio (doc)' : 'audio') : (asDocument ? 'video (doc)' : 'video')
+  const aviso = !asDocument && mins > 20 ? '\n‣ Se enviará como documento por superar 20 minutos.' : ''
+
+  // 💬 Mensaje previo (en lugar del sendFile)
+  await conn.reply(
+    m.chat,
+    `🎵 *${title}*\n⏱️ Duración: ${duration}\n\n⏳ _Preparando ${typeDesc}..._${aviso}`,
+    m,
+    { quoted: data._msg }
+  )
+
+  // API según formato
+  const main = `https://www.sankavollerei.com/download/${format === 'audio' ? 'ytmp3' : 'ytmp4'}?apikey=planaai&url=${encodeURIComponent(url)}`
+  const backup = `https://www.sankavollerei.com/download/${format === 'audio' ? 'ytmp4' : 'ytmp3'}?apikey=planaai&url=${encodeURIComponent(url)}`
+  let dataRes, usedBackup = false
+
   try {
-    // Checar tamaño del archivo
-    let sizeMB = 0
-    if (format === 'audio') {
-      const res = await axios.get(`https://api.vreden.my.id/api/ytmp3?url=${url}`)
-      const download = res?.data?.result?.download?.url
-      const sizeBytes = res?.data?.result?.download?.size
-      if (!download) throw new Error('No se pudo obtener el audio.')
-      sizeMB = parseFloat(sizeBytes || 0) / (1024 * 1024)
-      if (!asDocument && (sizeMB >= 100 || durationSeconds > 900)) asDocument = true
-
-      await conn.sendMessage(m.chat, {
-        text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : 'audio'}...`,
-      }, { quoted: quotedMsg })
-
-      await conn.sendMessage(m.chat, {
-        [asDocument ? 'document' : 'audio']: { url: download },
-        fileName: `${title}.mp3`,
-        mimetype: 'audio/mpeg'
-      }, { quoted: m })
-    } else {
-      const res = await axios.get(`https://api.neoxr.eu/api/youtube?url=${url}&type=video&quality=360p&apikey=GataDios`)
-      const download = res?.data?.data?.url
-      const sizeBytes = res?.data?.data?.size
-      if (!download) throw new Error('No se pudo obtener el video.')
-      sizeMB = parseFloat(sizeBytes || 0) / (1024 * 1024)
-      if (!asDocument && (sizeMB >= 100 || durationSeconds > 900)) asDocument = true
-
-      await conn.sendMessage(m.chat, {
-        text: `Enviando ✑ *${title}* como ${asDocument ? 'documento' : 'video'}...`,
-      }, { quoted: quotedMsg })
-
-      await conn.sendMessage(m.chat, {
-        [asDocument ? 'document' : 'video']: { url: download },
-        fileName: `${title}.mp4`,
-        mimetype: 'video/mp4'
-      }, { quoted: m })
-    }
-
-  } catch (e) {
-    console.error(e)
-    m.reply(`${e} Error en la descarga:\n${e.message}`)
+    const res = await axios.get(main)
+    dataRes = res.data.result
+    if (!dataRes?.download) throw new Error('Sin enlace principal')
+  } catch {
+    usedBackup = true
+    const res = await axios.get(backup)
+    dataRes = res.data.result
   }
+
+  if (!dataRes?.download) return m.reply('❌ No se pudo obtener el enlace de descarga.')
+
+  const fileName = `${dataRes.title || title}.${format === 'audio' ? 'mp3' : 'mp4'}`
+  const mimetype = format === 'audio' ? 'audio/mpeg' : 'video/mp4'
+
+  await conn.sendMessage(m.chat, {
+    [asDocument ? 'document' : format]: { url: dataRes.download },
+    mimetype,
+    fileName
+  }, { quoted: m })
+
+  await m.react(usedBackup ? '⌛' : '✅')
 }
 
 handler.command = ['yts', 'ytsearch']
