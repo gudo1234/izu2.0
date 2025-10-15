@@ -104,6 +104,7 @@ handler.before = async (m, { conn }) => {
   const aviso = !asDocument && mins > 20 ? '\n‣ Se enviará como documento por superar 20 minutos.' : ''
 
   // 💬 Mensaje previo (en lugar del sendFile)
+  m.react('🕒')
   await conn.reply(
     m.chat,
     `🎵 *${title}*\n⏱️ Duración: ${duration}\n\n⏳ _Preparando ${typeDesc}..._${aviso}`,
