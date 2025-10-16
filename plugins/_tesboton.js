@@ -15,8 +15,8 @@ export async function before(m, { conn, args, usedPrefix, command }) {
     let vn = './media/prueba4.mp3'
     let vn2 = './media/prueba3.mp3'
     let user = global.db.data.users[m.sender]
-    if (new Date() - user.pc < 105000) return
-
+    //if (new Date() - user.pc < 105000) return
+if (new Date() - user.pc < 21600000) return
     const { imageMessage } = await prepareWAMessageMedia({
         image: { url: icono }
     }, { upload: conn.waUploadToServer });
