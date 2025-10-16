@@ -1,220 +1,127 @@
-import fetch, { FormData, Blob } from 'node-fetch'
+import fetch from 'node-fetch'
 import crypto from 'crypto'
 import { fileTypeFromBuffer } from 'file-type'
-import { prepareWAMessageMedia, generateWAMessageFromContent, getDevice } from '@whiskeysockets/baileys'
 
-const UPLOAD_ENDPOINT = 'https://upload-g923.onrender.com/upload'
+const CATBOX_ENDPOINT = 'https://catbox.moe/user/api.php'
+const KIRITO_ENDPOINT = 'https://upload-g923.onrender.com/upload'
 
+// 📏 Función para mostrar tamaño
 function formatBytes(bytes) {
   if (!Number.isFinite(bytes)) return '0 B'
-  if (bytes === 0) return '0 B'
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / (1024 ** i)).toFixed(2)} ${sizes[i]}`
+  const units = ['B', 'KB', 'MB', 'GB']
+  let i = 0
+  while (bytes >= 1024 && i < units.length - 1) {
+    bytes /= 1024
+    i++
+  }
+  return `${bytes.toFixed(2)} ${units[i]}`
 }
 
-async function uploadToKirito(buffer, opts = {}) {
-  const typeInfo = await fileTypeFromBuffer(buffer).catch(() => null) || {}
-  const ext = (opts.ext || typeInfo.ext || 'bin').toLowerCase()
-  const mime = (opts.mime || typeInfo.mime || 'application/octet-stream').toLowerCase()
-  const fileName = opts.name || `${crypto.randomBytes(6).toString('hex')}.${ext}`
-  const folder = mime.startsWith('image/') ? 'images' : 'files'
-  const base64Image = Buffer.from(buffer).toString('base64')
-  const base64Data = `data:${mime};base64,${base64Image}`
+// 📤 Subida a Catbox
+async function uploadToCatbox(buffer) {
+  const formData = new FormData()
+  formData.append('reqtype', 'fileupload')
+  formData.append('fileToUpload', new Blob([buffer]))
+  const res = await fetch(CATBOX_ENDPOINT, { method: 'POST', body: formData })
+  if (!res.ok) throw new Error('Fallo al subir a Catbox')
+  const url = await res.text()
+  return { url: url.trim() }
+}
 
-  const res = await fetch(UPLOAD_ENDPOINT, {
+// 📤 Subida a Kirito
+async function uploadToKirito(buffer) {
+  const hash = crypto.createHash('md5').update(buffer).digest('hex')
+  const fileType = await fileTypeFromBuffer(buffer)
+  const res = await fetch(KIRITO_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': 'Mozilla/5.0',
-      'Accept': 'application/json, text/plain, */*'
-    },
-    body: JSON.stringify({ name: fileName, folder, file: base64Data })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      file: buffer.toString('base64'),
+      filename: `${hash}.${fileType?.ext || 'bin'}`
+    })
   })
-
-  const contentType = res.headers.get('content-type') || ''
-  if (/application\/json/i.test(contentType)) {
-    const data = await res.json().catch(() => ({}))
-    if (res.ok) return { ok: true, url: data.url || data.link || data.download_url || null }
-    return { ok: false, status: res.status, data }
-  } else {
-    const text = await res.text()
-    const urlMatch = text.match(/(https?:\/\/[^\s"']+)/)
-    return res.ok ? { ok: true, url: urlMatch ? urlMatch[0] : null } : { ok: false, raw: text }
-  }
+  const json = await res.json()
+  if (!json || !json.url) throw new Error('Fallo al subir a Kirito')
+  return { url: json.url }
 }
 
-async function uploadCatbox(buffer, ext, mime) {
-  const form = new FormData()
-  form.append('reqtype', 'fileupload')
-  const randomBytes = crypto.randomBytes(5).toString('hex')
-  form.append('fileToUpload', new Blob([buffer], { type: mime || 'application/octet-stream' }), `${randomBytes}.${ext || 'bin'}`)
-  const res = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: form })
-  return (await res.text()).trim()
-}
+// 🧠 Comando principal
+const handler = async (m, { conn, text, command }) => {
+  const q = m.quoted || m
+  const mime = (q.msg || q).mimetype || q.mtype || ''
+  if (!/image|video|gif/i.test(mime))
+    return m.reply('Responde a un archivo multimedia primero.')
 
-async function uploadServiceByName(name, buffer, ext, mime) {
-  switch (name.toLowerCase()) {
-    case 'catbox':
-      return await uploadCatbox(buffer, ext, mime)
-    case 'kirito': {
-      const result = await uploadToKirito(buffer, { ext, mime })
-      if (result.ok && result.url) return result.url
-      throw new Error('Error en Kirito upload')
-    }
-    default:
-      throw new Error('Servicio no soportado')
-  }
-}
+  const media = await q.download?.() || await conn.downloadMediaMessage(q)
+  if (!media) return m.reply('No pude descargar el archivo.')
 
-const SERVICE_LIST = [
-  { key: 'catbox', label: 'Catbox 🧰' },
-  { key: 'kirito', label: 'Kirito ⚔️' }
-]
+  const selected = (text || '').trim().toLowerCase()
 
-const tourSessions = new Map()
-
-async function makeFkontak() {
-  try {
-    const res = await fetch('https://i.postimg.cc/rFfVL8Ps/image.jpg')
-    const thumb2 = Buffer.from(await res.arrayBuffer())
-    return {
-      key: { participants: '0@s.whatsapp.net', remoteJid: 'status@broadcast', fromMe: false, id: 'Halo' },
-      message: { locationMessage: { name: 'Tourl', jpegThumbnail: thumb2 } },
-      participant: '0@s.whatsapp.net'
-    }
-  } catch {
-    return null
-  }
-}
-
-async function sendChooser(m, conn, usedPrefix) {
-  let fkontak = await makeFkontak()
-  if (!fkontak) fkontak = m
-  try {
-    const media = await prepareWAMessageMedia({ image: { url: 'https://files.catbox.moe/xr2m6u.jpg' } }, { upload: conn.waUploadToServer })
-    const rows = SERVICE_LIST.map(s => ({
-      header: s.label,
-      title: 'Tourl',
-      description: 'Seleccionar servicio',
-      id: `${usedPrefix}tourl ${s.key}`
-    }))
-    const interactiveMessage = {
-      body: { text: 'Elige el servicio de subida:' },
-      footer: { text: 'Solo Catbox o Kirito disponibles' },
-      header: { title: 'Subir archivo', hasMediaAttachment: true, imageMessage: media.imageMessage },
+  // ⚙️ Si no elige servicio, mostramos el menú interactivo
+  if (!selected) {
+    const msg = {
+      body: {
+        text: '📤 *Subir archivo*\n\nElige el servicio de subida:\nSolo *Catbox* o *Kirito* disponibles'
+      },
+      footer: { text: 'Uploader bot' },
+      header: {
+        title: 'Seleccionar servicio',
+        hasMediaAttachment: false
+      },
       nativeFlowMessage: {
         buttons: [
           {
-            name: 'single_select',
-            buttonParamsJson: JSON.stringify({ title: 'Servicios', sections: [{ title: 'Opciones disponibles', rows }] })
+            name: 'cta_reply',
+            buttonParamsJson: JSON.stringify({
+              display_text: 'Catbox',
+              id: `.tourl catbox`
+            })
+          },
+          {
+            name: 'cta_reply',
+            buttonParamsJson: JSON.stringify({
+              display_text: 'Kirito',
+              id: `.tourl kirito`
+            })
           }
-        ],
-        messageParamsJson: ''
+        ]
       }
     }
-    const msg = generateWAMessageFromContent(
-      m.chat,
-      { viewOnceMessage: { message: { interactiveMessage } } },
-      { userJid: conn.user.jid, quoted: m }
-    )
-    await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
-  } catch {
-    const list = SERVICE_LIST.map(s => `• ${usedPrefix}tourl ${s.key}`).join('\n')
-    await conn.reply(m.chat, `Elige el servicio de subida:\n\n${list}`, m)
-  }
-  return true
-}
 
-async function doUpload(m, conn, serviceKey) {
-  const sessKey = m.chat + ':' + m.sender
-  let fromCache = tourSessions.get(sessKey)
-  let buffer, mime
-  if (fromCache?.buffer) {
-    buffer = fromCache.buffer
-    mime = fromCache.mime
-  } else {
-    const q = m.quoted ? (m.quoted.msg || m.quoted) : m
-    mime = (q.mimetype || q.mediaType || q.mtype || '').toString().toLowerCase()
-    if (!/image|video|audio|sticker|document/.test(mime))
-      return conn.reply(m.chat, 'Responde a un archivo multimedia primero.', m)
-    buffer = await q.download()
+    await conn.sendMessage(m.chat, { interactiveMessage: msg }, { quoted: m })
+    return
   }
 
-  if (!buffer) return conn.reply(m.chat, 'No se pudo obtener el archivo.', m)
-  const size = formatBytes(buffer.length)
-  const typeInfo = await fileTypeFromBuffer(buffer) || {}
-  const { ext, mime: realMime } = typeInfo
-
-  let url
   try {
-    url = await uploadServiceByName(serviceKey, buffer, ext, realMime)
-  } catch (e) {
-    return conn.reply(m.chat, `❌ Error: ${e.message}`, m)
-  }
-
-  if (!url) return conn.reply(m.chat, 'No se obtuvo ninguna URL.', m)
-
-  const caption = `✅ *Subida completada*\n\n📂 *Servicio:* ${serviceKey}\n📎 *Enlace:* ${url}\n📏 *Tamaño:* ${size}`
-
-  const buttons = [{ name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copiar enlace', copy_code: url }) }]
-  const interactiveMessage = {
-    body: { text: caption },
-    footer: { text: 'Uploader bot' },
-    header: { title: 'Resultado', hasMediaAttachment: false },
-    nativeFlowMessage: { buttons, messageParamsJson: '' }
-  }
-
-  const msg = generateWAMessageFromContent(
-    m.chat,
-    { viewOnceMessage: { message: { interactiveMessage } } },
-    { userJid: conn.user.jid, quoted: m }
-  )
-  await conn.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
-  tourSessions.delete(sessKey)
-  return true
-}
-
-let handler = async (m, { conn, args, usedPrefix }) => {
-  const service = (args[0] || '').toLowerCase()
-  if (!service) {
-    const q = m.quoted ? (m.quoted.msg || m.quoted) : m
-    const mime = (q.mimetype || q.mediaType || q.mtype || '').toString().toLowerCase()
-    if (!/image|video|audio|sticker|document/.test(mime))
-      return conn.reply(m.chat, 'Responde a un archivo multimedia primero.', m)
-    const buffer = await q.download()
-    if (!buffer) return conn.reply(m.chat, 'No se pudo obtener el archivo.', m)
-    const sessKey = m.chat + ':' + m.sender
-    tourSessions.set(sessKey, { buffer, mime })
-    return sendChooser(m, conn, usedPrefix)
-  }
-  return doUpload(m, conn, service)
-}
-
-handler.command = ['tourl', 'upload']
-handler.group = true
-
-handler.before = async function (m, { conn }) {
-  try {
-    const msg = m.message || {}
-    let selectedId = null
-    const irm = msg.interactiveResponseMessage
-    if (irm?.nativeFlowResponseMessage) {
-      const params = JSON.parse(irm.nativeFlowResponseMessage.paramsJson || '{}')
-      selectedId = params.id || params.selectedId || params.rowId || null
+    let res
+    if (selected === 'catbox') {
+      res = await uploadToCatbox(media)
+    } else if (selected === 'kirito') {
+      res = await uploadToKirito(media)
+    } else {
+      return m.reply('⚠️ Servicio no válido. Usa: catbox o kirito.')
     }
-    const lrm = msg.listResponseMessage
-    if (!selectedId && lrm?.singleSelectReply?.selectedRowId)
-      selectedId = lrm.singleSelectReply.selectedRowId
-    const brm = msg.buttonsResponseMessage
-    if (!selectedId && brm?.selectedButtonId)
-      selectedId = brm.selectedButtonId
 
-    if (!selectedId) return false
-    const match = /\btourl\b\s+(catbox|kirito)/i.exec(selectedId)
-    if (match) return doUpload(m, conn, match[1])
-  } catch {}
-  return false
+    const resultText = `
+✅ *Subida completada*
+
+📁 *Servicio:* ${selected}
+🔗 *Enlace:* ${res.url}
+📏 *Tamaño:* ${formatBytes(media.length)}
+
+_Uploader bot_
+    `.trim()
+
+    await conn.sendMessage(m.chat, { text: resultText }, { quoted: m })
+    return
+  } catch (err) {
+    console.error(err)
+    m.reply('❌ Error al subir el archivo.')
+  }
 }
+
+handler.command = ['tourl']
+handler.help = ['tourl']
+handler.tags = ['tools']
 
 export default handler
