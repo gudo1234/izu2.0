@@ -1,7 +1,7 @@
 let handler = async (m, { conn, args, usedPrefix, command }) => {
 m.react('🌟')
 conn.sendMessage(m.chat, {
- image: img.getRandom(),
+ image: icono,
  caption: `${e} que pasa hermosa`,
 footer: wm,
  contextInfo: {
