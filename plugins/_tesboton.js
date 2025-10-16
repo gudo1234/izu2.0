@@ -11,8 +11,8 @@ if (m.isBaileys && m.fromMe)
     if (!m.message)
        return !0
 if (m.chat === '120363395205399025@newsletter') return !0
-let vn = './media/prueba3.mp3'
-let vn2 = './media/prueba4.mp3'
+let vn = './media/prueba4.mp3'
+let vn2 = './media/prueba3.mp3'
 let user = global.db.data.users[m.sender]
 if (new Date() - user.pc < 105000) return
 const { imageMessage } = await prepareWAMessageMedia({
@@ -86,6 +86,7 @@ await m.reply(`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desar
 ╭︶︶︶︶︶🌐︶︶︶︶︶╮
 *Síguenos en nuestro canal*
 *y mantente informado....*
+https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H
 ╰︶︶︶︶︶🎉︶︶︶︶︶╯`)
 await conn.relayMessage(m.chat, { viewOnceMessage: { message} }, {});
 conn.sendFile(m.chat, [vn, vn2].getRandom(), 'prueba3.mp3', null, null, true, { 
