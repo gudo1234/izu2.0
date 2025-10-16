@@ -13,9 +13,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         const caption = res.caption ? res.caption : `${e} _Video de Twitter, "X"_`;
 
         if (res?.type === 'video') {
-            await conn.sendMessage(m.chat, { video: { url: res.media[0].url }, caption: caption }, { quoted: m });
+            await conn.sendMessage(m.chat, { video: { url: res.media[0].url }, caption: caption }, { quoted: m, null, rcanal });
         } else if (res?.type === 'image') {
-            await conn.sendMessage(m.chat, { image: { url: res.media[0].url }, caption: caption }, { quoted: m });
+            await conn.sendMessage(m.chat, { image: { url: res.media[0].url }, caption: caption }, { quoted: m, null, rcanal });
         }
 
         enviando = false;
