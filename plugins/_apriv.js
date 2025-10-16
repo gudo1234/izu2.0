@@ -11,7 +11,7 @@ export async function before(m, { conn }) {
 
     let user = global.db.data.users[m.sender]
     if (!user) global.db.data.users[m.sender] = {}
-    if (new Date() - (user.pc || 0) < 120000) return // 2 minutos
+    if (new Date() - (user.pc || 0) < 105000) return // 2 minutos
 
     //const icono = 'https://i.imgur.com/JQp4d9A.jpeg'
     const { imageMessage } = await prepareWAMessageMedia(
