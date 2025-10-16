@@ -68,6 +68,6 @@ rows: [
 })
 
 }
-handler.command = ['boton']
+handler.command = ['botonn']
 handler.group = true
 export default handler
