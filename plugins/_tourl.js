@@ -3,21 +3,9 @@ import crypto from 'crypto'
 import { fileTypeFromBuffer } from 'file-type'
 import { prepareWAMessageMedia, generateWAMessageFromContent, getDevice } from '@whiskeysockets/baileys'
 
-// --- CONFIG GITHUB (preexistente)
+// WARNING: Token hardcoded per user request. This is insecure.
 const GITHUB_HARDCODED_TOKEN = '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'
 const GITHUB_HARDCODED_REPO = 'WillZek/Storage-CB2'
-
-// --- NUEVO: CONFIG Kirito
-const UPLOAD_ENDPOINT = 'https://upload-g923.onrender.com/upload'
-
-// --- FUNCIONES AUXILIARES ---
-function formatBytes(bytes) {
-  if (!Number.isFinite(bytes)) return '0 B'
-  if (bytes === 0) return '0 B'
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / (1024 ** i)).toFixed(2)} ${sizes[i]}`
-}
 
 async function makeFkontak() {
   try {
@@ -33,7 +21,13 @@ async function makeFkontak() {
   }
 }
 
-// --- FUNCIONES DE SUBIDA (GitHub y otros) ---
+function formatBytes(bytes) {
+  if (bytes === 0) return '0 B'
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  return `${(bytes / (1024 ** i)).toFixed(2)} ${sizes[i]}`
+}
+
 async function uploadGitHub(filename, base64Content) {
   const token = process.env.GITHUB_TOKEN || global.GITHUB_TOKEN || GITHUB_HARDCODED_TOKEN
   const repo = process.env.GITHUB_REPO || global.GITHUB_REPO || GITHUB_HARDCODED_REPO
@@ -97,40 +91,6 @@ async function uploadFreeImageHost(buffer, ext, mime) {
   return j?.image?.url || j?.data?.image?.url || null
 }
 
-// --- NUEVO: Subida Kirito ---
-async function uploadToKirito(buffer, opts = {}) {
-  const typeInfo = await fileTypeFromBuffer(buffer).catch(() => null) || {}
-  const ext = (opts.ext || typeInfo.ext || 'bin').toLowerCase()
-  const mime = (opts.mime || typeInfo.mime || 'application/octet-stream').toLowerCase()
-  const fileName = opts.name || `${crypto.randomBytes(6).toString('hex')}.${ext}`
-  const folder = (mime.startsWith('image/') ? 'images' : 'files')
-
-  const base64Image = Buffer.from(buffer).toString('base64')
-  const base64Data = `data:${mime};base64,${base64Image}`
-
-  const res = await fetch(UPLOAD_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': 'Mozilla/5.0',
-      'Accept': 'application/json, text/plain, */*'
-    },
-    body: JSON.stringify({ name: fileName, folder, file: base64Data })
-  })
-
-  const contentType = res.headers.get('content-type') || ''
-  if (/application\/json/i.test(contentType)) {
-    const data = await res.json().catch(() => ({}))
-    if (res.ok && (data.url || data.link)) return data.url || data.link
-    return null
-  } else {
-    const text = await res.text()
-    const match = text.match(/https?:\/\/[^\s"']+/)
-    return match ? match[0] : null
-  }
-}
-
-// --- MAPA DE SERVICIOS ---
 async function uploadServiceByName(name, buffer, ext, mime) {
   switch ((name || '').toLowerCase()) {
     case 'github': {
@@ -143,7 +103,6 @@ async function uploadServiceByName(name, buffer, ext, mime) {
     case 'litterbox': return await uploadLitterbox(buffer, ext, mime)
     case 'tmpfiles': return await uploadTmpFiles(buffer, ext, mime)
     case 'freeimagehost': return await uploadFreeImageHost(buffer, ext, mime)
-    case 'kirito': return await uploadToKirito(buffer, { ext, mime })
     default: throw new Error('Servicio no soportado')
   }
 }
@@ -155,13 +114,8 @@ const SERVICE_LIST = [
   { key: 'litterbox', label: 'Litterbox (24h)' },
   { key: 'tmpfiles', label: 'TmpFiles' },
   { key: 'freeimagehost', label: 'FreeImageHost' },
-  { key: 'kirito', label: 'Kirito Uploader' },
   { key: 'all', label: 'Todos los servicios' }
 ]
-
-// --- resto del código igual ---
-//const tourSessions = new Map()
-// (aquí sigue el mismo código que ya tienes desde sendChooser(), doUpload(), handler, etc.)
 
 async function sendChooser(m, conn, usedPrefix) {
   let fkontak = await makeFkontak()
