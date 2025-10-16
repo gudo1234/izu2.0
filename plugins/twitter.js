@@ -10,7 +10,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         const apiResponse = await axios.get(`https://delirius-apiofc.vercel.app/download/twitterdl?url=${args[0]}`);
         const res = apiResponse.data;
 
-        const caption = res.caption ? res.caption : `${m.pushName}`;
+        const caption = res.caption ? res.caption : `${e} _Video de Twitter, "X"_`;
 
         if (res?.type === 'video') {
             await conn.sendMessage(m.chat, { video: { url: res.media[0].url }, caption: caption }, { quoted: m });
