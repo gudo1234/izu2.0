@@ -72,9 +72,7 @@ let handler = async (m, { conn }) => {
   const ext = typeInfo?.ext || 'bin'
   const mimeType = typeInfo?.mime || 'application/octet-stream'
   const size = formatBytes(buffer.length)
-
-  await conn.reply(m.chat, '⏳ Subiendo a Catbox y Kirito, espera un momento...', m)
-
+m.react('🕒')
   let catboxUrl = null, kiritoUrl = null
 
   try {
@@ -88,10 +86,10 @@ let handler = async (m, { conn }) => {
   } catch (e) {
     console.log('Error Kirito:', e)
   }
-
+m.react('✅')
   // Catbox
   if (catboxUrl) {
-    const text1 = `✅ *Archivo subido con éxito*\n\n🗂️ *Servicio:* Catbox\n📎 *Enlace:* ${catboxUrl}\n📏 *Tamaño:* ${size}`
+    const text1 = `✅ *Enlace:* ${catboxUrl}\n📏 *Tamaño:* ${size}`
     const buttons1 = [{ name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copiar enlace', copy_code: catboxUrl }) }]
     const msg1 = generateWAMessageFromContent(m.chat, {
       viewOnceMessage: {
@@ -110,7 +108,7 @@ let handler = async (m, { conn }) => {
 
   // Kirito
   if (kiritoUrl) {
-    const text2 = `✅ *Archivo subido con éxito*\n\n🗂️ *Servicio:* Kirito\n📎 *Enlace:* ${kiritoUrl}\n📏 *Tamaño:* ${size}`
+    const text2 = `✅ *Enlace:* ${kiritoUrl}`
     const buttons2 = [{ name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copiar enlace', copy_code: kiritoUrl }) }]
     const msg2 = generateWAMessageFromContent(m.chat, {
       viewOnceMessage: {
