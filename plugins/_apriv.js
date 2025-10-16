@@ -1,4 +1,4 @@
-import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysockets/baileys'
+import { prepareWAMessageMedia } from '@whiskeysockets/baileys'
 
 export async function before(m, { conn }) {
   if (m.fromMe) return
@@ -15,45 +15,43 @@ export async function before(m, { conn }) {
     { upload: conn.waUploadToServer }
   )
 
-  // 🔹 MENÚ INTERACTIVO TIPO BUTTONS (template)
-  if (!m.message?.buttonsResponseMessage) {
-    const template = generateWAMessageFromContent(
-      m.chat,
-      {
-        templateMessage: {
-          hydratedTemplate: {
-            imageMessage: imageMessage,
-            hydratedContentText: '*Le compartimos nuestro menú*',
-            hydratedFooterText: 'Seleccione la *OPCIÓN* requerida',
-            hydratedButtons: [
-              { quickReplyButton: { displayText: 'Funciones del bot', id: '.tes' } },
-              { quickReplyButton: { displayText: 'Grupo oficial', id: '.tes2' } },
-              { quickReplyButton: { displayText: '¿Qué más sabes hacer?', id: '.tes3' } },
-              { quickReplyButton: { displayText: 'Horario', id: '.tes4' } }
-            ]
-          }
+  // 🔹 MENÚ DE LISTA
+  if (!m.message?.listResponseMessage) {
+    const listMessage = {
+      text: '*Le compartimos nuestro menú*',
+      footer: 'Seleccione la opción requerida',
+      title: 'OPCIONES',
+      buttonText: 'Abrir menú',
+      sections: [
+        {
+          title: '💻 Información',
+          rows: [
+            { title: 'Funciones del bot', rowId: 'tes', description: 'Explora lo que puedo hacer' },
+            { title: 'Grupo oficial', rowId: 'tes2', description: 'Únete a la comunidad' },
+            { title: '¿Qué más sabes hacer?', rowId: 'tes3', description: 'Detalles avanzados de funciones' },
+            { title: 'Horario', rowId: 'tes4', description: 'Disponibilidad y atención' }
+          ]
         }
-      },
-      { userJid: m.sender, quoted: m }
-    )
+      ]
+    }
 
-    await conn.relayMessage(m.chat, template.message, { messageId: template.key.id })
-    await m.reply(`🖐🏻 ¡Hola! puta *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir múltiples funciones en WhatsApp🪀`)
+    await conn.sendMessage(m.chat, listMessage, { quoted: m })
+    await m.reply(`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir múltiples funciones en WhatsApp🪀`)
     user.pc = new Date() * 1
     return
   }
 
-  // 🔹 RESPUESTAS AUTOMÁTICAS DE BOTONES
-  const id = m.message?.buttonsResponseMessage?.selectedButtonId
-  if (!id) return
+  // 🔹 RESPUESTAS AUTOMÁTICAS DE LA LISTA
+  const selectedId = m.message?.listResponseMessage?.singleSelectReply?.selectedRowId
+  if (!selectedId) return
 
-  if (id === '.tes') {
+  if (selectedId === 'tes') {
     await conn.reply(m.chat, '🤖 Este comando te muestra una vista general de mis funciones principales.', m)
-  } else if (id === '.tes2') {
+  } else if (selectedId === 'tes2') {
     await conn.reply(m.chat, '🌍 Únete a nuestro grupo oficial y forma parte de la comunidad.', m)
-  } else if (id === '.tes3') {
+  } else if (selectedId === 'tes3') {
     await conn.reply(m.chat, '✨ Aquí encontrarás más información sobre todo lo que puedo hacer.', m)
-  } else if (id === '.tes4') {
+  } else if (selectedId === 'tes4') {
     await conn.reply(m.chat, '🕒 Estoy disponible 24/7 para ayudarte en cualquier momento.', m)
   }
 }
