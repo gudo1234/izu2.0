@@ -1,4 +1,4 @@
-import { prepareWAMessageMedia } from '@whiskeysockets/baileys'
+import { prepareWAMessageMedia, generateWAMessageFromContent } from '@whiskeysockets/baileys'
 
 export async function before(m, { conn }) {
   if (m.fromMe) return
@@ -15,40 +15,30 @@ export async function before(m, { conn }) {
     { upload: conn.waUploadToServer }
   )
 
-  // 🔹 MENÚ INTERACTIVO (solo si es mensaje nuevo)
+  // 🔹 MENÚ INTERACTIVO TIPO BUTTONS (template)
   if (!m.message?.buttonsResponseMessage) {
-    const sections = [
-      {
-        title: '💻 Información',
-        highlight_label: 'Más detalles',
-        rows: [
-          { header: '', title: 'Funciones del bot', description: '', id: '.tes' },
-          { header: '', title: 'Grupo oficial', description: '', id: '.tes2' },
-          { header: '', title: '¿Qué más sabes hacer?', description: '', id: '.tes3' },
-          { header: '', title: '📅 Horario', description: '', id: '.tes4' }
-        ]
-      }
-    ]
-
-    const buttonParamsJson = JSON.stringify({
-      title: 'OPCIONES',
-      description: 'Seleccione una opción',
-      sections
-    })
-
-    const interactiveMessage = {
-      body: { text: '*Le compartimos nuestro menú*' },
-      footer: { text: 'Seleccione la *OPCIÓN* requerida' },
-      header: { hasMediaAttachment: true, imageMessage },
-      nativeFlowMessage: { buttons: [{ name: 'single_select', buttonParamsJson }] }
-    }
-
-    await m.reply(`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir múltiples funciones en WhatsApp🪀`)
-    await conn.relayMessage(
+    const template = generateWAMessageFromContent(
       m.chat,
-      { viewOnceMessage: { message: { interactiveMessage } } },
-      {}
+      {
+        templateMessage: {
+          hydratedTemplate: {
+            imageMessage: imageMessage,
+            hydratedContentText: '*Le compartimos nuestro menú*',
+            hydratedFooterText: 'Seleccione la *OPCIÓN* requerida',
+            hydratedButtons: [
+              { quickReplyButton: { displayText: 'Funciones del bot', id: '.tes' } },
+              { quickReplyButton: { displayText: 'Grupo oficial', id: '.tes2' } },
+              { quickReplyButton: { displayText: '¿Qué más sabes hacer?', id: '.tes3' } },
+              { quickReplyButton: { displayText: 'Horario', id: '.tes4' } }
+            ]
+          }
+        }
+      },
+      { userJid: m.sender, quoted: m }
     )
+
+    await conn.relayMessage(m.chat, template.message, { messageId: template.key.id })
+    await m.reply(`🖐🏻 ¡Hola! puta *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir múltiples funciones en WhatsApp🪀`)
     user.pc = new Date() * 1
     return
   }
