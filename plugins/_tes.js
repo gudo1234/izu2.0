@@ -11,7 +11,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   if (command == 'tes2') {
     let teks = `🗿 *Hola creador* ⭐ El número Wa.me/${m.sender.split`@`[0]} quiere de tus servicios`
     
-    // Enviar mensaje fijo al creador
+    // Enviar mensaje al creador
     conn.reply(
       '50492280729@s.whatsapp.net', 
       teks,
@@ -19,11 +19,12 @@ let handler = async (m, { conn, usedPrefix, command }) => {
       { contextInfo: { mentionedJid: [m.sender] } }
     )
     
-    // Mensaje de confirmación al usuario
+    // Mensaje de confirmación al usuario con mención
     conn.reply(
       m.chat, 
       `⚖️ _Por favor espere, nuestro siguiente asesor disponible le atenderá en breve..._\n\nSerá atendido por @50492280729 *🖐🏻Solo para asuntos importantes, no molestar.*`, 
-      m
+      m,
+      { contextInfo: { mentionedJid: ['50492280729@s.whatsapp.net'] } }
     )
   }
 
