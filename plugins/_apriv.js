@@ -16,8 +16,9 @@ let vn2 = './media/prueba3.mp3'
 let vn3 = './media/prueba4.mp3'
 let name = await conn.getName(m.sender)
 let user = global.db.data.users[m.sender]
-if (new Date() - user.pc < 21600000) return //6 horas
+//if (new Date() - user.pc < 21600000) return //6 horas
 //if (new Date() - user.pc < 420000) return // 7 minutos
+if (new Date() - user.pc < 105000) return
 //https://qu.ax/UccDS.jpg
 const { imageMessage } = await prepareWAMessageMedia({
         image: { url: icono }
