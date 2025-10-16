@@ -252,7 +252,7 @@ const numBott = (this.user.lid || '').replace(/:.*/, '') || false
 const detectnumbot = m.sender.includes('@lid') ? `${numBott}@lid` : this.user.jid
 const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == detectnumbot) : {}) || {}
 let bottt = conn?.user?.jid
-let bt = groupMetadata.participants.find(u => u.jid === bottt)
+let bt = groupMetadata?.participants?.find(u => u.jid === bottt)
 const isRAdmin = user?.admin == 'superadmin' || false
 const isAdmin = isRAdmin || user?.admin == 'admin' || false //user admins? 
 const isBotAdmin = bt?.admin == 'admin' //bot?.admin || false //Detecta sin el bot es admin
