@@ -12,11 +12,11 @@ let handler = async (m, { conn, usedPrefix, command }) => {
   }
 
   if (command == 'tes3') {
-    conn.reply(m.chat, `https://chat.whatsapp.com/Cy42GegnKSmCVA6zxWlxKU?mode=ac_t`, m)
+    conn.reply(m.chat, `🕒 *Horario de atención del bot*\n\nDe lunes a domingo de *8:00 AM* a *8:00 PM.*\n\n⚠️ *Recuerda:* Todo lo que no tenga que ver con el bot no será atendido.`, m)
   }
 
   if (command == 'tes4') {
-    conn.reply(m.chat, `🕒 *Horario de atención del bot*\n\nDe lunes a domingo de 8:00 AM a 8:00 PM.\n\n⚠️ *Recuerda:* Todo lo que no tenga que ver con el bot no será atendido.`,m)
+    conn.reply(m.chat, `${e} *Grupo Oficial del Bot*\n\nhttps://chat.whatsapp.com/Cy42GegnKSmCVA6zxWlxKU?mode=ac_t`,m)
   }
 }
 
