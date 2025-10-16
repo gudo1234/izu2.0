@@ -38,7 +38,7 @@ const { imageMessage } = await prepareWAMessageMedia({
             title: "🌐Convivir",
             highlight_label: "Unete a nuestra comunidad",
             rows: [
-                { header: "", title: "Grupo", description: "", id: `.tes3`}
+                { header: "", title: "Grupo", description: "", id: `.tes4`}
             ]
         }
     ];
