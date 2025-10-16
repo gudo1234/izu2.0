@@ -89,15 +89,15 @@ m.react('🕒')
 m.react('✅')
   // Catbox
   if (catboxUrl) {
-    const text1 = `✅ *Enlace:* ${catboxUrl}\n📏 *Tamaño:* ${size}`
+    const text1 = `🔗 *Enlace:* ${catboxUrl}`
     const buttons1 = [{ name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copiar enlace', copy_code: catboxUrl }) }]
     const msg1 = generateWAMessageFromContent(m.chat, {
       viewOnceMessage: {
         message: {
           interactiveMessage: {
             body: { text: text1 },
-            footer: { text: 'Subido con Tourl Bot' },
-            header: { title: 'Resultado Catbox', hasMediaAttachment: false },
+            footer: { text: textbot },
+            header: { title: '✅ _*Resultado Catbox*_', hasMediaAttachment: false },
             nativeFlowMessage: { buttons: buttons1, messageParamsJson: '' }
           }
         }
@@ -108,15 +108,15 @@ m.react('✅')
 
   // Kirito
   if (kiritoUrl) {
-    const text2 = `✅ *Enlace:* ${kiritoUrl}`
+    const text2 = `🔗 *Enlace:* ${kiritoUrl}`
     const buttons2 = [{ name: 'cta_copy', buttonParamsJson: JSON.stringify({ display_text: 'Copiar enlace', copy_code: kiritoUrl }) }]
     const msg2 = generateWAMessageFromContent(m.chat, {
       viewOnceMessage: {
         message: {
           interactiveMessage: {
             body: { text: text2 },
-            footer: { text: 'Subido con Tourl Bot' },
-            header: { title: 'Resultado Kirito', hasMediaAttachment: false },
+            footer: { text: textbot },
+            header: { title: '✅ _*Resultado Kirito*_', hasMediaAttachment: false },
             nativeFlowMessage: { buttons: buttons2, messageParamsJson: '' }
           }
         }
