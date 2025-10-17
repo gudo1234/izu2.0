@@ -12,7 +12,7 @@ let handler = async (m, { conn }) => {
         thumbnail,
         thumbnailUrl: redes,
         sourceUrl: redes,
-        //mediaType: 1,
+        mediaType: 1,
         renderLargerThumbnail: true
       }
     }
