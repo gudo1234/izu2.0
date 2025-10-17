@@ -2,6 +2,7 @@ import fs from 'fs'
 
 let handler = async (m, { conn }) => {
 m.react('✅')
+  let txt = 'hokaaaaa'
   await conn.sendMessage(m.chat, {
     image: { url: icono },
     caption: txt.trim(),
