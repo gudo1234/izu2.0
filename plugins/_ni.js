@@ -9,7 +9,7 @@ let handler = async (m, { conn }) => {
       externalAdReply: {
         title: wm,
         body: textbot,
-        mediaType: 3,
+        mediaType: 1,
         thumbnailUrl: icono, // 🔹 Usa URL directa del PNG o WEBP
         sourceUrl: redes,
         renderLargerThumbnail: true
