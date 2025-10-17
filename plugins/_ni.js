@@ -1,17 +1,16 @@
 import fs from 'fs'
 
 let handler = async (m, { conn }) => {
-m.react('✅')
-  let txt = 'hokaaaaa'
+  m.react('✅')
+
   await conn.sendMessage(m.chat, {
     image: { url: icono },
-    caption: txt.trim(),
+    caption: 'apoco',
     contextInfo: {
       externalAdReply: {
         title: "hola",
         body: "Mi bot xd",
-        thumbnailUrl: redes,
-        thumbnail: icono,
+        thumbnailUrl: icono, // ✅ solo una, no mezcles con thumbnail
         sourceUrl: redes,
         mediaType: 1,
         showAdAttribution: false,
@@ -22,5 +21,4 @@ m.react('✅')
 }
 
 handler.command = ['ni']
-
 export default handler
