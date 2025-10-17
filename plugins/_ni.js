@@ -1,8 +1,7 @@
-import fs from 'fs'
-
+import fetch from 'node-fetch'
 let handler = async (m, { conn }) => {
   m.react('✅')
-
+const thumbnail = await (await fetch(icono)).buffer()
   await conn.sendMessage(m.chat, {
       text: 'hsloo',
       contextInfo: {
