@@ -10,8 +10,9 @@ let handler = async (m, { conn }) => {
         title: wm,
         body: textbot,
         thumbnail,
+        thumbnailUrl: redes,
         sourceUrl: redes,
-        mediaType: 1,
+        //mediaType: 1,
         renderLargerThumbnail: true
       }
     }
