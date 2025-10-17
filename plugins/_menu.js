@@ -396,14 +396,12 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
       gifPlayback: true,
       caption: puta,
       contextInfo: {
-        mentionedJid: [m.sender],
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: channelRD.id,
           newsletterName: channelRD.name,
           serverMessageId: -1,
         },
-        forwardingScore: false,
         externalAdReply: {
           title: botname,
           body: textbot,
@@ -411,7 +409,6 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
           thumbnail,
           sourceUrl: redes,
           mediaType: 1,
-          showAdAttribution: false,
         },
       },
     }, { quoted: m })
@@ -422,14 +419,12 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
       text: puta,
       footer: textbot,
       contextInfo: {
-        mentionedJid: [m.sender],
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
           newsletterJid: channelRD.id,
           newsletterName: channelRD.name,
           serverMessageId: -1,
         },
-        forwardingScore: false,
         externalAdReply: {
           title: botname,
           body: textbot,
@@ -437,7 +432,6 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
           thumbnail,
           sourceUrl: redes,
           mediaType: 1,
-          showAdAttribution: false,
           renderLargerThumbnail: true,
         },
       },
