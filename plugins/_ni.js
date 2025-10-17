@@ -2,18 +2,16 @@ import fetch from 'node-fetch'
 
 let handler = async (m, { conn }) => {
   m.react('✅')
-  const thumbnail = await (await fetch(icono)).buffer()
   await conn.sendMessage(m.chat, {
     text: 'hsloo',
     contextInfo: {
       externalAdReply: {
         title: wm,
         body: textbot,
-        thumbnail,
-        thumbnailUrl: redes,
+        thumbnailUrl: icono, // usa la URL directa
         sourceUrl: redes,
-        mediaType: 1,
-        renderLargerThumbnail: true
+        mediaType: 2, // muestra imagen completa
+        renderLargerThumbnail: true // amplía el área de imagen
       }
     }
   }, { quoted: m })
