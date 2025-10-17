@@ -12,7 +12,7 @@ const thumbnail = await (await fetch(icono)).buffer()
           thumbnail,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: false
+          renderLargerThumbnail: true
         }
       }
     }, { quoted: m })
