@@ -2,15 +2,16 @@ import fetch from 'node-fetch'
 
 let handler = async (m, { conn }) => {
   m.react('✅')
+
   await conn.sendMessage(m.chat, {
     text: 'hsloo',
     contextInfo: {
       externalAdReply: {
         title: wm,
         body: textbot,
-        thumbnailUrl: icono, // usa la URL directamente
+        mediaType: 2,
+        thumbnailUrl: icono, // 🔹 Usa URL directa del PNG o WEBP
         sourceUrl: redes,
-        mediaType: 2, // 🔹 muestra la imagen completa
         renderLargerThumbnail: true
       }
     }
