@@ -76,7 +76,7 @@ if (new Date() - user.pc < 21600000) return
     };
 
     m.react('🤖')
-    await m.reply(`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
+    conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
 
 ✧──────‧₊˚📁˚₊‧──────╮
 │ _Tengo muchos comandos_
@@ -90,8 +90,7 @@ if (new Date() - user.pc < 21600000) return
 ╭︶︶︶︶︶🌐︶︶︶︶︶╮
 *Síguenos en nuestro canal*
 *y mantente informado....*
-https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H
-╰︶︶︶︶︶🎉︶︶︶︶︶╯`)
+╰︶︶︶︶︶🎉︶︶︶︶︶╯`, m, fake)
 
     await conn.relayMessage(m.chat, { viewOnceMessage: { message } }, {});
     conn.sendFile(m.chat, [vn, vn2].getRandom(), 'prueba3.mp3', null, null, true, { 
