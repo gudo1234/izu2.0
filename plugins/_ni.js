@@ -11,7 +11,7 @@ let handler = async (m, { conn }) => {
   body: "Mi bot xd",
   sourceUrl: redes,
   mediaType: 1,
-  renderLargerThumbnail: true,
+  renderLargerThumbnail: false,
   thumbnail:  icono,
   thumbnailUrl: redes
       }
