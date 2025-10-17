@@ -3,7 +3,6 @@ import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text }) => {
   const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
-  const fake = {} // objeto placeholder para compatibilidad si tu framework lo utiliza
 
   const basePrompt = `Tu nombre es IzuBot, una inteligencia artificial creada por ${author}. 
 Responde de forma natural, clara y sin exageraciones. 
