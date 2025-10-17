@@ -8,10 +8,10 @@ let handler = async (m, { conn }) => {
       externalAdReply: {
         title: wm,
         body: textbot,
-        thumbnailUrl: icono, // usa la URL directa
+        thumbnailUrl: icono, // usa la URL directamente
         sourceUrl: redes,
-        mediaType: 2, // muestra imagen completa
-        renderLargerThumbnail: true // amplía el área de imagen
+        mediaType: 2, // 🔹 muestra la imagen completa
+        renderLargerThumbnail: true
       }
     }
   }, { quoted: m })
