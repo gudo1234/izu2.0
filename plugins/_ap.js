@@ -14,7 +14,29 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints)
 }
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+// Asignación manual de zonas horarias más precisas por país
+const zonasPersonalizadas = {
+  HN: 'America/Tegucigalpa',
+  MX: 'America/Mexico_City',
+  AR: 'America/Argentina/Buenos_Aires',
+  CL: 'America/Santiago',
+  CO: 'America/Bogota',
+  PE: 'America/Lima',
+  VE: 'America/Caracas',
+  EC: 'America/Guayaquil',
+  PA: 'America/Panama',
+  DO: 'America/Santo_Domingo',
+  GT: 'America/Guatemala',
+  SV: 'America/El_Salvador',
+  NI: 'America/Managua',
+  ES: 'Europe/Madrid',
+  US: 'America/New_York',
+  BR: 'America/Sao_Paulo',
+  PY: 'America/Asuncion',
+  UY: 'America/Montevideo'
+}
+
+const handler = async (m, { conn, text }) => {
   let target = m.quoted?.sender || m.mentionedJid?.[0] || text
   let own = false
 
@@ -36,7 +58,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   const formatNum = phoneInfo.getNumber('international')
   const url = 'https://wa.me/' + number
 
-  // Info del país
+  // Info del país y hora local
   let capital = 'Desconocida'
   let fechaLocal = 'No disponible'
   let horaLocal = 'No disponible'
@@ -44,14 +66,14 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`)
     const data = res.data[0]
     capital = data.capital?.[0] || 'Desconocida'
-    const zona = data.timezones?.[0]
+    let zona = zonasPersonalizadas[countryCode] || data.timezones?.[0]
     if (zona) {
       const now = moment().tz(zona)
       fechaLocal = now.format('dddd, D [de] MMMM [de] YYYY')
-      horaLocal = now.format('hh:mm:ss A') // ← formato de 12 horas con AM/PM
+      horaLocal = now.format('h:mm A') // formato 12 horas con am/pm
     }
   } catch (e) {
-    console.error('Error obteniendo información del país:', e)
+    console.error('Error obteniendo país:', e)
   }
 
   // Imagen y bio
