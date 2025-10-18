@@ -48,7 +48,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     if (zona) {
       const now = moment().tz(zona)
       fechaLocal = now.format('dddd, D [de] MMMM [de] YYYY')
-      horaLocal = now.format('HH:mm:ss [hrs]')
+      horaLocal = now.format('hh:mm:ss A') // ← formato de 12 horas con AM/PM
     }
   } catch (e) {
     console.error('Error obteniendo información del país:', e)
