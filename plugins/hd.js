@@ -18,7 +18,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     image.resize(newWidth, newHeight);
     image.sharpen(8.0, 0.8, 1.5)
     const buffer = await image.jpeg({ quality: 100 }).toBuffer();
-    conn.sendFile(m.chat, buffer, 'image.jpg', 'Izumi Bot', m, null, rcanal);
+    conn.sendFile(m.chat, buffer, 'image.jpg', `${e} _Imagen mejorada con éxito_`, m, null, rcanal);
     
   } catch (error) {
     await m.react('❌')
