@@ -44,12 +44,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       ? `\n‣ Se enviará como documento por superar 20 minutos.` : ""
 
     const caption = `
-> 🎵 *Título:* ${title}
-> 📺 *Canal:* ${author?.name}
-> ⏱️ *Duración:* ${duration}
-> 👀 *Vistas:* ${views?.toLocaleString()}
-> 📅 *Publicado:* ${ago}
-> 🔗 *Link:* ${url}
+> ✰ *Título:* ${title}
+> ♢ *Canal:* ${author?.name}
+> ♪ *Duración:* ${duration}
+> ♫ *Vistas:* ${views?.toLocaleString()}
+> ♪ *Publicado:* ${ago}
+> ♬ *Link:* ${url}
 
 ⏳ _Preparando ${type}..._${aviso}
 `.trim()
