@@ -1,24 +1,24 @@
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
-import 'moment/locale/es.js' // Para mostrar fecha en español
+import 'moment/locale/es.js'
 import fetch from 'node-fetch'
 import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
   try {
-    // Extraer número internacional
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
-    let pais = numero.getRegionCode() // ej. "MX", "AR", "CO", etc.
-    let nombrePais = new Intl.DisplayNames(['es'], { type: 'region' }).of(pais) // Nombre del país en español
+    let pais = numero.getRegionCode()
+    let nombrePais = pais
+      ? new Intl.DisplayNames(['es'], { type: 'region' }).of(pais)
+      : 'Desconocido'
 
-    // Asignar bandera automáticamente según código ISO
-    let bandera = String.fromCodePoint(
-      ...[...pais.toUpperCase()].map(c => 127397 + c.charCodeAt())
-    )
+    let bandera = pais
+      ? String.fromCodePoint(...[...pais.toUpperCase()].map(c => 127397 + c.charCodeAt()))
+      : '🏳️'
 
-    // Detectar zona horaria del país (por región principal)
+    // Zonas horarias precisas
     const zonas = {
       MX: 'America/Mexico_City',
       CO: 'America/Bogota',
@@ -39,12 +39,35 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       PA: 'America/Panama',
       US: 'America/New_York',
       ES: 'Europe/Madrid',
-      BR: 'America/Sao_Paulo'
+      BR: 'America/Sao_Paulo',
+      CU: 'America/Havana',         // ✅ Cuba
+      PR: 'America/Puerto_Rico',   // ✅ Puerto Rico
+      HT: 'America/Port-au-Prince',// ✅ Haití
+      CA: 'America/Toronto',       // ✅ Canadá (zona este)
     }
 
-    let zona = zonas[pais] || 'UTC'
+    let zona = zonas[pais] || null
+
+    // Si no encuentra zona, intenta obtener por IP real como respaldo
+    if (!zona) {
+      try {
+        let res = await fetch('https://ipapi.co/json/')
+        let data = await res.json()
+        zona = data.timezone || 'UTC'
+        if (!nombrePais || nombrePais === 'Desconocido') {
+          nombrePais = data.country_name
+          bandera = data.country_code
+            ? String.fromCodePoint(...[...data.country_code.toUpperCase()].map(c => 127397 + c.charCodeAt()))
+            : '🏳️'
+        }
+      } catch {
+        zona = 'UTC'
+      }
+    }
+
+    // Aplicar hora y fecha correctas
     let fecha = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
-    let hora = moment().tz(zona).format('hh:mm:ss A') // ⏱️ Ahora con segundos
+    let hora = moment().tz(zona).format('hh:mm:ss A')
 
     mundo = `${nombrePais} ${bandera}\n│ 🗓️ *Fecha:* ${fecha}\n│ 🕒 *Hora local:* ${hora}`
   } catch (err) {
