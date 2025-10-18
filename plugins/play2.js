@@ -44,9 +44,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       ? `\n‣ Se enviará como documento por superar 20 minutos.` : ""
 
     const caption = `
-╭──── • ────╮
-  🎧 *YOUTUBE EXTRACTOR*
-╰──── • ────╯
 > 🎵 *Título:* ${title}
 > 📺 *Canal:* ${author?.name}
 > ⏱️ *Duración:* ${duration}
@@ -58,7 +55,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 `.trim()
 
     const thumb = (await conn.getFile(thumbnail)).data
-    /*await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })*/
 await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -70,13 +66,13 @@ await conn.sendMessage(m.chat, {
           serverMessageId: -1,
         },
         externalAdReply: {
-          title: botname,
+          title: '🎧 *YOUTUBE EXTRACTOR*',
           body: textbot,
           thumbnailUrl: redes,
           thumbnail: thumb,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: true,
+          renderLargerThumbnail: false,
         },
       },
     }, { quoted: m })
