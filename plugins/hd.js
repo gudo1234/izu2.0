@@ -1,4 +1,4 @@
-$ import sharp from 'sharp';
+import sharp from 'sharp';
 
 let handler = async (m, { conn, usedPrefix, command }) => {
   let q = m.quoted ? m.quoted : m;
