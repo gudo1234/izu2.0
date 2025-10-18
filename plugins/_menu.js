@@ -53,8 +53,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 
   // --- Resto del código original ---
-  let jpg = './media/gif.mp4'
-  let jpg2 = './media/giff.mp4'
+  let jpg = './media/gifff.mp4'
+  let jpg2 = './media/gifff.mp4'
   let jpg3 = './media/gifff.mp4'
   let or = ['grupo', 'gif', 'anu']
   let media = or[Math.floor(Math.random() * or.length)]
