@@ -1,168 +1,125 @@
 import fetch from "node-fetch"
 import yts from "yt-search"
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+const handler = async (m, { conn, text, usedPrefix, command, args }) => {
+  const docAudio = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
+  const docVideo = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
+  const normalAudio = ['play', 'yta', 'mp3', 'ytmp3', 'playaudio']
+  const normalVideo = ['play2', 'ytv', 'mp4', 'ytmp4', 'playvid']
+
+  if (!text) {
+    const tipo = normalAudio.includes(command)
+      ? 'audio'
+      : docAudio.includes(command)
+      ? 'audio en documento'
+      : normalVideo.includes(command)
+      ? 'video'
+      : 'video en documento'
+    return m.reply(`❀ Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n📌 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+  }
+
+  await m.react("🕒")
+
   try {
-    if (!text.trim())
-      return conn.reply(
-        m.chat,
-        `❀ Por favor, ingresa el nombre o el enlace del video/audio para descargar.`,
-        m
-      )
+    const query = args.join(' ')
+    const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    const ytMatch = query.match(ytRegex)
+    const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
-    await m.react("🕒")
+    const yt = await yts(search)
+    const v = ytMatch ? yt.videos.find(x => x.videoId === ytMatch[1]) : yt.videos[0]
+    if (!v) return m.reply("❌ No se encontró el video.")
 
-    const videoMatch = text.match(
-      /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|v\/))([a-zA-Z0-9_-]{11})/
-    )
-    const query = videoMatch
-      ? "https://youtu.be/" + videoMatch[1]
-      : text
+    const { title, thumbnail, timestamp, views, ago, url, author } = v
+    const duration = timestamp || "0:00"
 
-    const search = await yts(query)
-    const result = videoMatch
-      ? search.videos.find((v) => v.videoId === videoMatch[1]) || search.all[0]
-      : search.all[0]
+    // Convierte duración a minutos
+    const toSeconds = t => t.split(":").reduce((acc, n) => acc * 60 + +n, 0)
+    const mins = toSeconds(duration) / 60
 
-    if (!result) throw "ꕥ No se encontraron resultados."
+    const sendDoc = mins > 20 || docAudio.includes(command) || docVideo.includes(command)
+    const isAudio = [...docAudio, ...normalAudio].includes(command)
+    const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
 
-    const { title, thumbnail, timestamp, views, ago, url, author } = result
-    const formattedViews = formatViews(views)
-    const info = `「✦」Descargando *<${title}>*\n\n> ❑ Canal » *${author.name}*\n> ♡ Vistas » *${formattedViews}*\n> ✧︎ Duración » *${timestamp}*\n> ☁︎ Publicado » *${ago}*\n> ➪ Link » ${url}`
+    const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
+      ? `\n‣ Se enviará como documento por superar 20 minutos.`
+      : ""
+
+    const caption = `
+╭──── • ────╮
+  🎧 *YOUTUBE EXTRACTOR*
+╰──── • ────╯
+> 🎵 *Título:* ${title}
+> 📺 *Canal:* ${author?.name}
+> ⏱️ *Duración:* ${duration}
+> 👀 *Vistas:* ${views?.toLocaleString()}
+> 📅 *Publicado:* ${ago}
+> 🔗 *Link:* ${url}
+
+⏳ _Preparando ${type}..._${aviso}
+`.trim()
+
     const thumb = (await conn.getFile(thumbnail)).data
+    await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
 
-    await conn.sendMessage(m.chat, { image: thumb, caption: info }, { quoted: m })
+    // ↓↓↓ Descarga usando Ruby-core y Ultraplus
+    let data = null, usedBackup = false
 
-    // 🔹 AUDIO
-    if (["play", "yta", "ytmp3", "playaudio"].includes(command)) {
-      let audioData = null
+    if (isAudio) {
       try {
-        const r = await (
-          await fetch(
-            `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(
-              url
-            )}`
-          )
-        ).json()
+        const r = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`)).json()
         if (r?.status && r?.download?.url) {
-          audioData = { link: r.download.url, title: r.metadata?.title }
+          data = { link: r.download.url, title: r.metadata?.title }
+        } else throw new Error("Ruby-core no devolvió audio válido.")
+      } catch {
+        usedBackup = true
+        const b = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=audio&key=Alba`)).json()
+        if (b?.status && b?.result?.dl) {
+          data = { link: b.result.dl, title: b.result.title }
         }
-      } catch (e) {
-        console.error(e)
       }
-
-      if (!audioData) {
-        await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } })
-        return conn.reply(
-          m.chat,
-          "✦ No se pudo descargar el audio. Intenta más tarde.",
-          m
-        )
+    } else {
+      try {
+        const r = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(url)}`)).json()
+        if (r?.status && r?.download?.url) {
+          data = { link: r.download.url, title: r.metadata?.title }
+        } else throw new Error("Ruby-core no devolvió video válido.")
+      } catch {
+        usedBackup = true
+        const b = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`)).json()
+        if (b?.status && b?.result?.dl) {
+          data = { link: b.result.dl, title: b.result.title }
+        }
       }
-
-      await conn.sendMessage(
-        m.chat,
-        {
-          audio: { url: audioData.link },
-          fileName: `${audioData.title || "music"}.mp3`,
-          mimetype: "audio/mpeg",
-          ptt: false,
-        },
-        { quoted: m }
-      )
-      await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } })
     }
 
-    // 🔹 VIDEO (usa la nueva API Ultraplus como fallback)
-    else if (["play2", "ytv", "ytmp4", "mp4"].includes(command)) {
-      let videoData = null
+    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga.")
 
-      try {
-        // Intentar con Ruby-core primero
-        const r = await (
-          await fetch(
-            `https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(
-              url
-            )}`
-          )
-        ).json()
+    const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
+    const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
+    const pttMode = command === "playaudio" // Nota de voz
 
-        if (r?.status && r?.download?.url) {
-          videoData = { link: r.download.url, title: r.metadata?.title }
-        } else {
-          // Si Ruby-core falla, usar la nueva API Ultraplus
-          const nv = await (
-            await fetch(
-              `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(
-                url
-              )}&format=video&key=Alba`
-            )
-          ).json()
+    await conn.sendMessage(m.chat, {
+      [sendDoc ? "document" : isAudio ? "audio" : "video"]: { url: data.link },
+      mimetype,
+      fileName,
+      ptt: isAudio && pttMode
+    }, { quoted: m })
 
-          if (nv?.status && nv?.result?.dl) {
-            videoData = { link: nv.result.dl, title: nv.result.title }
-          }
-        }
-      } catch (e) {
-        console.error("Error al obtener video:", e)
-      }
+    await m.react(usedBackup ? "⌛" : "✅")
 
-      if (!videoData) {
-        await conn.sendMessage(m.chat, { react: { text: "❌", key: m.key } })
-        return conn.reply(
-          m.chat,
-          "✦ No se pudo descargar el video. Intenta más tarde.",
-          m
-        )
-      }
-
-      await conn.sendMessage(
-        m.chat,
-        {
-          video: { url: videoData.link },
-          caption: `> ❀ ${videoData.title}`,
-          fileName: `${videoData.title || "video"}.mp4`,
-          mimetype: "video/mp4",
-        },
-        { quoted: m }
-      )
-      await conn.sendMessage(m.chat, { react: { text: "✅", key: m.key } })
-    }
-  } catch (e) {
+  } catch (err) {
+    console.error(err)
     await m.react("✖️")
-    console.error("Error en play handler:", e)
-    return conn.reply(
-      m.chat,
-      typeof e === "string"
-        ? e
-        : `⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${e.message}`,
-      m
-    )
+    m.reply(`❌ Error: ${err.message || err}`)
   }
 }
 
-handler.command = handler.help = [
-  "play",
-  "yta",
-  "ytmp3",
-  "play2",
-  "ytv",
-  "ytmp4",
-  "playaudio",
-  "mp4",
+handler.command = [
+  'play', 'yta', 'mp3', 'ytmp3', 'playaudio',
+  'play3', 'ytadoc', 'mp3doc', 'ytmp3doc',
+  'play2', 'ytv', 'mp4', 'ytmp4', 'playvid',
+  'play4', 'ytvdoc', 'mp4doc', 'ytmp4doc'
 ]
-handler.tags = ["descargas"]
 handler.group = true
-
 export default handler
-
-function formatViews(views) {
-  if (views === undefined) return "No disponible"
-  if (views >= 1_000_000_000)
-    return `${(views / 1_000_000_000).toFixed(1)}B (${views.toLocaleString()})`
-  if (views >= 1_000_000)
-    return `${(views / 1_000_000).toFixed(1)}M (${views.toLocaleString()})`
-  if (views >= 1_000)
-    return `${(views / 1_000).toFixed(1)}k (${views.toLocaleString()})`
-  return views.toString()
-    }
