@@ -55,6 +55,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   // --- Resto del código original ---
   let jpg = './media/gif.mp4'
   let jpg2 = './media/giff.mp4'
+  let jpg3 = 'https://files.catbox.moe/y5yz64.mp4'
   let or = ['grupo', 'gif', 'anu']
   let media = or[Math.floor(Math.random() * or.length)]
 
@@ -428,7 +429,7 @@ let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
 
   if (media === 'gif') {
     await conn.sendMessage(m.chat, {
-      video: { url: [jpg, jpg2].sort(() => Math.random() - 0.5)[0] },
+      video: { url: [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
       caption: puta,
       contextInfo: {
