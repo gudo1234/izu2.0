@@ -33,7 +33,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
 
-    // Convierte duración a minutos
     const toSeconds = t => t.split(":").reduce((acc, n) => acc * 60 + +n, 0)
     const mins = toSeconds(duration) / 60
 
@@ -62,42 +61,57 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const thumb = (await conn.getFile(thumbnail)).data
     await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
 
-    // ↓↓↓ Descarga usando Ruby-core y Ultraplus
-    let data = null, usedBackup = false
+    let data = null
+    let usedBackup = false
 
-    if (isAudio) {
+    // 🔹 Siempre intentamos primero con los endpoints MP4
+    try {
+      const r = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(url)}`)).json()
+      if (r?.status && r?.download?.url) {
+        data = { link: r.download.url, title: r.metadata?.title }
+      } else throw new Error("Ruby-core MP4 falló")
+    } catch {
+      usedBackup = true
       try {
-        const r = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`)).json()
-        if (r?.status && r?.download?.url) {
-          data = { link: r.download.url, title: r.metadata?.title }
-        } else throw new Error("Ruby-core no devolvió audio válido.")
-      } catch {
-        usedBackup = true
-        const b = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=audio&key=Alba`)).json()
-        if (b?.status && b?.result?.dl) {
-          data = { link: b.result.dl, title: b.result.title }
-        }
-      }
-    } else {
-      try {
-        const r = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(url)}`)).json()
-        if (r?.status && r?.download?.url) {
-          data = { link: r.download.url, title: r.metadata?.title }
-        } else throw new Error("Ruby-core no devolvió video válido.")
-      } catch {
-        usedBackup = true
         const b = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`)).json()
         if (b?.status && b?.result?.dl) {
           data = { link: b.result.dl, title: b.result.title }
+        } else throw new Error("Ultraplus MP4 falló")
+      } catch {
+        try {
+          const c = await (await fetch(`https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`)).json()
+          if (c?.status && c?.result?.download) {
+            data = { link: c.result.download, title: c.result.title }
+          } else throw new Error("Sankavollerei MP4 falló")
+        } catch {
+          // 🔹 Si TODO falla, probamos con MP3 (último intento)
+          try {
+            const r2 = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`)).json()
+            if (r2?.status && r2?.download?.url) {
+              data = { link: r2.download.url, title: r2.metadata?.title }
+            } else throw new Error("Ruby-core MP3 falló")
+          } catch {
+            try {
+              const b2 = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=audio&key=Alba`)).json()
+              if (b2?.status && b2?.result?.dl) {
+                data = { link: b2.result.dl, title: b2.result.title }
+              } else throw new Error("Ultraplus MP3 falló")
+            } catch {
+              const c2 = await (await fetch(`https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`)).json()
+              if (c2?.status && c2?.result?.download) {
+                data = { link: c2.result.download, title: c2.result.title }
+              }
+            }
+          }
         }
       }
     }
 
-    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga.")
+    if (!data?.link) return m.reply("❌ No se pudo obtener ningún enlace de descarga.")
 
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
-    const pttMode = command === "playaudio" // Nota de voz
+    const pttMode = command === "playaudio"
 
     await conn.sendMessage(m.chat, {
       [sendDoc ? "document" : isAudio ? "audio" : "video"]: { url: data.link },
