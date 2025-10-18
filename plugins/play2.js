@@ -43,13 +43,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n‣ Se enviará como documento por superar 20 minutos.` : ""
 
-    const caption = `
+    const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
 > ♪ *Duración:* ${duration}
 > ♫ *Vistas:* ${views?.toLocaleString()}
 > ♪ *Publicado:* ${ago}
 > ♬ *Link:* ${url}
+╰──── • ────╯
 
 ⏳ _Preparando ${type}..._${aviso}
 `.trim()
