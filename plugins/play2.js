@@ -41,7 +41,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
 
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
-      ? `\n> Se enviará como documento por superar 20 minutos.` : ""
+      ? `\n‣ Se enviará como documento por superar 20 minutos.` : ""
 
     const caption = `
 ╭──── • ────╮
@@ -58,7 +58,28 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 `.trim()
 
     const thumb = (await conn.getFile(thumbnail)).data
-    await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
+    /*await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })*/
+await conn.sendMessage(m.chat, {
+      text: caption,
+      footer: textbot,
+      contextInfo: {
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: channelRD.id,
+          newsletterName: channelRD.name,
+          serverMessageId: -1,
+        },
+        externalAdReply: {
+          title: botname,
+          body: textbot,
+          thumbnailUrl: redes,
+          thumbnail: thumb,
+          sourceUrl: redes,
+          mediaType: 1,
+          renderLargerThumbnail: true,
+        },
+      },
+    }, { quoted: m })
 
     let data = null, usedBackup = 0
 
