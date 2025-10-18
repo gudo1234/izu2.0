@@ -1,23 +1,58 @@
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
-import axios from 'axios'
+import 'moment/locale/es.js' // Para mostrar fecha en español
 import fetch from 'node-fetch'
 import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
   try {
-    let delirius = await axios.get(`https://delirius-apiofc.vercel.app/tools/country?text=${PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', '')).getNumber('international')}`)
-    let paisdata = delirius.data.result
-    if (paisdata) {
-      mundo = `${paisdata.name} ${paisdata.emoji}\n│ 🗓️ *Fecha:* ${paisdata.date}\n│ 🕒 *Hora local:* ${paisdata.time12}`
+    // Extraer número internacional
+    let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
+    let pais = numero.getRegionCode() // ej. "MX", "AR", "CO", etc.
+    let nombrePais = new Intl.DisplayNames(['es'], { type: 'region' }).of(pais) // Nombre del país en español
+
+    // Asignar bandera automáticamente según código ISO
+    let bandera = String.fromCodePoint(
+      ...[...pais.toUpperCase()].map(c => 127397 + c.charCodeAt())
+    )
+
+    // Detectar zona horaria del país (por región principal)
+    const zonas = {
+      MX: 'America/Mexico_City',
+      CO: 'America/Bogota',
+      AR: 'America/Argentina/Buenos_Aires',
+      CL: 'America/Santiago',
+      VE: 'America/Caracas',
+      PE: 'America/Lima',
+      EC: 'America/Guayaquil',
+      BO: 'America/La_Paz',
+      PY: 'America/Asuncion',
+      UY: 'America/Montevideo',
+      DO: 'America/Santo_Domingo',
+      GT: 'America/Guatemala',
+      HN: 'America/Tegucigalpa',
+      NI: 'America/Managua',
+      CR: 'America/Costa_Rica',
+      SV: 'America/El_Salvador',
+      PA: 'America/Panama',
+      US: 'America/New_York',
+      ES: 'Europe/Madrid',
+      BR: 'America/Sao_Paulo'
     }
+
+    let zona = zonas[pais] || 'UTC'
+    let fecha = moment().tz(zona).format('dddd, D [de] MMMM [de] YYYY')
+    let hora = moment().tz(zona).format('hh:mm:ss A') // ⏱️ Ahora con segundos
+
+    mundo = `${nombrePais} ${bandera}\n│ 🗓️ *Fecha:* ${fecha}\n│ 🕒 *Hora local:* ${hora}`
   } catch (err) {
-    console.error('[ERROR EN API DELIRIUS]', err)
+    console.error('[ERROR EN GEOLOCALIZACIÓN LOCAL]', err)
     mundo = 'Desconocido'
   }
 
+  // --- Resto del código original ---
   let jpg = './media/gif.mp4'
   let jpg2 = './media/giff.mp4'
   let or = ['grupo', 'gif', 'anu']
@@ -42,6 +77,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const comandosAnime = comandosPorCategoria('anime', '*‹@υsєя›*')
   const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
   const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
+
   let txt = `${e} _¡Hola!_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
 
 ━━━━━━━━━━━━━
