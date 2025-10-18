@@ -66,7 +66,7 @@ await conn.sendMessage(m.chat, {
           serverMessageId: -1,
         },
         externalAdReply: {
-          title: '🎧 *YOUTUBE EXTRACTOR*',
+          title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
           thumbnailUrl: redes,
           thumbnail: thumb,
