@@ -33,7 +33,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
 
-    const toSeconds = t => t.split(":").reduce((acc, n) => acc * 60 + +n, 0)
+    const toSeconds = t => t.split(":").reduce((a, n) => a * 60 + +n, 0)
     const mins = toSeconds(duration) / 60
 
     const sendDoc = mins > 20 || docAudio.includes(command) || docVideo.includes(command)
@@ -41,8 +41,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
 
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
-      ? `\n‣ Se enviará como documento por superar 20 minutos.`
-      : ""
+      ? `\n> Se enviará como documento por superar 20 minutos.` : ""
 
     const caption = `
 ╭──── • ────╮
@@ -61,53 +60,44 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const thumb = (await conn.getFile(thumbnail)).data
     await conn.sendMessage(m.chat, { image: thumb, caption }, { quoted: m })
 
-    let data = null
-    let usedBackup = false
+    let data = null, usedBackup = 0
 
-    // 🔹 Siempre intentamos primero con los endpoints MP4
-    try {
-      const r = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(url)}`)).json()
-      if (r?.status && r?.download?.url) {
-        data = { link: r.download.url, title: r.metadata?.title }
-      } else throw new Error("Ruby-core MP4 falló")
-    } catch {
-      usedBackup = true
+    // Definición de APIs por tipo
+    const apis = isAudio
+      ? [
+          `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
+          `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=audio&key=Alba`,
+          `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
+        ]
+      : [
+          `https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(url)}`,
+          `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`,
+          `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
+        ]
+
+    // Ciclo de intento con fallback
+    for (let i = 0; i < apis.length && !data; i++) {
       try {
-        const b = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`)).json()
-        if (b?.status && b?.result?.dl) {
-          data = { link: b.result.dl, title: b.result.title }
-        } else throw new Error("Ultraplus MP4 falló")
-      } catch {
-        try {
-          const c = await (await fetch(`https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`)).json()
-          if (c?.status && c?.result?.download) {
-            data = { link: c.result.download, title: c.result.title }
-          } else throw new Error("Sankavollerei MP4 falló")
-        } catch {
-          // 🔹 Si TODO falla, probamos con MP3 (último intento)
-          try {
-            const r2 = await (await fetch(`https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`)).json()
-            if (r2?.status && r2?.download?.url) {
-              data = { link: r2.download.url, title: r2.metadata?.title }
-            } else throw new Error("Ruby-core MP3 falló")
-          } catch {
-            try {
-              const b2 = await (await fetch(`https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=audio&key=Alba`)).json()
-              if (b2?.status && b2?.result?.dl) {
-                data = { link: b2.result.dl, title: b2.result.title }
-              } else throw new Error("Ultraplus MP3 falló")
-            } catch {
-              const c2 = await (await fetch(`https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`)).json()
-              if (c2?.status && c2?.result?.download) {
-                data = { link: c2.result.download, title: c2.result.title }
-              }
-            }
-          }
-        }
-      }
+        const res = await fetch(apis[i])
+        const json = await res.json()
+
+        // Ruby-core
+        if (json?.download?.url)
+          data = { link: json.download.url, title: json.metadata?.title }
+
+        // Ultraplus
+        else if (json?.result?.dl)
+          data = { link: json.result.dl, title: json.result.title }
+
+        // Sankavollerei
+        else if (json?.result?.download)
+          data = { link: json.result.download, title: json.result.title }
+
+        if (data) usedBackup = i
+      } catch (e) { continue }
     }
 
-    if (!data?.link) return m.reply("❌ No se pudo obtener ningún enlace de descarga.")
+    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga desde ninguna API.")
 
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
@@ -120,7 +110,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       ptt: isAudio && pttMode
     }, { quoted: m })
 
-    await m.react(usedBackup ? "⌛" : "✅")
+    await m.react(usedBackup === 0 ? "✅" : usedBackup === 1 ? "⌛" : "🌀")
 
   } catch (err) {
     console.error(err)
