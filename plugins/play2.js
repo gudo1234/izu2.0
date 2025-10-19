@@ -1,5 +1,6 @@
 import fetch from "node-fetch"
 import yts from "yt-search"
+import sharp from "sharp"
 
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
   const docAudio = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
@@ -55,7 +56,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ⏳ _Preparando ${type}..._${aviso}
 `.trim()
 
-    const thumb = (await conn.getFile(thumbnail)).data
+    // 🔹 Convertir el thumbnail correctamente a JPEG pequeño
+    const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
+    const thumb = await sharp(Buffer.from(thumbBuffer))
+      .resize(200, 200) // tamaño miniatura válido
+      .jpeg({ quality: 80 })
+      .toBuffer()
+
+    // 🔹 Mensaje inicial con preview y miniatura correcta
     await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -69,11 +77,10 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnailUrl: redes,
           thumbnail: thumb,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: false,
+          renderLargerThumbnail: true, // ✅ muestra imagen completa
         },
       },
     }, { quoted: m })
@@ -113,14 +120,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const fileSize = data.size || 8000000
     const pttMode = command === "playaudio"
 
-    // 🔥 Si es documento, usa formato estilo WhatsApp con miniatura y tamaño
+    // 🔥 Si es documento, usa thumbnail correcto convertido con sharp
     if (sendDoc) {
       await conn.sendMessage(m.chat, {
         document: { url: data.link },
         mimetype,
         fileName,
         fileLength: fileSize,
-        jpegThumbnail: thumb,
+        jpegThumbnail: thumb, // ✅ ahora sí se ve bien
         caption: title,
       }, { quoted: m })
     } else {
