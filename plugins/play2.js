@@ -80,7 +80,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           thumbnail: thumb,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: true, // ✅ muestra imagen completa
+          renderLargerThumbnail: false,
         },
       },
     }, { quoted: m })
@@ -128,7 +128,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         fileName,
         fileLength: fileSize,
         jpegThumbnail: thumb, // ✅ ahora sí se ve bien
-        caption: title,
+        //caption: title,
       }, { quoted: m })
     } else {
       // 🔊 Audio o video normales (reproductor)
