@@ -68,7 +68,7 @@ export async function before(m) {
   let text = `⌗ _*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
   if (similares.length) {
     text += `\n¿Quizás quisiste decir?\n`
-    text += similares.map(s => `> ⌏${usedPrefix + s.cmd}`).join('\n')
+    text += similares.map(s => `> ${usedPrefix + s.cmd}`).join('\n')
   }
 
   await m.reply(text)
