@@ -72,10 +72,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         },
       },
     }, { quoted: m })
+
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
     })()
+
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -104,8 +106,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
     const fileSize = data.size || 8000000
-    const pttMode = command === "playaudio"
     const thumb = await thumbPromise.catch(() => null)
+
     const fileMsg = sendDoc
       ? {
           document: { url: data.link },
@@ -118,7 +120,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           [isAudio ? "audio" : "video"]: { url: data.link },
           mimetype,
           fileName,
-          ptt: isAudio && pttMode,
+          ptt: false,
           jpegThumbnail: thumb,
         }
 
