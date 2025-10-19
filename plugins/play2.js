@@ -121,7 +121,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         fileName,
         fileLength: fileSize,
         thumbnail: thumb,
-        //caption: title,
+        caption: title,
       }, { quoted: m })
     } else {
       // 🔊 Audio o video normales (reproductor)
