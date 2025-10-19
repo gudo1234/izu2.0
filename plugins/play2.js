@@ -41,8 +41,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
-
-    // 📤 Enviar mensaje informativo inmediatamente (sin esperar thumbnail)
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -67,21 +65,17 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnailUrl: thumbnail, // usa thumbnailUrl directo (más rápido)
+          thumbnailUrl: thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
         },
       },
     }, { quoted: m })
-
-    // 🧠 Procesar thumbnail en segundo plano (mejor calidad)
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
     })()
-
-    // ⚙️ Buscar descarga más rápida (todas las APIs en paralelo)
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -112,8 +106,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const fileSize = data.size || 8000000
     const pttMode = command === "playaudio"
     const thumb = await thumbPromise.catch(() => null)
-
-    // 📦 Enviar formato final
     const fileMsg = sendDoc
       ? {
           document: { url: data.link },
