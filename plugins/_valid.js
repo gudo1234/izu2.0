@@ -88,7 +88,7 @@ export async function before(m) {
     closestCommands.sort((a, b) => b.similarity - a.similarity);
     const topMatches = closestCommands.slice(0, 2);
 
-    let replyMessage = `${e} _Comando ingresado no encontrado en mi base de datos._\n` +
+    let replyMessage = `⟢ _Comando ingresado no encontrado en mi base de datos._\n` +
       `> ${mundo} Usa *${usedPrefix}menu* para ver la lista completa de comandos disponibles.\n\n`;
 
     if (topMatches.length > 0) {
