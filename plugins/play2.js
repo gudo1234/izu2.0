@@ -57,6 +57,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 `.trim()
 
     // 🔹 Convertir el thumbnail correctamente a JPEG pequeño
+    const img = (await conn.getFile(thumbnail)).data
     const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
     const thumb = await sharp(Buffer.from(thumbBuffer))
       .resize(200, 200) // tamaño miniatura válido
@@ -77,7 +78,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnail: thumb,
+          thumbnail: img,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
