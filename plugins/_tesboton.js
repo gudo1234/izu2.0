@@ -16,11 +16,10 @@ export async function before(m, { conn, args, usedPrefix, command }) {
     let vn2 = './media/prueba3.mp3'
     let user = global.db.data.users[m.sender]
     if (new Date() - user.pc < 105000) return
-//if (new Date() - user.pc < 21600000) return
-    const { imageMessage } = await prepareWAMessageMedia({
-        image: { url: icono }
-    }, { upload: conn.waUploadToServer });
-conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
+    //if (new Date() - user.pc < 21600000) return
+
+    // Enviar PRIMERO el mensaje de texto (m.reply)
+    conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
 
 ✧──────‧₊˚📁˚₊‧──────╮
 │ _Tengo muchos comandos_
@@ -35,6 +34,14 @@ conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui d
 *Síguenos en nuestro canal*
 *y mantente informado....*
 ╰︶︶︶︶︶🎉︶︶︶︶︶╯`, m, fake)
+
+    // Pequeña pausa antes de continuar
+    await new Promise(resolve => setTimeout(resolve, 800))
+
+    const { imageMessage } = await prepareWAMessageMedia({
+        image: { url: icono }
+    }, { upload: conn.waUploadToServer });
+
     const sections = [
         {
             title: "💻Información",
