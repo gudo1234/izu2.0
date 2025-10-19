@@ -17,7 +17,7 @@ export async function before(m, { conn, args, usedPrefix, command }) {
     let user = global.db.data.users[m.sender] || {}
     
     // Evitar repeticiones inmediatas
-    if (user.lastBoton && new Date() - user.lastBoton < 105000) return
+    if (user.lastBoton && new Date() - user.lastBoton < 21600000) return
     user.lastBoton = new Date() * 1
 
     // Enviar PRIMERO el mensaje de texto (m.reply)
