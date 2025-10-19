@@ -56,7 +56,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 `.trim()
 
     const thumb = (await conn.getFile(thumbnail)).data
-await conn.sendMessage(m.chat, {
+    await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
       contextInfo: {
@@ -80,7 +80,6 @@ await conn.sendMessage(m.chat, {
 
     let data = null, usedBackup = 0
 
-    // Definición de APIs por tipo
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -93,24 +92,16 @@ await conn.sendMessage(m.chat, {
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
 
-    // Ciclo de intento con fallback
     for (let i = 0; i < apis.length && !data; i++) {
       try {
         const res = await fetch(apis[i])
         const json = await res.json()
-
-        // Ruby-core
         if (json?.download?.url)
-          data = { link: json.download.url, title: json.metadata?.title }
-
-        // Ultraplus
+          data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
         else if (json?.result?.dl)
-          data = { link: json.result.dl, title: json.result.title }
-
-        // Sankavollerei
+          data = { link: json.result.dl, title: json.result.title, size: json.result.size }
         else if (json?.result?.download)
-          data = { link: json.result.download, title: json.result.title }
-
+          data = { link: json.result.download, title: json.result.title, size: json.result.size }
         if (data) usedBackup = i
       } catch (e) { continue }
     }
@@ -119,13 +110,16 @@ await conn.sendMessage(m.chat, {
 
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
-    const pttMode = command === "playaudio"
+    const fileSize = data.size || 8000000 // estimación si la API no devuelve tamaño
 
+    // 🔥 Enviar en formato documento visual idéntico a WhatsApp
     await conn.sendMessage(m.chat, {
-      [sendDoc ? "document" : isAudio ? "audio" : "video"]: { url: data.link },
+      document: { url: data.link },
       mimetype,
       fileName,
-      ptt: isAudio && pttMode
+      fileLength: fileSize,
+      jpegThumbnail: thumb, // miniatura visible
+      caption: title,
     }, { quoted: m })
 
     await m.react(usedBackup === 0 ? "✅" : usedBackup === 1 ? "⌛" : "🌀")
