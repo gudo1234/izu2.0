@@ -26,6 +26,9 @@ let tag = name || ''
   let vn13 = './media/stellar.mp3' // bye
   let vn14 = './media/theb.mp3' // bye
   let vn15 = './media/alanspectre.mp3' // bye
+  let jpg = './media/gif.mp4'
+  let jpg2 = './media/giff.mp4'
+  let jpg3 = './media/gifff.mp4'
   let or = ['stiker', 'audio', 'texto', 'gifPlayback'];
   let media = or[Math.floor(Math.random() * 4)];
   let stiker = await sticker(imagen7, false, global.packname, global.author) //despedida
@@ -122,7 +125,7 @@ if (media === 'texto') {
 
 if (media === 'gifPlayback') {
 await conn.sendMessage(m.chat, {
-    video: { url: 'https://qu.ax/TXRoC.mp4' },
+    video: { url:  [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
     gifPlayback: true,
     caption: a,
     contextInfo: {
