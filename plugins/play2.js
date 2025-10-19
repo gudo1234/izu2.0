@@ -78,6 +78,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
     })()
 
+    // 🔹 Prioridad de APIs
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -90,16 +91,32 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
 
-    const fetchers = apis.map(url => fetch(url).then(r => r.json()).catch(() => null))
-    const json = await Promise.any(fetchers)
-
+    // 🔹 Intentar una por una hasta obtener link válido
     let data = null
-    if (json?.download?.url)
-      data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
-    else if (json?.result?.dl)
-      data = { link: json.result.dl, title: json.result.title, size: json.result.size }
-    else if (json?.result?.download)
-      data = { link: json.result.download, title: json.result.title, size: json.result.size }
+    for (const api of apis) {
+      try {
+        const res = await fetch(api)
+        const json = await res.json()
+        const link =
+          json?.download?.url ||
+          json?.result?.dl ||
+          json?.result?.download ||
+          json?.result?.url ||
+          json?.data?.url ||
+          null
+
+        if (link) {
+          data = {
+            link,
+            title: json?.metadata?.title || json?.result?.title || title,
+            size: json?.metadata?.filesize || json?.result?.size || 8000000
+          }
+          break
+        }
+      } catch {
+        continue
+      }
+    }
 
     if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga desde ninguna API.")
 
@@ -120,7 +137,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           [isAudio ? "audio" : "video"]: { url: data.link },
           mimetype,
           fileName,
-          ptt: false,
+          ptt: false, // 🔹 Audio normal (no nota de voz)
           jpegThumbnail: thumb,
         }
 
