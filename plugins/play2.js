@@ -42,7 +42,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
 
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
-      ? `\n‣ Se enviará como documento por superar 20 minutos.` : ""
+      ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
 
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
