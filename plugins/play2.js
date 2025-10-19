@@ -55,15 +55,11 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
 ⏳ _Preparando ${type}..._${aviso}
 `.trim()
-
-    // 🔹 Convertir el thumbnail correctamente a JPEG pequeño
     const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
     const thumb = await sharp(Buffer.from(thumbBuffer))
-      .resize(200, 200) // tamaño miniatura válido
+      .resize(200, 200)
       .jpeg({ quality: 80 })
       .toBuffer()
-
-    // 🔹 Mensaje inicial con preview y miniatura correcta
     await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -119,19 +115,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
     const fileSize = data.size || 8000000
     const pttMode = command === "playaudio"
-
-    // 🔥 Si es documento, usa thumbnail correcto convertido con sharp
+    
     if (sendDoc) {
       await conn.sendMessage(m.chat, {
         document: { url: data.link },
         mimetype,
         fileName,
         fileLength: fileSize,
-        jpegThumbnail: thumb, // ✅ ahora sí se ve bien
-        //caption: title,
+        jpegThumbnail: thumb,
       }, { quoted: m })
     } else {
-      // 🔊 Audio o video normales (reproductor)
       await conn.sendMessage(m.chat, {
         [isAudio ? "audio" : "video"]: { url: data.link },
         mimetype,
