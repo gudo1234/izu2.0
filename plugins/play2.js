@@ -77,8 +77,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
     })()
-
-    // 🔹 Prioridad de APIs
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -90,8 +88,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`,
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
-
-    // 🔹 Intentar una por una hasta obtener link válido
     let data = null
     for (const api of apis) {
       try {
@@ -137,7 +133,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           [isAudio ? "audio" : "video"]: { url: data.link },
           mimetype,
           fileName,
-          ptt: false, // 🔹 Audio normal (no nota de voz)
           jpegThumbnail: thumb,
         }
 
