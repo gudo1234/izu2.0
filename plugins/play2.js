@@ -16,7 +16,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       : normalVideo.includes(command)
       ? 'video'
       : 'video en documento'
-    return m.reply(`${e} Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n\♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+    return m.reply(`${e} Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
   }
 
   await m.react("🕒")
@@ -33,17 +33,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
-
     const toSeconds = t => t.split(":").reduce((a, n) => a * 60 + +n, 0)
     const mins = toSeconds(duration) / 60
 
     const sendDoc = mins > 20 || docAudio.includes(command) || docVideo.includes(command)
     const isAudio = [...docAudio, ...normalAudio].includes(command)
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
-
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
 
+    // 📤 Enviar mensaje informativo inmediatamente (sin esperar thumbnail)
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -53,14 +52,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 > ♬ *Link:* ${url}
 ╰──── • ────╯
 
-⏳ _Preparando ${type}..._${aviso}
-`.trim()
-    const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
-    const thumb = await sharp(Buffer.from(thumbBuffer))
-      .resize(200, 200)
-      .jpeg({ quality: 80 })
-      .toBuffer()
-    await conn.sendMessage(m.chat, {
+⏳ _Preparando ${type}..._${aviso}`.trim()
+
+    conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
       contextInfo: {
@@ -73,7 +67,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnail: thumb,
+          thumbnailUrl: thumbnail, // usa thumbnailUrl directo (más rápido)
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
@@ -81,8 +75,13 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       },
     }, { quoted: m })
 
-    let data = null, usedBackup = 0
+    // 🧠 Procesar thumbnail en segundo plano (mejor calidad)
+    const thumbPromise = (async () => {
+      const buffer = await (await fetch(thumbnail)).arrayBuffer()
+      return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
+    })()
 
+    // ⚙️ Buscar descarga más rápida (todas las APIs en paralelo)
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -95,19 +94,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
 
-    for (let i = 0; i < apis.length && !data; i++) {
-      try {
-        const res = await fetch(apis[i])
-        const json = await res.json()
-        if (json?.download?.url)
-          data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
-        else if (json?.result?.dl)
-          data = { link: json.result.dl, title: json.result.title, size: json.result.size }
-        else if (json?.result?.download)
-          data = { link: json.result.download, title: json.result.title, size: json.result.size }
-        if (data) usedBackup = i
-      } catch (e) { continue }
-    }
+    const fetchers = apis.map(url => fetch(url).then(r => r.json()).catch(() => null))
+    const json = await Promise.any(fetchers)
+
+    let data = null
+    if (json?.download?.url)
+      data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
+    else if (json?.result?.dl)
+      data = { link: json.result.dl, title: json.result.title, size: json.result.size }
+    else if (json?.result?.download)
+      data = { link: json.result.download, title: json.result.title, size: json.result.size }
 
     if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga desde ninguna API.")
 
@@ -115,25 +111,27 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
     const fileSize = data.size || 8000000
     const pttMode = command === "playaudio"
-    
-    if (sendDoc) {
-      await conn.sendMessage(m.chat, {
-        document: { url: data.link },
-        mimetype,
-        fileName,
-        fileLength: fileSize,
-        jpegThumbnail: thumb,
-      }, { quoted: m })
-    } else {
-      await conn.sendMessage(m.chat, {
-        [isAudio ? "audio" : "video"]: { url: data.link },
-        mimetype,
-        fileName,
-        ptt: isAudio && pttMode
-      }, { quoted: m })
-    }
+    const thumb = await thumbPromise.catch(() => null)
 
-    await m.react(usedBackup === 0 ? "✅" : usedBackup === 1 ? "⌛" : "🌀")
+    // 📦 Enviar formato final
+    const fileMsg = sendDoc
+      ? {
+          document: { url: data.link },
+          mimetype,
+          fileName,
+          fileLength: fileSize,
+          jpegThumbnail: thumb,
+        }
+      : {
+          [isAudio ? "audio" : "video"]: { url: data.link },
+          mimetype,
+          fileName,
+          ptt: isAudio && pttMode,
+          jpegThumbnail: thumb,
+        }
+
+    await conn.sendMessage(m.chat, fileMsg, { quoted: m })
+    await m.react("✅")
 
   } catch (err) {
     console.error(err)
