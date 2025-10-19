@@ -80,7 +80,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           thumbnail: thumb,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: true, // ✅ muestra imagen completa
+          renderLargerThumbnail: false,
         },
       },
     }, { quoted: m })
