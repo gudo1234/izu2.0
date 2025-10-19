@@ -34,7 +34,7 @@
 "@bochilteam/scraper": "^4.2.4",
 "@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "@vitalets/google-translate-api": "^8.0.0",
-"@whiskeysockets/baileys":"npm:baileys-mod",
+"@whiskeysockets/baileys":"EdderBot02/bail",
 "@nechlophomeriaa/spotifydl": "^1.0.7",
 "acrcloud": "^1.4.0",
 "api-dylux": "^1.7.2",
