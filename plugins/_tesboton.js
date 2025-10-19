@@ -14,12 +14,14 @@ export async function before(m, { conn, args, usedPrefix, command }) {
 
     let vn = './media/prueba4.mp3'
     let vn2 = './media/prueba3.mp3'
-    let user = global.db.data.users[m.sender]
-    if (new Date() - user.pc < 105000) return
-    //if (new Date() - user.pc < 21600000) return
+    let user = global.db.data.users[m.sender] || {}
+    
+    // Evitar repeticiones inmediatas
+    if (user.lastBoton && new Date() - user.lastBoton < 105000) return
+    user.lastBoton = new Date() * 1
 
     // Enviar PRIMERO el mensaje de texto (m.reply)
-    conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
+    await conn.reply(m.chat, `🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
 
 ✧──────‧₊˚📁˚₊‧──────╮
 │ _Tengo muchos comandos_
@@ -99,9 +101,8 @@ export async function before(m, { conn, args, usedPrefix, command }) {
     m.react('🤖')
 
     await conn.relayMessage(m.chat, { viewOnceMessage: { message } }, {});
-    conn.sendFile(m.chat, [vn, vn2].getRandom(), 'prueba3.mp3', null, null, true, { 
+    await conn.sendFile(m.chat, [vn, vn2].getRandom(), 'prueba3.mp3', null, null, true, { 
         type: 'audioMessage', 
         ptt: true 
     })
-    user.pc = new Date * 1
 }
