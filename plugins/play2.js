@@ -110,17 +110,28 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
-    const fileSize = data.size || 8000000 // estimación si la API no devuelve tamaño
+    const fileSize = data.size || 8000000
+    const pttMode = command === "playaudio"
 
-    // 🔥 Enviar en formato documento visual idéntico a WhatsApp
-    await conn.sendMessage(m.chat, {
-      document: { url: data.link },
-      mimetype,
-      fileName,
-      fileLength: fileSize,
-      jpegThumbnail: thumb, // miniatura visible
-      caption: title,
-    }, { quoted: m })
+    // 🔥 Si es documento, usa formato estilo WhatsApp con miniatura y tamaño
+    if (sendDoc) {
+      await conn.sendMessage(m.chat, {
+        document: { url: data.link },
+        mimetype,
+        fileName,
+        fileLength: fileSize,
+        jpegThumbnail: thumb,
+        caption: title,
+      }, { quoted: m })
+    } else {
+      // 🔊 Audio o video normales (reproductor)
+      await conn.sendMessage(m.chat, {
+        [isAudio ? "audio" : "video"]: { url: data.link },
+        mimetype,
+        fileName,
+        ptt: isAudio && pttMode
+      }, { quoted: m })
+    }
 
     await m.react(usedBackup === 0 ? "✅" : usedBackup === 1 ? "⌛" : "🌀")
 
