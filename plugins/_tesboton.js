@@ -15,12 +15,26 @@ export async function before(m, { conn, args, usedPrefix, command }) {
     let vn = './media/prueba4.mp3'
     let vn2 = './media/prueba3.mp3'
     let user = global.db.data.users[m.sender]
-    //if (new Date() - user.pc < 105000) return
-if (new Date() - user.pc < 21600000) return
+    if (new Date() - user.pc < 105000) return
+//if (new Date() - user.pc < 21600000) return
     const { imageMessage } = await prepareWAMessageMedia({
         image: { url: icono }
     }, { upload: conn.waUploadToServer });
+conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
 
+✧──────‧₊˚📁˚₊‧──────╮
+│ _Tengo muchos comandos_
+│ _con diferentes funciones_
+│ _como la descarga de videos,_
+│ _audios, fotos y mucho mas,_
+│ _contiene búsquedas con_
+│ _chatGPT y diversos juegos._
+✧──────‧₊˚🎠˚₊‧──────╯
+
+╭︶︶︶︶︶🌐︶︶︶︶︶╮
+*Síguenos en nuestro canal*
+*y mantente informado....*
+╰︶︶︶︶︶🎉︶︶︶︶︶╯`, m, fake)
     const sections = [
         {
             title: "💻Información",
@@ -76,21 +90,6 @@ if (new Date() - user.pc < 21600000) return
     };
 
     m.react('🤖')
-    conn.reply(m.chat,`🖐🏻 ¡Hola! *${m.pushName}* mi nombre es *${wm}* y fui desarrollada para cumplir multiples funciones en *WhatsApp🪀*.
-
-✧──────‧₊˚📁˚₊‧──────╮
-│ _Tengo muchos comandos_
-│ _con diferentes funciones_
-│ _como la descarga de videos,_
-│ _audios, fotos y mucho mas,_
-│ _contiene búsquedas con_
-│ _chatGPT y diversos juegos._
-✧──────‧₊˚🎠˚₊‧──────╯
-
-╭︶︶︶︶︶🌐︶︶︶︶︶╮
-*Síguenos en nuestro canal*
-*y mantente informado....*
-╰︶︶︶︶︶🎉︶︶︶︶︶╯`, m, fake)
 
     await conn.relayMessage(m.chat, { viewOnceMessage: { message } }, {});
     conn.sendFile(m.chat, [vn, vn2].getRandom(), 'prueba3.mp3', null, null, true, { 
