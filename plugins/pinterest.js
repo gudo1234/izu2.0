@@ -4,44 +4,44 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text)
     return conn.reply(m.chat, `🧠 *Uso correcto:*\n> ${usedPrefix + command} <link o palabra clave de Pinterest>`, m, fake)
 
-  await conn.sendMessage(m.chat, { react: { text: '💭', key: m.key } })
+  await m.react('💭')
 
   const pinterestUrlRegex = /^https?:\/\/(www\.)?(pinterest\.[a-z.]+\/pin\/|pin\.it\/)/i
 
   try {
-    // Si es un enlace directo de Pinterest
+    // Si es un enlace de Pinterest
     if (pinterestUrlRegex.test(text)) {
-      try {
-        // Primer intento con API Agatz
-        const res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${encodeURIComponent(text)}`)
-        const json = await res.json()
+      let url = text.trim()
 
-        if (json?.data?.result) {
-          await conn.sendFile(m.chat, json.data.result, 'pinterest.mp4', `🔗 *Fuente:* ${text}`, m, null, rcanal)
-          await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
-          return
+      // Resolver redirección si el link es de pin.it
+      if (url.includes('pin.it')) {
+        try {
+          const head = await fetch(url, { method: 'HEAD', redirect: 'manual' })
+          const location = head.headers.get('location')
+          if (location) url = location
+        } catch (err) {
+          console.log('No se pudo resolver el pin.it:', err)
         }
-        throw new Error('Fallo la API Agatz')
-      } catch {
-        // Si falla, usar API Delirius como respaldo
-        const apiUrl = `https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(text)}`
-        const res2 = await fetch(apiUrl)
-        const json2 = await res2.json()
-
-        if (!json2.status || !json2.data || !json2.data.download?.url)
-          throw new Error('No se pudo obtener el video.')
-
-        const info = json2.data
-        const title = info.title || 'Video de Pinterest'
-        const description = info.description || ''
-        const videoUrl = info.download.url
-
-        const caption = `🎬 *${title}*\n${description ? `📝 ${description}\n` : ''}\n🔗 *Fuente:* ${text}`
-
-        await conn.sendFile(m.chat, videoUrl, 'pinterest.mp4', caption, m, null, rcanal)
-        await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
-        return
       }
+
+      // Intentar descargar con API Delirius
+      const apiUrl = `https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(url)}`
+      const res = await fetch(apiUrl)
+      const json = await res.json()
+
+      if (!json.status || !json.data) throw new Error('No se pudo obtener datos del pin.')
+
+      const info = json.data
+      const title = info.title || 'Pin de Pinterest'
+      const description = info.description || ''
+      const mediaUrl = info.download?.url || info.image || info.video || info.media
+      if (!mediaUrl) throw new Error('No se encontró contenido descargable.')
+
+      const caption = `${info.video ? '🎬' : '🖼️'} *${title}*\n${description ? `📝 ${description}\n` : ''}🔗 *Fuente:* ${url}`
+
+      await conn.sendFile(m.chat, mediaUrl, 'pinterest.mp4', caption, m, null, rcanal)
+      await m.react('✅')
+      return
     }
 
     // Si el texto no es URL → búsqueda de imágenes
@@ -66,10 +66,10 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       }
     }
 
-    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+    await m.react('✅')
   } catch (err) {
     console.error(err)
-    await conn.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
+    await m.react('❌')
     await conn.reply(m.chat, '❌ Ocurrió un error al procesar el enlace o la búsqueda.', m, fake)
   }
 }
