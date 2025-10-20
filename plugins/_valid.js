@@ -11,8 +11,6 @@ function banderaEmoji(countryCode) {
   const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
 }
-
-// === Distancia Levenshtein (sin librerías externas) ===
 function levenshteinDistance(a, b) {
   const dp = Array.from({ length: a.length + 1 }, (_, i) => [i])
   for (let j = 1; j <= b.length; j++) dp[0][j] = j
@@ -41,8 +39,6 @@ export async function before(m) {
   const phoneInfo = PhoneNumber('+' + number)
   const countryCode = phoneInfo.getRegionCode('international')
   const mundo = banderaEmoji(countryCode)
-
-  // === Verificar si el comando existe ===
   const validCommand = Object.values(global.plugins).some(plugin => {
     const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
     return cmds.includes(command)
@@ -52,14 +48,10 @@ export async function before(m) {
     user.commands = (user.commands || 0) + 1
     return
   }
-
-  // === Recolectar todos los comandos disponibles ===
   const allCommands = Object.values(global.plugins)
     .flatMap(p => Array.isArray(p.command) ? p.command : [p.command])
     .filter(Boolean)
     .filter(cmd => typeof cmd === 'string')
-
-  // === Calcular similitud y tomar las mejores ===
   const similares = allCommands
     .map(cmd => {
       const dist = levenshteinDistance(command, cmd)
@@ -67,15 +59,13 @@ export async function before(m) {
       const sim = maxLen === 0 ? 100 : Math.round((1 - dist / maxLen) * 100)
       return { cmd, sim }
     })
-    .filter(r => !isNaN(r.sim) && r.sim > 0) // mostrar solo si hay alguna similitud
+    .filter(r => !isNaN(r.sim) && r.sim > 0)
     .sort((a, b) => b.sim - a.sim)
     .slice(0, 2)
-
-  // === Mensaje final con % incluido ===
-  let text = `⌗ *Comando no reconocido*\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
+  let text = `⌗ _*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
   if (similares.length) {
-    text += `\n¿Quizás quisiste decir?\n`
-    text += similares.map(s => `> ${usedPrefix + s.cmd} (${s.sim}% de similitud)`).join('\n')
+    text += `\n∝ *Sugerencias:*\n`
+    text += similares.map(s => `> ${usedPrefix + s.cmd} (${s.sim}% de coincidencia)`).join('\n')
   }
 
   await m.reply(text)
