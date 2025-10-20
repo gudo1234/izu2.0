@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text }) => {
 
-  if (!text) return m.reply(`${e} *Por favor, ingresa una pregunta para Gemini.*`);
+  if (!text) return m.reply(`${e} *Por favor, ingresa una pregunta para gestionar conmigo usando la herramienta gémini.*`);
   m.react('🕒');
 
   try {
@@ -16,7 +16,7 @@ let handler = async (m, { conn, text }) => {
     if (json.status && json.data && json.data.parts) {
       const respuesta = json.data.parts.map(p => p.text).join('\n');
       m.react('✅')
-      m.reply(`${e} ${respuesta}`
+     conn.reply(m.chat, `${e} ${respuesta}`, m, fake)
       );
     } else {
       m.reply(`${e} No se pudo obtener respuesta de Gemini.`);
