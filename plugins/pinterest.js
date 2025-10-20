@@ -22,11 +22,11 @@ const handler = async (m, { conn, text }) => {
       const res = await fetch(api)
       const json = await res.json()
 
-      if (!json?.status || !json?.data?.download?.url) throw new Error('Respuesta inválida.')
+      if (!json?.status || !json?.data) throw new Error('Respuesta inválida.')
 
       const data = json.data
-      const url = data.download.url
-      const type = data.download.type
+      const type = data.download?.type || 'image'
+      const url = data.download?.url
       const thumb = data.thumbnail
 
       let caption = `
@@ -38,17 +38,26 @@ const handler = async (m, { conn, text }) => {
 > ✦ *Tipo:* ${type}
       `.trim()
 
-      // 🔹 3. Enviar miniatura + video o imagen
-      if (type === 'video') {
-        await conn.sendMessage(m.chat, {
-          video: { url },
-          caption,
-          thumbnail: await (await fetch(thumb)).buffer(),
-          mimetype: 'video/mp4'
-        }, { quoted: m })
-      } else {
-        await conn.sendFile(m.chat, url, 'pinterest.jpg', caption, m)
+      // 🔹 3. Intentar enviar video si existe y es accesible
+      if (type === 'video' && url) {
+        try {
+          const check = await fetch(url, { method: 'HEAD' })
+          if (check.ok) {
+            await conn.sendMessage(m.chat, {
+              video: { url },
+              caption,
+              thumbnail: await (await fetch(thumb)).buffer(),
+              mimetype: 'video/mp4'
+            }, { quoted: m })
+            return
+          }
+        } catch {
+          // Si falla la URL, caemos al envío de imagen
+        }
       }
+
+      // 🔹 4. Enviar como imagen si el video no es válido
+      await conn.sendFile(m.chat, thumb || url, 'pinterest.jpg', caption, m)
 
     } catch (err) {
       console.error(err)
