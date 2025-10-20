@@ -1,59 +1,60 @@
-import fetch from 'node-fetch';
+import fetch from "node-fetch"
+import fs from "fs"
+import path from "path"
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+let handler = async (m, { conn, text, usedPrefix, command }) => {
+  try {
+    if (!text && !m.quoted) throw `✳️ Ingresa un texto o responde a un video.\n\nEjemplo:\n*${usedPrefix + command}* Edar 💫`
 
-  if (!text) return m.reply(`${e} *Ingresa un enlace de Pinterest o una palabra clave para buscar.*`);
+    // Si el mensaje citado tiene video
+    const q = m.quoted ? m.quoted : m
+    const mime = (q.msg || q).mimetype || ''
+    const isVideo = /video/.test(mime)
 
-  conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
+    await m.react('🌀')
 
-  // Detectar cualquier URL válida de Pinterest (pin.it o pinterest.com)
-  const pinterestUrlRegex = /^https?:\/\/(www\.)?(pinterest\.[a-z.]+\/pin\/|pin\.it\/)/i;
+    if (isVideo) {
+      // --- VIDEO CON EFECTO NEÓN (Delirius) ---
+      let media = await q.download()
+      let form = new FormData()
+      form.append('file', media, 'video.mp4')
 
-  if (pinterestUrlRegex.test(text)) {
-    try {
-      // Enviar la URL directamente a la API (sin resolver)
-      const res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${encodeURIComponent(text)}`);
-      const json = await res.json();
+      const urlAPI = `https://api.deliriusapi.workers.dev/api/tools/video-neon?apikey=delirius`
+      const res = await fetch(urlAPI, { method: 'POST', body: form })
 
-      if (!json?.data?.result) throw `${e} No se pudo obtener el contenido del enlace.`;
+      if (!res.ok) throw '⚠️ Error al generar video (Delirius)'
+      const buffer = await res.arrayBuffer()
+      const filePath = path.join('./tmp', `${Date.now()}_neon.mp4`)
+      fs.writeFileSync(filePath, Buffer.from(buffer))
 
-      await conn.sendFile(m.chat, json.data.result, `pinterest.mp4`, `*🔗 Url:* ${json.data.url}`, m, null, rcanal);
-    } catch (err) {
-      console.error(err);
-      m.reply(`${e} Hubo un error al procesar el enlace.`);
+      await conn.sendMessage(m.chat, { video: { url: filePath }, caption: '✨ Video neón generado con Delirius' }, { quoted: m })
+      await m.react('✅')
+      fs.unlinkSync(filePath)
+    } else {
+      // --- IMAGEN CON TEXTO (Dorratz) ---
+      let texto = text || q.text
+      if (!texto) throw `✳️ Ingresa un texto para generar el arte.`
+
+      const res = await fetch(`https://api.dorratz.com/api/gfx1?text=${encodeURIComponent(texto)}&apikey=dorratz`)
+      if (!res.ok) throw '⚠️ Error al generar imagen (Dorratz)'
+      const buffer = await res.arrayBuffer()
+      const filePath = path.join('./tmp', `${Date.now()}_gfx.jpg`)
+      fs.writeFileSync(filePath, Buffer.from(buffer))
+
+      await conn.sendFile(m.chat, filePath, 'gfx.jpg', `✨ Arte generado con Dorratz`, m)
+      await m.react('✅')
+      fs.unlinkSync(filePath)
     }
-  } else {
-    try {
-      const res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
-      const data = await res.json();
 
-      if (!Array.isArray(data) || data.length === 0) {
-        return m.reply(`${e} No se encontraron imágenes para: *${text}*`);
-      }
-
-      const results = data.slice(0, 15);
-      let first = true;
-
-      for (const item of results) {
-        const url = item.image_large_url;
-        if (!url) continue;
-
-        if (first) {
-          await conn.sendFile(m.chat, url, "thumb.jpg", `${e} Resultados para: *${text}*`, m, null, rcanal);
-          first = false;
-        } else {
-          await conn.sendMessage(m.chat, { image: { url } }, { quoted: m });
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      m.reply(`${e} Ocurrió un error al buscar imágenes.`);
-    }
+  } catch (err) {
+    console.error(err)
+    await m.reply('❌ Ocurrió un error al generar el arte.')
+    await m.react('❌')
   }
+}
 
-  conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-};
+handler.help = ['neon <texto> o responde a un video']
+handler.tags = ['tools']
+handler.command = ['neon']
 
-handler.command = ['pin', 'pinterest', 'pinvid', 'pinimg', 'pinterestvid', 'pindl', 'pinterestdl'];
-handler.group = true;
-export default handler;
+export default handler
