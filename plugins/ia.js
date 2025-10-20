@@ -29,6 +29,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 }
 
-handler.command = ['chatgpt', 'ia', 'bot']
+handler.command = ['chatgpt', 'ia', 'ai']
 handler.group = true
 export default handler
