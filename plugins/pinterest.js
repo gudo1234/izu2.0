@@ -1,53 +1,59 @@
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
 
-let handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) throw `✳️ Ingresa un enlace de Pinterest.\n\nEjemplo:\n${usedPrefix + command} https://pin.it/2Vflx5O`
+const handler = async (m, { conn, text, usedPrefix, command }) => {
 
-  await m.react('🌀')
-  try {
-    // --- 1️⃣ Intentar con API de Delirius (para video) ---
-    const delirius = await fetch(`https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(text)}`)
-    const data1 = await delirius.json()
+  if (!text) return m.reply(`${e} *Ingresa un enlace de Pinterest o una palabra clave para buscar.*`);
 
-    if (data1?.status && data1.data?.download?.url) {
-      let info = data1.data
-      let caption = `🎀 *Pinterest Downloader*\n\n📌 *Título:* ${info.title || 'Sin título'}\n👤 *Autor:* ${info.author_name || '-'}\n📅 *Subido:* ${info.upload || '-'}\n🔗 *Fuente:* ${info.source || text}`
+  conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
 
-      await conn.sendMessage(m.chat, {
-        video: { url: info.download.url },
-        caption,
-        mimetype: 'video/mp4'
-      }, { quoted: m })
+  // Detectar cualquier URL válida de Pinterest (pin.it o pinterest.com)
+  const pinterestUrlRegex = /^https?:\/\/(www\.)?(pinterest\.[a-z.]+\/pin\/|pin\.it\/)/i;
 
-      await m.react('✅')
-      return
+  if (pinterestUrlRegex.test(text)) {
+    try {
+      // Enviar la URL directamente a la API (sin resolver)
+      const res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${encodeURIComponent(text)}`);
+      const json = await res.json();
+
+      if (!json?.data?.result) throw `${e} No se pudo obtener el contenido del enlace.`;
+
+      await conn.sendFile(m.chat, json.data.result, `pinterest.mp4`, `*🔗 Url:* ${json.data.url}`, m, null, rcanal);
+    } catch (err) {
+      console.error(err);
+      m.reply(`${e} Hubo un error al procesar el enlace.`);
     }
+  } else {
+    try {
+      const res = await fetch(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(text)}`);
+      const data = await res.json();
 
-    // --- 2️⃣ Si falla o no es video → usar Dorratz (para imagen) ---
-    const dorratz = await fetch(`https://api.dorratz.com/api/downloader/pinterest?url=${encodeURIComponent(text)}&apikey=dorratz`)
-    const data2 = await dorratz.json()
+      if (!Array.isArray(data) || data.length === 0) {
+        return m.reply(`${e} No se encontraron imágenes para: *${text}*`);
+      }
 
-    if (data2?.status && data2.result?.url) {
-      await conn.sendMessage(m.chat, {
-        image: { url: data2.result.url },
-        caption: `✨ *Imagen descargada de Pinterest*\n🔗 ${text}`
-      }, { quoted: m })
+      const results = data.slice(0, 15);
+      let first = true;
 
-      await m.react('✅')
-      return
+      for (const item of results) {
+        const url = item.image_large_url;
+        if (!url) continue;
+
+        if (first) {
+          await conn.sendFile(m.chat, url, "thumb.jpg", `${e} Resultados para: *${text}*`, m, null, rcanal);
+          first = false;
+        } else {
+          await conn.sendMessage(m.chat, { image: { url } }, { quoted: m });
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      m.reply(`${e} Ocurrió un error al buscar imágenes.`);
     }
-
-    throw '⚠️ No se pudo obtener contenido del enlace.'
-
-  } catch (e) {
-    console.error(e)
-    await m.reply('❌ Error al descargar el contenido de Pinterest.')
-    await m.react('❌')
   }
-}
 
-handler.help = ['pinterest <url>']
-handler.tags = ['downloader']
-handler.command = ['pinterest', 'pin']
+  conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+};
 
-export default handler
+handler.command = ['pin', 'pinterest', 'pinvid', 'pinimg', 'pinterestvid', 'pindl', 'pinterestdl'];
+handler.group = true;
+export default handler;
