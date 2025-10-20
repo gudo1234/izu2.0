@@ -1,60 +1,53 @@
-import fetch from "node-fetch"
-import fs from "fs"
-import path from "path"
+import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) throw `✳️ Ingresa un enlace de Pinterest.\n\nEjemplo:\n${usedPrefix + command} https://pin.it/2Vflx5O`
+
+  await m.react('🌀')
   try {
-    if (!text && !m.quoted) throw `✳️ Ingresa un texto o responde a un video.\n\nEjemplo:\n*${usedPrefix + command}* Edar 💫`
+    // --- 1️⃣ Intentar con API de Delirius (para video) ---
+    const delirius = await fetch(`https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(text)}`)
+    const data1 = await delirius.json()
 
-    // Si el mensaje citado tiene video
-    const q = m.quoted ? m.quoted : m
-    const mime = (q.msg || q).mimetype || ''
-    const isVideo = /video/.test(mime)
+    if (data1?.status && data1.data?.download?.url) {
+      let info = data1.data
+      let caption = `🎀 *Pinterest Downloader*\n\n📌 *Título:* ${info.title || 'Sin título'}\n👤 *Autor:* ${info.author_name || '-'}\n📅 *Subido:* ${info.upload || '-'}\n🔗 *Fuente:* ${info.source || text}`
 
-    await m.react('🌀')
+      await conn.sendMessage(m.chat, {
+        video: { url: info.download.url },
+        caption,
+        mimetype: 'video/mp4'
+      }, { quoted: m })
 
-    if (isVideo) {
-      // --- VIDEO CON EFECTO NEÓN (Delirius) ---
-      let media = await q.download()
-      let form = new FormData()
-      form.append('file', media, 'video.mp4')
-
-      const urlAPI = `https://api.deliriusapi.workers.dev/api/tools/video-neon?apikey=delirius`
-      const res = await fetch(urlAPI, { method: 'POST', body: form })
-
-      if (!res.ok) throw '⚠️ Error al generar video (Delirius)'
-      const buffer = await res.arrayBuffer()
-      const filePath = path.join('./tmp', `${Date.now()}_neon.mp4`)
-      fs.writeFileSync(filePath, Buffer.from(buffer))
-
-      await conn.sendMessage(m.chat, { video: { url: filePath }, caption: '✨ Video neón generado con Delirius' }, { quoted: m })
       await m.react('✅')
-      fs.unlinkSync(filePath)
-    } else {
-      // --- IMAGEN CON TEXTO (Dorratz) ---
-      let texto = text || q.text
-      if (!texto) throw `✳️ Ingresa un texto para generar el arte.`
-
-      const res = await fetch(`https://api.dorratz.com/api/gfx1?text=${encodeURIComponent(texto)}&apikey=dorratz`)
-      if (!res.ok) throw '⚠️ Error al generar imagen (Dorratz)'
-      const buffer = await res.arrayBuffer()
-      const filePath = path.join('./tmp', `${Date.now()}_gfx.jpg`)
-      fs.writeFileSync(filePath, Buffer.from(buffer))
-
-      await conn.sendFile(m.chat, filePath, 'gfx.jpg', `✨ Arte generado con Dorratz`, m)
-      await m.react('✅')
-      fs.unlinkSync(filePath)
+      return
     }
 
-  } catch (err) {
-    console.error(err)
-    await m.reply('❌ Ocurrió un error al generar el arte.')
+    // --- 2️⃣ Si falla o no es video → usar Dorratz (para imagen) ---
+    const dorratz = await fetch(`https://api.dorratz.com/api/downloader/pinterest?url=${encodeURIComponent(text)}&apikey=dorratz`)
+    const data2 = await dorratz.json()
+
+    if (data2?.status && data2.result?.url) {
+      await conn.sendMessage(m.chat, {
+        image: { url: data2.result.url },
+        caption: `✨ *Imagen descargada de Pinterest*\n🔗 ${text}`
+      }, { quoted: m })
+
+      await m.react('✅')
+      return
+    }
+
+    throw '⚠️ No se pudo obtener contenido del enlace.'
+
+  } catch (e) {
+    console.error(e)
+    await m.reply('❌ Error al descargar el contenido de Pinterest.')
     await m.react('❌')
   }
 }
 
-handler.help = ['neon <texto> o responde a un video']
-handler.tags = ['tools']
-handler.command = ['neon']
+handler.help = ['pinterest <url>']
+handler.tags = ['downloader']
+handler.command = ['pinterest', 'pin']
 
 export default handler
