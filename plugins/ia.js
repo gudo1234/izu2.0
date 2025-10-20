@@ -1,8 +1,7 @@
-import axios from 'axios'
 import fetch from 'node-fetch'
 
 let handler = async (m, { conn, text }) => {
-  const author = 'Ixumi' // 🔧 Puedes cambiarlo si quieres
+  const author = 'Ixumi'
   const username = m.pushName || 'Usuario'
   const isQuotedImage = m.quoted && (m.quoted.msg || m.quoted).mimetype && (m.quoted.msg || m.quoted).mimetype.startsWith('image/')
 
@@ -37,8 +36,7 @@ Separa bien las ideas con puntos y saltos de línea cuando sea necesario.`
     return conn.reply(m.chat, `👋 Hola ${username}, ¿en qué puedo ayudarte hoy?`, m)
   }
 
-  // Reacción visual
-  try { await m.react && m.react('💬') } catch { /* opcional */ }
+  try { await m.react && m.react('💬') } catch {}
 
   try {
     const prompt = `${basePrompt}\n\n${username} dice: ${text}\n\nResponde de forma natural.`
@@ -56,22 +54,28 @@ handler.command = ['ia', 'chatgpt', 'gpt', 'gemini', 'bot', 'meta']
 handler.group = true
 export default handler
 
-// ⚙️ Función para la API de Dorratz
+// ⚙️ Llamado correcto a la API de Dorratz
 async function dorratzAI(prompt) {
   try {
-    const res = await axios.get(`https://api.dorratz.com/ai/gpt?prompt=${encodeURIComponent(prompt)}`)
-    return res.data || res.data.result || res.data.response || 'No se obtuvo respuesta de la IA.'
+    const api = `https://api.dorratz.com/ai/gpt?prompt=${encodeURIComponent(prompt)}`
+    const res = await fetch(api)
+
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`)
+    const text = await res.text()
+
+    // La API devuelve texto plano
+    return text.trim() || 'No se obtuvo respuesta de la IA.'
   } catch (err) {
-    console.error('Error en Dorratz API:', err?.response?.data || err.message)
+    console.error('Error en Dorratz API:', err.message)
     throw err
   }
 }
 
-// 🧩 Formatear texto para que no se vea amontonado
+// 🧩 Limpieza de texto
 function formatResponse(text) {
   if (!text) return ''
   return text
-    .replace(/([.!?])\s*(?=[A-ZÁÉÍÓÚÑ])/g, '$1\n\n') // separa oraciones largas
-    .replace(/\n{3,}/g, '\n\n') // evita saltos excesivos
+    .replace(/([.!?])\s*(?=[A-ZÁÉÍÓÚÑ])/g, '$1\n\n')
+    .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
