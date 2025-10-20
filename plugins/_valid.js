@@ -5,7 +5,6 @@ import path from "path"
 
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
 
-// === Función para mostrar bandera por país ===
 function banderaEmoji(countryCode) {
   if (!countryCode || countryCode.length !== 2) return '🌐'
   const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
@@ -65,7 +64,7 @@ export async function before(m) {
   let text = `⌗ _*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
   if (similares.length) {
     text += `\n∝ *Sugerencias:*\n`
-    text += similares.map(s => `> ${usedPrefix + s.cmd} (${s.sim}% de coincidencia)`).join('\n')
+    text += similares.map(s => `> _${usedPrefix + s.cmd}_ (${s.sim}% de coincidencia)`).join('\n')
   }
 
   await m.reply(text)
