@@ -4,12 +4,15 @@ import moment from "moment-timezone"
 import path from "path"
 
 const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
+
+// === Función para mostrar bandera por país ===
 function banderaEmoji(countryCode) {
   if (!countryCode || countryCode.length !== 2) return '🌐'
-  const codePoints = [...countryCode.toUpperCase()]
-    .map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+  const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
 }
+
+// === Distancia Levenshtein (sin librerías externas) ===
 function levenshteinDistance(a, b) {
   const dp = Array.from({ length: a.length + 1 }, (_, i) => [i])
   for (let j = 1; j <= b.length; j++) dp[0][j] = j
@@ -38,6 +41,8 @@ export async function before(m) {
   const phoneInfo = PhoneNumber('+' + number)
   const countryCode = phoneInfo.getRegionCode('international')
   const mundo = banderaEmoji(countryCode)
+
+  // === Verificar si el comando existe ===
   const validCommand = Object.values(global.plugins).some(plugin => {
     const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
     return cmds.includes(command)
@@ -47,28 +52,30 @@ export async function before(m) {
     user.commands = (user.commands || 0) + 1
     return
   }
-  let allCommands = []
-  for (let plugin of Object.values(global.plugins)) {
-    if (!plugin.command) continue
-    const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
-    allCommands.push(...cmds)
-  }
 
-  const similares = allCommands
+  // === Recolectar todos los comandos disponibles ===
+  const allCommands = Object.values(global.plugins)
+    .flatMap(p => Array.isArray(p.command) ? p.command : [p.command])
+    .filter(Boolean)
     .filter(cmd => typeof cmd === 'string')
+
+  // === Calcular similitud y tomar las mejores ===
+  const similares = allCommands
     .map(cmd => {
       const dist = levenshteinDistance(command, cmd)
-      const max = Math.max(command.length, cmd.length)
-      const sim = Math.round((1 - dist / max) * 100)
+      const maxLen = Math.max(command.length, cmd.length)
+      const sim = maxLen === 0 ? 100 : Math.round((1 - dist / maxLen) * 100)
       return { cmd, sim }
     })
-    .filter(r => r.sim >= 50)
+    .filter(r => !isNaN(r.sim) && r.sim > 0) // mostrar solo si hay alguna similitud
     .sort((a, b) => b.sim - a.sim)
     .slice(0, 2)
-  let text = `⌗ _*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
+
+  // === Mensaje final con % incluido ===
+  let text = `⌗ *Comando no reconocido*\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
   if (similares.length) {
     text += `\n¿Quizás quisiste decir?\n`
-    text += similares.map(s => `> ${usedPrefix + s.cmd}`).join('\n')
+    text += similares.map(s => `> ${usedPrefix + s.cmd} (${s.sim}%)`).join('\n')
   }
 
   await m.reply(text)
