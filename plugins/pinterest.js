@@ -12,7 +12,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (pinterestUrlRegex.test(text)) {
     try {
       // Enviar la URL directamente a la API (sin resolver)
-      const res = await fetch(`https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(text)}`);
+      const res = await fetch(`https://api.agatz.xyz/api/pinterest?url=${encodeURIComponent(text)}`);
       const json = await res.json();
 
       if (!json?.data?.result) throw `${e} No se pudo obtener el contenido del enlace.`;
