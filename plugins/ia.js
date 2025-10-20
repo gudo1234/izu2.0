@@ -19,8 +19,9 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       respuesta = respuesta.replace(/^"|"$/g, '') // quita comillas al inicio y fin
     }
 
-    await m.reply(`🤖 *ChatGPT responde:*\n\n${respuesta}`, m, fake)
-    await m.react('✅')
+    //await m.reply(`🤖 *ChatGPT responde:*\n\n${respuesta}`, m, fake)
+    await conn.reply(m.chat, respuesta, m, fake)
+    m.react('✅')
   } catch (e) {
     console.error(e)
     await m.react('❌')
