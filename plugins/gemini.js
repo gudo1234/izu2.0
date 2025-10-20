@@ -16,8 +16,7 @@ let handler = async (m, { conn, text }) => {
     if (json.status && json.data && json.data.parts) {
       const respuesta = json.data.parts.map(p => p.text).join('\n');
       m.react('✅')
-      conn.reply(m.chat, respuesta, m, fake)
-      );
+      conn.reply(m.chat, respuesta, m, fake);
     } else {
       m.reply(`${e} No se pudo obtener respuesta de Gemini.`);
     }
