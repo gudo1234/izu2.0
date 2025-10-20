@@ -1,50 +1,33 @@
-import fetch from 'node-fetch'
+import fetch from 'node-fetch';
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return conn.reply(m.chat, `🧠 *Uso correcto:*\n> ${usedPrefix + command} <link de Pinterest>`, m, fake)
+let handler = async (m, { conn, text }) => {
+  const e = '✦'; // decorativo
+
+  if (!text) return m.reply(`${e} *Ingresa una pregunta para Gemini.*`);
+
+  // Reacción de espera
+  m.react('🕒')
 
   try {
-    await m.react && m.react('💭')
+    const encodedPrompt = encodeURIComponent(text);
+    const url = `https://api.siputzx.my.id/api/ai/gemini-lite?prompt=${encodedPrompt}&model=gemini-2.0-flash-lite`;
 
-    const apiUrl = `https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(text)}`
-    const res = await fetch(apiUrl)
-    const json = await res.json()
+    const res = await fetch(url);
+    const json = await res.json();
 
-    if (!json.status || !json.data || !json.data.download?.url) {
-      return conn.reply(m.chat, '❌ No se pudo obtener el video de Pinterest.', m, fake)
+    if (json.status && json.data && json.data.parts) {
+      const respuesta = json.data.parts.map(p => p.text).join('\n');
+      m.reply(`${e} *Pregunta:* ${text}\n\n${e} *Respuesta:* ${respuesta}`);
+    } else {
+      m.reply(`${e} No se pudo obtener respuesta de Gemini.`);
     }
-
-    const info = json.data
-    const title = info.title || 'Video de Pinterest'
-    const description = info.description || ''
-    const videoUrl = info.download.url
-    const thumbnail = info.thumbnail
-
-    // Mensaje de información
-    const messageText = `🎬 *Título:* ${title}\n` +
-                        `👤 *Autor:* ${info.author_name || info.username}\n` +
-                        `📅 *Subido:* ${info.upload}\n` +
-                        `🔗 *Fuente:* ${info.source}\n\n` +
-                        `${description}`
-
-    await conn.reply(m.chat, messageText, m, fake)
-
-    // Enviar el video directamente como archivo mp4
-    await conn.sendMessage(m.chat, {
-      video: { url: videoUrl },
-      caption: `🎬 *${title}*`,
-      thumbnail: thumbnail ? { url: thumbnail } : undefined,
-    }, { quoted: m, mimetype: 'video/mp4' })
-
-    await m.react && m.react('✅')
-
-  } catch (e) {
-    console.error(e)
-    await m.react && m.react('❌')
-    await conn.reply(m.chat, '❌ Ocurrió un error al descargar el video de Pinterest.', m, fake)
+  } catch (error) {
+    console.error(error);
+    m.reply(`${e} Ocurrió un error al consultar Gemini.`);
   }
-}
+};
 
-handler.command = ['pin']
-handler.group = true
-export default handler
+handler.command = ['gemimi']
+handler.group = true;
+
+export default handler;
