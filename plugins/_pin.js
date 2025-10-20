@@ -15,8 +15,8 @@ let handler = async (m, { conn, text }) => {
 
     if (json.status && json.data && json.data.parts) {
       const respuesta = json.data.parts.map(p => p.text).join('\n');
-      m.reply(
-`${e + \t + respuesta}`
+      m.react('✅')
+      m.reply(`${e} ${respuesta}`
       );
     } else {
       m.reply(`${e} No se pudo obtener respuesta de Gemini.`);
@@ -27,7 +27,7 @@ let handler = async (m, { conn, text }) => {
   }
 };
 
-handler.command = ['gemini'];
+handler.command = ['gemini', 'bot'];
 handler.group = true;
 
 export default handler;
