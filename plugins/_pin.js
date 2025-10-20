@@ -1,50 +1,50 @@
 import fetch from 'node-fetch'
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) return m.reply(`🧠 *Uso correcto:*\n> ${usedPrefix + command} <link de Pinterest>`)
+  if (!text) return conn.reply(m.chat, `🧠 *Uso correcto:*\n> ${usedPrefix + command} <link de Pinterest>`, m, fake)
 
   try {
-    await m.react('💭')
+    await m.react && m.react('💭')
 
     const apiUrl = `https://api.delirius.store/download/pinterestdl?url=${encodeURIComponent(text)}`
     const res = await fetch(apiUrl)
     const json = await res.json()
 
     if (!json.status || !json.data || !json.data.download?.url) {
-      return m.reply('❌ No se pudo obtener el video de Pinterest.', m, fake)
+      return conn.reply(m.chat, '❌ No se pudo obtener el video de Pinterest.', m, fake)
     }
 
     const info = json.data
     const title = info.title || 'Video de Pinterest'
     const description = info.description || ''
-    const thumbnail = info.thumbnail
     const videoUrl = info.download.url
+    const thumbnail = info.thumbnail
 
-    // Mensaje informativo antes de enviar el video
-    let messageText = `🎬 *Título:* ${title}\n` +
-                      `👤 *Autor:* ${info.author_name || info.username}\n` +
-                      `📅 *Subido:* ${info.upload}\n` +
-                      `🔗 *Fuente:* ${info.source}\n\n` +
-                      `${description}`
+    // Mensaje de información
+    const messageText = `🎬 *Título:* ${title}\n` +
+                        `👤 *Autor:* ${info.author_name || info.username}\n` +
+                        `📅 *Subido:* ${info.upload}\n` +
+                        `🔗 *Fuente:* ${info.source}\n\n` +
+                        `${description}`
 
-    await m.reply(messageText, m, fake)
+    await conn.reply(m.chat, messageText, m, fake)
 
-    // Enviar video
+    // Enviar el video directamente como archivo mp4
     await conn.sendMessage(m.chat, {
       video: { url: videoUrl },
       caption: `🎬 *${title}*`,
       thumbnail: thumbnail ? { url: thumbnail } : undefined,
     }, { quoted: m, mimetype: 'video/mp4' })
 
-    await m.react('✅')
+    await m.react && m.react('✅')
 
   } catch (e) {
     console.error(e)
-    await m.react('❌')
-    await m.reply('❌ Ocurrió un error al descargar el video de Pinterest.', m, fake)
+    await m.react && m.react('❌')
+    await conn.reply(m.chat, '❌ Ocurrió un error al descargar el video de Pinterest.', m, fake)
   }
 }
 
-handler.command = ['pi']
+handler.command = ['pin']
 handler.group = true
 export default handler
