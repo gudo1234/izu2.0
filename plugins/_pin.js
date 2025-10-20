@@ -1,15 +1,13 @@
 import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text }) => {
-  const e = '✦'; // decorativo
 
-  if (!text) return m.reply(`${e} *Ingresa una pregunta para Gemini.*`);
-
-  // Reacción de espera
-  m.react('🕒')
+  if (!text) return m.reply(`${e} *Por favor, ingresa una pregunta para Gemini.*`);
+  m.react('🕒');
 
   try {
-    const encodedPrompt = encodeURIComponent(text);
+    const prompt = `Responde en español: ${text}`;
+    const encodedPrompt = encodeURIComponent(prompt);
     const url = `https://api.siputzx.my.id/api/ai/gemini-lite?prompt=${encodedPrompt}&model=gemini-2.0-flash-lite`;
 
     const res = await fetch(url);
@@ -17,7 +15,9 @@ let handler = async (m, { conn, text }) => {
 
     if (json.status && json.data && json.data.parts) {
       const respuesta = json.data.parts.map(p => p.text).join('\n');
-      m.reply(`${e} *Pregunta:* ${text}\n\n${e} *Respuesta:* ${respuesta}`);
+      m.reply(
+`${e + respuesta}`
+      );
     } else {
       m.reply(`${e} No se pudo obtener respuesta de Gemini.`);
     }
@@ -27,7 +27,7 @@ let handler = async (m, { conn, text }) => {
   }
 };
 
-handler.command = ['gemimi']
+handler.command = ['gemini'];
 handler.group = true;
 
 export default handler;
