@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text }) => {
 
-  if (!text) return m.reply(`${e} *Por favor, ingresa una pregunta para gestionar conmigo usando la herramienta gémini.*`);
+  if (!text) return m.reply(`${e} _*Por favor, ingresa una pregunta para gestionar conmigo usando la herramienta gémini.*_`);
   m.react('🕒');
 
   try {
