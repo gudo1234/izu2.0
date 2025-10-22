@@ -168,9 +168,8 @@ buttonParamsJson:
 },
 { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"🦄드림 가이 Xeon"}' },
 {
-name: 'cta_url',
-buttonParamsJson:
-'{"display_text":"Canal de WhatsApp","url": channel,"merchant_url": channel}'
+  name: 'cta_url',
+  buttonParamsJson: `{"display_text":"Canal de WhatsApp","url": channel,"merchant_url": channel}`
 },
 {
 name: 'galaxy_message',
