@@ -472,7 +472,7 @@ if (m.isGroup) {
         hasMediaAttachment: true
       },
       body: { text: puta },
-      footer: { text: 'xvideos🤨🫦🍆' },
+      footer: { text: '🤨 xvidẹ𝆬os.er/k' },
       nativeFlowMessage: {
         buttons: [
           { name: 'single_select', buttonParamsJson: '{"has_multiple_buttons":true}' },
