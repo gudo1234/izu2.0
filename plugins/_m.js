@@ -141,13 +141,10 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
         messageParamsJson:
           '{"limited_time_offer":{"text":"🧀 𝗠𝗲𝗻𝘂 𝗟𝗶𝘀𝘁","url":"https://github.com/xrljosedv","copy_code":"I LOVE XRLJOSE","expiration_time":1754613436864329}}'
       },
-      // 📌 AQUÍ VA EL NUEVO CONTEXTINFO GENERAL
       contextInfo: {
         mentionedJid: [m.sender],
-        forwardingScore: 777,
         isForwarded: true,
         externalAdReply: {
-          showAdAttribution: true,
           title: '🍂 IzuBot - Sistema IA WhatsApp',
           body: textbot,
           thumbnailUrl: icono,
