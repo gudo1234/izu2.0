@@ -18,6 +18,8 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       return text.toLowerCase().split('').map(v => (map.find(x => x.o === v)?.c || v)).join('')
     }
 
+    const sleep = ms => new Promise(r => setTimeout(r, ms))
+
     async function resizeImage(buffer, width, height) {
       try {
         const img = await Jimp.read(buffer)
@@ -27,6 +29,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       }
     }
 
+    // simulador de xpRange
     function xpRange(level, multiplier = 1) {
       const min = level * 100 * multiplier
       const xp = 100 * multiplier
@@ -50,7 +53,20 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       return 'Buenas noches 🌙'
     }
 
-    // 🔹 Eliminado todo el bloque de LOADING
+   /* const { key } = await conn.sendMessage(m.chat, { text: 'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ. . .' })
+    const loadd = [
+      '□□■■■■■■■■\n             𝟷𝟶٪',
+      '■■□□■■■■■■\n             𝟹𝟶٪',
+      '■■■■□□■■■■\n             𝟻𝟶٪',
+      '■■■■■■□□■■\n             𝟾𝟶٪',
+      '■■■■■■■■□□\n             𝟷𝟶𝟶٪',
+      'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ  ᴄ ᴏ ᴍ ᴘ ʟ ᴇ ᴛ ᴇ. . .'
+    ]*/
+    for (let i = 0; i < loadd.length; i++) {
+      await sleep(750)
+      // quitamos "edit" porque no es soportado en Baileys
+      await conn.sendMessage(m.chat, { text: loadd[i] })
+    }
 
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
@@ -84,8 +100,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     const muptime = clockString(_muptime || 0)
     const uptime = clockString(_uptime)
 
-    // 🔹 Thumbnail personalizada
-    const imgPath1 = join(__dirname, icono)
+    const imgPath1 = join(__dirname, '../thumbnail.jpg')
     const thumbLocal = fs.existsSync(imgPath1) ? fs.readFileSync(imgPath1) : null
     const thumbResized = thumbLocal ? await resizeImage(thumbLocal, 300, 150) : null
 
@@ -136,7 +151,7 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
           directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
           mediaKeyTimestamp: Date.now(),
-          jpegThumbnail: thumbResized || null, // 🔸 Miniatura visible aquí
+          jpegThumbnail: thumbResized || null,
           contextInfo: {
             mentionedJid: [m.sender],
             groupMentions: [],
@@ -151,11 +166,21 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
       nativeFlowMessage: {
         buttons: [
           { name: 'single_select', buttonParamsJson: '{"has_multiple_buttons":true}' },
+          { name: 'call_permission_request', buttonParamsJson: '{"has_multiple_buttons":true}' },
           {
             name: 'single_select',
             buttonParamsJson:
-              '{"title":"𝚂𝚎𝚕𝚎𝚌𝚝 𝙼𝚎𝚗𝚞","sections":[{"title":"ᴍᴀʜɪʀᴜ sʜɪɪɴᴀ ʟᴀ ᴍᴇᴊᴏʀ 🫓","rows":[{"title":"Info Grupos","description":"Información de grupos","id":".grupos"},{"title":"Info Bot","description":"Información del bot","id":".infobot"},{"title":"Menu All","description":"Menú completo","id":".allmenu"}]}]}' }
-        ]
+              '{"title":"𝚂𝚎𝚕𝚎𝚌𝚝 𝙼𝚎𝚗𝚞","sections":[{"title":"ᴍᴀʜɪʀᴜ sʜɪɪɴᴀ ʟᴀ ᴍᴇᴊᴏʀ 🫓","highlight_label":"🫩","rows":[{"title":"Info Grupos","description":"Información de grupos","id":".grupos"},{"title":"Info Bot","description":"Información del bot","id":".infobot"},{"title":"Menu All","description":"Menú completo","id":".allmenu"},{"title":"Auto Reg","description":"Registro automático","id":".reg user.19"},{"title":"Ping","description":"Velocidad del bot","id":".ping"},{"title":"Status","description":"Estado del bot","id":".status"}]}],"has_multiple_buttons":true}'
+          },
+          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"I Love You xrljose 😻"}' },
+          {
+            name: 'cta_url',
+            buttonParamsJson:
+              '{"display_text":"Canal de WhatsApp","url": channel}'
+          }
+        ],
+        messageParamsJson:
+          '{"limited_time_offer":{"text":"🧀 𝗠𝗲𝗻𝘂 𝗟𝗶𝘀𝘁","url":"https://github.com/xrljosedv","copy_code":"I LOVE XRLJOSE","expiration_time":1754613436864329}}'
       },
       contextInfo: {
         mentionedJid: [m.sender],
@@ -172,7 +197,8 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
             interactiveMessage: nativeFlowPayload
           }
         }
-      }
+      },
+      { quoted: fkontak }
     )
   } catch (e) {
     console.error(e)
