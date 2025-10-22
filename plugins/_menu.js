@@ -22,7 +22,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       ? String.fromCodePoint(...[...pais.toUpperCase()].map(c => 127397 + c.charCodeAt()))
       : '🏳️'
 
-    // Zonas horarias precisas
+    // Zonas horarias precisass
     const zonas = {
       MX: 'America/Mexico_City',
       CO: 'America/Bogota',
