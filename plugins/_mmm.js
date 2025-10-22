@@ -1,14 +1,9 @@
-import fs from 'fs'
-import { join } from 'path'
-import Jimp from 'jimp'
 import fetch from 'node-fetch'
 
-let handler = async (m, { conn, __dirname }) => {
+let handler = async (m, { conn }) => {
   try {
-    // Imagen miniatura
-    const imgPath = join(__dirname, '../thumbnail.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG) : null
+    // Descargar miniatura desde URL
+    const thumbResized = await (await fetch('https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me5.jpg')).buffer()
 
     // Menú simple
     const menu = `hola`
