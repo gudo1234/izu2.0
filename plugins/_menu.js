@@ -10,6 +10,11 @@ import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
+  const imgPath = join(__dirname, '../thumbnail.jpg')
+    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+    const thumbResized = thumbLocal
+      ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
+      : null
   
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
@@ -436,11 +441,6 @@ if (m.isGroup) {
     const metadata = await conn.groupMetadata(m.chat)
     groupName = metadata.subject
 }
-const imgPath = join(__dirname, '../thumbnail.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal
-      ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
-      : null
  const contextInfo = {
       externalAdReply: {
         title: wm,
