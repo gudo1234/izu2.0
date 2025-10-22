@@ -1,19 +1,11 @@
 import fs, { promises as fsp } from 'fs'
 import { join } from 'path'
 import Jimp from 'jimp'
+import fetch from 'node-fetch'
 
 let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
   try {
     const prem = (global.prems || []).includes(m.sender.split('@')[0])
-
-    const Styles = (text, style = 1) => {  
-      const xStr = 'abcdefghijklmnñopqrstuvwxyz1234567890'.split('')  
-      const yStr = Object.freeze({  
-        1: 'ᴀʙᴄᴅᴇғɢʜɪᴊᴋʟᴍɴñᴏᴘǫʀsᴛᴜᴠᴡxʏᴢ1234567890'  
-      })  
-      const map = xStr.map((v, i) => ({ o: v, c: yStr[style].split('')[i] || v }))  
-      return text.toLowerCase().split('').map(v => (map.find(x => x.o === v)?.c || v)).join('')  
-    }
 
     async function resizeImage(buffer, width, height) {  
       try {  
@@ -72,7 +64,6 @@ let handler = async (m, { conn, usedPrefix: _p, __dirname }) => {
       process.send('uptime')
       _muptime = (await new Promise(resolve => { process.once('message', resolve); setTimeout(resolve, 1000) })) * 1000
     }
-    const muptime = clockString(_muptime)
     const uptime = clockString(_uptime)
 
     const imgPath1 = join(__dirname, '../thumbnail.jpg')
@@ -153,7 +144,19 @@ Welcome To ${meName || 'MyBot'}, Un Assistant WhatsApp listo para ayudarte y ale
       nativeFlowMessage: {
         buttons: [
           { name: 'single_select', buttonParamsJson: '{"has_multiple_buttons":true}' },
-          { name: 'call_permission_request', buttonParamsJson: '{"has_multiple_buttons":true}' }
+          { name: 'call_permission_request', buttonParamsJson: '{"has_multiple_buttons":true}' },
+          {
+            name: 'single_select',
+            buttonParamsJson:
+              '{"title":"𝚂𝚎𝚕𝚎𝚌𝚝 𝙼𝚎𝚗𝚞","sections":[{"title":"ᴍᴀʜɪʀᴜ sʜɪɪɴᴀ ʟᴀ ᴍᴇᴊᴏʀ 🫓","highlight_label":"🦄드림 가이 Xeon","rows":[{"title":"Info Grupos","description":"Información de grupos","id":".grupos"},{"title":"Info Bot","description":"Información del bot","id":".infobot"},{"title":"Menu All","description":"Menú completo","id":".allmenu"},{"title":"Auto Reg","description":"Registro automático","id":".reg user.19"},{"title":"Ping","description":"Velocidad del bot","id":".ping"},{"title":"Status","description":"Estado del bot","id":".status"}]}],"has_multiple_buttons":true}'
+          },
+          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"🦄드림 가이 Xeon"}' },
+          { name: 'cta_url', buttonParamsJson: `{"display_text":"Canal de WhatsApp","url":"${channel}","merchant_url":"${channel}"}` },
+          {
+            name: 'galaxy_message',
+            buttonParamsJson:
+              '{"mode":"published","flow_message_version":"3","flow_token":"1:1307913409923914:293680f87029f5a13d1ec5e35e718af3","flow_id":"1307913409923914","flow_cta":"ᴀᴄᴄᴇᴅᴇ ᴀ ʙᴏᴛ ᴀɪ","flow_action":"navigate","flow_action_payload":{"screen":"QUESTION_ONE","params":{"user_id":"123456789","referral":"campaign_xyz"}},"flow_metadata":{"flow_json_version":"201","data_api_protocol":"v2","flow_name":"Lead Qualification [en]","data_api_version":"v2","categories":["Lead Generation","Sales"]}}'
+          }
         ]
       },
       contextInfo: {
