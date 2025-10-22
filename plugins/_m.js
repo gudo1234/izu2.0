@@ -29,6 +29,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       }
     }
 
+    // simulador de xpRange
     function xpRange(level, multiplier = 1) {
       const min = level * 100 * multiplier
       const xp = 100 * multiplier
@@ -51,9 +52,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       if (h >= 12 && h < 18) return 'Buenas tardes 🌤'
       return 'Buenas noches 🌙'
     }
-
-    m.react('🎃')
-
+m.react('🎃')
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
     const exp = userData.exp || 0
@@ -140,6 +139,7 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           jpegThumbnail: thumbResized || null,
           contextInfo: {
             mentionedJid: [m.sender],
+            groupMentions: [],
             forwardingScore: 777,
             isForwarded: true
           }
@@ -160,11 +160,8 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"Negro de mierd"}' },
           {
             name: 'cta_url',
-            buttonParamsJson: JSON.stringify({
-              display_text: "Canal de WhatsApp",
-              url: channelUrl,
-              merchant_url: channelUrl
-            })
+            buttonParamsJson:
+              '{"display_text":"Canal de WhatsApp","url":"https:\\/\\/whatsapp.com\\/channel\\/0029VaXHNMZL7UVTeseuqw3H","merchant_url":"https:\\/\\/whatsapp.com\\/channel\\/0029VaXHNMZL7UVTeseuqw3H"}'
           }
         ],
         messageParamsJson:
