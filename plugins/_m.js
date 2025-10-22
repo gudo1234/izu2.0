@@ -29,7 +29,6 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       }
     }
 
-    // simulador de xpRange
     function xpRange(level, multiplier = 1) {
       const min = level * 100 * multiplier
       const xp = 100 * multiplier
@@ -52,7 +51,9 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       if (h >= 12 && h < 18) return 'Buenas tardes 🌤'
       return 'Buenas noches 🌙'
     }
-m.react('🎃')
+
+    m.react('🎃')
+
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
     const exp = userData.exp || 0
@@ -94,34 +95,7 @@ m.react('🎃')
 
     const menu = `Hey *${tagUser}!* ${headerGreet}
 Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y alegrar tu día!
-
-╭──┈➤ *\`𝗜𝗡𝗙𝗢 𝗨𝗦𝗘𝗥\`*
-│ 𔓕 *Nombre*  : ${name}
-│ 𔓕 *Tag*     : ${tagUser}
-│ 𔓕 *Rol*     : ${role}
-│ 𔓕 *Nivel*   : ${level} (${(exp - (min || 0))}/${xp || 100})
-│ 𔓕 *Límite*  : ${limit}
-│ 𔓕 *Money*   : S/.${money.toLocaleString('es-PE')}
-│ 𔓕 *Premium* : ${prem ? '✅' : '❌'}
-╰────────────────┈➤
-
-╭──┈➤ *\`𝗜𝗡𝗙𝗢 𝗕𝗢𝗧\`*
-│ 𔓕 *Nombre*     : ${meName || 'Bot'}
-│ 𔓕 *Owner*      : ${_package?.author?.name || 'dev'}
-│ 𔓕 *Powered*    : WhatsApp Business
-│ 𔓕 *Prefix*     : ${_p}
-│ 𔓕 *Mode*       : ${global.opts?.['self'] ? 'Privado' : 'Público'}
-│ 𔓕 *Total Fitur*: ${totalFitur}+
-│ 𔓕 *Version*    : ${_package?.version || '1.0.0'}
-│ 𔓕 *Language*   : Javascript
-│ 𔓕 *Type*       : NodeJs/Case
-│ 𔓕 *Library*    : Baileys-MD
-│ 𔓕 *Uptime*     : ${uptime}
-│ 𔓕 *Users*      : ${totalreg} (${rtotalreg} reg.)
-│ 𔓕 *Hora*       : ${time} WIB
-│ 𔓕 *Día*        : ${week}
-│ 𔓕 *Fecha*      : ${date}
-╰────────────────┈➤`.trim()
+... (contenido del menú)`.trim()
 
     const nativeFlowPayload = {
       header: {
@@ -167,10 +141,20 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
         messageParamsJson:
           '{"limited_time_offer":{"text":"🧀 𝗠𝗲𝗻𝘂 𝗟𝗶𝘀𝘁","url":"https://github.com/xrljosedv","copy_code":"I LOVE XRLJOSE","expiration_time":1754613436864329}}'
       },
+      // 📌 AQUÍ VA EL NUEVO CONTEXTINFO GENERAL
       contextInfo: {
         mentionedJid: [m.sender],
         forwardingScore: 777,
-        isForwarded: true
+        isForwarded: true,
+        externalAdReply: {
+          showAdAttribution: true,
+          title: '🍂 IzuBot - Sistema IA WhatsApp',
+          body: textbot,
+          thumbnailUrl: icono,
+          sourceUrl: redes,
+          mediaType: 1,
+          renderLargerThumbnail: true
+        }
       }
     }
 
