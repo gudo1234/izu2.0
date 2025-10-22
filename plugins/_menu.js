@@ -4,17 +4,16 @@ import moment from 'moment-timezone'
 import 'moment/locale/es.js'
 import fetch from 'node-fetch'
 import fs from 'fs'
-import { join } from 'path'
 import Jimp from 'jimp'
-//import path from 'path'
+import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
-  const imgPath = join(__dirname, '../thumbnail.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal
-      ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
-      : null
+  const imgPath = require('path').join(__dirname, '../thumbnail.jpg');
+const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null;
+const thumbResized = thumbLocal
+  ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
+  : null;
   
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
