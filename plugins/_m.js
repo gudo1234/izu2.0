@@ -169,18 +169,17 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           '{"limited_time_offer":{"text":"🧀 𝗠𝗲𝗻𝘂 𝗟𝗶𝘀𝘁","url":"https://github.com/xrljosedv","copy_code":"I LOVE XRLJOSE","expiration_time":1754613436864329}}'
       },
       contextInfo: {
-        mentionedJid: [m.sender],
-        isForwarded: true,
         externalAdReply: {
-          title: '🍂 IzuBot - Sistema IA WhatsApp',
+          title: wm,
           body: textbot,
           thumbnailUrl: redes,
-          thumbnail: icono,
+          thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: true
         }
-      }
+      }, { quoted: m })
+      
     }
 
     await conn.relayMessage(
