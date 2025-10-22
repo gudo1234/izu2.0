@@ -95,7 +95,34 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
 
     const menu = `Hey *${tagUser}!* ${headerGreet}
 Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y alegrar tu día!
-... (contenido del menú)`.trim()
+
+╭──┈➤ *\`𝗜𝗡𝗙𝗢 𝗨𝗦𝗘𝗥\`*
+│ 𔓕 *Nombre*  : ${name}
+│ 𔓕 *Tag*     : ${tagUser}
+│ 𔓕 *Rol*     : ${role}
+│ 𔓕 *Nivel*   : ${level} (${(exp - (min || 0))}/${xp || 100})
+│ 𔓕 *Límite*  : ${limit}
+│ 𔓕 *Money*   : S/.${money.toLocaleString('es-PE')}
+│ 𔓕 *Premium* : ${prem ? '✅' : '❌'}
+╰────────────────┈➤
+
+╭──┈➤ *\`𝗜𝗡𝗙𝗢 𝗕𝗢𝗧\`*
+│ 𔓕 *Nombre*     : ${meName || 'Bot'}
+│ 𔓕 *Owner*      : ${_package?.author?.name || 'dev'}
+│ 𔓕 *Powered*    : WhatsApp Business
+│ 𔓕 *Prefix*     : ${_p}
+│ 𔓕 *Mode*       : ${global.opts?.['self'] ? 'Privado' : 'Público'}
+│ 𔓕 *Total Fitur*: ${totalFitur}+
+│ 𔓕 *Version*    : ${_package?.version || '1.0.0'}
+│ 𔓕 *Language*   : Javascript
+│ 𔓕 *Type*       : NodeJs/Case
+│ 𔓕 *Library*    : Baileys-MD
+│ 𔓕 *Uptime*     : ${uptime}
+│ 𔓕 *Users*      : ${totalreg} (${rtotalreg} reg.)
+│ 𔓕 *Hora*       : ${time} WIB
+│ 𔓕 *Día*        : ${week}
+│ 𔓕 *Fecha*      : ${date}
+╰────────────────┈➤`.trim()
 
     const nativeFlowPayload = {
       header: {
@@ -147,7 +174,8 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
         externalAdReply: {
           title: '🍂 IzuBot - Sistema IA WhatsApp',
           body: textbot,
-          thumbnailUrl: icono,
+          thumbnailUrl: redes,
+          thumbnail: icono,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: true
