@@ -471,7 +471,7 @@ if (m.isGroup) {
         },
         hasMediaAttachment: true
       },
-      body: { text: '' },
+      body: { text: 'xvideos🤨🫦🍆' },
       footer: { text: puta },
       nativeFlowMessage: {
         buttons: [
