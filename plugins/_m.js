@@ -2,6 +2,7 @@ import fs, { promises as fsp } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 import Jimp from 'jimp'
+import fetch from 'node-fetch'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -53,6 +54,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
     }
 
     m.react('🎃')
+    const thumbnail = await (await fetch(icono)).buffer()
 
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
@@ -199,5 +201,5 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
   }
 }
 
-handler.command = ['lis']
+handler.command = ['list']
 export default handler
