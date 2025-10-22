@@ -180,7 +180,7 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           mediaType: 1,
           renderLargerThumbnail: true
         }
-      }, { quoted: m })
+      }, { quoted: m }
       
     }
 
