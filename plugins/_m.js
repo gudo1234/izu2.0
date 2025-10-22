@@ -1,4 +1,4 @@
-import fs, { promises as fsp } from 'fs'
+/*import fs, { promises as fsp } from 'fs'
 import { join } from 'path'
 import Jimp from 'jimp'
 
@@ -215,4 +215,4 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
 
 handler.command = ['lis']
 
-export default handler
+export default handler*/
