@@ -9,8 +9,7 @@ import path from 'path'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
-  const path = await import('path');
-const imgPath = path.join(__dirname, '../thumbnail.jpg');
+  const imgPath = __dirname + '/../thumbnail.jpg';
 const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null;
 const thumbResized = thumbLocal
   ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
