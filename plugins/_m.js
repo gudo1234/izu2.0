@@ -53,7 +53,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       return 'Buenas noches 🌙'
     }
 
-   /* const { key } = await conn.sendMessage(m.chat, { text: 'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ. . .' })
+   /*const { key } = await conn.sendMessage(m.chat, { text: 'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ. . .' })
     const loadd = [
       '□□■■■■■■■■\n             𝟷𝟶٪',
       '■■□□■■■■■■\n             𝟹𝟶٪',
@@ -61,12 +61,12 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       '■■■■■■□□■■\n             𝟾𝟶٪',
       '■■■■■■■■□□\n             𝟷𝟶𝟶٪',
       'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ  ᴄ ᴏ ᴍ ᴘ ʟ ᴇ ᴛ ᴇ. . .'
-    ]*/
+    ]
     for (let i = 0; i < loadd.length; i++) {
       await sleep(750)
       // quitamos "edit" porque no es soportado en Baileys
       await conn.sendMessage(m.chat, { text: loadd[i] })
-    }
+    }*/
 
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
