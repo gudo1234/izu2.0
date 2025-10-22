@@ -135,7 +135,7 @@ renderLargerThumbnail: false
 const nativeFlowPayload = {
 header: {
 documentMessage: {
-url: await (await fetch(icono)).buffer(),
+url: 'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me10.jpg', // <- ruta ficticia (puedes poner un enlace real a tu jpg)
 mimetype: 'image/jpeg',
 fileSha256: Buffer.from('ae23fba2d13e734aa73f86b92f0b0f4b4e874e7a7b20f88543a3f832f3f3cc7f', 'hex'),
 fileLength: { low: 91223, high: 0, unsigned: true },
