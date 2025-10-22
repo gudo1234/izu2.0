@@ -123,7 +123,7 @@ Welcome To ${meName || 'MyBot'}, Un Assistant WhatsApp listo para ayudarte y ale
 │ 𔓕 Fecha      : ${date}
 ╰────────────────┈➤`.trim()
 
-// 🔹 Aquí agregamos tu contextInfo personalizado:
+// 🔹 contextInfo
 const contextInfo = {
 externalAdReply: {
 title: wm,
@@ -136,7 +136,7 @@ renderLargerThumbnail: true
 }
 }
 
-// 🔹 Payload interactivo (sin tocar tu estructura original)
+// 🔹 Payload interactivo
 const nativeFlowPayload = {
 header: {
 documentMessage: {
@@ -184,7 +184,7 @@ messageParamsJson:
 contextInfo
 }
 
-// 🔹 Envío del mensaje
+// 🔹 Envío del mensaje (ya responde al usuario)
 await conn.relayMessage(
 m.chat,
 {
@@ -194,7 +194,7 @@ interactiveMessage: nativeFlowPayload
 }
 }
 },
-{ quoted: m }
+{ quoted: m } // ✅ agregado aquí correctamente
 )
 } catch (e) {
 console.error('Error al generar menú:', e)
