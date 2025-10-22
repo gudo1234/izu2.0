@@ -5,17 +5,17 @@ import fetch from 'node-fetch'
 
 let handler = async (m, { conn, __dirname }) => {
   try {
-    // Miniatura local
+    // --- Imagen miniatura ---
     const imgPath = join(__dirname, '../thumbnail.jpg')
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
       : null
 
-    // Menú simple
+    // --- Menú simple ---
     const menu = `hola`
 
-    // Context info
+    // --- Context info para botones y mensajes ---
     const contextInfo = {
       externalAdReply: {
         title: wm,
@@ -28,7 +28,7 @@ let handler = async (m, { conn, __dirname }) => {
       }
     }
 
-    // Botones y lista
+    // --- Estructura del mensaje interactivo ---
     const nativeFlowPayload = {
       header: {
         documentMessage: {
@@ -51,86 +51,83 @@ let handler = async (m, { conn, __dirname }) => {
       footer: { text: menu },
       nativeFlowMessage: {
         buttons: [
-          // ✅ Lista real
+          { name: 'single_select', buttonParamsJson: '{"has_multiple_buttons":true}' },
+          { name: 'call_permission_request', buttonParamsJson: '{"has_multiple_buttons":true}' },
           {
             name: 'single_select',
-            buttonParamsJson: JSON.stringify({
-              title: '𝚂𝚎𝚕𝚎𝚌𝚝 𝙼𝚎𝚗𝚞',
-              sections: [
+            buttonParamsJson: `{
+              "title":"𝚂𝚎𝚕𝚎𝚌𝚝 𝙼𝚎𝚗𝚞",
+              "sections":[
                 {
-                  title: 'ᴍᴀʜɪʀᴜ sʜɪɪɴᴀ ʟᴀ ᴍᴇᴊᴏʀ 🫓',
-                  highlight_label: '🦄드림 가이 Xeon',
-                  rows: [
-                    { title: 'Info Grupos', description: 'Información de grupos', id: '.grupos' },
-                    { title: 'Info Bot', description: 'Información del bot', id: '.infobot' },
-                    { title: 'Menu All', description: 'Menú completo', id: '.allmenu' },
-                    { title: 'Auto Reg', description: 'Registro automático', id: '.reg user.19' },
-                    { title: 'Ping', description: 'Velocidad del bot', id: '.ping' },
-                    { title: 'Status', description: 'Estado del bot', id: '.status' }
+                  "title":"ᴍᴀʜɪʀᴜ sʜɪɪɴᴀ ʟᴀ ᴍᴇᴊᴏʀ 🫓",
+                  "highlight_label":"🦄드림 가이 Xeon",
+                  "rows":[
+                    {"title":"Info Grupos","description":"Información de grupos","id":".grupos"},
+                    {"title":"Info Bot","description":"Información del bot","id":".infobot"},
+                    {"title":"Menu All","description":"Menú completo","id":".allmenu"},
+                    {"title":"Auto Reg","description":"Registro automático","id":".reg user.19"},
+                    {"title":"Ping","description":"Velocidad del bot","id":".ping"},
+                    {"title":"Status","description":"Estado del bot","id":".status"}
                   ]
                 }
               ],
-              has_multiple_buttons: true
-            })
+              "has_multiple_buttons":true
+            }`
           },
-
-          // ✅ Botón copiar
-          {
-            name: 'cta_copy',
-            buttonParamsJson: JSON.stringify({
-              display_text: 'Copiar Código',
-              id: '123456789',
-              copy_code: '🦄드림 가이 Xeon'
-            })
-          },
-
-          // ✅ Botón URL
+          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"🦄드림 가이 Xeon"}' },
           {
             name: 'cta_url',
-            buttonParamsJson: JSON.stringify({
-              display_text: 'Canal de WhatsApp',
-              url: global.channel,
-              merchant_url: global.channel
-            })
+            buttonParamsJson: `{"display_text":"Canal de WhatsApp","url":"${global.channel}","merchant_url":"${global.channel}"}`
           },
-
-          // ✅ Galaxy / flujo
           {
             name: 'galaxy_message',
-            buttonParamsJson: JSON.stringify({
-              mode: 'published',
-              flow_message_version: '3',
-              flow_token: '1:1307913409923914:293680f87029f5a13d1ec5e35e718af3',
-              flow_id: '1307913409923914',
-              flow_cta: 'ᴀᴄᴄᴇᴅᴇ ᴀ ʙᴏᴛ ᴀɪ',
-              flow_action: 'navigate',
-              flow_action_payload: {
-                screen: 'QUESTION_ONE',
-                params: { user_id: '123456789', referral: 'campaign_xyz' }
+            buttonParamsJson: `{
+              "mode":"published",
+              "flow_message_version":"3",
+              "flow_token":"1:1307913409923914:293680f87029f5a13d1ec5e35e718af3",
+              "flow_id":"1307913409923914",
+              "flow_cta":"ᴀᴄᴄᴇᴅᴇ ᴀ ʙᴏᴛ ᴀɪ",
+              "flow_action":"navigate",
+              "flow_action_payload":{
+                "screen":"QUESTION_ONE",
+                "params":{"user_id":"123456789","referral":"campaign_xyz"}
               },
-              flow_metadata: {
-                flow_json_version: '201',
-                data_api_protocol: 'v2',
-                flow_name: 'Lead Qualification [en]',
-                data_api_version: 'v2',
-                categories: ['Lead Generation', 'Sales']
+              "flow_metadata":{
+                "flow_json_version":"201",
+                "data_api_protocol":"v2",
+                "flow_name":"Lead Qualification [en]",
+                "data_api_version":"v2",
+                "categories":["Lead Generation","Sales"]
               }
-            })
+            }`
           }
         ],
-        messageParamsJson: JSON.stringify({
-          bottom_sheet: {
-            in_thread_buttons_limit: 2,
-            divider_indices: [1, 2, 3, 4, 5, 999],
-            list_title: 'Select Menu',
-            button_title: '⊱✿ ᴍᴇɴᴜ ʟɪsᴛ ✿⊰'
+        messageParamsJson: `{
+          "limited_time_offer":{
+            "text":"🧀 𝗠𝗲𝗻𝘂 𝗟𝗶𝘀𝘁",
+            "url":"https://github.com/xrljosedv",
+            "copy_code":"I LOVE XRLJOSE",
+            "expiration_time":1754613436864329
+          },
+          "bottom_sheet":{
+            "in_thread_buttons_limit":2,
+            "divider_indices":[1,2,3,4,5,999],
+            "list_title":"Select Menu",
+            "button_title":"⊱✿ ᴍᴇɴᴜ ʟɪsᴛ ✿⊰"
+          },
+          "tap_target_configuration":{
+            "title":"▸ X ◂",
+            "description":"Let’s go",
+            "canonical_url":"https://github.com/xrljosedv",
+            "domain":"https://xrljosedvapi.vercel.app",
+            "button_index":0
           }
-        })
+        }`
       },
       contextInfo
     }
 
-    // Envío del mensaje
+    // --- Envío del mensaje ---
     await conn.relayMessage(
       m.chat,
       { viewOnceMessage: { message: { interactiveMessage: nativeFlowPayload } } },
