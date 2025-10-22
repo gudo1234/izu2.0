@@ -29,7 +29,6 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       }
     }
 
-    // simulador de xpRange
     function xpRange(level, multiplier = 1) {
       const min = level * 100 * multiplier
       const xp = 100 * multiplier
@@ -52,7 +51,9 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       if (h >= 12 && h < 18) return 'Buenas tardes 🌤'
       return 'Buenas noches 🌙'
     }
-m.react('🎃')
+
+    m.react('🎃')
+
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
     const exp = userData.exp || 0
@@ -139,7 +140,6 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           jpegThumbnail: thumbResized || null,
           contextInfo: {
             mentionedJid: [m.sender],
-            groupMentions: [],
             forwardingScore: 777,
             isForwarded: true
           }
@@ -157,11 +157,14 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
             buttonParamsJson:
               '{"title":"𝚂𝚎𝚕𝚎𝚌𝚝 𝙼𝚎𝚗𝚞","sections":[{"title":"ᴍᴀʜɪʀᴜ sʜɪɪɴᴀ ʟᴀ ᴍᴇᴊᴏʀ 🫓","highlight_label":"🫩","rows":[{"title":"Info Grupos","description":"Información de grupos","id":".grupos"},{"title":"Info Bot","description":"Información del bot","id":".infobot"},{"title":"Menu All","description":"Menú completo","id":".allmenu"},{"title":"Auto Reg","description":"Registro automático","id":".reg user.19"},{"title":"Ping","description":"Velocidad del bot","id":".ping"},{"title":"Status","description":"Estado del bot","id":".status"}]}],"has_multiple_buttons":true}'
           },
-          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"I Love You xrljose 😻"}' },
+          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"Negro de mierd"}' },
           {
             name: 'cta_url',
-            buttonParamsJson:
-              '{"display_text":"Canal de WhatsApp","url": channel,"merchant_url": channel}'
+            buttonParamsJson: JSON.stringify({
+              display_text: "Canal de WhatsApp",
+              url: channelUrl,
+              merchant_url: channelUrl
+            })
           }
         ],
         messageParamsJson:
@@ -183,7 +186,7 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           }
         }
       },
-      { quoted: fkontak }
+      { quoted: m }
     )
   } catch (e) {
     console.error(e)
