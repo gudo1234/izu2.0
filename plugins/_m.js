@@ -108,7 +108,7 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
 
 ╭──┈➤ *\`𝗜𝗡𝗙𝗢 𝗕𝗢𝗧\`*
 │ 𔓕 *Nombre*     : ${meName || 'Bot'}
-│ 𔓕 *Owner*      : ${_package?.author?.name || 'dev'}
+│ 𔓕 *Owner*      : ${author}
 │ 𔓕 *Powered*    : WhatsApp Business
 │ 𔓕 *Prefix*     : ${_p}
 │ 𔓕 *Mode*       : ${global.opts?.['self'] ? 'Privado' : 'Público'}
