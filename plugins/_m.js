@@ -52,22 +52,7 @@ let handler = async (m, { conn, usedPrefix: _p }) => {
       if (h >= 12 && h < 18) return 'Buenas tardes 🌤'
       return 'Buenas noches 🌙'
     }
-
-   /*const { key } = await conn.sendMessage(m.chat, { text: 'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ. . .' })
-    const loadd = [
-      '□□■■■■■■■■\n             𝟷𝟶٪',
-      '■■□□■■■■■■\n             𝟹𝟶٪',
-      '■■■■□□■■■■\n             𝟻𝟶٪',
-      '■■■■■■□□■■\n             𝟾𝟶٪',
-      '■■■■■■■■□□\n             𝟷𝟶𝟶٪',
-      'ʟ ᴏ ᴀ ᴅ ɪ ɴ ɢ  ᴄ ᴏ ᴍ ᴘ ʟ ᴇ ᴛ ᴇ. . .'
-    ]
-    for (let i = 0; i < loadd.length; i++) {
-      await sleep(750)
-      // quitamos "edit" porque no es soportado en Baileys
-      await conn.sendMessage(m.chat, { text: loadd[i] })
-    }*/
-
+m.react('🎃')
     const _package = JSON.parse((await fsp.readFile(join(__dirname, '../package.json')).catch(() => '{}')).toString())
     const userData = (global.db?.data?.users?.[m.sender]) || {}
     const exp = userData.exp || 0
@@ -176,7 +161,7 @@ Welcome To *${meName || 'MyBot'}*, Un Assistant WhatsApp listo para ayudarte y a
           {
             name: 'cta_url',
             buttonParamsJson:
-              '{"display_text":"Canal de WhatsApp","url": channel}'
+              '{"display_text":"Canal de WhatsApp","url": channel,"merchant_url": channel}'
           }
         ],
         messageParamsJson:
