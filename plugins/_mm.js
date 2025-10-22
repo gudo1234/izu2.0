@@ -144,5 +144,5 @@ if (m.isGroup) {
   }
 }
 
-handler.command = ['mmm']
+handler.command = ['mm']
 export default handler
