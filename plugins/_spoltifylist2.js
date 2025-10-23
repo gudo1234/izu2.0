@@ -11,14 +11,15 @@ let handler = async (m, { conn, args }) => {
 
   const track = global.spResults[index]
   m.react('⬆️')
+
+  // --- PRIMER INTENTO: API DELIRIUS ---
   try {
-    // --- PRIMER INTENTO: API DELIRIUS ---
     const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(track.url)}`
     const res = await fetch(api)
     const json = await res.json()
 
     if (json.status && json.data?.url) {
-    m.react('⬇️')
+      m.react('⬇️')
       await conn.sendMessage(
         m.chat,
         {
@@ -37,18 +38,22 @@ let handler = async (m, { conn, args }) => {
         },
         { quoted: m }
       )
+      return // <-- si funciona, salimos y no ejecutamos el segundo método
     }
+    // si json.status no es true o no hay URL, caemos al catch
+    throw new Error("Primer método falló")
+  } catch (err) {
+    console.log("Primer método falló, intentando método alternativo...")
+  }
 
-    // --- SEGUNDO INTENTO: MÉTODO ALTERNATIVO ---
+  // --- SEGUNDO INTENTO: MÉTODO ALTERNATIVO ---
+  try {
     m.react('⌛')
-
     let downTrack = await downloadTrack2(track.url)
     let backup = await spotifydl(track.url)
 
     if (!backup.status) return m.reply(`${e} No se pudo obtener el audio del método alternativo.`)
 
-    /*const txt = `🎧 *Artista:* ${downTrack.artists}\n🎵 *Título:* ${downTrack.title}\n⏱ *Duración:* ${downTrack.duration}`
-    await conn.sendFile(m.chat, downTrack.imageUrl, 'cover.jpg', txt, m)*/
     await conn.sendMessage(
       m.chat,
       {
@@ -67,8 +72,6 @@ let handler = async (m, { conn, args }) => {
       },
       { quoted: m }
     )
-
-
   } catch (err) {
     console.error(err)
     return m.reply(`${e} Error al procesar la descarga.`)
