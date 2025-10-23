@@ -2,17 +2,17 @@ import fetch from "node-fetch"
 import { prepareWAMessageMedia } from "@whiskeysockets/baileys"
 
 let handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text) return m.reply(`⚠️ Ingresa el nombre de una canción para buscar en Spotify.\n\nEjemplo:\n*${usedPrefix + command} twice*`)
+  if (!text) return m.reply(`${e} Ingresa el nombre de una canción para buscar en Spotify.\n\nEjemplo:\n*${usedPrefix + command} diles*`)
 
   try {
     const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}&limit=20`)
     const json = await res.json()
     if (!json.status || !json.data || !json.data.length)
-      return m.reply("⚠️ No se encontraron resultados para tu búsqueda.")
+      return m.reply(`${e} No se encontraron resultados para tu búsqueda.`)
 
     const results = json.data
-    global.spResults = results // guardamos resultados globalmente para .spt
-
+    global.spResults = results
+m.react('🕒')
     const { imageMessage } = await prepareWAMessageMedia(
       { image: { url: results[0].image } },
       { upload: conn.waUploadToServer }
@@ -33,7 +33,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
     const buttonParamsJson = JSON.stringify({
       title: "Spotify Search",
-      description: "Selecciona una canción para descargar o escuchar",
+      description: "Selecciona una canción para descargar",
       sections
     })
 
@@ -63,14 +63,12 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
     }
 
     await conn.relayMessage(m.chat, { viewOnceMessage: { message } }, {})
-    await m.reply(`✅ Se encontraron *${results.length}* canciones.\nSelecciona una opción del menú o usa *.spt <número>* para descargar.`)
   } catch (e) {
     console.error(e)
-    await m.reply("❌ Error al realizar la búsqueda en Spotify.")
+    await m.reply(`${e} Error al realizar la búsqueda en Spotify.`)
   }
 }
-
-handler.command = ['spo']
+handler.command = ['spotifysearch', 'spsearch', 'sps', 'spotify', 'music']
 handler.group = true
 
 export default handler
