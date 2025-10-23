@@ -3,18 +3,14 @@ import axios from "axios"
 import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 
 let handler = async (m, { conn, args }) => {
-  if (!global.spResults) return m.reply(`${e} No hay resultados recientes. Usa primero *.spotify <nombre>*`)
+  const url = args[0]
+  if (!url) return m.reply(`${e} Debes proporcionar la URL de Spotify.`)
 
-  const index = parseInt(args[0]) - 1
-  if (isNaN(index) || index < 0 || index >= global.spResults.length)
-    return m.reply(`${e} Número inválido. Usa *.spotify <número>* según la lista mostrada.`)
-
-  const track = global.spResults[index]
   m.react('⬆️')
 
   // --- PRIMER INTENTO: API DELIRIUS ---
   try {
-    const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(track.url)}`
+    const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(url)}`
     const res = await fetch(api)
     const json = await res.json()
 
@@ -25,22 +21,21 @@ let handler = async (m, { conn, args }) => {
         {
           audio: { url: json.data.url },
           mimetype: "audio/mpeg",
-          fileName: `${track.title}.mp3`,
+          fileName: `${json.data.title || "track"}.mp3`,
           contextInfo: {
             externalAdReply: {
-              title: track.title,
-              body: track.artist,
-              thumbnailUrl: track.image,
+              title: json.data.title || "Track",
+              body: json.data.artist || "",
+              thumbnailUrl: json.data.image || "",
               mediaType: 2,
-              sourceUrl: track.url
+              sourceUrl: url
             }
           }
         },
         { quoted: m }
       )
-      return // <-- si funciona, salimos y no ejecutamos el segundo método
+      return
     }
-    // si json.status no es true o no hay URL, caemos al catch
     throw new Error("Primer método falló")
   } catch (err) {
     console.log("Primer método falló, intentando método alternativo...")
@@ -49,8 +44,8 @@ let handler = async (m, { conn, args }) => {
   // --- SEGUNDO INTENTO: MÉTODO ALTERNATIVO ---
   try {
     m.react('⌛')
-    let downTrack = await downloadTrack2(track.url)
-    let backup = await spotifydl(track.url)
+    let downTrack = await downloadTrack2(url)
+    let backup = await spotifydl(url)
 
     if (!backup.status) return m.reply(`${e} No se pudo obtener el audio del método alternativo.`)
 
@@ -66,7 +61,7 @@ let handler = async (m, { conn, args }) => {
             body: downTrack.artists,
             thumbnailUrl: downTrack.imageUrl,
             mediaType: 2,
-            sourceUrl: track.url
+            sourceUrl: url
           }
         }
       },
@@ -80,10 +75,9 @@ let handler = async (m, { conn, args }) => {
 
 handler.command = ['spt', 'spotifydl']
 handler.group = true
-
 export default handler
 
-// --- FUNCIÓN DE RESPALDO (Fabdl + SpotifyDL) ---
+// --- FUNCIÓN DE RESPALDO ---
 async function spotifydl(url) {
   try {
     let maxIntentos = 10
