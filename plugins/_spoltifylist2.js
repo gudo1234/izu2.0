@@ -3,14 +3,19 @@ import axios from "axios"
 import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 
 let handler = async (m, { conn, args }) => {
-  const url = args[0]
-  if (!url) return m.reply(`${e} Debes proporcionar la URL de Spotify.`)
+  const userResults = global.spResultsUser?.[m.sender]
+  if (!userResults) return m.reply(`⚠️ No hay resultados recientes. Usa primero *.spotify <nombre>*`)
 
+  const index = parseInt(args[0]) - 1
+  if (isNaN(index) || index < 0 || index >= userResults.length)
+    return m.reply(`❌ Número inválido. Usa *.spotify <número>* según la lista mostrada.`)
+
+  const track = userResults[index]
   m.react('⬆️')
 
   // --- PRIMER INTENTO: API DELIRIUS ---
   try {
-    const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(url)}`
+    const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(track.url)}`
     const res = await fetch(api)
     const json = await res.json()
 
@@ -21,14 +26,14 @@ let handler = async (m, { conn, args }) => {
         {
           audio: { url: json.data.url },
           mimetype: "audio/mpeg",
-          fileName: `${json.data.title || "track"}.mp3`,
+          fileName: `${track.title}.mp3`,
           contextInfo: {
             externalAdReply: {
-              title: json.data.title || "Track",
-              body: json.data.artist || "",
-              thumbnailUrl: json.data.image || "",
+              title: track.title,
+              body: track.artist,
+              thumbnailUrl: track.image,
               mediaType: 2,
-              sourceUrl: url
+              sourceUrl: track.url
             }
           }
         },
@@ -44,10 +49,10 @@ let handler = async (m, { conn, args }) => {
   // --- SEGUNDO INTENTO: MÉTODO ALTERNATIVO ---
   try {
     m.react('⌛')
-    let downTrack = await downloadTrack2(url)
-    let backup = await spotifydl(url)
+    const downTrack = await downloadTrack2(track.url)
+    const backup = await spotifydl(track.url)
 
-    if (!backup.status) return m.reply(`${e} No se pudo obtener el audio del método alternativo.`)
+    if (!backup.status) return m.reply(`❌ No se pudo obtener el audio del método alternativo.`)
 
     await conn.sendMessage(
       m.chat,
@@ -61,38 +66,40 @@ let handler = async (m, { conn, args }) => {
             body: downTrack.artists,
             thumbnailUrl: downTrack.imageUrl,
             mediaType: 2,
-            sourceUrl: url
+            sourceUrl: track.url
           }
         }
       },
       { quoted: m }
     )
+
   } catch (err) {
     console.error(err)
-    return m.reply(`${e} Error al procesar la descarga.`)
+    return m.reply(`⚠️ Error al procesar la descarga.`)
   }
 }
 
 handler.command = ['spt', 'spotifydl']
 handler.group = true
+
 export default handler
 
-// --- FUNCIÓN DE RESPALDO ---
+// --- FUNCIÓN DE RESPALDO (Fabdl + SpotifyDL) ---
 async function spotifydl(url) {
   try {
     let maxIntentos = 10
     let intentos = 0
     let statusOk = 0
-    let res
+    let res, data
 
     while (statusOk !== 3 && statusOk !== -3 && intentos < maxIntentos) {
       try {
-        var { data } = await axios.get(`https://api.fabdl.com/spotify/get?url=${url}`, {
+        ({ data } = await axios.get(`https://api.fabdl.com/spotify/get?url=${url}`, {
           headers: {
             accept: "application/json, text/plain, */*",
             referer: "https://spotifydownload.org/"
           }
-        })
+        }))
 
         const datax = await axios.get(`https://api.fabdl.com/spotify/mp3-convert-task/${data.result.gid}/${data.result.id}`, {
           headers: {
@@ -105,7 +112,7 @@ async function spotifydl(url) {
         statusOk = res.result.status
         intentos++
         if (statusOk !== 3 && statusOk !== -3) await new Promise(r => setTimeout(r, 3000))
-      } catch (error) {
+      } catch {
         return { status: false, message: "Error inesperado." }
       }
     }
@@ -120,7 +127,7 @@ async function spotifydl(url) {
       cover: data.result.image,
       download: "https://api.fabdl.com" + res.result.download_url
     }
-  } catch (e) {
+  } catch {
     return { status: false, message: "Error inesperado." }
   }
 }
