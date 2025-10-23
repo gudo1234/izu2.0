@@ -1,14 +1,14 @@
 import fetch from "node-fetch"
 
 let handler = async (m, { conn, args }) => {
-  if (!global.spResults) return m.reply("⚠️ No hay resultados recientes. Usa primero *.spo <nombre>*")
+  if (!global.spResults) return m.reply(`${e} No hay resultados recientes. Usa primero *.spo <nombre>*`)
   
   const index = parseInt(args[0]) - 1
   if (isNaN(index) || index < 0 || index >= global.spResults.length)
-    return m.reply("⚠️ Número inválido. Usa *.spt <número>* según la lista mostrada.")
+    return m.reply(`${e} Número inválido. Usa *.spotifysearch <número>* según la lista mostrada.`)
 
   const track = global.spResults[index]
-  await m.reply(`🎶 *Descargando...*\n> ${track.title} - ${track.artist}`)
+  m.react('⬆️')
 
   try {
     const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(track.url)}`
@@ -16,8 +16,8 @@ let handler = async (m, { conn, args }) => {
     const json = await res.json()
 
     if (!json.status || !json.data || !json.data.url)
-      return m.reply("❌ No se pudo obtener el enlace de descarga desde Spotify.")
-
+      return m.reply(`${e} No se pudo obtener el enlace de descarga desde Spotify.`)
+m.react('⬇️')
     await conn.sendMessage(
       m.chat,
       {
@@ -38,7 +38,7 @@ let handler = async (m, { conn, args }) => {
     )
   } catch (err) {
     console.error(err)
-    await m.reply("❌ Ocurrió un error al procesar la descarga.")
+    await m.reply(`${e} Ocurrió un error al procesar la descarga.`)
   }
 }
 
