@@ -155,7 +155,7 @@ if (opts["queque"] && m.text && !isPrems) {
         queque.push(msgId);
         (async () => {
             try {
-                await this.reply(m.chat, 'Mensaje recibido ✅', m);
+                //await this.reply(m.chat, 'Mensaje recibido ✅', m);
             } catch (err) {
                 console.error('Error procesando el mensaje:', err);
             } finally {
