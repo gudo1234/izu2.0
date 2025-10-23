@@ -3,23 +3,17 @@ import axios from "axios"
 import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 
 let handler = async (m, { conn, args }) => {
-  if (args.length < 2)
-    return m.reply(`${e} Usa el formato correcto:\n*.spt <id> <número>*\n\nEjemplo:\n*.spt a1b2c3 2*`)
+  if (!args[0]) return m.reply(`🎶 Usa el formato correcto:\n*.spt <url de Spotify>*`)
 
-  const [searchId, numStr] = args
-  const index = parseInt(numStr) - 1
+  const url = args[0]
+  if (!url.startsWith("https://open.spotify.com/")) 
+    return m.reply(`❌ Enlace inválido. Debe ser una URL de Spotify.`)
 
-  const results = global.spResultsMap?.get(searchId)
-  if (!results) return m.reply(`❌ Los resultados de esta búsqueda ya no existen o expiraron.`)
-  if (isNaN(index) || index < 0 || index >= results.length)
-    return m.reply(`❌ Número inválido. Usa *.spt <id> <número>* correctamente.`)
-
-  const track = results[index]
   m.react('⬆️')
 
   // --- PRIMER INTENTO: API DELIRIUS ---
   try {
-    const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(track.url)}`
+    const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(url)}`
     const res = await fetch(api)
     const json = await res.json()
 
@@ -30,14 +24,14 @@ let handler = async (m, { conn, args }) => {
         {
           audio: { url: json.data.url },
           mimetype: "audio/mpeg",
-          fileName: `${track.title}.mp3`,
+          fileName: `${json.data.title}.mp3`,
           contextInfo: {
             externalAdReply: {
-              title: track.title,
-              body: track.artist,
-              thumbnailUrl: track.image,
+              title: json.data.title,
+              body: json.data.artists,
+              thumbnailUrl: json.data.cover,
               mediaType: 2,
-              sourceUrl: track.url
+              sourceUrl: url
             }
           }
         },
@@ -50,11 +44,11 @@ let handler = async (m, { conn, args }) => {
     console.log("Primer método falló, intentando método alternativo...")
   }
 
-  // --- SEGUNDO INTENTO: MÉTODO ALTERNATIVO ---
+  // --- SEGUNDO INTENTO ---
   try {
     m.react('⌛')
-    const downTrack = await downloadTrack2(track.url)
-    const backup = await spotifydl(track.url)
+    const downTrack = await downloadTrack2(url)
+    const backup = await spotifydl(url)
 
     if (!backup.status) return m.reply(`❌ No se pudo obtener el audio del método alternativo.`)
 
@@ -70,13 +64,12 @@ let handler = async (m, { conn, args }) => {
             body: downTrack.artists,
             thumbnailUrl: downTrack.imageUrl,
             mediaType: 2,
-            sourceUrl: track.url
+            sourceUrl: url
           }
         }
       },
       { quoted: m }
     )
-
   } catch (err) {
     console.error(err)
     return m.reply(`⚠️ Error al procesar la descarga.`)
@@ -99,17 +92,11 @@ async function spotifydl(url) {
     while (statusOk !== 3 && statusOk !== -3 && intentos < maxIntentos) {
       try {
         ({ data } = await axios.get(`https://api.fabdl.com/spotify/get?url=${url}`, {
-          headers: {
-            accept: "application/json, text/plain, */*",
-            referer: "https://spotifydownload.org/"
-          }
+          headers: { accept: "application/json, text/plain, */*", referer: "https://spotifydownload.org/" }
         }))
 
         const datax = await axios.get(`https://api.fabdl.com/spotify/mp3-convert-task/${data.result.gid}/${data.result.id}`, {
-          headers: {
-            accept: "application/json, text/plain, */*",
-            referer: "https://spotifydownload.org/"
-          }
+          headers: { accept: "application/json, text/plain, */*", referer: "https://spotifydownload.org/" }
         })
 
         res = datax.data
