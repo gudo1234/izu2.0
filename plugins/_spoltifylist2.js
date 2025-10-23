@@ -11,6 +11,19 @@ let handler = async (m, { conn, args }) => {
 
   m.react('⬆️')
 
+  // 🔹 Función para obtener miniatura válida
+  async function getValidThumbnail(coverUrl) {
+    try {
+      const res = await fetch(coverUrl)
+      const buffer = await res.arrayBuffer()
+      return Buffer.from(buffer)
+    } catch {
+      const fallback = "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"
+      const res = await fetch(fallback)
+      return Buffer.from(await res.arrayBuffer())
+    }
+  }
+
   // --- PRIMER INTENTO: API DELIRIUS ---
   try {
     const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(url)}`
@@ -19,6 +32,10 @@ let handler = async (m, { conn, args }) => {
 
     if (json.status && json.data?.url) {
       m.react('⬇️')
+
+      // 🔹 Asegurar que el thumbnail sea válido
+      const thumb = await getValidThumbnail(json.data.cover)
+
       await conn.sendMessage(
         m.chat,
         {
@@ -29,7 +46,7 @@ let handler = async (m, { conn, args }) => {
             externalAdReply: {
               title: json.data.title,
               body: json.data.artists,
-              thumbnailUrl: json.data.cover,
+              thumbnail: thumb, // <---- buffer seguro
               mediaType: 2,
               sourceUrl: url
             }
@@ -52,6 +69,8 @@ let handler = async (m, { conn, args }) => {
 
     if (!backup.status) return m.reply(`❌ No se pudo obtener el audio del método alternativo.`)
 
+    const thumb = await getValidThumbnail(downTrack.imageUrl || backup.cover)
+
     await conn.sendMessage(
       m.chat,
       {
@@ -62,7 +81,7 @@ let handler = async (m, { conn, args }) => {
           externalAdReply: {
             title: downTrack.title,
             body: downTrack.artists,
-            thumbnailUrl: downTrack.imageUrl,
+            thumbnail: thumb,
             mediaType: 2,
             sourceUrl: url
           }
