@@ -1,4 +1,5 @@
 import fetch from "node-fetch"
+import crypto from "crypto"
 import { prepareWAMessageMedia } from "@whiskeysockets/baileys"
 
 let handler = async (m, { conn, text, command, usedPrefix }) => {
@@ -7,16 +8,17 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
   try {
     const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}&limit=20`)
     const json = await res.json()
-    if (!json.status || !json.data || !json.data.length) return m.reply(`❌ No se encontraron resultados para tu búsqueda.`)
+    if (!json.status || !json.data?.length) return m.reply(`❌ No se encontraron resultados para tu búsqueda.`)
 
-    const results = json.data
-    if (!global.spResultsUser) global.spResultsUser = {}
-    global.spResultsUser[m.sender] = results // ← Se guarda solo para el usuario actual
+    // Generar un ID único para esta búsqueda
+    const searchId = crypto.randomBytes(6).toString("hex")
+    if (!global.spResultsMap) global.spResultsMap = new Map()
+    global.spResultsMap.set(searchId, json.data)
 
     m.react('🕒')
 
     const { imageMessage } = await prepareWAMessageMedia(
-      { image: { url: results[0].image } },
+      { image: { url: json.data[0].image } },
       { upload: conn.waUploadToServer }
     )
 
@@ -24,11 +26,11 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
       {
         title: `🎧 Resultados de Spotify: ${text}`,
         highlight_label: "Selecciona una canción",
-        rows: results.map((v, i) => ({
+        rows: json.data.map((v, i) => ({
           header: v.artist,
           title: v.title,
           description: `${v.album} • ${v.duration} • Popularidad ${v.popularity}`,
-          id: `.spt ${i + 1}`
+          id: `.spt ${searchId} ${i + 1}`
         }))
       }
     ]
@@ -41,7 +43,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
 
     const interactiveMessage = {
       body: { text: `🎵 Resultados de búsqueda para: *${text}*` },
-      footer: { text: "Toca una canción o usa *.spt <número>* para descargar." },
+      footer: { text: "Toca una canción o usa *.spt <id> <número>* para descargar." },
       header: { hasMediaAttachment: true, imageMessage },
       nativeFlowMessage: {
         buttons: [
