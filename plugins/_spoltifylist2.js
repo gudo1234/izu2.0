@@ -3,14 +3,18 @@ import axios from "axios"
 import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 
 let handler = async (m, { conn, args }) => {
-  const userResults = global.spResultsUser?.[m.sender]
-  if (!userResults) return m.reply(`⚠️ No hay resultados recientes. Usa primero *.spotify <nombre>*`)
+  if (args.length < 2)
+    return m.reply(`${e} Usa el formato correcto:\n*.spt <id> <número>*\n\nEjemplo:\n*.spt a1b2c3 2*`)
 
-  const index = parseInt(args[0]) - 1
-  if (isNaN(index) || index < 0 || index >= userResults.length)
-    return m.reply(`❌ Número inválido. Usa *.spotify <número>* según la lista mostrada.`)
+  const [searchId, numStr] = args
+  const index = parseInt(numStr) - 1
 
-  const track = userResults[index]
+  const results = global.spResultsMap?.get(searchId)
+  if (!results) return m.reply(`❌ Los resultados de esta búsqueda ya no existen o expiraron.`)
+  if (isNaN(index) || index < 0 || index >= results.length)
+    return m.reply(`❌ Número inválido. Usa *.spt <id> <número>* correctamente.`)
+
+  const track = results[index]
   m.react('⬆️')
 
   // --- PRIMER INTENTO: API DELIRIUS ---
