@@ -90,15 +90,14 @@ const handler = async (m, { conn, text }) => {
       const results = data.slice(0, 8).map(v => v.image_large_url).filter(Boolean)
       if (results.length === 0) return m.reply(`${e} No se pudieron obtener imágenes válidas.`)
 
-      // Mensaje principal
-      await conn.sendMessage(m.chat, {
-        text: `✨ *Pinterest Search*\nResultados para: *${text}*`
-      }, { quoted: m })
+      // Creamos el array de mensajes tipo "álbum"
+      const messages = results.map((url, index) => ({
+        image: { url },
+        caption: index === 0 ? `✨ *Pinterest Search*\nResultados para: *${text}*` : null
+      }))
 
-      // Enviamos las imágenes rápidamente para que WhatsApp las agrupe visualmente
-      for (const url of results) {
-        await conn.sendMessage(m.chat, { image: { url } }, { quoted: m })
-      }
+      // Enviamos las 8 fotos juntas (álbum visual)
+      await conn.sendMessage(m.chat, { messages }, { quoted: m })
 
     } catch (err) {
       console.error(err)
