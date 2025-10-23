@@ -59,6 +59,9 @@ handler.group = true;
 export default handler;*/
 
 import fetch from 'node-fetch'
+import fs from 'fs'
+import path from 'path'
+import { tmpdir } from 'os'
 
 const handler = async (m, { conn, text }) => {
 
@@ -87,17 +90,36 @@ const handler = async (m, { conn, text }) => {
       if (!Array.isArray(data) || data.length === 0)
         return m.reply(`${e} No se encontraron imágenes para: *${text}*`)
 
+      // Tomamos máximo 8 imágenes
       const results = data.slice(0, 8).map(v => v.image_large_url).filter(Boolean)
       if (results.length === 0) return m.reply(`${e} No se pudieron obtener imágenes válidas.`)
 
-      // Creamos el array de mensajes tipo "álbum"
-      const messages = results.map((url, index) => ({
-        image: { url },
-        caption: index === 0 ? `✨ *Pinterest Search*\nResultados para: *${text}*` : null
-      }))
+      // Descargamos y guardamos temporalmente las 8 imágenes antes de enviarlas
+      const files = []
+      for (const [i, url] of results.entries()) {
+        const buffer = await fetch(url).then(r => r.buffer())
+        const tempFile = path.join(tmpdir(), `pin_${Date.now()}_${i}.jpg`)
+        fs.writeFileSync(tempFile, buffer)
+        files.push(tempFile)
+      }
 
-      // Enviamos las 8 fotos juntas (álbum visual)
-      await conn.sendMessage(m.chat, { messages }, { quoted: m })
+      // Pausa corta antes del envío (para que estén todas listas)
+      await new Promise(r => setTimeout(r, 800))
+
+      // Enviar todas las fotos (caption solo en la primera)
+      for (const [i, file] of files.entries()) {
+        await conn.sendMessage(
+          m.chat,
+          {
+            image: { url: file },
+            caption: i === 0 ? `✨ *Pinterest Search*\nResultados para: *${text}*` : null
+          },
+          { quoted: m }
+        )
+      }
+
+      // Eliminamos los archivos temporales
+      for (const file of files) fs.unlinkSync(file)
 
     } catch (err) {
       console.error(err)
