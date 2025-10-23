@@ -23,7 +23,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
           header: `${v.artist}`,
           title: `${v.title}`,
           description: `${v.album} • ${v.duration} • Popularidad ${v.popularity}`,
-          id: `.spotify ${v.title}`
+          id: `.spotify ${i + 1}`
         }))
       }
     ]
