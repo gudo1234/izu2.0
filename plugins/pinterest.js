@@ -60,13 +60,12 @@ export default handler;*/
 
 import fetch from 'node-fetch';
 
-const handler = async (m, { conn, text, usedPrefix, command }) => {
+const handler = async (m, { conn, text }) => {
 
   if (!text) return m.reply(`${e} *Ingresa un enlace de Pinterest o una palabra clave para buscar.*`);
 
   await conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
 
-  // Detectar URLs válidas de Pinterest (pin.it o pinterest.com)
   const pinterestUrlRegex = /^https?:\/\/(www\.)?(pinterest\.[a-z.]+\/pin\/|pin\.it\/)/i;
 
   if (pinterestUrlRegex.test(text)) {
@@ -90,37 +89,29 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         return m.reply(`${e} No se encontraron imágenes para: *${text}*`);
       }
 
-      // Seleccionar máximo 8 imágenes para enviarlas como álbum
+      // Tomamos máximo 8 resultados
       const results = data.slice(0, 8);
-      const media = [];
+      const images = [];
 
       for (const item of results) {
         if (!item.image_large_url) continue;
-        media.push({ image: { url: item.image_large_url } });
+        images.push({ type: 'image', url: item.image_large_url });
       }
 
-      if (media.length > 0) {
+      if (images.length > 0) {
+        // Enviar todas las imágenes en formato álbum
         await conn.sendMessage(
           m.chat,
           {
-            caption: `✨ Pinterest Search\nResultados para: *${text}*`,
-            image: { url: media[0].image.url }
+            caption: `✨ *Pinterest Search*\nResultados para: *${text}*`,
+            media: images.map(i => ({ image: { url: i.url } }))
           },
           { quoted: m }
         );
-
-        if (media.length > 1) {
-          await conn.sendMessage(
-            m.chat,
-            {
-              forward: media.slice(1)
-            },
-            { quoted: m }
-          );
-        }
       } else {
         await m.reply(`${e} No se pudieron obtener imágenes válidas.`);
       }
+
     } catch (err) {
       console.error(err);
       await m.reply(`${e} Ocurrió un error al buscar imágenes.`);
