@@ -93,7 +93,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       for (let i = 0; i < result.images.length; i++) {
         await conn.sendFile(m.chat, result.images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m, null, rcanal);
       }
-      if (result.audio) await conn.sendFile(m.chat, result.audio, 'audio.mp3', '*Audio original*', m);
+      if (result.audio) await conn.sendFile(m.chat, result.audio, 'audio.mp3', '*Audio original*', m, false, { mimetype: 'audio/mpeg' });
     } else {
       await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m, null, rcanal);
     }
