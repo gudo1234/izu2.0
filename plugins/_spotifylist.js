@@ -2,7 +2,7 @@ import fetch from "node-fetch"
 import { prepareWAMessageMedia } from "@whiskeysockets/baileys"
 
 let handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text) throw `✳️ Ingresa el nombre de una canción para buscar en Spotify.\n\nEjemplo:\n*${usedPrefix + command} twice*`
+  if (!text) throw `${e} Ingresa el nombre de una canción para buscar en Spotify.\n\nEjemplo:\n*${usedPrefix + command} twice*`
 
   try {
     const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}&limit=20`)
@@ -23,7 +23,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
           header: `${v.artist}`,
           title: `${v.title}`,
           description: `${v.album} • ${v.duration} • Popularidad ${v.popularity}`,
-          id: `.spt ${i + 1}`
+          id: `.spotify ${v.title}`
         }))
       }
     ]
