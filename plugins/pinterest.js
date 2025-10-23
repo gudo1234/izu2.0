@@ -66,19 +66,8 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   await conn.sendMessage(m.chat, { react: { text: "🕒", key: m.key } });
 
+  // Detectar URLs válidas de Pinterest (pin.it o pinterest.com)
   const pinterestUrlRegex = /^https?:\/\/(www\.)?(pinterest\.[a-z.]+\/pin\/|pin\.it\/)/i;
-
-  const contextInfo = {
-    externalAdReply: {
-      title: wm,
-      body: textbot,
-      thumbnailUrl: redes,
-      thumbnail: await (await fetch(icono)).buffer(),
-      sourceUrl: redes,
-      mediaType: 1,
-      renderLargerThumbnail: true
-    }
-  };
 
   if (pinterestUrlRegex.test(text)) {
     try {
@@ -87,7 +76,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
       if (!json?.data?.result) throw `${e} No se pudo obtener el contenido del enlace.`;
 
-      await conn.sendFile(m.chat, json.data.result, 'pinterest.mp4', `*🔗 Url:* ${json.data.url}`, m, false, { contextInfo });
+      await conn.sendFile(m.chat, json.data.result, 'pinterest.mp4', `*🔗 Url:* ${json.data.url}`, m);
     } catch (err) {
       console.error(err);
       await m.reply(`${e} Hubo un error al procesar el enlace.`);
@@ -101,7 +90,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         return m.reply(`${e} No se encontraron imágenes para: *${text}*`);
       }
 
-      // Seleccionamos máximo 8 imágenes para enviarlas como álbum
+      // Seleccionar máximo 8 imágenes para enviarlas como álbum
       const results = data.slice(0, 8);
       const media = [];
 
@@ -114,21 +103,18 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         await conn.sendMessage(
           m.chat,
           {
-            caption: `✨ *Pinterest Search*\nResultados para: *${text}*`,
-            image: { url: media[0].image.url },
-            contextInfo
+            caption: `✨ Pinterest Search\nResultados para: *${text}*`,
+            image: { url: media[0].image.url }
           },
           { quoted: m }
         );
 
         if (media.length > 1) {
-          // enviamos el resto de imágenes agrupadas como álbum
           await conn.sendMessage(
             m.chat,
-            { 
-              forward: media.slice(1), 
-              contextInfo 
-            }, 
+            {
+              forward: media.slice(1)
+            },
             { quoted: m }
           );
         }
