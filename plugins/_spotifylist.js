@@ -11,8 +11,8 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
       return m.reply(`${e} No se encontraron resultados para tu búsqueda.`)
 
     const results = json.data
-    global.spResults = results
-m.react('🕒')
+    m.react('🕒')
+
     const { imageMessage } = await prepareWAMessageMedia(
       { image: { url: results[0].image } },
       { upload: conn.waUploadToServer }
@@ -22,11 +22,11 @@ m.react('🕒')
       {
         title: `🎧 Resultados de Spotify: ${text}`,
         highlight_label: "Selecciona una canción",
-        rows: results.map((v, i) => ({
+        rows: results.map((v) => ({
           header: v.artist,
           title: v.title,
           description: `${v.album} • ${v.duration} • Popularidad ${v.popularity}`,
-          id: `.spt ${i + 1}`
+          id: `.spt ${encodeURIComponent(v.url)}` // <-- guardamos la URL directamente
         }))
       }
     ]
@@ -39,7 +39,7 @@ m.react('🕒')
 
     const interactiveMessage = {
       body: { text: `🎵 Resultados de búsqueda para: *${text}*` },
-      footer: { text: "Toca una canción o usa *.spt <número>* para descargar." },
+      footer: { text: "Toca una canción o usa *.spt <url>* para descargar." },
       header: {
         hasMediaAttachment: true,
         imageMessage: imageMessage
@@ -68,7 +68,7 @@ m.react('🕒')
     await m.reply(`${e} Error al realizar la búsqueda en Spotify.`)
   }
 }
+
 handler.command = ['spotifysearch', 'spsearch', 'sps', 'spotify', 'music']
 handler.group = true
-
 export default handler
