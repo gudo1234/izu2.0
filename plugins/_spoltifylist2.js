@@ -34,26 +34,25 @@ let handler = async (m, { conn, args }) => {
       m.react('⬇️')
 
       // 🔹 Asegurar que el thumbnail sea válido
-      const thumb = await getValidThumbnail(json.data.cover)
-
-      await conn.sendMessage(
-        m.chat,
-        {
-          audio: { url: json.data.url },
-          mimetype: "audio/mpeg",
-          fileName: `${json.data.title}.mp3`,
-          contextInfo: {
-            externalAdReply: {
-              title: json.data.title,
-              body: json.data.artists,
-              thumbnail: thumb, // <---- buffer seguro
-              mediaType: 2,
-              sourceUrl: url
-            }
-          }
-        },
-        { quoted: m }
-      )
+      await conn.sendMessage(  
+  m.chat,  
+  {  
+    audio: { url: backup.download },  
+    mimetype: "audio/mpeg",  
+    fileName: `${downTrack.title}.mp3`,  
+    contextInfo: {  
+      externalAdReply: {  
+        title: downTrack.title,  
+        body: downTrack.artists,  
+        thumbnailUrl: downTrack.imageUrl || icono, // ✅ corrección del thumbnail
+        mediaType: 2,  
+        showAdAttribution: true,  
+        sourceUrl: track.url  
+      }  
+    }  
+  },  
+  { quoted: m }  
+)
       return
     }
     throw new Error("Primer método falló")
