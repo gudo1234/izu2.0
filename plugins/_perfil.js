@@ -9,44 +9,35 @@ const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
 
 function banderaEmoji(countryCode) {
   if (!countryCode || countryCode.length !== 2) return ''
-  const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+  const codePoints = [...countryCode.toUpperCase()].map(char => 0x1F1E6 + char.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
 }
 
-const handler = async (m, { conn, text }) => {
+const handler = async (m, { conn, usedPrefix, command, text }) => {
   try {
-    // ======== OBTENER PARTICIPANTES DEL GRUPO ==========
-    const participants = (conn.chats[m.chat]?.metadata?.participants || await conn.groupMetadata(m.chat).catch(() => ({})).then(g => g?.participants) || [])
-
-    // ======== OBTENER MENCIONES REALES, IGNORANDO @lid ==========
-    let mentionedJid = []
-    if (m.mentionedJid?.length) {
-      mentionedJid = m.mentionedJid.filter(u => !u.includes('@lid'))
-    }
-
     // ======== DETECTAR USUARIO OBJETIVO ==========
-    let jid, number, own = false
-    if (mentionedJid.length) {
-      jid = mentionedJid[0]
-      number = jid.split('@')[0]
-    } else if (m.quoted?.sender && !m.quoted.sender.includes('@lid')) {
-      jid = m.quoted.sender
-      number = jid.split('@')[0]
-    } else if (/^\+?\d{5,16}$/.test(text?.trim())) {
-      number = text.replace(/\D/g, '')
-      jid = number + '@s.whatsapp.net'
+    let target
+    let own = false
+
+    if (m.quoted?.sender) {
+      target = m.quoted.sender
+    } else if (m.mentionedJid?.[0]) {
+      target = m.mentionedJid[0]
+    } else if (text) {
+      const clean = text.replace(/\D/g, '')
+      target = clean ? `${clean}@s.whatsapp.net` : m.sender
     } else {
-      jid = m.sender
-      number = jid.split('@')[0]
+      target = m.sender
       own = true
     }
 
     // ======== VALIDAR EXISTENCIA ==========
-    const exists = await conn.onWhatsApp(jid)
+    const exists = await conn.onWhatsApp(target)
     if (!exists[0]?.exists) throw '❌ Este usuario no existe o no está registrado en WhatsApp.'
 
     // ======== DATOS BÁSICOS ==========
-    const name = await conn.getName(jid)
+    const number = target.split('@')[0]
+    const name = await conn.getName(target)
     const phoneInfo = PhoneNum('+' + number)
     const countryCode = phoneInfo.getRegionCode('international')
     const country = regionNames.of(countryCode) || 'Desconocido'
@@ -73,6 +64,7 @@ const handler = async (m, { conn, text }) => {
       extraInfo += `🗣️ *Idioma:* ${data.idioma_oficial || '-'}\n`
       extraInfo += `🍽️ *Gastronomía:* ${data.gastronomía || '-'}\n`
 
+      // ======== CLIMA ACTUAL ==========
       try {
         const climaRes = await axios.get(`https://api.dorratz.com/v2/clima-s?city=${encodeURIComponent(data.capital || data.nombre)}`)
         const clima = climaRes.data
@@ -89,6 +81,7 @@ const handler = async (m, { conn, text }) => {
 
       fechaLocal = moment().tz('America/Tegucigalpa').format('dddd, D [de] MMMM [de] YYYY')
     } catch {
+      // ======== FALLBACK: RESTCOUNTRIES ==========
       try {
         const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`)
         const data = res.data[0]
@@ -101,9 +94,9 @@ const handler = async (m, { conn, text }) => {
     }
 
     // ======== DATOS DE PERFIL ==========
-    const img = await conn.profilePictureUrl(jid, 'image').catch(_ => icono)
-    const bio = await conn.fetchStatus(jid).catch(_ => null)
-    const business = await conn.getBusinessProfile(jid).catch(_ => null)
+    const img = await conn.profilePictureUrl(target, 'image').catch(_ => icono)
+    const bio = await conn.fetchStatus(target).catch(_ => null)
+    const business = await conn.getBusinessProfile(target).catch(_ => null)
 
     let caption = `🔥 _*ɪɴғᴏʀᴍᴀᴄɪᴏɴ ᴅᴇʟ ᴜsᴜᴀʀɪᴏ*_\n\n`
     caption += `👤 *Nombre:* ${name || '-'}\n`
@@ -133,12 +126,11 @@ const handler = async (m, { conn, text }) => {
     await conn.sendMessage(m.chat, {
       image: { url: img },
       caption,
-      mentions: [jid]
+      mentions: [target]
     }, { quoted: m })
-
   } catch (err) {
     console.error(err)
-    await m.reply('❌ Ocurrió un error al obtener la información del usuario.')
+    await m.reply(`${e} Para obtener la información, responda al mensaje del usuario o ingrese su número con código de país, por ejemplo: ${usedPrefix + command} +504XXXXXXXX`)
   }
 }
 
