@@ -130,7 +130,7 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
     }, { quoted: m })
   } catch (err) {
     console.error(err)
-    await m.reply(`${e} _Para obtener la información, responda al mensaje del usuario o ingrese su número con código de país, por ejemplo: ${usedPrefix + command} +504XXXXXXXX_`)
+    await m.reply(`${e} _Para obtener la información, responda al mensaje del usuario o ingrese su número con código de país, por ejemplo: *${usedPrefix + command}* +504XXXXXXXX_`)
   }
 }
 
