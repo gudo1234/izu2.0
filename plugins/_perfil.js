@@ -15,14 +15,16 @@ function banderaEmoji(countryCode) {
 
 const handler = async (m, { conn }) => {
   try {
-    // ======== DETECTAR USUARIO OBJETIVO ==========
+    // ======== DETECTAR USUARIO OBJETIVO, EVITANDO @lid ==========
     let target
     let own = false
 
-    if (m.quoted?.sender) {
+    // Filtrar menciones válidas
+    const validMention = m.mentionedJid?.find(u => !u.includes('@lid'))
+    if (m.quoted?.sender && !m.quoted.sender.includes('@lid')) {
       target = m.quoted.sender
-    } else if (m.mentionedJid?.length) {
-      target = m.mentionedJid[0]
+    } else if (validMention) {
+      target = validMention
     } else {
       target = m.sender
       own = true
@@ -78,7 +80,6 @@ const handler = async (m, { conn }) => {
 
       fechaLocal = moment().tz('America/Tegucigalpa').format('dddd, D [de] MMMM [de] YYYY')
     } catch {
-      // ======== FALLBACK: RESTCOUNTRIES ==========
       try {
         const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`)
         const data = res.data[0]
