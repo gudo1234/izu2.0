@@ -72,7 +72,7 @@ const handler = async (m, { conn, text }) => {
   const bio = await conn.fetchStatus(target).catch(_ => null)
   const business = await conn.getBusinessProfile(target).catch(_ => null)
 
-  let caption = `${e} *Información del usuario*\n\n`
+  let caption = `${e} _*ɪɴғᴏʀᴍᴀᴄɪᴏɴ ᴅᴇʟ ᴜsᴜᴀʀɪᴏ*_\n\n`
   caption += `👤 *Nombre:* ${name || '-'}\n`
   caption += `📱 *Número:* ${formatNum}\n`
   caption += `🌎 *País:* ${country} ${flag}\n`
