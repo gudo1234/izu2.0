@@ -68,7 +68,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
         enviados++
       } catch (err) {
-        console.log(`${e} Error al descargar resultado #${i + 1}:`, err)
+        console.log(`Error al descargar resultado #${i + 1}:`, err)
       }
     }
 
