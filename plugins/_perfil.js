@@ -54,8 +54,24 @@ const handler = async (m, { conn, text }) => {
     extraInfo += `🗣️ *Idioma:* ${data.idioma_oficial || '-'}\n`
     extraInfo += `🍽️ *Gastronomía:* ${data.gastronomía || '-'}\n`
 
+    // ======== CLIMA ACTUAL ==========
+    try {
+      const climaRes = await axios.get(`https://api.dorratz.com/v2/clima-s?city=${encodeURIComponent(data.capital || data.nombre)}`)
+      const clima = climaRes.data
+      extraInfo += `\n☁️ *Clima actual en ${data.capital || data.nombre}:*\n`
+      extraInfo += `- Estado: ${clima.weather || '-'}\n`
+      extraInfo += `- Temperatura: ${clima.temperature || '-'}\n`
+      extraInfo += `- Temp. mínima: ${clima.minimumTemperature || '-'}\n`
+      extraInfo += `- Temp. máxima: ${clima.maximumTemperature || '-'}\n`
+      extraInfo += `- Humedad: ${clima.humidity || '-'}\n`
+      extraInfo += `- Viento: ${clima.wind || '-'}\n`
+    } catch (err) {
+      extraInfo += `\n☁️ *Clima actual:* No disponible\n`
+    }
+
     fechaLocal = moment().tz('America/Tegucigalpa').format('dddd, D [de] MMMM [de] YYYY')
   } catch (err) {
+    // ======== FALLBACK: RESTCOUNTRIES ==========
     try {
       const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`)
       const data = res.data[0]
@@ -72,7 +88,7 @@ const handler = async (m, { conn, text }) => {
   const bio = await conn.fetchStatus(target).catch(_ => null)
   const business = await conn.getBusinessProfile(target).catch(_ => null)
 
-  let caption = `${e} _*ɪɴғᴏʀᴍᴀᴄɪᴏɴ ᴅᴇʟ ᴜsᴜᴀʀɪᴏ*_\n\n`
+  let caption = `${e} *ɪɴғᴏʀᴍᴀᴄɪᴏɴ ᴅᴇʟ ᴜsᴜᴀʀɪᴏ*\n\n`
   caption += `👤 *Nombre:* ${name || '-'}\n`
   caption += `📱 *Número:* ${formatNum}\n`
   caption += `🌎 *País:* ${country} ${flag}\n`
@@ -82,7 +98,7 @@ const handler = async (m, { conn, text }) => {
   caption += `🏷️ *Tag:* @${number}\n`
   caption += `💬 *Bio:* ${bio?.status || '-'}\n`
   caption += `🕓 *Actualizado:* ${bio?.setAt ? moment(bio.setAt).format('LLLL') : '-'}\n`
-  caption += `📲 *Dispositivo:* ${own ? getDevice(m.key.id) : '-'}\n`
+  caption += `📲 *Dispositivo:* ${own ? getDevice(m.key.id) : '-'}\n\n`
   caption += extraInfo
 
   if (business) {
