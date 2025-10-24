@@ -13,7 +13,7 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints)
 }
 
-const handler = async (m, { conn, text }) => {
+const handler = async (m, { conn }) => {
   try {
     // ======== DETECTAR USUARIO OBJETIVO ==========
     let target
@@ -21,11 +21,8 @@ const handler = async (m, { conn, text }) => {
 
     if (m.quoted?.sender) {
       target = m.quoted.sender
-    } else if (m.mentionedJid?.[0]) {
+    } else if (m.mentionedJid?.length) {
       target = m.mentionedJid[0]
-    } else if (text) {
-      const clean = text.replace(/\D/g, '')
-      target = clean ? `${clean}@s.whatsapp.net` : m.sender
     } else {
       target = m.sender
       own = true
@@ -128,6 +125,7 @@ const handler = async (m, { conn, text }) => {
       caption,
       mentions: [target]
     }, { quoted: m })
+
   } catch (err) {
     console.error(err)
     await m.reply('❌ Ocurrió un error al obtener la información del usuario.')
