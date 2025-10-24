@@ -102,7 +102,7 @@ const handler = async (m, { conn, text }) => {
   caption += extraInfo
 
   if (business) {
-    caption += `\n⚡ *Cuenta Business:*\n`
+    caption += `\n⚡ _*ᴄᴜᴇɴᴛᴀ  ᴡᴀ/ʙᴜsɪɴᴇss*_\n`
     caption += `🆔 *ID:* ${business.wid}\n`
     caption += `🌐 *Sitio Web:* ${business.website || '-'}\n`
     caption += `📧 *Email:* ${business.email || '-'}\n`
