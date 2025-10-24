@@ -9,18 +9,25 @@ const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
 
 function banderaEmoji(countryCode) {
   if (!countryCode || countryCode.length !== 2) return ''
-  const codePoints = [...countryCode.toUpperCase()].map(char => 0x1F1E6 + char.charCodeAt(0) - 65)
+  const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
 }
 
 const handler = async (m, { conn, text }) => {
   try {
-    // ======== DETECTAR USUARIO OBJETIVO, EVITANDO @lid ==========
-    let jid, number, own = false
+    // ======== OBTENER PARTICIPANTES DEL GRUPO ==========
+    const participants = (conn.chats[m.chat]?.metadata?.participants || await conn.groupMetadata(m.chat).catch(() => ({})).then(g => g?.participants) || [])
 
-    const mention = m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.find(u => !u.includes('@lid'))
-    if (mention) {
-      jid = mention
+    // ======== OBTENER MENCIONES REALES, IGNORANDO @lid ==========
+    let mentionedJid = []
+    if (m.mentionedJid?.length) {
+      mentionedJid = m.mentionedJid.filter(u => !u.includes('@lid'))
+    }
+
+    // ======== DETECTAR USUARIO OBJETIVO ==========
+    let jid, number, own = false
+    if (mentionedJid.length) {
+      jid = mentionedJid[0]
       number = jid.split('@')[0]
     } else if (m.quoted?.sender && !m.quoted.sender.includes('@lid')) {
       jid = m.quoted.sender
@@ -66,7 +73,6 @@ const handler = async (m, { conn, text }) => {
       extraInfo += `🗣️ *Idioma:* ${data.idioma_oficial || '-'}\n`
       extraInfo += `🍽️ *Gastronomía:* ${data.gastronomía || '-'}\n`
 
-      // ======== CLIMA ACTUAL ==========
       try {
         const climaRes = await axios.get(`https://api.dorratz.com/v2/clima-s?city=${encodeURIComponent(data.capital || data.nombre)}`)
         const clima = climaRes.data
@@ -83,7 +89,6 @@ const handler = async (m, { conn, text }) => {
 
       fechaLocal = moment().tz('America/Tegucigalpa').format('dddd, D [de] MMMM [de] YYYY')
     } catch {
-      // ======== FALLBACK: RESTCOUNTRIES ==========
       try {
         const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`)
         const data = res.data[0]
