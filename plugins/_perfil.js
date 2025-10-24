@@ -98,7 +98,7 @@ const handler = async (m, { conn, text }) => {
   caption += `🏷️ *Tag:* @${number}\n`
   caption += `💬 *Bio:* ${bio?.status || '-'}\n`
   caption += `🕓 *Actualizado:* ${bio?.setAt ? moment(bio.setAt).format('LLLL') : '-'}\n`
-  caption += `📲 *Dispositivo:* ${own ? getDevice(m.key.id) : '-'}\n\n`
+  caption += `📲 *Dispositivo:* ${own ? getDevice(m.key.id) : '-'}\n`
   caption += extraInfo
 
   if (business) {
