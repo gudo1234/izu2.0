@@ -13,30 +13,33 @@ function banderaEmoji(countryCode) {
   return String.fromCodePoint(...codePoints)
 }
 
-const handler = async (m, { conn }) => {
+const handler = async (m, { conn, text }) => {
   try {
     // ======== DETECTAR USUARIO OBJETIVO, EVITANDO @lid ==========
-    let target
-    let own = false
+    let jid, number, own = false
 
-    // Filtrar menciones válidas
-    const validMention = m.mentionedJid?.find(u => !u.includes('@lid'))
-    if (m.quoted?.sender && !m.quoted.sender.includes('@lid')) {
-      target = m.quoted.sender
-    } else if (validMention) {
-      target = validMention
+    const mention = m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.find(u => !u.includes('@lid'))
+    if (mention) {
+      jid = mention
+      number = jid.split('@')[0]
+    } else if (m.quoted?.sender && !m.quoted.sender.includes('@lid')) {
+      jid = m.quoted.sender
+      number = jid.split('@')[0]
+    } else if (/^\+?\d{5,16}$/.test(text?.trim())) {
+      number = text.replace(/\D/g, '')
+      jid = number + '@s.whatsapp.net'
     } else {
-      target = m.sender
+      jid = m.sender
+      number = jid.split('@')[0]
       own = true
     }
 
     // ======== VALIDAR EXISTENCIA ==========
-    const exists = await conn.onWhatsApp(target)
+    const exists = await conn.onWhatsApp(jid)
     if (!exists[0]?.exists) throw '❌ Este usuario no existe o no está registrado en WhatsApp.'
 
     // ======== DATOS BÁSICOS ==========
-    const number = target.split('@')[0]
-    const name = await conn.getName(target)
+    const name = await conn.getName(jid)
     const phoneInfo = PhoneNum('+' + number)
     const countryCode = phoneInfo.getRegionCode('international')
     const country = regionNames.of(countryCode) || 'Desconocido'
@@ -80,6 +83,7 @@ const handler = async (m, { conn }) => {
 
       fechaLocal = moment().tz('America/Tegucigalpa').format('dddd, D [de] MMMM [de] YYYY')
     } catch {
+      // ======== FALLBACK: RESTCOUNTRIES ==========
       try {
         const res = await axios.get(`https://restcountries.com/v3.1/alpha/${countryCode}`)
         const data = res.data[0]
@@ -92,9 +96,9 @@ const handler = async (m, { conn }) => {
     }
 
     // ======== DATOS DE PERFIL ==========
-    const img = await conn.profilePictureUrl(target, 'image').catch(_ => icono)
-    const bio = await conn.fetchStatus(target).catch(_ => null)
-    const business = await conn.getBusinessProfile(target).catch(_ => null)
+    const img = await conn.profilePictureUrl(jid, 'image').catch(_ => icono)
+    const bio = await conn.fetchStatus(jid).catch(_ => null)
+    const business = await conn.getBusinessProfile(jid).catch(_ => null)
 
     let caption = `🔥 _*ɪɴғᴏʀᴍᴀᴄɪᴏɴ ᴅᴇʟ ᴜsᴜᴀʀɪᴏ*_\n\n`
     caption += `👤 *Nombre:* ${name || '-'}\n`
@@ -124,7 +128,7 @@ const handler = async (m, { conn }) => {
     await conn.sendMessage(m.chat, {
       image: { url: img },
       caption,
-      mentions: [target]
+      mentions: [jid]
     }, { quoted: m })
 
   } catch (err) {
