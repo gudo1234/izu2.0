@@ -1,3 +1,4 @@
+// plugins/welcome.js
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
@@ -5,40 +6,48 @@ import fs from 'fs'
 import path from 'path'
 
 const MEDIA = {
-  // stickers fijos (según mencionaste)
-  welcomeSticker: './media/byenavidad.png',
-  byeSticker: './media/ad.png',
-  // gifs
-  welcomeGifs: ['./media/gif.mp4', './media/giff.mp4', './media/gifff.mp4'],
+  welcomeStickerFile: './media/byenavidad.png',
+  byeStickerFile: './media/ad.png',
+  welcomeGifs: ['./media/gif.mp4','./media/giff.mp4','./media/gifff.mp4'],
   byeGifs: ['https://qu.ax/xOtQJ.mp4'],
-  // audios
   welcomeAudios: ['./media/a.mp3','./media/bien.mp3','./media/prueba3.mp3','./media/prueba4.mp3','./media/bloody.mp3'],
   byeAudios: ['./media/adios.mp3','./media/prueba.mp3','./media/sad.mp3','./media/cardigansad.mp3','./media/iwas.mp3','./media/juntos.mp3','./media/space.mp3','./media/stellar.mp3','./media/theb.mp3','./media/alanspectre.mp3']
 }
 
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)] }
 
-async function safeProfileBuffer(conn, jid){
+async function fetchBufferFromUrl(url){
   try {
-    const url = await conn.profilePictureUrl(jid, 'image')
-    if (!url) return null
-    const res = await fetch(url)
-    if (!res.ok) return null
-    return Buffer.from(await res.arrayBuffer())
-  } catch {
-    try { // fallback a global icono si existe
-      if (typeof icono !== 'undefined' && fs.existsSync(icono)) return fs.readFileSync(icono)
-    } catch {}
+    const r = await fetch(url)
+    if (!r.ok) throw new Error('fetch fail: ' + r.status)
+    return Buffer.from(await r.arrayBuffer())
+  } catch (e) {
     return null
   }
 }
 
-async function makeStickerBufferFromFileOrBuffer(filePath, buffer, pack = global.packname, author = global.author){
+async function safeProfileBuffer(conn, jid){
   try {
-    if (filePath && fs.existsSync(filePath)) return await sticker(filePath, false, pack, author)
-    if (buffer) return await sticker(buffer, false, pack, author)
+    const url = await conn.profilePictureUrl(jid, 'image')
+    if (!url) return null
+    const buf = await fetchBufferFromUrl(url)
+    if (buf) return buf
+  } catch (e) {}
+  // fallback to global icono if defined and exists
+  try {
+    if (typeof icono !== 'undefined' && fs.existsSync(icono)) return fs.readFileSync(icono)
+  } catch(e){}
+  return null
+}
+
+async function makeStickerBuffer(preferredFile, fallbackBuffer){
+  try {
+    if (preferredFile && fs.existsSync(preferredFile)) {
+      return await sticker(preferredFile, false, global.packname, global.author)
+    }
+    if (fallbackBuffer) return await sticker(fallbackBuffer, false, global.packname, global.author)
   } catch (err) {
-    console.error('sticker creation failed:', err)
+    console.error('makeStickerBuffer error:', err?.message || err)
   }
   return null
 }
@@ -49,39 +58,41 @@ export async function before(m, { conn, participants, groupMetadata }) {
     const chat = global.db?.data?.chats?.[m.chat]
     if (!chat?.welcome) return !0
 
-    const whoRaw = m.messageStubParameters?.[0]
-    if (!whoRaw) return !0
-    const who = whoRaw.includes('@') ? whoRaw.split('@')[0] : whoRaw
-    const userJid = `${who}@s.whatsapp.net`
+    const whoParam = m.messageStubParameters?.[0]
+    if (!whoParam) return !0
 
-    const type = m.messageStubType === 27 ? 'welcome' :
-                 ([28,32].includes(m.messageStubType) ? 'bye' : null)
+    // normalize who -> full jid
+    const normalized = whoParam.includes('@') ? whoParam : `${whoParam}@s.whatsapp.net`
+    const short = normalized.split('@')[0] // number part
+
+    // determine event type
+    const type = m.messageStubType === 27 ? 'welcome' : ([28,32].includes(m.messageStubType) ? 'bye' : null)
     if (!type) return !0
 
-    // nombre / tag
-    const userDB = global.db?.data?.users?.[userJid]
-    const name = (userDB && userDB.name) || await conn.getName(userJid).catch(()=> null) || who
-    const tag = `@${who}`
+    // name / tag
+    const userDB = global.db?.data?.users?.[normalized]
+    const name = (userDB && userDB.name) || await conn.getName(normalized).catch(()=> null) || short
+    const tag = `@${short}`
 
-    // profile pic buffer para thumbnail
-    const im = await safeProfileBuffer(conn, userJid) // puede ser null
+    // get thumbnail buffer (profile pic) with fallback
+    const imBuffer = await safeProfileBuffer(conn, normalized) // maybe null
 
-    // preparar arrays y textos
+    // prepare media arrays and texts
     const audios = type === 'welcome' ? MEDIA.welcomeAudios : MEDIA.byeAudios
     const gifs = type === 'welcome' ? MEDIA.welcomeGifs : MEDIA.byeGifs
-    const stickerFile = type === 'welcome' ? MEDIA.welcomeSticker : MEDIA.byeSticker
+    const stickerFile = type === 'welcome' ? MEDIA.welcomeStickerFile : MEDIA.byeStickerFile
 
-    const a = `🎉 _Welcome_ *@${who}*`
-    const b = `✋🏻 Adiós *@${who}*`
-    const caption = type === 'welcome' ? a : b
-    const simpleText = type === 'welcome'
-      ? `🌟 ¡Hola ${tag}!\nBienvenido a *${groupMetadata?.subject || ''}*`
-      : `✋🏻 ${tag} ha salido.\nEsperemos que no vuelva -_-`
+    const captionWelcome = `🎉 _Welcome_ *@${short}*`
+    const captionBye = `✋🏻 Adiós *@${short}*`
+    const caption = type === 'welcome' ? captionWelcome : captionBye
+
+    const txtWelcome = `🌟 ¡Hola ${tag}!\nBienvenido a *${groupMetadata?.subject || ''}*\nPasa un buen rato, sé respetuoso.`
+    const txtBye = `✋🏻 ${tag} ha salido.\nEsperemos que no vuelva -_-`
 
     const title = type === 'welcome' ? `💫 WELCOME ${name}` : `👋🏻 ADIOS ${name}`
     const body = type === 'welcome' ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'
 
-    // externalAdReply / contextInfo común
+    // common contextInfo
     const contextInfo = {
       forwardedNewsletterMessageInfo: {
         newsletterJid: channelRD?.id || '',
@@ -90,62 +101,72 @@ export async function before(m, { conn, participants, groupMetadata }) {
       },
       forwardingScore: false,
       isForwarded: true,
-      mentionedJid: [userJid],
+      mentionedJid: [normalized],
       externalAdReply: {
         title,
         body,
         thumbnailUrl: redes,
-        thumbnail: im || undefined,
+        thumbnail: imBuffer || undefined,
         sourceUrl: redes,
         showAdAttribution: false
       }
     }
 
-    // generar stickers (intenta usar archivo fijo, sino foto de perfil)
-    const stBuf = await makeStickerBufferFromFileOrBuffer(stickerFile, im, global.packname, global.author)
+    // build stickers
+    const stBuf = await makeStickerBuffer(stickerFile, imBuffer)
 
-    // elegir formato aleatorio
+    // pick random format
     const formats = ['stiker','audio','texto','gifPlayback']
-    const media = pick(formats)
+    const chosen = pick(formats)
+    console.log('[welcome] chosen format:', chosen, 'type:', type, 'user:', normalized)
 
-    // ejecutar envio según formato
-    if (media === 'stiker') {
+    if (chosen === 'stiker') {
       if (stBuf) {
-        await conn.sendFile(m.chat, stBuf, 'sticker.webp', '', null, true, {
-          contextInfo: contextInfo
-        }, { quoted: null })
+        // send sticker buffer (works with sendFile in your codebase)
+        await conn.sendFile(m.chat, stBuf, 'sticker.webp', '', null, true, { contextInfo }, { quoted: null })
+      } else if (imBuffer) {
+        // fallback: send profile pic as image with caption
+        await conn.sendMessage(m.chat, { image: imBuffer, caption: title, contextInfo }, { quoted: null })
       } else {
-        // fallback: enviar simple imagen como mensaje si sticker falla
-        if (im) await conn.sendMessage(m.chat, { image: im, caption: title, contextInfo }, { quoted: null })
+        console.warn('[welcome] no sticker or thumbnail available')
       }
-    } else if (media === 'audio') {
+    } else if (chosen === 'audio') {
       const sel = pick(audios)
-      // si es path local, envía buffer; si es url, envía como url en audio object
-      const audioPayload = fs.existsSync(sel) ? fs.readFileSync(sel) : { url: sel }
+      try {
+        const audioPayload = fs.existsSync(sel) ? fs.readFileSync(sel) : { url: sel }
+        await conn.sendMessage(m.chat, {
+          audio: audioPayload,
+          mimetype: 'audio/mpeg',
+          ptt: false,
+          fileName: 'audio.mp3',
+          seconds: 4556,
+          contextInfo
+        }, { quoted: null, ephemeralExpiration: 24*60*100, disappearingMessagesInChat: 24*60*100 })
+      } catch (err) {
+        console.error('[welcome] send audio error:', err)
+      }
+    } else if (chosen === 'texto') {
       await conn.sendMessage(m.chat, {
-        audio: audioPayload,
-        mimetype: 'audio/mpeg',
-        ptt: false,
-        fileName: 'welcome.mp3',
-        seconds: 4556
-      }, { quoted: null, contextInfo })
-    } else if (media === 'texto') {
-      await conn.sendMessage(m.chat, {
-        text: simpleText,
+        text: type === 'welcome' ? txtWelcome : txtBye,
         contextInfo
       }, { quoted: null })
-    } else if (media === 'gifPlayback') {
+    } else if (chosen === 'gifPlayback') {
       const sel = pick(gifs)
-      const videoPayload = fs.existsSync(sel) ? fs.readFileSync(sel) : { url: sel }
-      await conn.sendMessage(m.chat, {
-        video: videoPayload,
-        gifPlayback: true,
-        caption
-      }, { quoted: m, contextInfo })
+      try {
+        const videoPayload = fs.existsSync(sel) ? fs.readFileSync(sel) : { url: sel }
+        await conn.sendMessage(m.chat, {
+          video: videoPayload,
+          gifPlayback: true,
+          caption,
+          contextInfo
+        }, { quoted: m })
+      } catch (err) {
+        console.error('[welcome] send gifPlayback error:', err)
+      }
     }
 
   } catch (err) {
-    console.error('welcome before error:', err)
+    console.error('welcome before final error:', err)
   }
   return !0
 }
