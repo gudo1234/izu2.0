@@ -56,6 +56,7 @@ async function sendAlbumMessage(conn, jid, medias, options = {}) {
 
 let handler = async (m, { conn }) => {
   try {
+    m.react('🕒')
     const res = await fetch('https://api.kirito.my/api/meme?apikey=by_deylin');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
@@ -67,11 +68,11 @@ let handler = async (m, { conn }) => {
       type: 'image',
       data: { url }
     }));
-
     await sendAlbumMessage(conn, m.chat, medias, {
       caption: "Aquí tienes tus memes aleatorios 😜",
       quoted: m
     });
+    m.react('✅')
 
   } catch (e) {
     console.error('[ERROR MEMES]', e);
