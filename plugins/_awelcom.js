@@ -8,11 +8,21 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
   let name = (user && user.name) || await conn.getName(who)
-  let tag = name || ''
-  let chat = global.db.data.chats[m.chat]
+
+  // 🔹 Tamaño del grupo dinámico según acción
   let groupSize = participants.length
-  if (m.messageStubType == 27) groupSize++
-  else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
+  if (m.messageStubType == 27) groupSize++      // alguien entra
+  else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--  // alguien sale
+
+  // 🔹 Mensaje dinámico según entrada o salida
+  let tag = ''
+  if (m.messageStubType == 27) {
+    tag = `Ahora somos ${groupSize} ${groupSize === 1 ? 'participante' : 'participantes'}`
+  } else if (m.messageStubType == 28 || m.messageStubType == 32) {
+    tag = `Ahora quedan ${groupSize} ${groupSize === 1 ? 'participante' : 'participantes'}`
+  }
+
+  let chat = global.db.data.chats[m.chat]
 
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = [
