@@ -6,31 +6,21 @@ import PhoneNumber from 'awesome-phonenumber'
 export async function before(m, { conn }) {
   if (!m.isGroup || !m.messageStubType) return true
 
-  // 🔹 Obtener metadata actual del grupo
-  const metadata = await conn.groupMetadata(m.chat).catch(() => null)
-  if (!metadata?.participants) return true
-
-  // 🔹 Filtrar participantes válidos (sin @lid)
-  const participants = metadata.participants.filter(p => p.jid && !p.jid.includes('@lid'))
-  const currentJids = participants.map(p => p.jid)
-
-  // 🔹 Obtener participantes anteriores (según messageStubParameters)
-  const oldJids = (m.messageStubParameters || []).map(id => id.includes('@') ? id : id+'@s.whatsapp.net')
-
-  let targetJid
-
-  // 🔹 Detectar quién entró o salió
-  if (m.messageStubType === 27) {
-    // Entrada → participante que está ahora y antes no
-    targetJid = currentJids.find(jid => !oldJids.includes(jid))
-  } else if ([28, 32].includes(m.messageStubType)) {
-    // Salida → participante que estaba antes y ahora no
-    targetJid = oldJids.find(jid => !currentJids.includes(jid))
+  // 🔹 Detectar participante real
+  let targetJid = null
+  if (m.messageStubType === WAMessageStubType.GROUP_PARTICIPANT_ADD) {
+    // Entrada: el participante agregado
+    targetJid = m.messageStubParameters?.[0]
+    if (targetJid && !targetJid.includes('@')) targetJid += '@s.whatsapp.net'
+  } else if ([WAMessageStubType.GROUP_PARTICIPANT_REMOVE, WAMessageStubType.GROUP_PARTICIPANT_LEAVE].includes(m.messageStubType)) {
+    // Salida: el participante eliminado
+    targetJid = m.messageStubParameters?.[0]
+    if (targetJid && !targetJid.includes('@')) targetJid += '@s.whatsapp.net'
   }
 
-  if (!targetJid) return true
+  if (!targetJid || targetJid.includes('@lid')) return true
 
-  // 🔹 Número y bandera
+  // 🔹 Número y bandera del participante
   const rawNumber = '+' + targetJid.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
@@ -63,7 +53,7 @@ export async function before(m, { conn }) {
   let im = await (await fetch(pp)).buffer()
 
   if (chat.welcome && [27,28,32].includes(m.messageStubType)) {
-    const isWelcome = m.messageStubType == 27
+    const isWelcome = m.messageStubType === 27
     const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
     const mentionJid = [targetJid]
     const caption = `${accion} *@${targetJid.split`@`[0]}*`
