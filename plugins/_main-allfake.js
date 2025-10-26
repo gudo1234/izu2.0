@@ -111,7 +111,7 @@ export async function before(m, { conn }) {
       }
     }
 
-const res2 = await fetch(global.icono)
+const res2 = await fetch('https://files.catbox.moe/875ido.png')
 const imgBuffer = Buffer.from(await res2.arrayBuffer())
 
 // Convertir y redimensionar para asegurar compatibilidad
