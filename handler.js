@@ -389,7 +389,7 @@ group: `${e} El comando *${comando}* solo puede ser usado en grupos.`,
 private: `${e} El comando *${comando}* solo puede ser usado al chat privado del bot.`,
 admin: `${e} El comando *${comando}* solo puede ser usado por los administradores del grupo.`, 
 botAdmin: `${e} Para ejecutar el comando *${comando}* debo ser administrador del grupo.`,
-unreg: `${e} comando *${comando}* solo puede ser usado por los usuarios registrado, registrate usando:\n> #${verifyaleatorio} ${user2}.${edadaleatoria}`,
+unreg: `${e} comando *${comando}* solo puede ser usado por los usuarios registrado, registrate usando:\n> #verificar ${user2}.${edadaleatoria}`,
 restrict: `${e} Esta caracteristica está desactivada.`
 }[type];
 if (msg) return conn.reply(m.chat, msg, m, rcanal).then(_ => m.react('✖️'))
