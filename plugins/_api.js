@@ -120,7 +120,7 @@ let handler = async (m, { conn, text }) => {
 
     await sendAlbumMessage(conn, m.chat, medias, {
       caption: `𝗥𝗲𝘀𝘂𝗹𝘁𝗮𝗱𝗼𝘀 𝗱𝗲: ${text}\n𝗖𝗮𝗻𝘁𝗶𝗱𝗮𝗱 𝗱𝗲 𝗿𝗲𝘀𝘂𝗹𝘁𝗮𝗱𝗼𝘀: ${maxImages}`,
-      quoted: fakeimg
+      quoted: rcanal
     });
 
     await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
