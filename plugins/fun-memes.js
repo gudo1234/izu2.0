@@ -81,7 +81,7 @@ let handler = async (m, { conn }) => {
 
     await sendAlbumMessage(conn, m.chat, medias, {
       caption: `${emoji} Aqu铆 tienes tus memes aleatorios 馃槃`,
-      quoted: fkontak
+      quoted: m
     });
 
   } catch (e) {
