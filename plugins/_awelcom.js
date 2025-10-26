@@ -1,17 +1,27 @@
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
-import PhoneNumber from 'awesome-phonenumber'
+const PhoneNumber = require('awesome-phonenumber')
 
 export async function before(m, { conn, participants, groupMetadata }) {
-  if (!m.messageStubType || !m.isGroup) return true
+  if (!m.messageStubType || !m.isGroup) return !0
+  
+  let who = m.messageStubParameters[0] + '@s.whatsapp.net'
+  let user = global.db.data.users[who]
+  let name = (user && user.name) || await conn.getName(who)
 
-  const who = m.messageStubParameters[0] + '@s.whatsapp.net'
-  const user = global.db.data.users[who]
-  const name = (user && user.name) || await conn.getName(who)
-  const tag = name || ''
-  const chat = global.db.data.chats[m.chat]
-  if (!chat.welcome) return
+  // 🔹 NUEVO: Generar tag con +código de país
+  const rawNumber = '+' + m.messageStubParameters[0].split('@')[0]
+  const pn = new PhoneNumber(rawNumber)
+  const regionCode = pn.getRegionCode() || '??'
+  const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
+  const countryName = regionNames.of(regionCode) || 'Desconocido'
+  const tag = `${rawNumber}` // Aquí se pone el +50492280729 por ejemplo
+
+  let chat = global.db.data.chats[m.chat]
+  let groupSize = participants.length
+  if (m.messageStubType == 27) groupSize++
+  else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
 
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = [
@@ -33,7 +43,6 @@ export async function before(m, { conn, participants, groupMetadata }) {
     './media/theb.mp3',
     './media/alanspectre.mp3'
   ]
-  const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
 
   // 🖼️ Stickers
   const stikerBienvenida = await sticker(imagen8, false, global.packname, global.author)
@@ -47,139 +56,129 @@ export async function before(m, { conn, participants, groupMetadata }) {
   ]
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
 
-  // 🧩 Foto de perfil
-  let pp = await conn.profilePictureUrl(who, 'image').catch(_ => icono)
+  // 🧩 Datos generales
+  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
 
-  // 🌍 Función para obtener número +504 y bandera, burlar @lid
-  const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const bandera = c => c?.length === 2 ? [...c.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
+  if (chat.welcome && [27, 28, 32].includes(m.messageStubType)) {
+    const isWelcome = m.messageStubType == 27
+    const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
+    const mentionJid = [m.messageStubParameters[0]]
+    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
+    const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
+    const or = ['stiker', 'audio', 'texto', 'gifPlayback']
+    const media = or[Math.floor(Math.random() * or.length)]
 
-  const participantesFiltrados = (conn.chats[m.chat]?.metadata?.participants
-    || await conn.groupMetadata(m.chat).catch(() => ({})).then(g => g?.participants)
-    || []).filter(u => u.jid && !u.jid.includes('@lid'))
+    // 📰 Info del canal reenviado
+    const newsletterInfo = {
+      forwardedNewsletterMessageInfo: {
+        newsletterJid: channelRD.id,
+        newsletterName: channelRD.name,
+        serverMessageId: 0
+      }
+    }
 
-  const mainUser = participantesFiltrados.find(u => u.jid === who)
-    ? participantesFiltrados.find(u => u.jid === who)
-    : { jid: who }
+    switch (media) {
+      case 'stiker':
+        await conn.sendFile(
+          m.chat,
+          isWelcome ? stikerBienvenida : stikerDespedida,
+          'sticker.webp',
+          '',
+          null,
+          true,
+          {
+            contextInfo: {
+              ...newsletterInfo,
+              mentionedJid: mentionJid,
+              forwardingScore: 200,
+              isForwarded: false,
+              externalAdReply: {
+                showAdAttribution: false,
+                title: `${accion} ${tag}`, // <- aquí ya usa +código de país
+                body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
+                mediaType: 1,
+                sourceUrl: redes,
+                thumbnailUrl: redes,
+                thumbnail: im
+              }
+            }
+          }
+        )
+        break
 
-  const num = '+' + mainUser.jid.split('@')[0]
-  const region = new PhoneNumber(num).getRegionCode() || '??'
-  const flag = bandera(region)
+      case 'audio':
+        await conn.sendMessage(
+          m.chat,
+          {
+            audio: { url: isWelcome ? audioPick(audiosWelcome) : audioPick(audiosBye) },
+            contextInfo: {
+              ...newsletterInfo,
+              forwardingScore: false,
+              isForwarded: true,
+              mentionedJid: mentionJid,
+              externalAdReply: {
+                title: `${accion} ${tag}`,
+                body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
+                previewType: 'PHOTO',
+                thumbnailUrl: redes,
+                thumbnail: im,
+                sourceUrl: redes,
+                showAdAttribution: false
+              }
+            },
+            ptt: false,
+            mimetype: 'audio/mpeg',
+            fileName: 'noti.mp3'
+          }
+        )
+        break
 
-  const mentionJid = [who]
-  const accion = m.messageStubType == 27 ? '🎉 WELCOME' : '👋🏻 ADIOS'
-  const caption = `${accion} *@${who.split('@')[0]}*`
-  const titleWithNumber = `${accion} ${num} ${flag}`
+      case 'texto':
+        await conn.sendMessage(
+          m.chat,
+          {
+            text: caption,
+            contextInfo: {
+              ...newsletterInfo,
+              mentionedJid: mentionJid,
+              forwardingScore: 10,
+              isForwarded: true,
+              externalAdReply: {
+                title: `${accion} ${tag}`,
+                body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
+                sourceUrl: redes,
+                thumbnailUrl: redes,
+                thumbnail: im
+              }
+            }
+          }
+        )
+        break
 
-  // 📰 Info del canal reenviado (mantener newsletterInfo)
-  const newsletterInfo = {
-    forwardedNewsletterMessageInfo: {
-      newsletterJid: channelRD.id,
-      newsletterName: channelRD.name,
-      serverMessageId: 0
+      case 'gifPlayback':
+        await conn.sendMessage(
+          m.chat,
+          {
+            video: { url: isWelcome ? gifsBienvenida[Math.floor(Math.random() * gifsBienvenida.length)] : gifDespedida },
+            gifPlayback: true,
+            caption,
+            contextInfo: {
+              ...newsletterInfo,
+              mentionedJid: mentionJid,
+              isForwarded: true,
+              forwardingScore: 10,
+              externalAdReply: {
+                title: `${accion} ${tag}`,
+                body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
+                sourceUrl: redes,
+                thumbnailUrl: redes,
+                thumbnail: im
+              }
+            }
+          }
+        )
+        break
     }
   }
-
-  const or = ['stiker', 'audio', 'texto', 'gifPlayback']
-  const media = or[Math.floor(Math.random() * or.length)]
-
-  switch(media){
-    case 'stiker':
-      await conn.sendFile(
-        m.chat,
-        m.messageStubType == 27 ? stikerBienvenida : stikerDespedida,
-        'sticker.webp','',null,true,
-        { contextInfo:{
-            ...newsletterInfo,
-            mentionedJid,
-            forwardingScore: 200,
-            isForwarded: false,
-            externalAdReply:{
-              showAdAttribution:false,
-              title: titleWithNumber,
-              body: accion == '🎉 WELCOME' ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-              mediaType:1,
-              sourceUrl:redes,
-              thumbnailUrl:redes,
-              thumbnail:im
-            }
-        }}
-      )
-      break
-
-    case 'audio':
-      await conn.sendMessage(
-        m.chat,
-        {
-          audio:{ url: m.messageStubType == 27 ? audioPick(audiosWelcome) : audioPick(audiosBye) },
-          contextInfo:{
-            ...newsletterInfo,
-            mentionedJid,
-            forwardingScore:false,
-            isForwarded:true,
-            externalAdReply:{
-              title: titleWithNumber,
-              body: accion == '🎉 WELCOME' ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-              previewType:'PHOTO',
-              thumbnailUrl:redes,
-              thumbnail:im,
-              sourceUrl:redes,
-              showAdAttribution:false
-            }
-          },
-          ptt:false,
-          mimetype:'audio/mpeg',
-          fileName:'noti.mp3'
-        }
-      )
-      break
-
-    case 'texto':
-      await conn.sendMessage(
-        m.chat,
-        {
-          text: caption,
-          contextInfo:{
-            ...newsletterInfo,
-            mentionedJid,
-            forwardingScore:10,
-            isForwarded:true,
-            externalAdReply:{
-              title: titleWithNumber,
-              body: accion == '🎉 WELCOME' ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-              sourceUrl:redes,
-              thumbnailUrl:redes,
-              thumbnail:im
-            }
-          }
-        }
-      )
-      break
-
-    case 'gifPlayback':
-      await conn.sendMessage(
-        m.chat,
-        {
-          video:{ url: m.messageStubType == 27 ? gifsBienvenida[Math.floor(Math.random()*gifsBienvenida.length)] : gifDespedida },
-          gifPlayback:true,
-          caption,
-          contextInfo:{
-            ...newsletterInfo,
-            mentionedJid,
-            isForwarded:true,
-            forwardingScore:10,
-            externalAdReply:{
-              title: titleWithNumber,
-              body: accion == '🎉 WELCOME' ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-              sourceUrl:redes,
-              thumbnailUrl:redes,
-              thumbnail:im
-            }
-          }
-        }
-      )
-      break
-  }
-
 }
