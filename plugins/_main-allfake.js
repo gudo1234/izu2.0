@@ -122,7 +122,7 @@ global.fakeimg = {
     documentMessage: {
       title: global.botname,
       fileName: textbot,
-      jpegThumbnail: thumbnailBuffer
+      jpegThumbnail: icono
     }
   }
 }
