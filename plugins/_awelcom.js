@@ -3,22 +3,28 @@ import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
 import PhoneNumber from 'awesome-phonenumber'
 
-export async function before(m, { conn, participants, groupMetadata }) {
+export async function before(m, { conn }) {
   if (!m.messageStubType || !m.isGroup) return !0
 
-  // 🔹 Tomar el número del participante que causó el evento
-  const eventId = m.messageStubParameters[0] // número real del evento
-  const participant = participants.find(p => p.jid.split('@')[0] === eventId && !p.jid.includes('@lid'))
+  // 🔹 Obtener metadata real del grupo
+  const metadata = await conn.groupMetadata(m.chat).catch(() => null)
+  if (!metadata?.participants) return !0
 
-  if (!participant) return true // si no se encuentra, salimos
+  // 🔹 Filtrar participantes válidos (sin @lid)
+  const validParticipants = metadata.participants.filter(p => p.jid && !p.jid.includes('@lid'))
+
+  // 🔹 Buscar el participante que causó el evento
+  const eventId = m.messageStubParameters?.[0]
+  const participant = validParticipants.find(p => p.jid.split('@')[0] === eventId)
+
+  if (!participant) return !0 // si no se encuentra, salir
 
   const participantJid = participant.jid
   const rawNumber = '+' + participantJid.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
   const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const flag = [...(regionCode?.length===2?regionCode.toUpperCase():[])]
-    .map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') || '🌐'
+  const flag = regionCode.length === 2 ? [...regionCode.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
   const tag = `${flag} ${rawNumber}`
 
   const who = participantJid
@@ -26,17 +32,23 @@ export async function before(m, { conn, participants, groupMetadata }) {
   const name = (user && user.name) || await conn.getName(who)
 
   let chat = global.db.data.chats[m.chat]
-  let groupSize = participants.length
-  if (m.messageStubType == 27) groupSize++
-  else if ([28,32].includes(m.messageStubType)) groupSize--
+  let participantsCount = validParticipants.length
+  if (m.messageStubType == 27) participantsCount++
+  else if ([28,32].includes(m.messageStubType)) participantsCount--
 
-  // 🔊 Audios, stickers, gifs y newsletter se mantienen igual
+  // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = ['./media/a.mp3','./media/bien.mp3','./media/prueba3.mp3','./media/prueba4.mp3','./media/bloody.mp3']
   const audiosBye = ['./media/adios.mp3','./media/prueba.mp3','./media/sad.mp3','./media/cardigansad.mp3','./media/iwas.mp3','./media/juntos.mp3','./media/space.mp3','./media/stellar.mp3','./media/theb.mp3','./media/alanspectre.mp3']
+
+  // 🖼️ Stickers
   const stikerBienvenida = await sticker(imagen8, false, global.packname, global.author)
   const stikerDespedida = await sticker(imagen7, false, global.packname, global.author)
+
+  // 🎞️ Gifs
   const gifsBienvenida = ['./media/gif.mp4','./media/giff.mp4','./media/gifff.mp4']
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
+
+  // 🧩 Datos generales
   let pp = await conn.profilePictureUrl(participantJid, 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
 
@@ -46,30 +58,39 @@ export async function before(m, { conn, participants, groupMetadata }) {
     const mentionJid = [participantJid]
     const caption = `${accion} *@${participantJid.split`@`[0]}*`
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
-    const or = ['stiker','audio','texto','gifPlayback']
-    const media = or[Math.floor(Math.random() * or.length)]
+    const mediaOptions = ['stiker','audio','texto','gifPlayback']
+    const media = mediaOptions[Math.floor(Math.random() * mediaOptions.length)]
     const newsletterInfo = { forwardedNewsletterMessageInfo: { newsletterJid: channelRD.id, newsletterName: channelRD.name, serverMessageId: 0 } }
 
     switch (media) {
       case 'stiker':
-        await conn.sendFile(m.chat, isWelcome ? stikerBienvenida : stikerDespedida,'sticker.webp','',null,true,{
-          contextInfo:{
-            ...newsletterInfo,
-            mentionedJid:mentionJid,
-            forwardingScore:200,
-            isForwarded:false,
-            externalAdReply:{
-              showAdAttribution:false,
-              title:`${accion} ${tag}`,
-              body:`${isWelcome?'IzuBot te da la bienvenida':'Esperemos que no vuelva -_-'}`,
-              mediaType:1,
-              sourceUrl:redes,
-              thumbnailUrl:redes,
-              thumbnail:im
+        await conn.sendFile(
+          m.chat,
+          isWelcome ? stikerBienvenida : stikerDespedida,
+          'sticker.webp',
+          '',
+          null,
+          true,
+          {
+            contextInfo:{
+              ...newsletterInfo,
+              mentionedJid:mentionJid,
+              forwardingScore:200,
+              isForwarded:false,
+              externalAdReply:{
+                showAdAttribution:false,
+                title:`${accion} ${tag}`,
+                body:`${isWelcome?'IzuBot te da la bienvenida':'Esperemos que no vuelva -_-'}`,
+                mediaType:1,
+                sourceUrl:redes,
+                thumbnailUrl:redes,
+                thumbnail:im
+              }
             }
           }
-        })
+        )
         break
+
       case 'audio':
         await conn.sendMessage(m.chat,{
           audio:{url:isWelcome?audioPick(audiosWelcome):audioPick(audiosBye)},
@@ -93,6 +114,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
           fileName:'noti.mp3'
         })
         break
+
       case 'texto':
         await conn.sendMessage(m.chat,{
           text:caption,
@@ -111,6 +133,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
           }
         })
         break
+
       case 'gifPlayback':
         await conn.sendMessage(m.chat,{
           video:{url:isWelcome?gifsBienvenida[Math.floor(Math.random()*gifsBienvenida.length)]:gifDespedida},
