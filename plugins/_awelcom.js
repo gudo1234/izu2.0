@@ -6,38 +6,31 @@ import PhoneNumber from 'awesome-phonenumber'
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0
 
-  // 🔹 Obtener participante real del evento
-  // Buscamos en participants por m.messageStubParameters
-  let participantJid = m.messageStubParameters[0]+'@s.whatsapp.net'
-  let participant = participants.find(p => p.jid === participantJid)
+  // 🔹 Tomar el número del participante que causó el evento
+  const eventId = m.messageStubParameters[0] // número real del evento
+  const participant = participants.find(p => p.jid.split('@')[0] === eventId && !p.jid.includes('@lid'))
 
-  if (!participant) {
-    // Si no se encuentra, tomamos el primero válido que no sea @lid
-    participant = participants.find(p => p.jid && !p.jid.includes('@lid'))
-    participantJid = participant?.jid
-  }
+  if (!participant) return true // si no se encuentra, salimos
 
-  // 🔹 Número real del participante
+  const participantJid = participant.jid
   const rawNumber = '+' + participantJid.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
   const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const countryName = regionNames.of(regionCode) || 'Desconocido'
+  const flag = [...(regionCode?.length===2?regionCode.toUpperCase():[])]
+    .map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') || '🌐'
+  const tag = `${flag} ${rawNumber}`
 
-  const bandera = c => c?.length===2?[...c.toUpperCase()].map(x=>String.fromCodePoint(0x1F1E6+x.charCodeAt(0)-65)).join(''):'🌐'
-  const flag = bandera(regionCode)
-  const tag = `${flag} ${rawNumber}` // 🎌 +50492280729
-
-  let who = participantJid
-  let user = global.db.data.users[who]
-  let name = (user && user.name) || await conn.getName(who)
+  const who = participantJid
+  const user = global.db.data.users[who]
+  const name = (user && user.name) || await conn.getName(who)
 
   let chat = global.db.data.chats[m.chat]
   let groupSize = participants.length
   if (m.messageStubType == 27) groupSize++
   else if ([28,32].includes(m.messageStubType)) groupSize--
 
-  // 🔊 Audios, stickers, gifs y newsletter
+  // 🔊 Audios, stickers, gifs y newsletter se mantienen igual
   const audiosWelcome = ['./media/a.mp3','./media/bien.mp3','./media/prueba3.mp3','./media/prueba4.mp3','./media/bloody.mp3']
   const audiosBye = ['./media/adios.mp3','./media/prueba.mp3','./media/sad.mp3','./media/cardigansad.mp3','./media/iwas.mp3','./media/juntos.mp3','./media/space.mp3','./media/stellar.mp3','./media/theb.mp3','./media/alanspectre.mp3']
   const stikerBienvenida = await sticker(imagen8, false, global.packname, global.author)
