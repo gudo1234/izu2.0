@@ -14,6 +14,18 @@ export async function before(m, { conn, participants, groupMetadata }) {
   if (m.messageStubType == 27) groupSize++
   else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
 
+  // Obtener datos de país del usuario
+  let countryCode = who.replace(/.*@/, '+') // Ej: +58
+  let countryData = {}
+  try {
+    const res = await fetch(`https://api.dorratz.com/v2/pais/${countryCode}`)
+    countryData = await res.json()
+  } catch (e) {
+    countryData = { bandera: '', código: countryCode }
+  }
+
+  const flagAndCode = `${countryData.bandera || ''} ${countryData.código || countryCode}`
+
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = [
     './media/a.mp3',
@@ -86,7 +98,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: false,
               externalAdReply: {
                 showAdAttribution: false,
-                title: `${accion} ${tag}`,
+                title: `${accion} ${tag} ${flagAndCode}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 mediaType: 1,
                 sourceUrl: redes,
@@ -109,7 +121,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: true,
               mentionedJid: mentionJid,
               externalAdReply: {
-                title: `${accion} ${tag}`,
+                title: `${accion} ${tag} ${flagAndCode}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 previewType: 'PHOTO',
                 thumbnailUrl: redes,
@@ -136,7 +148,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               forwardingScore: 10,
               isForwarded: true,
               externalAdReply: {
-                title: `${accion} ${tag}`,
+                title: `${accion} ${tag} ${flagAndCode}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
@@ -160,7 +172,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: true,
               forwardingScore: 10,
               externalAdReply: {
-                title: `${accion} ${tag}`,
+                title: `${accion} ${tag} ${flagAndCode}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
