@@ -32,14 +32,20 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
   if (chat.welcome && [27,28,32].includes(m.messageStubType)) {
     const isWelcome = m.messageStubType == 27
-    const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
     const mentionJid = [m.messageStubParameters[0]]
-    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
-    const audioPick = arr => arr[Math.floor(Math.random()*arr.length)]
-    const or = ['stiker','audio','texto','gifPlayback']
-    const media = or[Math.floor(Math.random()*or.length)]
 
-    // 📰 Info del canal
+    await sendRandomMedia(m.chat, isWelcome, mentionJid)
+  }
+
+  // -----------------------------
+  // Función para enviar media aleatoria
+  async function sendRandomMedia(chatId, isWelcome, mentionJid) {
+    const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
+    const caption = `${accion} *@${mentionJid[0].split`@`[0]}*`
+    const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
+    const or = ['stiker','audio','texto','gifPlayback']
+    const media = or[Math.floor(Math.random() * or.length)]
+
     const newsletterInfo = {
       forwardedNewsletterMessageInfo: {
         newsletterJid: channelRD.id,
@@ -48,7 +54,6 @@ export async function before(m, { conn, participants, groupMetadata }) {
       }
     }
 
-    // ✨ ExternalAdReply común parametrizable
     const externalAdReply = {
       title: `${accion} ${tag}`,
       body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
@@ -62,7 +67,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
     switch (media) {
       case 'stiker':
         await conn.sendFile(
-          m.chat,
+          chatId,
           isWelcome ? stikerBienvenida : stikerDespedida,
           'sticker.webp',
           '',
@@ -74,7 +79,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
       case 'audio':
         await conn.sendMessage(
-          m.chat,
+          chatId,
           {
             audio: { url: isWelcome ? audioPick(audiosWelcome) : audioPick(audiosBye) },
             contextInfo: { ...newsletterInfo, forwardingScore: false, isForwarded: true, mentionedJid, externalAdReply },
@@ -87,14 +92,14 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
       case 'texto':
         await conn.sendMessage(
-          m.chat,
+          chatId,
           { text: caption, contextInfo: { ...newsletterInfo, mentionedJid, forwardingScore: 10, isForwarded: true, externalAdReply } }
         )
         break
 
       case 'gifPlayback':
         await conn.sendMessage(
-          m.chat,
+          chatId,
           {
             video: { url: isWelcome ? gifsBienvenida[Math.floor(Math.random()*gifsBienvenida.length)] : gifDespedida },
             gifPlayback: true,
