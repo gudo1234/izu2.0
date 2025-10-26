@@ -110,6 +110,24 @@ export async function before(m, { conn }) {
       }
     }
 
+ /*const res2 = await fetch('https://files.catbox.moe/875ido.png')
+const thumb2 = Buffer.from(await res2.arrayBuffer())*/
+const userJid = m.sender;
+global.fakeimg = {
+  key: { 
+    fromMe: false, 
+    participant: userJid
+  },
+  message: {
+    documentMessage: {
+      title: global.botname,
+      fileName: textbot,
+      jpegThumbnail: thumbnailBuffer
+    }
+  }
+}
+    
+//🗿
   } catch (err) {
     console.error('before() error:', err)
     throw err
