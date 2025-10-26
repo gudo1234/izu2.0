@@ -14,12 +14,6 @@ export async function before(m, { conn, participants, groupMetadata }) {
   if (m.messageStubType == 27) groupSize++
   else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
 
-  // ⚒️ nombre del grupo 
-let groupName = ''
-if (m.isGroup) {
-    const metadata = await conn.groupMetadata(m.chat)
-    groupName = metadata.subject
-}
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = [
     './media/a.mp3',
@@ -63,7 +57,7 @@ if (m.isGroup) {
     const mentionJid = [m.messageStubParameters[0]]
     const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
-    const or = ['stiker', 'audio', 'texto', 'gifPlayback', 'product'] // <-- quinto formato agregado
+    const or = ['stiker', 'audio', 'texto', 'gifPlayback']
     const media = or[Math.floor(Math.random() * or.length)]
 
     // 📰 Info del canal reenviado
@@ -175,44 +169,6 @@ if (m.isGroup) {
             }
           }
         )
-        break
-
-      case 'product':
-        /*const totalMembers = participants.length
-        const tipo = isWelcome ? 'Bienvenid@' : 'Despedida'
-        const number = who.split`@`[0]*/
-        const productMessage = {
-          product: {
-            productImage: { url: im },
-            productId: '24529689176623820',
-            title: groupName,
-            description: '',
-            currencyCode: 'USD',
-            priceAmount1000: '0',
-            retailerId: 1677,
-            url: redes,
-            productImageCount: 1
-          },
-          businessOwnerJid: who,
-          caption,
-          footer: textbot || '',
-          interactiveButtons: [
-            {
-              name: 'quick_reply',
-              buttonParamsJson: JSON.stringify({
-                display_text: `${e} ᴄᴏᴍᴀɴᴅᴏs`,
-                id: '.m'
-              })
-            }
-          ],
-          mentions: [who]
-        }
-
-        await conn.sendMessage(
-  m.chat,
-  { productMessage },
-  { contextInfo: { mentionedJid: [who] } }
-)
         break
     }
   }
