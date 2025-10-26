@@ -177,7 +177,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
-const PhoneNumber = require('awesome-phonenumber')
+import PhoneNumber from 'awesome-phonenumber'
 
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0
@@ -243,7 +243,6 @@ export async function before(m, { conn, participants, groupMetadata }) {
     const bandera = r.length === 2 ? [...r.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
 
     const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
-
     const titleWithCountry = `${accion} ${tag} ${pn} ${bandera}`
 
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
@@ -361,4 +360,4 @@ export async function before(m, { conn, participants, groupMetadata }) {
         break
     }
   }
-}
+    }
