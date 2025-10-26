@@ -15,6 +15,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
   else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
 
   // ⚒️ nombre del grupo 
+let groupName = ''
 if (m.isGroup) {
     const metadata = await conn.groupMetadata(m.chat)
     groupName = metadata.subject
@@ -184,7 +185,7 @@ if (m.isGroup) {
           product: {
             productImage: { url: im },
             productId: '24529689176623820',
-            title: `${groupName}`,
+            title: groupName,
             description: '',
             currencyCode: 'USD',
             priceAmount1000: '0',
