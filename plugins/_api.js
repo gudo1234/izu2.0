@@ -88,21 +88,6 @@ let handler = async (m, { conn, text }) => {
   if (!text) return conn.reply(m.chat, `${emojis} Ingresa un texto. Ejemplo: .pinterest ${botname}`, m, rcanal);
 
   try {
-    const res2 = await fetch('https://files.catbox.moe/875ido.png');
-    const thumb2 = Buffer.from(await res2.arrayBuffer());
-
-    const userJid = m.sender;
-    const fkontak = {
-      key: { fromMe: false, participant: userJid },
-      message: {
-        documentMessage: {
-          title: botname,
-          fileName: `𝗛𝗢𝗟𝗔, 𝗘𝗦𝗧𝗘 𝗘𝗦 𝗘𝗟 𝗣𝗜𝗡𝗧𝗘𝗥𝗘𝗧𝗦 𝗠𝗔𝗦 𝗣𝗢𝗧𝗘𝗡𝗧𝗘`,
-          jpegThumbnail: thumb2
-        }
-      }
-    };
-
     m.react('🕒');
 
     const results = await pins(text);
@@ -119,11 +104,10 @@ let handler = async (m, { conn, text }) => {
     }
 
     await sendAlbumMessage(conn, m.chat, medias, {
-      caption: `𝗥𝗲𝘀𝘂𝗹𝘁𝗮𝗱𝗼𝘀 𝗱𝗲: ${text}\n𝗖𝗮𝗻𝘁𝗶𝗱𝗮𝗱 𝗱𝗲 𝗿𝗲𝘀𝘂𝗹𝘁𝗮𝗱𝗼𝘀: ${maxImages}`,
-      quoted: fakeimg
+      caption: `${e} Se muestran resultados de: ${text}`,
+      quoted: m
     });
-
-    await conn.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+m.react('✅');
 
   } catch (error) {
     console.error(error);
