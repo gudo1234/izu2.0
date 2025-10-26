@@ -385,40 +385,67 @@ const filePath = join(tmpDir, file)
 unlinkSync(filePath)})
 }
 
-function purgeSession() {
-let prekey = []
-let directorio = readdirSync(`./${sessions}`)
-let filesFolderPreKeys = directorio.filter(file => {
-return file.startsWith('pre-key-')
-})
-prekey = [...prekey, ...filesFolderPreKeys]
-filesFolderPreKeys.forEach(files => {
-unlinkSync(`./${sessions}/${files}`)
-})
-} 
 
-function purgeSessionSB() {
-try {
-const listaDirectorios = readdirSync(`./${jadi}/`);
-let SBprekey = [];
-listaDirectorios.forEach(directorio => {
-if (statSync(`./${jadi}/${directorio}`).isDirectory()) {
-const DSBPreKeys = readdirSync(`./${jadi}/${directorio}`).filter(fileInDir => {
-return fileInDir.startsWith('pre-key-')
-})
-SBprekey = [...SBprekey, ...DSBPreKeys];
-DSBPreKeys.forEach(fileInDir => {
-if (fileInDir !== 'creds.json') {
-unlinkSync(`./${jadi}/${directorio}/${fileInDir}`)
-}})
-}})
-if (SBprekey.length === 0) {
-console.log(chalk.bold.green(`\n╭» ❍ ${jadi} ❍\n│→ NADA POR ELIMINAR \n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎`))
-} else {
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ${jadi} ❍\n│→ ARCHIVOS NO ESENCIALES ELIMINADOS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻︎︎`))
-}} catch (err) {
-console.log(chalk.bold.red(`\n╭» ❍ ${jadi} ❍\n│→ OCURRIÓ UN ERROR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻\n` + err))
-}}
+function purgePreKeysDir(dir, ageMinutes = 60, keepLatestN = 50) {
+  try {
+    if (!existsSync(dir)) return
+
+
+    const files = readdirSync(dir)
+      .filter(f => f.startsWith('pre-key-'))
+
+    if (!files.length) return
+
+
+    const withTime = files.map(f => {
+      const fp = join(dir, f)
+      const st = statSync(fp)
+      return { f, fp, mtimeMs: st.mtimeMs }
+    }).sort((a, b) => b.mtimeMs - a.mtimeMs)
+
+
+    const keep = new Set(withTime.slice(0, keepLatestN).map(x => x.f))
+
+    const now = Date.now()
+    const maxAgeMs = ageMinutes * 60 * 1000
+    let deleted = 0
+
+    for (const item of withTime.slice(keepLatestN)) {
+      const ageMs = now - item.mtimeMs
+      if (ageMs >= maxAgeMs && !keep.has(item.f)) {
+        try {
+          unlinkSync(item.fp)
+          deleted++
+        } catch (err) {
+          console.log(chalk.bold.red(`No se pudo borrar ${item.fp}: ${err?.message}`))
+        }
+      }
+    }
+
+    if (deleted > 0) {
+      console.log(chalk.bold.cyanBright(`\n╭» ❍ ${dir} ❍\n│→ PRE-KEYS ANTIGUAS ELIMINADAS (${deleted})\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+    } else {
+      console.log(chalk.bold.green(`\n╭» ❍ ${dir} ❍\n│→ Sin pre-keys antiguas para borrar\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ✓`))
+    }
+  } catch (err) {
+    console.log(chalk.bold.red(`\n[prekeys] Error en ${dir}: ${err?.message}`))
+  }
+}
+
+
+function purgePreKeysJadiRoot(jadiRoot, ageMinutes = 60, keepLatestN = 50) {
+  try {
+    if (!existsSync(jadiRoot)) return
+    const subdirs = readdirSync(jadiRoot).filter(name => {
+      try { return statSync(join(jadiRoot, name)).isDirectory() } catch { return false }
+    })
+    for (const sub of subdirs) {
+      purgePreKeysDir(join(jadiRoot, sub), ageMinutes, keepLatestN)
+    }
+  } catch (err) {
+    console.log(chalk.bold.red(`\n[prekeys] Error recorriendo ${jadiRoot}: ${err?.message}`))
+  }
+}
 
 function purgeOldFiles() {
 const directories = [`./${sessions}/`, `./${jadi}/`]
@@ -451,18 +478,22 @@ if (stopped === 'close' || !conn || !conn.user) return
 await clearTmp()
 console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 4) // 4 min 
 
+// Limpia pre-keys del bot principal cada 10 min, borra las > 60 min y conserva 50 recientes
 setInterval(async () => {
-if (stopped === 'close' || !conn || !conn.user) return
-await purgeSession()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ${global.sessions} ❍\n│→ SESIONES NO ESENCIALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10) // 10 min
+  if (stopped === 'close' || !conn || !conn.user) return
+  purgePreKeysDir(`./${sessions}`, /*ageMinutes*/ 60, /*keepLatestN*/ 50)
+}, 1000 * 60 * 10)
+
+// Limpia pre-keys de cada sub-bot cada 10 min
+setInterval(async () => {
+  if (stopped === 'close' || !conn || !conn.user) return
+  purgePreKeysJadiRoot(`./${jadi}`, 60, 50)
+}, 1000 * 60 * 10)
+
 
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
-await purgeSessionSB()}, 1000 * 60 * 10) 
-
-setInterval(async () => {
-if (stopped === 'close' || !conn || !conn.user) return
-await purgeOldFiles()
+//await purgeOldFiles()
 console.log(chalk.bold.cyanBright(`\n╭» ❍ ARCHIVOS ❍\n│→ ARCHIVOS RESIDUALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10)
 
 _quickTest().then(() => conn.logger.info(chalk.bold(`✦  H E C H O\n`.trim()))).catch(console.error)
