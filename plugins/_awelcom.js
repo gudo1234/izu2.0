@@ -208,7 +208,11 @@ if (m.isGroup) {
           mentions: [who]
         }
 
-        await conn.sendMessage(m.chat, productMessage, { contextInfo: { mentionedJid: [who] } })
+        await conn.sendMessage(
+  m.chat,
+  { productMessage },
+  { contextInfo: { mentionedJid: [who] } }
+)
         break
     }
   }
