@@ -1,5 +1,4 @@
 import fetch from 'node-fetch'
-import { createCanvas, loadImage } from '@napi-rs/canvas'
 function getRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
@@ -110,35 +109,6 @@ export async function before(m, { conn }) {
         }
       }
     }
-
-const res2 = await fetch('https://files.catbox.moe/875ido.png')
-const imgBuffer = Buffer.from(await res2.arrayBuffer())
-
-// Convertir y redimensionar para asegurar compatibilidad
-const thumb2 = await sharp(imgBuffer)
-  .resize(300, 300) // tamaño pequeño para thumbnail
-  .jpeg({ quality: 70 })
-  .toBuffer()
-
-const userJid = m.sender
-
-global.fakeimg = {
-  key: { 
-    fromMe: false, 
-    participant: userJid
-  },
-  message: {
-    documentMessage: {
-      title: global.botname || 'Powered System WA-Bot © 2025',
-      fileName: textbot || 'Bienvenido',
-      mimetype: 'application/pdf', // necesario para mostrar el preview
-      pageCount: 1,
-      fileLength: 999999,
-      jpegThumbnail: thumb2, // ahora es un JPEG real compatible
-      caption: wm || 'IzuBot'
-    }
-  }
-}
     
 //🗿
   } catch (err) {
