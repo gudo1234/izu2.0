@@ -234,16 +234,22 @@ export async function before(m, { conn, participants, groupMetadata }) {
   if (chat.welcome && [27, 28, 32].includes(m.messageStubType)) {
     const isWelcome = m.messageStubType == 27
     const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
-    const mentionJid = [m.messageStubParameters[0]]
 
-    // 📌 Obtener número, país y bandera del usuario
-    const pn = '+' + m.messageStubParameters[0].split('@')[0]
-    const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-    const r = new PhoneNumber(pn).getRegionCode() || '??'
-    const bandera = r.length === 2 ? [...r.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
+    // 📌 Filtrar participantes y burlar @lid
+    const participantesFiltrados = participants
+      .filter(u => u.jid && !u.jid.includes('@lid'))
+      .map(u => {
+        const num = '+' + u.jid.split('@')[0]
+        const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
+        const r = new PhoneNumber(num).getRegionCode() || '??'
+        const bandera = r.length === 2 ? [...r.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
+        return { jid: u.jid, num, pais: regionNames.of(r) || 'Desconocido', bandera }
+      })
 
-    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
-    const titleWithCountry = `${accion} ${tag} ${pn} ${bandera}`
+    // Tomamos el usuario principal del evento
+    const mainUser = participantesFiltrados.find(u => u.jid === who) || { num: '+' + who.split('@')[0], bandera: '🌐' }
+    const caption = `${accion} *@${who.split`@`[0]}*`
+    const titleWithCountry = `${accion} ${tag} ${mainUser.num} ${mainUser.bandera}`
 
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
     const or = ['stiker', 'audio', 'texto', 'gifPlayback']
@@ -269,7 +275,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
           {
             contextInfo: {
               ...newsletterInfo,
-              mentionedJid: mentionJid,
+              mentionedJid: [who],
               forwardingScore: 200,
               isForwarded: false,
               externalAdReply: {
@@ -295,7 +301,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               ...newsletterInfo,
               forwardingScore: false,
               isForwarded: true,
-              mentionedJid: mentionJid,
+              mentionedJid: [who],
               externalAdReply: {
                 title: titleWithCountry,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
@@ -320,7 +326,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
             text: caption,
             contextInfo: {
               ...newsletterInfo,
-              mentionedJid: mentionJid,
+              mentionedJid: [who],
               forwardingScore: 10,
               isForwarded: true,
               externalAdReply: {
@@ -344,7 +350,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
             caption,
             contextInfo: {
               ...newsletterInfo,
-              mentionedJid: mentionJid,
+              mentionedJid: [who],
               isForwarded: true,
               forwardingScore: 10,
               externalAdReply: {
@@ -360,4 +366,4 @@ export async function before(m, { conn, participants, groupMetadata }) {
         break
     }
   }
-    }
+      }
