@@ -6,21 +6,14 @@ import PhoneNumber from 'awesome-phonenumber'
 export async function before(m, { conn }) {
   if (!m.isGroup || !m.messageStubType) return true
 
-  // 🔹 Detectar participante real
-  let targetJid = null
-  if (m.messageStubType === WAMessageStubType.GROUP_PARTICIPANT_ADD) {
-    // Entrada: el participante agregado
-    targetJid = m.messageStubParameters?.[0]
-    if (targetJid && !targetJid.includes('@')) targetJid += '@s.whatsapp.net'
-  } else if ([WAMessageStubType.GROUP_PARTICIPANT_REMOVE, WAMessageStubType.GROUP_PARTICIPANT_LEAVE].includes(m.messageStubType)) {
-    // Salida: el participante eliminado
-    targetJid = m.messageStubParameters?.[0]
-    if (targetJid && !targetJid.includes('@')) targetJid += '@s.whatsapp.net'
-  }
+  // 🔹 Participante real
+  let targetJid = m.messageStubParameters?.[0]
+  if (!targetJid) return true
+  if (!targetJid.includes('@')) targetJid += '@s.whatsapp.net'
+  if (targetJid.includes('@lid')) return true
+  if (targetJid === conn.user.jid) return true // ignorar el bot
 
-  if (!targetJid || targetJid.includes('@lid')) return true
-
-  // 🔹 Número y bandera del participante
+  // 🔹 Número y bandera
   const rawNumber = '+' + targetJid.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
