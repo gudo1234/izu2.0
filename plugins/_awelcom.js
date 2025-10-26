@@ -184,7 +184,7 @@ if (m.isGroup) {
           product: {
             productImage: { url: im },
             productId: '24529689176623820',
-            title: groupName,
+            title: `${groupName}`,
             description: '',
             currencyCode: 'USD',
             priceAmount1000: '0',
