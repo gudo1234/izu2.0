@@ -5,23 +5,34 @@ import PhoneNumber from 'awesome-phonenumber'
 
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0
-  
-  let who = m.messageStubParameters[0] + '@s.whatsapp.net'
+
+  // 🔹 Filtrar participantes que NO tengan @lid
+  const participantesLimpios = (conn.chats[m.chat]?.metadata?.participants || await conn.groupMetadata(m.chat).catch(()=>({})).then(g=>g?.participants)||[])
+    .filter(u => u.jid && !u.jid.includes('@lid'))
+
+  // 🔹 Tomar solo al usuario relevante del evento
+  let who = participantesLimpios.find(u => u.jid === m.messageStubParameters[0]+'@s.whatsapp.net')?.jid || m.messageStubParameters[0]+'@s.whatsapp.net'
+
   let user = global.db.data.users[who]
   let name = (user && user.name) || await conn.getName(who)
 
-  // 🔹 NUEVO: Generar tag con +código de país
-  const rawNumber = '+' + m.messageStubParameters[0].split('@')[0]
+  // 🔹 Construir número + código de país
+  const rawNumber = '+' + who.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
   const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
   const countryName = regionNames.of(regionCode) || 'Desconocido'
-  const tag = `${rawNumber}` // Aquí se pone el +50492280729 por ejemplo
+
+  // 🔹 Bandera
+  const bandera = c => c?.length===2?[...c.toUpperCase()].map(x=>String.fromCodePoint(0x1F1E6+x.charCodeAt(0)-65)).join(''):'🌐'
+  const flag = bandera(regionCode)
+
+  const tag = `${flag} ${rawNumber}` // 🎌 +50492280729
 
   let chat = global.db.data.chats[m.chat]
   let groupSize = participants.length
   if (m.messageStubType == 27) groupSize++
-  else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
+  else if ([28,32].includes(m.messageStubType)) groupSize--
 
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = [
@@ -60,11 +71,11 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
 
-  if (chat.welcome && [27, 28, 32].includes(m.messageStubType)) {
+  if (chat.welcome && [27,28,32].includes(m.messageStubType)) {
     const isWelcome = m.messageStubType == 27
     const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
-    const mentionJid = [m.messageStubParameters[0]]
-    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
+    const mentionJid = [who]
+    const caption = `${accion} *@${who.split`@`[0]}*`
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
     const or = ['stiker', 'audio', 'texto', 'gifPlayback']
     const media = or[Math.floor(Math.random() * or.length)]
@@ -95,7 +106,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: false,
               externalAdReply: {
                 showAdAttribution: false,
-                title: `${accion} ${tag}`, // <- aquí ya usa +código de país
+                title: `${accion} ${tag}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 mediaType: 1,
                 sourceUrl: redes,
