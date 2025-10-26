@@ -6,35 +6,41 @@ import PhoneNumber from 'awesome-phonenumber'
 export async function before(m, { conn }) {
   if (!m.messageStubType || !m.isGroup) return !0
 
-  // 🔹 Obtener metadata real del grupo
   const metadata = await conn.groupMetadata(m.chat).catch(() => null)
   if (!metadata?.participants) return !0
 
-  // 🔹 Filtrar participantes válidos (sin @lid)
-  const validParticipants = metadata.participants.filter(p => p.jid && !p.jid.includes('@lid'))
+  const currentJids = metadata.participants
+    .filter(p => p.jid && !p.jid.includes('@lid'))
+    .map(p => p.jid)
 
-  // 🔹 Buscar el participante que causó el evento
-  const eventId = m.messageStubParameters?.[0]
-  const participant = validParticipants.find(p => p.jid.split('@')[0] === eventId)
+  let targetJid
 
-  if (!participant) return !0 // si no se encuentra, salir
+  // 🔹 Detectar quién entró o salió
+  if (m.messageStubType === 27) {
+    // Entrada → participante que no estaba antes
+    const oldParticipants = m.messageStubParameters || []
+    targetJid = currentJids.find(jid => !oldParticipants.includes(jid.split('@')[0]))
+  } else if ([28, 32].includes(m.messageStubType)) {
+    // Salida → participante que ya no está
+    const oldParticipants = m.messageStubParameters || []
+    targetJid = oldParticipants.find(jid => !currentJids.includes(jid + '@s.whatsapp.net')) + '@s.whatsapp.net'
+  }
 
-  const participantJid = participant.jid
-  const rawNumber = '+' + participantJid.split('@')[0]
+  if (!targetJid) return !0
+
+  // 🔹 Número y bandera
+  const rawNumber = '+' + targetJid.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
   const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
   const flag = regionCode.length === 2 ? [...regionCode.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
   const tag = `${flag} ${rawNumber}`
 
-  const who = participantJid
+  const who = targetJid
   const user = global.db.data.users[who]
   const name = (user && user.name) || await conn.getName(who)
 
   let chat = global.db.data.chats[m.chat]
-  let participantsCount = validParticipants.length
-  if (m.messageStubType == 27) participantsCount++
-  else if ([28,32].includes(m.messageStubType)) participantsCount--
 
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = ['./media/a.mp3','./media/bien.mp3','./media/prueba3.mp3','./media/prueba4.mp3','./media/bloody.mp3']
@@ -49,14 +55,14 @@ export async function before(m, { conn }) {
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
 
   // 🧩 Datos generales
-  let pp = await conn.profilePictureUrl(participantJid, 'image').catch(_ => icono)
+  let pp = await conn.profilePictureUrl(targetJid, 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
 
   if (chat.welcome && [27,28,32].includes(m.messageStubType)) {
     const isWelcome = m.messageStubType == 27
     const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
-    const mentionJid = [participantJid]
-    const caption = `${accion} *@${participantJid.split`@`[0]}*`
+    const mentionJid = [targetJid]
+    const caption = `${accion} *@${targetJid.split`@`[0]}*`
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
     const mediaOptions = ['stiker','audio','texto','gifPlayback']
     const media = mediaOptions[Math.floor(Math.random() * mediaOptions.length)]
