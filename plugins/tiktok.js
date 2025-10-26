@@ -151,7 +151,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       }));
 
       await sendAlbumMessage(conn, m.chat, medias, {
-        caption: `${e} *Se muestran resultados de TikTok*`,
+        caption: `${e} *Se muestran resultados del TikTok*`,
         quoted: m
       });
     }
