@@ -36,8 +36,8 @@ export async function before(m, { conn, participants, groupMetadata }) {
   ]
 
   // 🖼️ Stickers
-  const stikerBienvenida = await sticker(imagen7, false, global.packname, global.author)
-  const stikerDespedida = await sticker(imagen8, false, global.packname, global.author)
+  const stikerBienvenida = await sticker(imagen8, false, global.packname, global.author)
+  const stikerDespedida = await sticker(imagen7, false, global.packname, global.author)
 
   // 🎞️ Gifs
   const gifsBienvenida = [
