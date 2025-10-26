@@ -4,15 +4,15 @@ import fetch from 'node-fetch'
 import PhoneNumber from 'awesome-phonenumber'
 
 export async function before(m, { conn }) {
-  if (!m.messageStubType || !m.isGroup) return !0
+  if (!m.isGroup || !m.messageStubType) return true
 
   // 🔹 Obtener metadata actual del grupo
   const metadata = await conn.groupMetadata(m.chat).catch(() => null)
-  if (!metadata?.participants) return !0
+  if (!metadata?.participants) return true
 
-  const currentJids = metadata.participants
-    .filter(p => p.jid && !p.jid.includes('@lid'))
-    .map(p => p.jid)
+  // 🔹 Filtrar participantes válidos (sin @lid)
+  const participants = metadata.participants.filter(p => p.jid && !p.jid.includes('@lid'))
+  const currentJids = participants.map(p => p.jid)
 
   // 🔹 Obtener participantes anteriores (según messageStubParameters)
   const oldJids = (m.messageStubParameters || []).map(id => id.includes('@') ? id : id+'@s.whatsapp.net')
@@ -28,14 +28,16 @@ export async function before(m, { conn }) {
     targetJid = oldJids.find(jid => !currentJids.includes(jid))
   }
 
-  if (!targetJid) return !0
+  if (!targetJid) return true
 
   // 🔹 Número y bandera
   const rawNumber = '+' + targetJid.split('@')[0]
   const pn = new PhoneNumber(rawNumber)
   const regionCode = pn.getRegionCode() || '??'
   const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const flag = regionCode.length === 2 ? [...regionCode.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('') : '🌐'
+  const flag = regionCode.length === 2
+    ? [...regionCode.toUpperCase()].map(x => String.fromCodePoint(0x1F1E6 + x.charCodeAt(0) - 65)).join('')
+    : '🌐'
   const tag = `${flag} ${rawNumber}`
 
   const who = targetJid
