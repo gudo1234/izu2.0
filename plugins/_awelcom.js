@@ -4,29 +4,15 @@ import fetch from 'node-fetch'
 
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0
-
+  
   let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
-  let name = (user && user.name) || await conn.getName(who).catch(_ => null)
-
-  // 🔹 Tamaño del grupo dinámico según acción
-  let groupSize = participants.length
-  if (m.messageStubType == 27) groupSize++      // alguien entra
-  else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--  // alguien sale
-
-  // 🔹 Tag dinámico: nombre si existe, si no mostrar participantes
-  let tag = ''
-  if (name) {
-    tag = name
-  } else {
-    if (m.messageStubType == 27) { // Entrada
-      tag = `Ahora somos ${groupSize} ${groupSize === 1 ? 'participante' : 'participantes'}`
-    } else if (m.messageStubType == 28 || m.messageStubType == 32) { // Salida
-      tag = `Ahora quedan ${groupSize} ${groupSize === 1 ? 'participante' : 'participantes'}`
-    }
-  }
-
+  let name = (user && user.name) || await conn.getName(who)
+  let tag = name || ''
   let chat = global.db.data.chats[m.chat]
+  let groupSize = participants.length
+  if (m.messageStubType == 27) groupSize++
+  else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
 
   // 🔊 Audios de bienvenida y despedida
   const audiosWelcome = [
