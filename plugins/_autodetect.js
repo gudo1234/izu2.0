@@ -1,46 +1,109 @@
+
 let WAMessageStubType = (await import('@whiskeysockets/baileys')).default
 
 let handler = m => m
+
 handler.before = async function (m, { conn, participants, groupMetadata }) {
-if (!m.messageStubType || !m.isGroup) return
-let chat = global.db.data.chats[m.chat]
-let usuario = `@${m.sender.split`@`[0]}`
-let pp = await conn.profilePictureUrl(m.chat, 'image').catch(_ => null) || 'https://files.catbox.moe/xr2m6u.jpg'
+  try {
+    
+    if (!m?.messageStubType || !m?.isGroup) return
 
-let nombre, foto, edit, newlink, status, admingp, noadmingp
-nombre = `🚦 ${usuario} Ha cambiado el nombre del grupo.\n\n> ✧ Ahora el grupo se llama:\n> *${m.messageStubParameters[0]}*.`
-foto = `🚀 Se ha cambiado la imagen del grupo.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
-edit = `🎈 ${usuario} Ha permitido que ${m.messageStubParameters[0] == 'on' ? 'solo admins' : 'todos'} puedan configurar el grupo.`
-newlink = `🎋 El enlace del grupo ha sido restablecido.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
-status = `🪄 El grupo ha sido ${m.messageStubParameters[0] == 'on' ? '*cerrado*' : '*abierto*'} Por ${usuario}\n\n> ✧ Ahora ${m.messageStubParameters[0] == 'on' ? '*solo admins*' : '*todos*'} pueden enviar mensaje.`
-admingp = `🎯 @${m.messageStubParameters[0].split`@`[0]} Ahora es admin del grupo.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
-noadmingp =  `🏮 @${m.messageStubParameters[0].split`@`[0]} Deja de ser admin del grupo.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
-  
-if (chat.detect && m.messageStubType == 21) {
-await conn.sendMessage(m.chat, { text: nombre, mentions: [m.sender] }, { quoted: null })   
+    const chat = global?.db?.data?.chats?.[m.chat] || {}
+    if (!chat.detect) return
 
-} else if (chat.detect && m.messageStubType == 22) {
-await conn.sendMessage(m.chat, { image: { url: pp }, caption: foto, mentions: [m.sender] }, { quoted: null })
+    
+    const safeStr = v => (typeof v === 'string' ? v : '')
+    const first = (s, sep='@') => safeStr(s).split(sep)[0]
 
-} else if (chat.detect && m.messageStubType == 23) {
-await conn.sendMessage(m.chat, { text: newlink, mentions: [m.sender] }, { quoted: null })    
+    
+    const senderJid =
+      m?.sender ||
+      m?.key?.participant ||
+      m?.participant ||
+      m?.key?.remoteJid ||
+      ''
 
-} else if (chat.detect && m.messageStubType == 25) {
-await conn.sendMessage(m.chat, { text: edit, mentions: [m.sender] }, { quoted: null })  
+    const usuario = senderJid ? `@${first(senderJid)}` : '@usuario'
 
-} else if (chat.detect && m.messageStubType == 26) {
-await conn.sendMessage(m.chat, { text: status, mentions: [m.sender] }, { quoted: null })  
+    
+    const p0 = safeStr(m?.messageStubParameters?.[0])
 
-} else if (chat.detect && m.messageStubType == 29) {
-await conn.sendMessage(m.chat, { text: admingp, mentions: [`${m.sender}`,`${m.messageStubParameters[0]}`] }, { quoted: null })  
+    
+    const mentions = []
+    if (senderJid) mentions.push(senderJid)
+    if (p0) mentions.push(p0)
 
-} if (chat.detect && m.messageStubType == 30) {
-await conn.sendMessage(m.chat, { text: noadmingp, mentions: [`${m.sender}`,`${m.messageStubParameters[0]}`] }, { quoted: null })
-} else {
-if (m.messageStubType == 2) return
-console.log({messageStubType: m.messageStubType,
-messageStubParameters: m.messageStubParameters,
-type: WAMessageStubType[m.messageStubType], 
-})
-}}
+    
+    let pp =
+      (await conn.profilePictureUrl(m.chat, 'image').catch(_ => null)) ||
+      'https://files.catbox.moe/xr2m6u.jpg'
+
+    
+    const nombre  = `🚦 ${usuario} ha cambiado el nombre del grupo.\n\n> ✧ Ahora el grupo se llama:\n> *${p0 || '(sin dato)'}*.`
+    const foto    = `🚀 Se ha cambiado la imagen del grupo.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
+    const edit    = `🎈 ${usuario} ha permitido que ${p0 === 'on' ? 'solo admins' : 'todos'} puedan configurar el grupo.`
+    const newlink = `🎋 El enlace del grupo ha sido restablecido.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
+    const status  = `🪄 El grupo ha sido ${p0 === 'on' ? '*cerrado*' : '*abierto*'} por ${usuario}\n\n> ✧ Ahora ${p0 === 'on' ? '*solo admins*' : '*todos*'} pueden enviar mensaje.`
+    const admingp = `🎯 ${p0 ? `@${first(p0)}` : '@usuario'} ahora es admin del grupo.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
+    const noadmingp = `🏮 ${p0 ? `@${first(p0)}` : '@usuario'} deja de ser admin del grupo.\n\n> ✧ Acción hecha por:\n> » ${usuario}`
+
+    
+    switch (m.messageStubType) {
+      
+      case 21:
+        await conn.sendMessage(m.chat, { text: nombre, mentions: [senderJid].filter(Boolean) }, { quoted: null })
+        break
+
+     
+      case 22:
+        await conn.sendMessage(m.chat, { image: { url: pp }, caption: foto, mentions: [senderJid].filter(Boolean) }, { quoted: null })
+        break
+
+ 
+      case 23:
+        await conn.sendMessage(m.chat, { text: newlink, mentions: [senderJid].filter(Boolean) }, { quoted: null })
+        break
+
+      
+      case 25:
+        await conn.sendMessage(m.chat, { text: edit, mentions: [senderJid].filter(Boolean) }, { quoted: null })
+        break
+
+    
+      case 26:
+        await conn.sendMessage(m.chat, { text: status, mentions: [senderJid].filter(Boolean) }, { quoted: null })
+        break
+
+    
+      case 29: {
+        const ms = Array.from(new Set([senderJid, p0].filter(Boolean)))
+        await conn.sendMessage(m.chat, { text: admingp, mentions: ms }, { quoted: null })
+        break
+      }
+
+    
+      case 30: {
+        const ms = Array.from(new Set([senderJid, p0].filter(Boolean)))
+        await conn.sendMessage(m.chat, { text: noadmingp, mentions: ms }, { quoted: null })
+        break
+      }
+
+     
+      case 2:
+        return
+
+     
+      default:
+        console.log({
+          messageStubType: m.messageStubType,
+          messageStubParameters: m?.messageStubParameters || [],
+          type: WAMessageStubType?.[m.messageStubType],
+        })
+    }
+  } catch (err) {
+    console.error('[_autodetect.before] error:', err?.message, { stub: m?.messageStubType })
+   
+  }
+}
+
 export default handler
