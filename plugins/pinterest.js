@@ -128,7 +128,7 @@ let handler = async (m, { conn, text }) => {
     }
 
     await sendAlbumMessage(conn, m.chat, medias, {
-      caption: `${e} Se muestran resultados de: ${text}`,
+      caption: `${e} _Se muestran resultados de:_ *${text}*`,
       quoted: m
     });
     m.react('✅');
