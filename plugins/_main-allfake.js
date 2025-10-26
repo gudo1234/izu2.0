@@ -110,9 +110,10 @@ export async function before(m, { conn }) {
       }
     }
 
- const res2 = await fetch(icono)
+ const res2 = await fetch(global.icono)
 const thumb2 = Buffer.from(await res2.arrayBuffer())
-const userJid = m.sender;
+const userJid = m.sender
+
 global.fakeimg = {
   key: { 
     fromMe: false, 
@@ -120,9 +121,13 @@ global.fakeimg = {
   },
   message: {
     documentMessage: {
-      title: global.botname,
-      fileName: textbot,
-      jpegThumbnail: thumb2
+      title: global.botname || 'Powered System WA-Bot © 2025',
+      fileName: textbot || 'Bienvenido',
+      mimetype: 'application/pdf', // importante para que renderice la miniatura
+      pageCount: 1,
+      fileLength: 1000000, // número simbólico
+      jpegThumbnail: thumb2, // buffer de la imagen
+      caption: wm || 'IzuBot'
     }
   }
 }
