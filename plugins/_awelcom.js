@@ -62,7 +62,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
     const isWelcome = m.messageStubType == 27
     const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
     const mentionJid = [m.messageStubParameters[0]]
-    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
+    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}* ${paisFlag}`
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
     const or = ['stiker', 'audio', 'texto', 'gifPlayback']
     const media = or[Math.floor(Math.random() * or.length)]
