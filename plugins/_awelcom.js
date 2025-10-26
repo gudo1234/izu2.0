@@ -1,7 +1,7 @@
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
-const PhoneNumber = require('awesome-phonenumber')
+import PhoneNumber from 'awesome-phonenumber'
 
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0
