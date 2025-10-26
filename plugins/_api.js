@@ -131,6 +131,6 @@ let handler = async (m, { conn, text }) => {
   }
 };
 
-handler.command = ['pinterest', 'pin'];
+handler.command = ['apin'];
 
 export default handler;
