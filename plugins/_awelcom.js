@@ -6,6 +6,7 @@ import PhoneNumber from 'awesome-phonenumber'
 export async function before(m, { conn }) {
   if (!m.messageStubType || !m.isGroup) return !0
 
+  // 🔹 Obtener metadata actual del grupo
   const metadata = await conn.groupMetadata(m.chat).catch(() => null)
   if (!metadata?.participants) return !0
 
@@ -13,17 +14,18 @@ export async function before(m, { conn }) {
     .filter(p => p.jid && !p.jid.includes('@lid'))
     .map(p => p.jid)
 
+  // 🔹 Obtener participantes anteriores (según messageStubParameters)
+  const oldJids = (m.messageStubParameters || []).map(id => id.includes('@') ? id : id+'@s.whatsapp.net')
+
   let targetJid
 
   // 🔹 Detectar quién entró o salió
   if (m.messageStubType === 27) {
-    // Entrada → participante que no estaba antes
-    const oldParticipants = m.messageStubParameters || []
-    targetJid = currentJids.find(jid => !oldParticipants.includes(jid.split('@')[0]))
+    // Entrada → participante que está ahora y antes no
+    targetJid = currentJids.find(jid => !oldJids.includes(jid))
   } else if ([28, 32].includes(m.messageStubType)) {
-    // Salida → participante que ya no está
-    const oldParticipants = m.messageStubParameters || []
-    targetJid = oldParticipants.find(jid => !currentJids.includes(jid + '@s.whatsapp.net')) + '@s.whatsapp.net'
+    // Salida → participante que estaba antes y ahora no
+    targetJid = oldJids.find(jid => !currentJids.includes(jid))
   }
 
   if (!targetJid) return !0
