@@ -1,21 +1,14 @@
 import { WAMessageStubType } from '@whiskeysockets/baileys'
 import { sticker } from '../lib/sticker.js'
 import fetch from 'node-fetch'
-import PhoneNumber from 'awesome-phonenumber'
 
 export async function before(m, { conn, participants, groupMetadata }) {
   if (!m.messageStubType || !m.isGroup) return !0
-
-  const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-  const bandera = c => c?.length===2 ? [...c.toUpperCase()].map(x=>String.fromCodePoint(0x1F1E6+x.charCodeAt(0)-65)).join('') : '🌐'
-
+  
   let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
   let name = (user && user.name) || await conn.getName(who)
-  let n = '+' + who.split('@')[0]
-  let r = new PhoneNumber(n).getRegionCode() || '??'
-  let paisFlag = `${regionNames.of(r) || 'Desconocido'} ${bandera(r)}`
-  
+  let tag = name || ''
   let chat = global.db.data.chats[m.chat]
   let groupSize = participants.length
   if (m.messageStubType == 27) groupSize++
@@ -62,7 +55,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
     const isWelcome = m.messageStubType == 27
     const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
     const mentionJid = [m.messageStubParameters[0]]
-    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}* ${paisFlag}`
+    const caption = `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`
     const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
     const or = ['stiker', 'audio', 'texto', 'gifPlayback']
     const media = or[Math.floor(Math.random() * or.length)]
@@ -93,7 +86,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: false,
               externalAdReply: {
                 showAdAttribution: false,
-                title: `${accion} ${paisFlag}`,
+                title: `${accion} ${tag}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 mediaType: 1,
                 sourceUrl: redes,
@@ -116,7 +109,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: true,
               mentionedJid: mentionJid,
               externalAdReply: {
-                title: `${accion} ${paisFlag}`,
+                title: `${accion} ${tag}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 previewType: 'PHOTO',
                 thumbnailUrl: redes,
@@ -143,7 +136,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               forwardingScore: 10,
               isForwarded: true,
               externalAdReply: {
-                title: `${accion} ${paisFlag}`,
+                title: `${accion} ${tag}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
@@ -167,7 +160,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
               isForwarded: true,
               forwardingScore: 10,
               externalAdReply: {
-                title: `${accion} ${paisFlag}`,
+                title: `${accion} ${tag}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
