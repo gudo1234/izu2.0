@@ -21,6 +21,11 @@ export async function before(m, { conn, participants, groupMetadata }) {
   // 🔥 Fusionado en un solo bloque
   if (chat.welcome && [27, 28, 32].includes(m.messageStubType)) {
     const accion = m.messageStubType == 27 ? 'Bienvenido' : 'Adiós'
-    await m.reply(`${accion} *@${m.messageStubParameters[0].split`@`[0]}*`, null, { mentions: [who] })
+    await conn.reply(
+      m.chat,
+      `${accion} *@${m.messageStubParameters[0].split`@`[0]}*`,
+      null,
+      { contextInfo: { mentionedJid: [who] } }
+    )
   }
 }
