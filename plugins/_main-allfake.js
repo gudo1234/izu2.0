@@ -110,8 +110,8 @@ export async function before(m, { conn }) {
       }
     }
 
- /*const res2 = await fetch('https://files.catbox.moe/875ido.png')
-const thumb2 = Buffer.from(await res2.arrayBuffer())*/
+ const res2 = await fetch(icono)
+const thumb2 = Buffer.from(await res2.arrayBuffer())
 const userJid = m.sender;
 global.fakeimg = {
   key: { 
@@ -122,7 +122,7 @@ global.fakeimg = {
     documentMessage: {
       title: global.botname,
       fileName: textbot,
-      jpegThumbnail: icono
+      jpegThumbnail: thumb2
     }
   }
 }
