@@ -7,8 +7,8 @@ export async function before(m, { conn, participants, groupMetadata }) {
   
   let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let user = global.db.data.users[who]
-  let name = (user && user.name) || await conn.getName(who)
-  let tag = name || ''
+  let name = (user && user.name) || await conn.getName(who).catch(() => '')
+  let tag = name ? name : '' // Aquí evitamos mostrar +s.whatsapp.net
   let chat = global.db.data.chats[m.chat]
   let groupSize = participants.length
   if (m.messageStubType == 27) groupSize++
