@@ -1,14 +1,9 @@
 import fetch from 'node-fetch';
 import Starlights from '@StarlightsTeam/Scraper';
-import {
-  generateWAMessageFromContent,
-  generateWAMessage,
-  delay
-} from '@whiskeysockets/baileys';
 
-/*───────────────────────────────────────────────
- 🔹 Normalización de URL de TikTok
-───────────────────────────────────────────────*/
+/* pequeño helper sleep */
+const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
 function normalizeTikTokUrl(text) {
   const regex = /(https?:\/\/)?(www\.)?(vm\.|vt\.|www\.)?tiktok\.com\/[^\s]+/i;
   const match = text.match(regex);
@@ -20,86 +15,58 @@ function normalizeTikTokUrl(text) {
   return null;
 }
 
-/*───────────────────────────────────────────────
- 🔹 Envío de Álbum (videos/imágenes)
- - Evita usar album.key si no existe (para no romper).
-───────────────────────────────────────────────*/
-async function sendAlbumMessage(conn, jid, medias, options = {}) {
-  if (typeof jid !== "string") throw new TypeError("jid must be string");
-  if (!Array.isArray(medias) || medias.length < 2) throw new RangeError("Minimum 2 media required");
+/* Envío de álbum robusto: envía primero el mensaje principal y asocia los demás al primero */
+async function sendAlbumVideos(conn, jid, videoUrls = [], options = {}) {
+  if (typeof jid !== 'string') throw new TypeError('jid must be string');
+  if (!Array.isArray(videoUrls) || videoUrls.length < 2) throw new RangeError('Minimum 2 videos required for album');
 
-  const caption = options.caption || "";
-  const wait = !isNaN(options.delay) ? options.delay : 800;
+  const caption = options.caption || '';
+  const delay = !isNaN(options.delay) ? Number(options.delay) : 800;
+  const quoted = options.quoted || null;
 
-  // Construye el mensaje de álbum (content)
-  const album = generateWAMessageFromContent(
-    jid,
-    {
-      albumMessage: {
-        expectedImageCount: medias.filter(m => m.type === "image").length,
-        expectedVideoCount: medias.filter(m => m.type === "video").length,
-        ...(options.quoted ? {
-          contextInfo: {
-            remoteJid: options.quoted.key?.remoteJid,
-            fromMe: options.quoted.key?.fromMe,
-            stanzaId: options.quoted.key?.id,
-            participant: options.quoted.key?.participant || options.quoted.key?.remoteJid,
-            quotedMessage: options.quoted.message,
-          },
-        } : {})
-      }
-    },
-    {}
-  );
-
-  // Enviar el "encabezado" del álbum con sendMessage en lugar de depender de album.key
+  // Enviamos el primer video con caption
+  let firstMsg = null;
   try {
-    // album.message es el content armado por generateWAMessageFromContent
-    await conn.sendMessage(jid, album.message, { quoted: options.quoted });
+    firstMsg = await conn.sendMessage(jid, {
+      video: { url: videoUrls[0] },
+      caption
+    }, { quoted });
   } catch (err) {
-    // Si falla enviar el encabezado, lo notificamos pero seguimos con los items individuales
-    console.warn('[WARN ALBUM] No se pudo enviar el encabezado del álbum:', err?.message || err);
+    // si falla el primer envío, lanzamos para que el caller lo controle
+    throw new Error('No se pudo enviar el primer video del álbum: ' + (err?.message || err));
   }
 
-  // Enviar cada media como mensaje asociado (si album.key existe, opcionalmente podríamos intentar usar messageAssociation)
-  for (let i = 0; i < medias.length; i++) {
-    const { type, data } = medias[i];
+  // enviamos el resto y los vinculamos al primer mensaje
+  for (let i = 1; i < videoUrls.length; i++) {
     try {
-      // Generamos el mensaje (esto sube si hace falta usando conn.waUploadToServer)
-      const msg = await generateWAMessage(
-        jid,
-        { [type]: data, ...(i === 0 ? { caption } : {}) },
-        { upload: conn.waUploadToServer }
-      );
-
-      // Si album tiene key, intentamos adjuntar asociación (siempre envuelto en comprobación)
-      if (album?.key) {
-        msg.message.messageContextInfo = msg.message.messageContextInfo || {};
-        msg.message.messageContextInfo.messageAssociation = {
+      // Construimos contextInfo para intentar asociarlo como album (messageAssociation)
+      const contextInfo = {};
+      // si firstMsg.key existe, usamos messageAssociation (Baileys/WA soporta esto en algunas versiones)
+      if (firstMsg && firstMsg.key) {
+        contextInfo.messageAssociation = {
           associationType: 1,
-          parentMessageKey: album.key
+          parentMessageKey: firstMsg.key
         };
-      } else if (options.quoted) {
-        // si no hay album.key, preservamos quoted si existía
-        msg.message.messageContextInfo = msg.message.messageContextInfo || {};
-        msg.message.messageContextInfo.quotedMessage = options.quoted.message;
+      } else if (quoted) {
+        // fallback: preservamos quoted para mantener referencia
+        contextInfo.quotedMessage = quoted.message;
       }
 
-      // Enviar el mensaje; usamos sendMessage para evitar dependencia de msg.key.* no existente
-      await conn.sendMessage(jid, msg.message, { quoted: options.quoted });
-      await delay(wait);
+      await conn.sendMessage(jid, {
+        video: { url: videoUrls[i] }
+      }, { quoted, contextInfo });
+
+      await sleep(delay);
     } catch (err) {
-      console.warn(`[WARN ALBUM] No se pudo enviar el archivo ${i + 1}:`, err?.message || err);
-      continue;
+      console.warn(`[WARN ALBUM] No se pudo enviar el video ${i + 1}:`, err?.message || err);
+      // no abortamos el loop; continuamos con los demás
     }
   }
 
-  return album;
+  return firstMsg;
 }
 
-/*───────────────────────────────────────────────
- 🔹 Comando principal (tu lógica original)
-───────────────────────────────────────────────*/
+/* Comando principal */
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
     return conn.reply(m.chat, `✎ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola\n*${usedPrefix + command}* https://vt.tiktok.com/ZShhtdsRh/`, m);
@@ -144,7 +111,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     if (!result) {
       const url = normalizeTikTokUrl(text);
       const scrape = url ? await Starlights.tiktokdl(url) : await Starlights.tiktokvid(text);
-      result = { ...scrape, dl_url: scrape.dl_url, type: result?.type || 'video', isFromApi: false };
+      result = { ...scrape, dl_url: scrape.dl_url, type: (scrape.type || 'video'), isFromApi: false };
       dl_url = result.dl_url;
     }
 
@@ -165,36 +132,41 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     await m.react('✅');
 
-    /*───────────────────────────────────────────────
-     🔹 Envío de álbum si hay 2+ videos (hasta 5)
-    ───────────────────────────────────────────────*/
+    // Si hay videos (array) y al menos 2 -> álbum (hasta 5)
     if (result.videos && Array.isArray(result.videos) && result.videos.length >= 2) {
       const limit = Math.min(result.videos.length, 5);
-      const medias = result.videos.slice(0, limit).map(v => ({
-        type: 'video',
-        data: { url: v }
-      }));
+      const videosToSend = result.videos.slice(0, limit);
 
-      await sendAlbumMessage(conn, m.chat, medias, {
-        caption: `${txt}\n\n🎞️ *Álbum con ${limit} videos de TikTok*`,
-        quoted: m
-      });
-
-      // terminamos aquí si enviamos el álbum
-      return;
+      try {
+        await sendAlbumVideos(conn, m.chat, videosToSend, {
+          caption: `${txt}\n\n🎞️ *Álbum con ${limit} videos de TikTok*`,
+          quoted: m,
+          delay: 900
+        });
+        return; // ya enviamos álbum, terminamos
+      } catch (err) {
+        console.warn('[WARN ALBUM FALLÓ]', err?.message || err);
+        // si falla el álbum, caemos al envío individual
+      }
     }
 
-    /*───────────────────────────────────────────────
-     🔹 Envío individual (por defecto)
-    ───────────────────────────────────────────────*/
+    // Envío de imágenes
     if (result.type === 'image' && result.images?.length > 0) {
       for (let i = 0; i < result.images.length; i++) {
         await conn.sendFile(m.chat, result.images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m);
       }
       if (result.audio) await conn.sendFile(m.chat, result.audio, 'audio.mp3', '*Audio original*', m, false, { mimetype: 'audio/mpeg' });
-    } else {
-      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
+      return;
     }
+
+    // Envío por defecto (un solo video)
+    if (dl_url) {
+      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m);
+      return;
+    }
+
+    // Si no hay nada que enviar
+    conn.reply(m.chat, '✗ No se encontró contenido para descargar.', m);
 
   } catch (err) {
     console.error('[ERROR TOTAL]', err);
@@ -204,5 +176,4 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
 handler.command = ['tiktokvid', 'tiktokdl', 'ttvid', 'tt', 'tiktok', 'ttimg', 'tiktokimg'];
 handler.group = true;
-
 export default handler;
