@@ -1,20 +1,20 @@
 import fetch from 'node-fetch';
-import baileys from '@whiskeysockets/baileys';
+import {
+  generateWAMessageFromContent,
+  generateWAMessage,
+  delay
+} from '@whiskeysockets/baileys';
 
 async function sendAlbumMessage(conn, jid, medias, options = {}) {
   if (typeof jid !== "string") throw new TypeError("jid must be string");
-  if (medias.length < 2) throw new RangeError("Minimum 2 media");
+  if (!Array.isArray(medias) || medias.length < 2) throw new RangeError("Minimum 2 media required");
 
-  const caption = options.text || options.caption || "";
-  const delay = !isNaN(options.delay) ? options.delay : 500;
-  delete options.text;
-  delete options.caption;
-  delete options.delay;
+  const caption = options.caption || "";
+  const wait = !isNaN(options.delay) ? options.delay : 500;
 
-  const album = baileys.generateWAMessageFromContent(
+  const album = generateWAMessageFromContent(
     jid,
     {
-      messageContextInfo: {},
       albumMessage: {
         expectedImageCount: medias.filter(m => m.type === "image").length,
         expectedVideoCount: medias.filter(m => m.type === "video").length,
@@ -26,8 +26,8 @@ async function sendAlbumMessage(conn, jid, medias, options = {}) {
             participant: options.quoted.key.participant || options.quoted.key.remoteJid,
             quotedMessage: options.quoted.message,
           },
-        } : {}),
-      },
+        } : {})
+      }
     },
     {}
   );
@@ -37,14 +37,14 @@ async function sendAlbumMessage(conn, jid, medias, options = {}) {
   for (let i = 0; i < medias.length; i++) {
     const { type, data } = medias[i];
     try {
-      const img = await baileys.generateWAMessage(
+      const msg = await generateWAMessage(
         album.key.remoteJid,
         { [type]: data, ...(i === 0 ? { caption } : {}) },
         { upload: conn.waUploadToServer }
       );
-      img.message.messageContextInfo = { messageAssociation: { associationType: 1, parentMessageKey: album.key } };
-      await conn.relayMessage(img.key.remoteJid, img.message, { messageId: img.key.id });
-      await baileys.delay(delay);
+      msg.message.messageContextInfo = { messageAssociation: { associationType: 1, parentMessageKey: album.key } };
+      await conn.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
+      await delay(wait);
     } catch (err) {
       console.warn(`[WARN MEME] No se pudo enviar la imagen ${i + 1}:`, err.message);
       continue;
@@ -63,33 +63,23 @@ let handler = async (m, { conn }) => {
     if (!json.memes || !Array.isArray(json.memes)) throw new Error('No se encontraron memes');
 
     const maxMemes = Math.min(json.memes.length, 10);
-    const medias = [];
-
-    for (let i = 0; i < maxMemes; i++) {
-      medias.push({ type: 'image', data: { url: json.memes[i] } });
-    }
-
-    const fkontak = {
-      key: { fromMe: false, participant: m.sender },
-      message: {
-        documentMessage: {
-          title: "Memes Aleatorios",
-          fileName: `饾棤饾棙饾棤饾棙饾棪_饾棗饾棙_饾棡饾棞饾棩饾棞饾棫饾棦`,
-        }
-      }
-    };
+    const medias = json.memes.slice(0, maxMemes).map(url => ({
+      type: 'image',
+      data: { url }
+    }));
 
     await sendAlbumMessage(conn, m.chat, medias, {
-      caption: `${emoji} Aqu铆 tienes tus memes aleatorios 馃槃`,
+      caption: "Aquí tienes tus memes aleatorios 😜",
       quoted: m
     });
 
   } catch (e) {
     console.error('[ERROR MEMES]', e);
-    m.reply(`馃樋 Ocurri贸 un error al obtener los memes.\n\n${e.message}\n\n> Usa el comando #report para reportar este error.`);
+    m.reply(`❌ Ocurrió un error al obtener los memes.\n\n${e.message}`);
   }
 };
 
 handler.command = ['meme', 'memes'];
-hanndler.group = true
+handler.group = true;
+
 export default handler;
