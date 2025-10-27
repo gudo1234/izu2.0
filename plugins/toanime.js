@@ -130,7 +130,7 @@ let handler = async (m, { conn, command }) => {
 
     if (!mime.startsWith('image/')) return m.reply('*\`ʏ ʟᴀ ɪᴍᴀɢᴇɴ, ᴘᴀʀᴀ ᴄᴏɴᴠᴇʀᴛɪʀ ᴇɴ ᴀɴɪᴍᴇ\`*')
 
-    m.reply('Wait...')
+    m.react('🕒')
 
     const media = await q.download()
     const tempPath = `./tmp/${Date.now()}.jpg`
@@ -140,10 +140,8 @@ let handler = async (m, { conn, command }) => {
     const result = await colorifyai.create(tempPath, "(masterpiece), best quality", useGhibli)
 
     fs.unlinkSync(tempPath)
-
-    await conn.sendMessage(m.chat, {
-      image: { url: result.imageUrl },
-    }, { quoted: m })
+    m.react('✅')
+    await conn.sendFile(m.chat, result.imageUrl, "Thumbnail.jpg", `${e} _*Listo*_`, m, null, rcanal)
 
   } catch (e) {
     m.reply(e.message)
