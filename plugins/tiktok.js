@@ -100,7 +100,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   } catch (err) {
     console.error('[ERROR TOTAL]', err);
-    conn.reply(m.chat, '✗ No se pudo descargar el TikTok. Verifica el enlace o intenta con otra búsqueda.', m);
+    //conn.reply(m.chat, '✗ No se pudo descargar el TikTok. Verifica el enlace o intenta con otra búsqueda.', m);
   }
 };
 
