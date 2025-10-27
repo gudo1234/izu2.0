@@ -12,7 +12,7 @@ let handler = async (m, { conn, args, command, usedPrefix }) => {
 
   try {
     let searchResults = await searchPornhub(args[0]);
-    let t = `${e} _*Pornhub - Search*_`
+    let t = `${e} _*Pornhub - Search*_\n\n`
     let teks = searchResults.result.map((v, i) => 
       `🎞️ *Título:* ${v.title}
 🕒 *Duración:* ${v.duration}
