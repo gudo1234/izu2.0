@@ -1,13 +1,12 @@
 import { generateWAMessageFromContent } from '@whiskeysockets/baileys';
 import { smsg } from '../lib/simple.js';
-//import print from '../lib/print.js'
-import { format } from "util"
-import { fileURLToPath } from "url"
-import path, { join } from "path"
-import fs, { unwatchFile, watchFile } from "fs"
-import chalk from "chalk"
-import fetch from "node-fetch"
-import ws from "ws"
+import { format } from 'util';
+import { fileURLToPath } from 'url';
+import path, { join } from 'path';
+import { unwatchFile, watchFile } from 'fs';
+import fs from 'fs';
+import chalk from 'chalk';
+import ws from 'ws';
 
 const isNumber = x => typeof x === "number" && !isNaN(x)
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(function () {
