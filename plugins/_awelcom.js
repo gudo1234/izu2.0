@@ -9,7 +9,12 @@ export async function before(m, { conn, participants, groupMetadata }) {
   let user = global.db.data.users[who]
   let name = (user && user.name) || await conn.getName(who)
   let tag = name || ''
+  
   let chat = global.db.data.chats[m.chat]
+
+  // ✅ Activar welcome por defecto si no existe
+  if (chat.welcome === undefined) chat.welcome = true
+
   let groupSize = participants.length
   if (m.messageStubType == 27) groupSize++
   else if (m.messageStubType == 28 || m.messageStubType == 32) groupSize--
@@ -60,7 +65,6 @@ export async function before(m, { conn, participants, groupMetadata }) {
     const or = ['stiker', 'audio', 'texto', 'gifPlayback']
     const media = or[Math.floor(Math.random() * or.length)]
 
-    // 📰 Info del canal reenviado
     const newsletterInfo = {
       forwardedNewsletterMessageInfo: {
         newsletterJid: channelRD.id,
