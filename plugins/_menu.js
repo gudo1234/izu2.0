@@ -232,6 +232,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}spotifysearch *‹τ×τ›*
 │ ${e}${s}xnxxsearch *‹τ×τ›*
 │ ${e}${s}xvideosearch *‹τ×τ›*
+│ ${e}${s}pornhubsearch *‹τ×τ›*
 │ ${e}${s}tiktoksearch *‹τ×τ›*
 │ ${e}${s}noticias *‹›*
 │ ${e}${s}githubsearch *‹τ×τ›*
@@ -321,13 +322,14 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}stickers ⬄ ${usedPrefix}par
 
 \`✏ʙᴜsᴄᴀᴅᴏʀ - ᴡᴇʙ🔎\`
-> ${s + usedPrefix}chatgpt ⬄ ${usedPrefix}ia  
-> ${s + usedPrefix}gemini ⬌ ${usedPrefix}bot  
-> ${s + usedPrefix}ytsearch ⬄ ${usedPrefix}perfil  
-> ${s + usedPrefix}spotifysearch ⬌ ${usedPrefix}xnxxsearch  
-> ${s + usedPrefix}xvideosearch ⬄ ${usedPrefix}tiktoksearch  
-> ${s + usedPrefix}noticias ⬌ ${usedPrefix}githubsearch
-> ${s + usedPrefix}fetch ⬄ ${usedPrefix}google
+> ${s + usedPrefix}chatgpt ⬄ ${usedPrefix}ia
+> ${s + usedPrefix}gemini ⬌ ${usedPrefix}bot
+> ${s + usedPrefix}ytsearch ⬄ ${usedPrefix}perfil
+> ${s + usedPrefix}spotifysearch ⬌ ${usedPrefix}xnxxsearch
+> ${s + usedPrefix}xvideosearch ⬄ ${usedPrefix}pornhubsearch
+> ${s + usedPrefix}tiktoksearch ⬌ ${usedPrefix}noticias
+> ${s + usedPrefix}githubsearch ⬄ ${usedPrefix}fetch
+> ${s + usedPrefix}google
 
 \`✧ғᴜɴᴄᴛɪᴏɴ-ᴀɴɪᴍᴇ🎎\`
 > ${s + usedPrefix}abrazar ⬄ ${usedPrefix}aburrido  
