@@ -201,6 +201,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}ssweb ‹υяʟ›
 │ ${e}${s}vcard #
 │ ${e}${s}whamusic ‹rєρℓy›
+│ ${e}${s}toanime ‹rєρℓy›
 └────────────
 
 \`✔sᴛɪᴄᴋᴇʀ - ᴍᴀʀᴋᴇʀ/ʟᴏɢᴏ🧩\`
@@ -310,7 +311,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}toimg ⬄ ${usedPrefix}ver
 > ${s + usedPrefix}tourl ⬌ ${usedPrefix}hd
 > ${s + usedPrefix}ssweb ⬄ ${usedPrefix}vcard
-> ${s + usedPrefix}whamusic  
+> ${s + usedPrefix}whamusic ⬌ ${usedPrefix}toanime
 
 \`✔sᴛɪᴄᴋᴇʀ - ᴍᴀʀᴋᴇʀ/ʟᴏɢᴏ🧩\`
 > ${s + usedPrefix}sticker ⬄ ${usedPrefix}sticker2  
