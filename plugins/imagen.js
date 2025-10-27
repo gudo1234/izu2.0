@@ -76,9 +76,10 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     }))
 
     await sendAlbumMessage(conn, m.chat, medias, {
-      caption: `*🔎 Resultado De:* ${text}`,
-      quoted: m
-    })
+  caption: `${e} *Resultado De:* ${text}`,
+  quoted: m,
+  ...global.rcanal
+})
 
     m.react('✅')
 
