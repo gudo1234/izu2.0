@@ -12,9 +12,9 @@ let handler = async (m, { conn, args, command, usedPrefix }) => {
 
   try {
     let searchResults = await searchPornhub(args[0]);
+    let t = `${e} _*Pornhub - Search*_`
     let teks = searchResults.result.map((v, i) => 
-      `『 *P O R N H U B  - S E A R C H* 』
-🎞️ *Título:* ${v.title}
+      `🎞️ *Título:* ${v.title}
 🕒 *Duración:* ${v.duration}
 👀 *Vistas:* ${v.views}
 🔗 *Link:* ${v.url}
@@ -24,7 +24,7 @@ ________________\n`).join('\n\n');
       teks = '🍭 No se encontraron resultados...';
     }
 
-    conn.reply(m.chat, teks, m);
+    conn.reply(m.chat, t + teks, m);
   } catch (e) {
     return conn.reply(m.chat, `⚠️ Ocurrió un error: ${e.message}`, m);
   }
