@@ -57,7 +57,7 @@ async function sendAlbumMessage(conn, jid, medias, options = {}) {
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    conn.reply(m.chat, `${e} _*Uso Correcto:*_ ${usedPrefix + command} carros`, m, null, rcanal)
+    conn.reply(m.chat, `${e} _*Uso Correcto:*_ ${usedPrefix + command} carros`, m, rcanal)
     return
   }
 
