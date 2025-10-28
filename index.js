@@ -212,31 +212,31 @@ if (opcion == '1' || methodCodeQR) {
 console.log(chalk.bold.yellow(`\n❐ ESCANEA EL CÓDIGO QR EXPIRA EN 45 SEGUNDOS`))}
 }
 if (connection == 'open') {
-console.log(chalk.bold.green('\n❀ YukiBot-MD Conectada con éxito ❀'))
+console.log(chalk.bold.green('\n✅ Conectado...'))
 }
 let reason = new Boom(lastDisconnect?.error)?.output?.statusCode
 if (connection === 'close') {
 if (reason === DisconnectReason.badSession) {
-console.log(chalk.bold.cyanBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
+console.log(chalk.bold.cyanBright(`\n⚠︎ Sin conección, borre la carpeta ${global.sessions} y vincula de nuevo ⚠︎`))
 } else if (reason === DisconnectReason.connectionClosed) {
-console.log(chalk.bold.magentaBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹\n┆ ⚠︎ CONEXION CERRADA, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☹`))
+console.log(chalk.bold.magentaBright(`\n⚠︎ onección cerrada, reconectando...`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.connectionLost) {
-console.log(chalk.bold.blueBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂\n┆ ⚠︎ CONEXIÓN PERDIDA CON EL SERVIDOR, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ☂`))
+console.log(chalk.bold.blueBright(`\nConeccion perdida por el servidor, reconectando...`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.connectionReplaced) {
-console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗\n┆ ⚠︎ CONEXIÓN REEMPLAZADA, SE HA ABIERTO OTRA NUEVA SESION, POR FAVOR, CIERRA LA SESIÓN ACTUAL PRIMERO.\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✗`))
+console.log(chalk.bold.yellowBright(`\nConeccion reemplazada`))
 } else if (reason === DisconnectReason.loggedOut) {
-console.log(chalk.bold.redBright(`\n⚠︎ SIN CONEXIÓN, BORRE LA CARPETA ${global.sessions} Y ESCANEA EL CÓDIGO QR ⚠︎`))
+console.log(chalk.bold.redBright(`\n⚠︎ Sin conección, borre la carpeta ${global.sessions} y vincula de nuevo⚠︎`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.restartRequired) {
-console.log(chalk.bold.cyanBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓\n┆ ✧ CONECTANDO AL SERVIDOR...\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ✓`))
+console.log(chalk.bold.cyanBright(`\nConectado al servidor...`))
 await global.reloadHandler(true).catch(console.error)
 } else if (reason === DisconnectReason.timedOut) {
-console.log(chalk.bold.yellowBright(`\n╭┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸\n┆ ⧖ TIEMPO DE CONEXIÓN AGOTADO, RECONECTANDO....\n╰┄┄┄┄┄┄┄┄┄┄┄┄┄┄ • • • ┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ▸`))
+console.log(chalk.bold.yellowBright(`\nTiempo agotado, reconectando...`))
 await global.reloadHandler(true).catch(console.error) //process.send('reset')
 } else {
-console.log(chalk.bold.redBright(`\n⚠︎！ RAZON DE DESCONEXIÓN DESCONOCIDA: ${reason || 'No encontrado'} >> ${connection || 'No encontrado'}`))
+console.log(chalk.bold.redBright(`\n⚠︎ Razón de desconexión desconocida, o se baneo el número: ${reason || 'No encontrado'} >> ${connection || 'No encontrado'}`))
 }}
 }
 process.on('uncaughtException', console.error)
@@ -385,67 +385,40 @@ const filePath = join(tmpDir, file)
 unlinkSync(filePath)})
 }
 
+function purgeSession() {
+let prekey = []
+let directorio = readdirSync(`./${sessions}`)
+let filesFolderPreKeys = directorio.filter(file => {
+return file.startsWith('pre-key-')
+})
+prekey = [...prekey, ...filesFolderPreKeys]
+filesFolderPreKeys.forEach(files => {
+unlinkSync(`./${sessions}/${files}`)
+})
+} 
 
-function purgePreKeysDir(dir, ageMinutes = 60, keepLatestN = 50) {
-  try {
-    if (!existsSync(dir)) return
-
-
-    const files = readdirSync(dir)
-      .filter(f => f.startsWith('pre-key-'))
-
-    if (!files.length) return
-
-
-    const withTime = files.map(f => {
-      const fp = join(dir, f)
-      const st = statSync(fp)
-      return { f, fp, mtimeMs: st.mtimeMs }
-    }).sort((a, b) => b.mtimeMs - a.mtimeMs)
-
-
-    const keep = new Set(withTime.slice(0, keepLatestN).map(x => x.f))
-
-    const now = Date.now()
-    const maxAgeMs = ageMinutes * 60 * 1000
-    let deleted = 0
-
-    for (const item of withTime.slice(keepLatestN)) {
-      const ageMs = now - item.mtimeMs
-      if (ageMs >= maxAgeMs && !keep.has(item.f)) {
-        try {
-          unlinkSync(item.fp)
-          deleted++
-        } catch (err) {
-          console.log(chalk.bold.red(`No se pudo borrar ${item.fp}: ${err?.message}`))
-        }
-      }
-    }
-
-    if (deleted > 0) {
-      console.log(chalk.bold.cyanBright(`\n╭» ❍ ${dir} ❍\n│→ PRE-KEYS ANTIGUAS ELIMINADAS (${deleted})\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
-    } else {
-      console.log(chalk.bold.green(`\n╭» ❍ ${dir} ❍\n│→ Sin pre-keys antiguas para borrar\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ✓`))
-    }
-  } catch (err) {
-    console.log(chalk.bold.red(`\n[prekeys] Error en ${dir}: ${err?.message}`))
-  }
-}
-
-
-function purgePreKeysJadiRoot(jadiRoot, ageMinutes = 60, keepLatestN = 50) {
-  try {
-    if (!existsSync(jadiRoot)) return
-    const subdirs = readdirSync(jadiRoot).filter(name => {
-      try { return statSync(join(jadiRoot, name)).isDirectory() } catch { return false }
-    })
-    for (const sub of subdirs) {
-      purgePreKeysDir(join(jadiRoot, sub), ageMinutes, keepLatestN)
-    }
-  } catch (err) {
-    console.log(chalk.bold.red(`\n[prekeys] Error recorriendo ${jadiRoot}: ${err?.message}`))
-  }
-}
+function purgeSessionSB() {
+try {
+const listaDirectorios = readdirSync(`./${jadi}/`);
+let SBprekey = [];
+listaDirectorios.forEach(directorio => {
+if (statSync(`./${jadi}/${directorio}`).isDirectory()) {
+const DSBPreKeys = readdirSync(`./${jadi}/${directorio}`).filter(fileInDir => {
+return fileInDir.startsWith('pre-key-')
+})
+SBprekey = [...SBprekey, ...DSBPreKeys];
+DSBPreKeys.forEach(fileInDir => {
+if (fileInDir !== 'creds.json') {
+unlinkSync(`./${jadi}/${directorio}/${fileInDir}`)
+}})
+}})
+if (SBprekey.length === 0) {
+console.log(chalk.bold.green(`\n ${jadi} Nada por borrar... ⌫ ♻︎`))
+} else {
+console.log(chalk.bold.cyanBright(`\n${jadi} Archivos no escenciales eliminados... ⌫ ♻︎︎`))
+}} catch (err) {
+console.log(chalk.bold.red(`\n╭» ❍ ${jadi} ❍\n│→ OCURRIÓ UN ERROR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻\n` + err))
+}}
 
 function purgeOldFiles() {
 const directories = [`./${sessions}/`, `./${jadi}/`]
@@ -459,7 +432,7 @@ unlinkSync(filePath, err => {
 if (err) {
 console.log(chalk.bold.red(`\n╭» ❍ ARCHIVO ❍\n│→ ${file} NO SE LOGRÓ BORRAR\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ✘\n` + err))
 } else {
-console.log(chalk.bold.green(`\n╭» ❍ ARCHIVO ❍\n│→ ${file} BORRADO CON ÉXITO\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))
+console.log(chalk.bold.green(`\n${file} Borrado... ⌫ ♻`))
 } }) }
 }) }) }) }
 
@@ -476,25 +449,21 @@ originalConsoleMethod.apply(console, arguments)
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
 await clearTmp()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ MULTIMEDIA ❍\n│→ ARCHIVOS DE LA CARPETA TMP ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 4) // 4 min 
-
-// Limpia pre-keys del bot principal cada 10 min, borra las > 60 min y conserva 50 recientes
-setInterval(async () => {
-  if (stopped === 'close' || !conn || !conn.user) return
-  purgePreKeysDir(`./${sessions}`, /*ageMinutes*/ 60, /*keepLatestN*/ 50)
-}, 1000 * 60 * 10)
-
-// Limpia pre-keys de cada sub-bot cada 10 min
-setInterval(async () => {
-  if (stopped === 'close' || !conn || !conn.user) return
-  purgePreKeysJadiRoot(`./${jadi}`, 60, 50)
-}, 1000 * 60 * 10)
-
+console.log(chalk.bold.cyanBright(`\n Archivos de tmp eliminados... ⌫ ♻`))}, 1000 * 60 * 4) // 4 min 
 
 setInterval(async () => {
 if (stopped === 'close' || !conn || !conn.user) return
-//await purgeOldFiles()
-console.log(chalk.bold.cyanBright(`\n╭» ❍ ARCHIVOS ❍\n│→ ARCHIVOS RESIDUALES ELIMINADAS\n╰― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ― ⌫ ♻`))}, 1000 * 60 * 10)
+await purgeSession()
+console.log(chalk.bold.cyanBright(`\n${global.sessions} Sesiones no escenciales eliminadas... ⌫ ♻`))}, 1000 * 60 * 10) // 10 min
+
+setInterval(async () => {
+if (stopped === 'close' || !conn || !conn.user) return
+await purgeSessionSB()}, 1000 * 60 * 10) 
+
+setInterval(async () => {
+if (stopped === 'close' || !conn || !conn.user) return
+await purgeOldFiles()
+console.log(chalk.bold.cyanBright(`\nArchivos residuales eliminados... ⌫ ♻`))}, 1000 * 60 * 10)
 
 _quickTest().then(() => conn.logger.info(chalk.bold(`✦  H E C H O\n`.trim()))).catch(console.error)
 
