@@ -79,9 +79,9 @@ global.db.data.chats[m.chat] = {}
 if (chat) {
 if (!("isBanned" in chat)) chat.isBanned = false
 if (!("isMute" in chat)) chat.isMute = false;
-if (!("welcome" in chat)) chat.welcome = true
-if (!("sWelcome" in chat)) chat.sWelcome = true
-if (!("sBye" in chat)) chat.sBye = true
+if (!("welcome" in chat)) chat.welcome = false
+if (!("sWelcome" in chat)) chat.sWelcome = ""
+if (!("sBye" in chat)) chat.sBye = ""
 if (!("detect" in chat)) chat.detect = true
 if (!("primaryBot" in chat)) chat.primaryBot = null
 if (!("modoadmin" in chat)) chat.modoadmin = false
@@ -92,9 +92,9 @@ if (!("gacha" in chat)) chat.gacha = true
 } else global.db.data.chats[m.chat] = {
 isBanned: false,
 isMute: false,
-welcome: true,
-sWelcome: true,
-sBye: true,
+welcome: false,
+sWelcome: "",
+sBye: "",
 detect: true,
 primaryBot: null,
 modoadmin: false,
@@ -109,13 +109,13 @@ global.db.data.settings[this.user.jid] = {}
 }
 if (settings) {
 if (!("self" in settings)) settings.self = false
-if (!("restrict" in settings)) settings.restrict = false
+if (!("restrict" in settings)) settings.restrict = true
 if (!("jadibotmd" in settings)) settings.jadibotmd = true
 if (!("antiPrivate" in settings)) settings.antiPrivate = false
 if (!("gponly" in settings)) settings.gponly = false
 } else global.db.data.settings[this.user.jid] = {
 self: false,
-restrict: false,
+restrict: true,
 jadibotmd: true,
 antiPrivate: false,
 gponly: false
