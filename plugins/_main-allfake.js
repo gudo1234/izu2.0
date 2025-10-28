@@ -15,6 +15,11 @@ async function getRandomChannel() {
 
 export async function before(m, { conn }) {
   try {
+global.rwait = '🕒'
+global.done = '✅'
+global.error = '✖️'
+global.msm = '⚠︎'
+    
     global.emoji = '🪴'
     global.emoji2 = '🍁'
     global.emoji3 = '🍎'
