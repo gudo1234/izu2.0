@@ -10,7 +10,7 @@ const handler = async (m, { text, conn, args }) => {
     await m.react(rwait);
     res = await igdl(args[0]);
   } catch (e) {
-    return conn.reply(m.chat, `${msm} Error al obtener datos. Verifica el enlace.`, m)
+    return conn.reply(m.chat, `${e} Error al obtener datos. Verifica el enlace.`, m)
   }
 
   let result = res.data;
