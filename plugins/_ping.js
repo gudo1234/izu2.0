@@ -9,9 +9,7 @@ const handler = async (m, { conn }) => {
   }
 };
 
-// Acepta sin prefijo o con prefijo, pero siempre dentro de []
-// Ejemplos válidos: [p], [ping], .[p], .[ping]
-handler.customPrefix = /^(\.|)?\[(p|ping)\]$/i;
+handler.customPrefix = /^(?:\[(p|ping)\]|\.\[(p|ping)\])$/i;
 handler.command = new RegExp;
 
 export default handler;
