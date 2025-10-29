@@ -7,7 +7,11 @@ const handler = async (m, { conn }) => {
   } catch (e) {
     m.reply(`Error en plugin "ping":\n${e.message}`);
   }
-}
+};
 
-handler.command = ['p', 'ping'];
+// Acepta sin prefijo o con prefijo, pero siempre dentro de []
+// Ejemplos válidos: [p], [ping], .[p], .[ping]
+handler.customPrefix = /^(\.|)?\[(p|ping)\]$/i;
+handler.command = new RegExp;
+
 export default handler;
