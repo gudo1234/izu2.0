@@ -21,6 +21,6 @@ let handler = async (m, { conn }) => {
   )
 }
 
-handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee|pe|p)$/i
+handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee|pe)$/i
 handler.command = new RegExp
 export default handler
