@@ -1,17 +1,10 @@
 const handler = async (m, { conn }) => {
   try {
     const start = Date.now();
-
-    // Respuesta inmediata
-    const sentMsg = await conn.sendMessage(m.chat, { text: 'Fetching...' }, { quoted: m });
-
-    // Simulación de delay medido (casi instantáneo)
+    const sentMsg = await conn.sendMessage(m.chat, { text: `Fetching...` }, { quoted: m });
     const end = Date.now();
-    const ping = end - start;
-
-    // Edita el mensaje anterior con el resultado
     await conn.sendMessage(m.chat, {
-      text: `${e} *Response:*\n> ${ping}ms`,
+      text: `*Response:*\n> ${end - start}ms`,
       edit: sentMsg.key
     });
   } catch (e) {
@@ -19,8 +12,8 @@ const handler = async (m, { conn }) => {
   }
 };
 
-// Acepta .p, /p, #ping, ping, p, etc.
+// Detecta tanto con como sin prefijo (.p, /ping, ping, etc.)
 handler.customPrefix = /^[.!#/\\]?(p|ping)$/i;
-handler.command = new RegExp;
+handler.command = new RegExp; // necesario para compatibilidad con el sistema de handlers
 
 export default handler;
