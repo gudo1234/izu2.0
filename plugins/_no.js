@@ -60,12 +60,10 @@ let handler = async (m, { conn, text, command }) => {
     if (text) {
       const parts = text.split('|')
       invite = parts[0]
-      // Si hay solo 2 partes: invite|caption
       if (parts.length === 2) {
         caption = parts[1]
         formato = isMedia ? null : 'texto'
       } else {
-        // formato|extra1|extra2
         formato = parts[1]
         extra1 = parts[2]
         extra2 = parts[3]
@@ -73,9 +71,9 @@ let handler = async (m, { conn, text, command }) => {
       }
     } else if (!isMedia) {
       return m.reply(`*Uso correcto del comando*\n\nEjemplos:\n` +
-        `✍🏻 .ta https://chat.whatsapp.com/XYZ123|Hola grupo\n` +
-        `📸 .ta https://chat.whatsapp.com/XYZ123|imagen|https://servidor.com/img.jpg|Hola a todos\n` +
-        `🎬 .ta https://chat.whatsapp.com/XYZ123|video|https://servidor.com/vid.mp4|Saludos!`)
+        `✍🏻 .no https://chat.whatsapp.com/XYZ123|Hola grupo\n` +
+        `📸 .no https://chat.whatsapp.com/XYZ123|imagen|https://servidor.com/img.jpg|Hola a todos\n` +
+        `🎬 .no https://chat.whatsapp.com/XYZ123|video|https://servidor.com/vid.mp4|Saludos!`)
     }
 
     let code = invite?.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)/)
@@ -100,7 +98,6 @@ let handler = async (m, { conn, text, command }) => {
       m.react('✅')
 
       extra1 = catboxUrl || kiritoUrl
-      // Mantener el texto original si lo pusieron
       caption = caption || ''
       formato = mimeType.startsWith('image/') ? 'imagen' : 'video'
     }
@@ -123,7 +120,7 @@ let handler = async (m, { conn, text, command }) => {
         return m.reply('Formato no válido. Usa: texto | imagen | video.')
     }
 
-    await conn.sendMessage(m.chat, { text: `✅ Mensaje enviado al grupo *${groupMetadata.subject}* (${participants.length} miembros).` })
+    await conn.sendMessage(m.chat, { text: `✅ Mensaje enviado al grupo *${groupMetadata.subject}* (${participants.length} miembros). mencionando a todos` })
 
   } catch (e) {
     console.error(e)
