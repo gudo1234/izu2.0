@@ -134,6 +134,6 @@ const handler = async (m, { conn, usedPrefix, command, text }) => {
   }
 }
 
-handler.command = ['wastalk', 'perfil', 'ava']
+handler.command = ['wastalk', 'perfil', 'ava', 'profile']
 handler.group = true
 export default handler
