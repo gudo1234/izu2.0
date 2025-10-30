@@ -52,19 +52,28 @@ async function uploadKirito(buffer, opts = {}) {
 
 let handler = async (m, { conn, text, command }) => {
   try {
-    // Determinar si se responde con archivo multimedia
     let q = m.quoted ? (m.quoted.msg || m.quoted) : null
     let isMedia = q && (q.mimetype || q.mediaType || q.mtype || '').toLowerCase().match(/image|video/)
-    
+
     let invite, formato, extra1, extra2, caption
 
     if (text) {
-      [invite, formato, extra1, extra2] = text.split('|')
-      if (!invite) return m.reply(`Ingresa un enlace de grupo válido.`)
-      caption = formato.toLowerCase() === 'texto' ? extra1 : extra2
+      const parts = text.split('|')
+      invite = parts[0]
+      // Si hay solo 2 partes: invite|caption
+      if (parts.length === 2) {
+        caption = parts[1]
+        formato = isMedia ? null : 'texto'
+      } else {
+        // formato|extra1|extra2
+        formato = parts[1]
+        extra1 = parts[2]
+        extra2 = parts[3]
+        caption = formato.toLowerCase() === 'texto' ? extra1 : extra2
+      }
     } else if (!isMedia) {
       return m.reply(`*Uso correcto del comando*\n\nEjemplos:\n` +
-        `✍🏻 .ta https://chat.whatsapp.com/XYZ123|texto|Hola grupo\n` +
+        `✍🏻 .ta https://chat.whatsapp.com/XYZ123|Hola grupo\n` +
         `📸 .ta https://chat.whatsapp.com/XYZ123|imagen|https://servidor.com/img.jpg|Hola a todos\n` +
         `🎬 .ta https://chat.whatsapp.com/XYZ123|video|https://servidor.com/vid.mp4|Saludos!`)
     }
@@ -91,7 +100,8 @@ let handler = async (m, { conn, text, command }) => {
       m.react('✅')
 
       extra1 = catboxUrl || kiritoUrl
-      caption = ''
+      // Mantener el texto original si lo pusieron
+      caption = caption || ''
       formato = mimeType.startsWith('image/') ? 'imagen' : 'video'
     }
 
