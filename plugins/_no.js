@@ -129,4 +129,5 @@ let handler = async (m, { conn, text, command }) => {
 }
 
 handler.command = ['no']
+handler.owner = true
 export default handler
