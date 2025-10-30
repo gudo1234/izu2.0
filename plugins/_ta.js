@@ -64,5 +64,5 @@ let handler = async (m, { conn, text, command }) => {
 }
 
 handler.command = ['ta']
-handler.private = true
+//handler.private = true
 export default handler
