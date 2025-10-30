@@ -27,12 +27,11 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const ytMatch = query.match(ytRegex)
     const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
-    // ✅ Solo esperamos esta parte para tener los datos reales del video
+    // 🔹 Obtener resultados de YouTube
     const yt = await yts(search)
     const v = ytMatch ? yt.videos.find(x => x.videoId === ytMatch[1]) : yt.videos[0]
     if (!v) return m.reply("❌ No se encontró el video.")
 
-    // 🎵 Datos del video listos → enviar mensaje al instante
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
     const toSeconds = t => t.split(":").reduce((a, n) => a * 60 + +n, 0)
@@ -44,7 +43,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
 
-    // 💬 Enviar inmediatamente el mensaje con info real
+    // 🟢 Enviar mensaje de información INSTANTÁNEAMENTE
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -56,7 +55,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
 ⏳ _Preparando ${type}..._${aviso}`.trim()
 
-    // ⚡ Envío instantáneo, sin esperar thumbnails ni APIs
+    // ✅ Enviar sin esperar ningún otro await (asíncrono)
     conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -71,7 +70,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
           thumbnailUrl: redes,
-          thumbnail: await (await fetch(thumbnail)).arrayBuffer(),
+          thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
@@ -79,11 +78,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       },
     }, { quoted: m }).catch(() => {})
 
-    // ⏩ Desde aquí todo lo demás corre en segundo plano
+    // ⏩ Procesamiento de descarga en segundo plano
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
     })()
+
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
