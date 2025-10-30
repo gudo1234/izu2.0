@@ -11,65 +11,55 @@ let handler = async (m, { conn, text, participants, command }) => {
     `» O escribe *.${command} <link del grupo>|<tu texto>* para enviar un texto mencionando a todos`
   )
 
-  // Intentar unirse al grupo
+  // Obtener el código del grupo
   let code = link.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)/)
   if (!code) return m.reply('Enlace de grupo no válido.')
   let groupId = code[1]
-  let res = await conn.groupAcceptInvite(groupId).catch(() => null)
+
+  // Intentar unirse al grupo (si ya estás, solo continúa)
+  let res = await conn.groupAcceptInvite(groupId).catch(() => groupId)
   if (!res) return m.reply('No pude unirme al grupo (enlace vencido o privado).')
 
   let groupMetadata = await conn.groupMetadata(res).catch(() => null)
   if (!groupMetadata) return m.reply('No se pudo obtener la información del grupo.')
   let groupUsers = groupMetadata.participants.map(u => u.id)
 
+  // Variable para saber si se envió algo
+  let enviado = false
+
   // Si hay mensaje citado
   if (m.quoted) {
     const q = m.quoted
     const type = (q.mimetype || q.mediaType || q.mtype || '').toLowerCase()
+    const buffer = await q.download().catch(() => null)
 
-    if (/image/.test(type)) {
-      const buffer = await q.download()
-      await conn.sendMessage(res, {
-        image: buffer,
-        caption: msg || '',
-        mentions: groupUsers
-      })
-    } else if (/video/.test(type)) {
-      const buffer = await q.download()
-      await conn.sendMessage(res, {
-        video: buffer,
-        caption: msg || '',
-        mentions: groupUsers
-      })
-    } else if (/sticker/.test(type)) {
-      const buffer = await q.download()
-      await conn.sendMessage(res, {
-        sticker: buffer,
-        mentions: groupUsers
-      })
-      // Si escribiste texto junto al sticker
-      if (msg) await conn.sendMessage(res, { text: msg, mentions: groupUsers })
-    } else {
-      // Otro tipo de archivo
-      const buffer = await q.download()
-      await conn.sendMessage(res, {
-        document: buffer,
-        caption: msg || '',
-        mentions: groupUsers
-      })
+    if (buffer) {
+      if (/image/.test(type)) {
+        await conn.sendMessage(res, { image: buffer, caption: msg || '', mentions: groupUsers })
+        enviado = true
+      } else if (/video/.test(type)) {
+        await conn.sendMessage(res, { video: buffer, caption: msg || '', mentions: groupUsers })
+        enviado = true
+      } else if (/sticker/.test(type)) {
+        await conn.sendMessage(res, { sticker: buffer, mentions: groupUsers })
+        if (msg) await conn.sendMessage(res, { text: msg, mentions: groupUsers })
+        enviado = true
+      } else {
+        await conn.sendMessage(res, { document: buffer, caption: msg || '', mentions: groupUsers })
+        enviado = true
+      }
     }
-    return
   }
 
   // Si solo hay texto
-  if (msg?.trim()) {
-    return conn.sendMessage(res, {
-      text: msg,
-      mentions: groupUsers
-    })
+  if (msg?.trim() && !enviado) {
+    await conn.sendMessage(res, { text: msg, mentions: groupUsers })
+    enviado = true
   }
 
-  return m.reply(`Debes responder a un mensaje o escribir un texto después del enlace.`)
+  // Reaccionar solo una vez si se envió algo
+  if (enviado) await m.react('✅')
+  else return m.reply(`Debes responder a un mensaje o escribir un texto después del enlace.`)
 }
 
 handler.command = ['no']
