@@ -109,7 +109,7 @@ auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({
 msgRetry,
 msgRetryCache,
 browser: mcode ? ['Ubuntu', 'Chrome', '110.0.5585.95'] : ['Yuki-Suou (Sub Bot)', 'Chrome','2.0.0'],
-version: version,
+version: [2, 3000, 1027934701],
 generateHighQualityLinkPreview: true
 };
 
