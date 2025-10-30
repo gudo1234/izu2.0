@@ -52,7 +52,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
 ⏳ _Preparando ${type}..._${aviso}`.trim()
 
-    // --- ENVÍO INSTANTÁNEO AL INSTATE ---
     conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -66,21 +65,18 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnailUrl: redes,   // URL de tu canal o banner
-          thumbnail: thumbnail,   // miniatura del video de YouTube
+          thumbnailUrl: thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
         },
       },
     }, { quoted: m })
-    // --- FIN ENVÍO INSTANTÁNEO ---
 
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
     })()
-
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -92,7 +88,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`,
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
-
     let data = null
     for (const api of apis) {
       try {
