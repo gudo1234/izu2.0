@@ -41,6 +41,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
+
+    // 📤 Enviar mensaje INMEDIATAMENTE con la info del video
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -52,6 +54,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
 ⏳ _Preparando ${type}..._${aviso}`.trim()
 
+    // Enviar al instante (sin esperar ningún await adicional)
     conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -71,8 +74,9 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           renderLargerThumbnail: false,
         },
       },
-    }, { quoted: m })
+    }, { quoted: m }).catch(() => {}) // 👈 No bloquea la ejecución
 
+    // ⚙️ Luego seguimos con todo el proceso en segundo plano
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
