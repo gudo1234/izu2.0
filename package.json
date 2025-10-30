@@ -1,5 +1,5 @@
 {
-"name": "YukiBot-MD",
+"name": "IzuBot-MD",
 "version": "2.2.5",
 "description": "WhatsApp Bot Multi Device",
 "main": "index.js",
@@ -18,16 +18,16 @@
 "eslint": "eslint .",
 "eslintfix": "eslint --fix ."
 },
-"homepage": "https://github.com/The-King-Destroy/Yuki_Suou-Bot",
+"homepage": "https://github.com/gudo1234/izu2.0",
 "author": {
-"name": "The-King-Destroy"
+"name": "Zeus"
 },
 "repository": {
 "type": "git",
-"url": "git+https://github.com/The-King-Destroy/Yuki_Suou-Bot.git"
+"url": "git+https://github.com/gudo1234/izu2.0.git"
 },
 "bugs": {
-"url": "https://github.com/The-King-Destroy/Yuki_Suou-Bot/issues"
+"url": "https://github.com/gudo1234/izu2.0/issues"
 },
 "license": "MIT-License",
 "dependencies": {
