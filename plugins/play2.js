@@ -16,7 +16,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       : normalVideo.includes(command)
       ? 'video'
       : 'video en documento'
-    return m.reply(`${e} _Ingresa texto o enlace de YouTube para descargar el *${tipo}.*_\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+    return m.reply(`${e} Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
   }
 
   await m.react("🕒")
@@ -27,10 +27,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const ytMatch = query.match(ytRegex)
     const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
+    // ✅ Solo esperamos esta parte para tener los datos reales del video
     const yt = await yts(search)
     const v = ytMatch ? yt.videos.find(x => x.videoId === ytMatch[1]) : yt.videos[0]
     if (!v) return m.reply("❌ No se encontró el video.")
 
+    // 🎵 Datos del video listos → enviar mensaje al instante
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
     const toSeconds = t => t.split(":").reduce((a, n) => a * 60 + +n, 0)
@@ -42,7 +44,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
 
-    // 📤 Enviar mensaje INMEDIATAMENTE con la info del video
+    // 💬 Enviar inmediatamente el mensaje con info real
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -54,7 +56,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
 ⏳ _Preparando ${type}..._${aviso}`.trim()
 
-    // Enviar al instante (sin esperar ningún await adicional)
+    // ⚡ Envío instantáneo, sin esperar thumbnails ni APIs
     conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -68,15 +70,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnailUrl: thumbnail,
+          thumbnailUrl: redes,
+          thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
         },
       },
-    }, { quoted: m }).catch(() => {}) // 👈 No bloquea la ejecución
+    }, { quoted: m }).catch(() => {})
 
-    // ⚙️ Luego seguimos con todo el proceso en segundo plano
+    // ⏩ Desde aquí todo lo demás corre en segundo plano
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
@@ -92,6 +95,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`,
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
+
     let data = null
     for (const api of apis) {
       try {
