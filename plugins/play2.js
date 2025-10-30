@@ -27,7 +27,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const ytMatch = query.match(ytRegex)
     const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
-    // 🔹 Obtener resultados de YouTube
     const yt = await yts(search)
     const v = ytMatch ? yt.videos.find(x => x.videoId === ytMatch[1]) : yt.videos[0]
     if (!v) return m.reply("❌ No se encontró el video.")
@@ -42,8 +41,6 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
-
-    // 🟢 Enviar mensaje de información INSTANTÁNEAMENTE
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -55,7 +52,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
 ⏳ _Preparando ${type}..._${aviso}`.trim()
 
-    // ✅ Enviar sin esperar ningún otro await (asíncrono)
+    // --- ENVÍO INSTANTÁNEO AL INSTATE ---
     conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -69,16 +66,16 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnailUrl: redes,
-          thumbnail,
+          thumbnailUrl: redes,   // URL de tu canal o banner
+          thumbnail: thumbnail,   // miniatura del video de YouTube
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
         },
       },
-    }, { quoted: m }).catch(() => {})
+    }, { quoted: m })
+    // --- FIN ENVÍO INSTANTÁNEO ---
 
-    // ⏩ Procesamiento de descarga en segundo plano
     const thumbPromise = (async () => {
       const buffer = await (await fetch(thumbnail)).arrayBuffer()
       return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
