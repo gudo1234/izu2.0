@@ -73,6 +73,6 @@ let handler = async (m, { conn, text, participants, command }) => {
 }
 
 handler.command = ['no']
-handler.admin = true
-handler.group = true
+handler.owner = true
+//handler.group = true
 export default handler
