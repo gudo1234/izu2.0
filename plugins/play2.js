@@ -71,7 +71,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
           thumbnailUrl: redes,
-          thumbnail,
+          thumbnail: await (await fetch(thumbnail)).arrayBuffer(),
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
