@@ -21,12 +21,12 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
         : contentType.includes('video') ? '.mp4'
         : '.bin'
 
-      const buffer = await res.buffer()
       m.react('✅')
+      // Enviar directamente sin esperar a que se descargue todo
       return conn.sendMessage(m.chat, {
-        document: buffer,
-        mimetype: contentType,
+        document: { url: text },
         fileName: 'media' + ext,
+        mimetype: contentType,
         caption: text
       }, { quoted: m })
     }
@@ -77,16 +77,12 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
 
     // ==============================
-    // 📦 DESCARGA Y ENVÍO COMO DOCUMENTO
+    // 📦 ENVÍO INSTANTÁNEO COMO DOCUMENTO
     // ==============================
     if (fileUrl) {
-      const fileRes = await fetch(fileUrl)
-      const type = fileRes.headers.get('content-type') || 'video/mp4'
-      const buffer = await fileRes.buffer()
       m.react('✅')
-
       return conn.sendMessage(m.chat, {
-        document: buffer,
+        document: { url: fileUrl },
         fileName: 'video.mp4',
         mimetype: 'video/mp4',
         caption: isAdult
