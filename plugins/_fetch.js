@@ -5,8 +5,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
     return conn.reply(m.chat, `✳️ Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
-  // 🔹 Reacción inicial: proceso iniciado
-  m.react('🕒')
+  m.react('🕒') // Inicio
 
   try {
     const res = await fetch(text)
@@ -22,37 +21,30 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
         : contentType.includes('video') ? '.mp4'
         : '.bin'
 
-      // ⚙️ Reacción: listo para enviar
       await m.react('⚙️')
-
-      // Enviar al instante sin descargar
       await conn.sendMessage(m.chat, {
         document: { url: text },
         fileName: 'media' + ext,
         mimetype: contentType,
         caption: text
       }, { quoted: m })
-
-      // ✅ Reacción: enviado
       await m.react('✅')
       return
     }
 
     // ==============================
+    // 🔹 DETECCIÓN DE DOMINIOS ESPECÍFICOS
+    // ==============================
+    const ytRegex = /(?:youtube\.com|youtu\.be)/i
+    const videoSites = [
+      'instagram', 'facebook', 'tiktok', 'x.com', 'twitter',
+      'mediafire', 'github', 'pinterest', 'terabox'
+    ]
+
+    // ==============================
     // 📄 LEER HTML SI NO ES DIRECTO
     // ==============================
     const html = await res.text()
-
-    // ==============================
-    // 🔞 DETECTAR SITIOS ADULTOS / STREAMING
-    // ==============================
-    const adultSites = [
-      'xvideos', 'xnxx', 'pornhub', 'redtube', 'spankbang',
-      'youjizz', 'youporn', 'tube8', 'tnaflix', 'eporner',
-      'jav', 'rule34', 'hclips', 'beeg', 'googleusercontent',
-      'share.google'
-    ]
-    const isAdult = adultSites.some(site => text.includes(site))
 
     // ==============================
     // 🔍 EXTRAER POSIBLES ENLACES
@@ -69,39 +61,57 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const allCandidates = [...foundLinks, ...srcMatches, ...iframeMatches].filter(Boolean)
 
     // ==============================
-    // 🧩 ENCONTRAR PRIMER VIDEO VÁLIDO
+    // 🧩 DETECTAR URL PRINCIPAL
     // ==============================
     let fileUrl
     for (let url of allCandidates) {
       if (!url) continue
       let fullUrl = url.startsWith('http') ? url : new URL(url, text).href
-      if (/\.(mp4|webm|mov|avi|mkv)(\?|$)/i.test(fullUrl)) {
+      if (/\.(mp4|webm|mov|avi|mkv|mp3)(\?|$)/i.test(fullUrl)) {
         fileUrl = fullUrl
         break
       }
     }
 
     // ==============================
-    // 📦 ENVIAR COMO DOCUMENTO AL INSTANTE
+    // ⚙️ PREPARAR ENVÍO
     // ==============================
     if (fileUrl) {
-      await m.react('⚙️') // Reacción antes de enviar
+      await m.react('⚙️')
 
-      await conn.sendMessage(m.chat, {
-        document: { url: fileUrl },
-        fileName: 'video.mp4',
-        mimetype: 'video/mp4',
-        caption: isAdult
-          ? '🔞 Video detectado y enviado como documento.'
-          : fileUrl
-      }, { quoted: m })
+      // Detectar tipo de envío
+      if (ytRegex.test(text)) {
+        // YouTube → audio
+        await conn.sendMessage(m.chat, {
+          document: { url: fileUrl },
+          fileName: 'audio.mp3',
+          mimetype: 'audio/mpeg',
+          caption: '🎵 Audio extraído de YouTube'
+        }, { quoted: m })
+      } else if (videoSites.some(site => text.includes(site))) {
+        // Video normal
+        await conn.sendMessage(m.chat, {
+          document: { url: fileUrl },
+          fileName: 'video.mp4',
+          mimetype: 'video/mp4',
+          caption: '🎬 Video descargado'
+        }, { quoted: m })
+      } else {
+        // Otros → enviar como documento genérico
+        await conn.sendMessage(m.chat, {
+          document: { url: fileUrl },
+          fileName: 'media.mp4',
+          mimetype: 'video/mp4',
+          caption: fileUrl
+        }, { quoted: m })
+      }
 
-      await m.react('✅') // Reacción final: enviado
+      await m.react('✅')
       return
     }
 
     // ==============================
-    // 📜 SIN RESULTADOS
+    // ⚠️ SIN RESULTADOS
     // ==============================
     return m.reply('⚠️ No se encontró ningún recurso multimedia válido en la página.')
 
