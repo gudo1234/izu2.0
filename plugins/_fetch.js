@@ -3,7 +3,7 @@ import { URL } from 'url'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
-    return conn.reply(m.chat, `⚠️ Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
+    return conn.reply(m.chat, `${e} Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
   m.react('🕒')
 
