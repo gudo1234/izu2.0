@@ -159,7 +159,7 @@ chat.autolevelup = false
 if (!('autoAceptar' in chat))
 chat.autoAceptar = false
 if (!('autosticker' in chat))
-chat.autosticker = true
+chat.autosticker = false
 if (!('autoRechazar' in chat))
 chat.autoRechazar = false
 if (!('autoresponder' in chat))
@@ -209,13 +209,13 @@ if (typeof settings !== 'object') global.db.data.settings[this.user.jid] = {}
 if (settings) {
 if (!('self' in settings)) settings.self = false
 if (!('restrict' in settings)) settings.restrict = true
-if (!('jadibotmd' in settings)) settings.jadibotmd = true
+if (!('jadibotmd' in settings)) settings.jadibotmd = false
 if (!('antiPrivate' in settings)) settings.antiPrivate = false
 if (!('autoread' in settings)) settings.autoread = false
 } else global.db.data.settings[this.user.jid] = {
 self: false,
 restrict: true,
-jadibotmd: true,
+jadibotmd: false,
 antiPrivate: false,
 autoread: false,
 status: 0
