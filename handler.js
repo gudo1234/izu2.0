@@ -79,27 +79,27 @@ if (typeof chat !== "object") global.db.data.chats[m.chat] = {}
 if (chat) {
 if (!("isBanned" in chat)) chat.isBanned = false
 if (!("isMute" in chat)) chat.isMute = false;
-if (!("welcome" in chat)) chat.welcome = true
-if (!("sWelcome" in chat)) chat.sWelcome = true
-if (!("sBye" in chat)) chat.sBye = true
+if (!("welcome" in chat)) chat.welcome = false
+if (!("sWelcome" in chat)) chat.sWelcome = ""
+if (!("sBye" in chat)) chat.sBye = ""
 if (!("detect" in chat)) chat.detect = true
 if (!("primaryBot" in chat)) chat.primaryBot = null
 if (!("modoadmin" in chat)) chat.modoadmin = false
-if (!("antiLink" in chat)) chat.antiLink = false
-if (!("nsfw" in chat)) chat.nsfw = true
+if (!("antiLink" in chat)) chat.antiLink = true
+if (!("nsfw" in chat)) chat.nsfw = false
 if (!("economy" in chat)) chat.economy = true;
 if (!("gacha" in chat)) chat.gacha = true
 } else global.db.data.chats[m.chat] = {
 isBanned: false,
 isMute: false,
 welcome: false,
-sWelcome: true,
-sBye: true,
+sWelcome: "",
+sBye: "",
 detect: true,
 primaryBot: null,
 modoadmin: false,
 antiLink: true,
-nsfw: true,
+nsfw: false,
 economy: true,
 gacha: true
 }
@@ -124,12 +124,11 @@ user.name = nuevo
 }} catch {}
 const chat = global.db.data.chats[m.chat]
 const settings = global.db.data.settings[this.user.jid]  
-//const isROwner = [...global.owner.map((number) => number)].map(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender)
-const isROwner = [this.user.jid, ...global.owner.map((number) => number + "@s.whatsapp.net")].includes(m.sender)
+const isROwner = [...global.owner.map((number) => number)].map(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender)
 const isOwner = isROwner || m.fromMe
 const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender) || user.premium == true
 const isOwners = [this.user.jid, ...global.owner.map((number) => number + "@s.whatsapp.net")].includes(m.sender)
-/*if (opts["queque"] && m.text && !(isPrems)) {
+if (opts["queque"] && m.text && !(isPrems)) {
 const queque = this.msgqueque, time = 1000 * 5
 const previousID = queque[queque.length - 1]
 queque.push(m.id || m.key.id)
@@ -137,23 +136,6 @@ setInterval(async function () {
 if (queque.indexOf(previousID) === -1) clearInterval(this)
 await delay(time)
 }, time)
-}*/
-if (opts["queque"] && m.text && !isPrems) {
-    const queque = this.msgqueque;
-    const msgId = m.id || m.key?.id;
-    if (!queque.includes(msgId)) {
-        queque.push(msgId);
-        (async () => {
-            try {
-                //await this.reply(m.chat, 'Mensaje recibido ✅', m);
-            } catch (err) {
-                console.error('Error procesando el mensaje:', err);
-            } finally {
-                const index = queque.indexOf(msgId);
-                if (index > -1) queque.splice(index, 1);
-            }
-        })();
-    }
 }
  
 if (m.isBaileys) return
@@ -367,17 +349,16 @@ console.log(m.message)
 }}}
 global.dfail = (type, m, conn) => {
 const msg = {
-rowner: `${e} El comando *${comando}* solo puede ser usado por los creadores del bot.`, 
-owner: `${e} El comando *${comando}* solo puede ser usado por los desarrolladores del bot.`, 
-mods: `${e} El comando *${comando}* solo puede ser usado por los moderadores del bot.`, 
-premium: `${e} El comando *${comando}* solo puede ser usado por los usuarios premium.`, 
-group: `${e} El comando *${comando}* solo puede ser usado en grupos.`,
-private: `${e} El comando *${comando}* solo puede ser usado al chat privado del bot.`,
-admin: `${e} El comando *${comando}* solo puede ser usado por los administradores del grupo.`, 
-botAdmin: `${e} Para ejecutar el comando *${comando}* debo ser administrador del grupo.`,
-unreg: `${e} comando *${comando}* solo puede ser usado por los usuarios registrado, registrate usando:\n> #verificar ${user2}.${edadaleatoria}`,
-restrict: `${e} Esta caracteristica está desactivada.`
-}[type];
+rowner: `『✦』El comando *${comando}* solo puede ser usado por los creadores del bot.`, 
+owner: `『✦』El comando *${comando}* solo puede ser usado por los desarrolladores del bot.`, 
+mods: `『✦』El comando *${comando}* solo puede ser usado por los moderadores del bot.`, 
+premium: `『✦』El comando *${comando}* solo puede ser usado por los usuarios premium.`, 
+group: `『✦』El comando *${comando}* solo puede ser usado en grupos.`,
+private: `『✦』El comando *${comando}* solo puede ser usado al chat privado del bot.`,
+admin: `『✦』El comando *${comando}* solo puede ser usado por los administradores del grupo.`, 
+botAdmin: `『✦』Para ejecutar el comando *${comando}* debo ser administrador del grupo.`,
+restrict: `『✦』Esta caracteristica está desactivada.`
+}[type]
 if (msg) return conn.reply(m.chat, msg, m, rcanal).then(_ => m.react('✖️'))
 }
 let file = global.__filename(import.meta.url, true)
