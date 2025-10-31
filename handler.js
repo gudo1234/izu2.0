@@ -366,7 +366,6 @@ console.log(m.message)
 }}}
 global.dfail = (type, m, conn) => {
 const msg = {
-const msg = {
 rowner: `${e} El comando *${comando}* solo puede ser usado por los creadores del bot.`, 
 owner: `${e} El comando *${comando}* solo puede ser usado por los desarrolladores del bot.`, 
 mods: `${e} El comando *${comando}* solo puede ser usado por los moderadores del bot.`, 
