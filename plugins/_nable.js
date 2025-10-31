@@ -5,6 +5,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
   const chat = global.db.data.chats[m.chat]
   const bot = global.db.data.settings[conn.user.jid] || {}
 
+  // Opciones disponibles y su ámbito
   const opcionesValidas = {
     welcome: 'chat',
     autoaceptar: 'chat',
@@ -20,12 +21,15 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     antiprivado: 'bot',
     jadibotmd: 'bot',
     boton: 'bot',
+    audio: 'bot',
+    audios: 'bot'
   }
 
   let type = command.toLowerCase()
   let opcion = args[0]?.toLowerCase()
   let valor = null
 
+  // Manejo de activación/desactivación
   if ((type === 'on' || type === 'enable') && opcion in opcionesValidas) {
     type = opcion
     valor = true
@@ -38,6 +42,7 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     valor = false
   }
 
+  // Función para mostrar el listado actual de estados
   const mostrarLista = () => {
     const estados = Object.entries(opcionesValidas)
       .map(([opt, scope]) => {
@@ -45,13 +50,19 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
         return `> *${opt}*      ${estado ? 'Activo ✓' : 'Desactivado ✗'}`
       })
       .join('\n')
-    return conn.reply(m.chat, `⚙️ *Lista de funciones y su estado:*\n${estados}\n\n*_Ejemplo de uso:_*\n\`${usedPrefix}on\` welcome\n\`${usedPrefix}off\` autosticker`, m)
+    return conn.reply(
+      m.chat,
+      `⚙️ *Lista de funciones y su estado:*\n${estados}\n\n*_Ejemplo de uso:_*\n\`${usedPrefix}on\` welcome\n\`${usedPrefix}off\` autosticker`,
+      m
+    )
   }
 
+  // Si solo se usa .on o .off sin argumento
   if ((type === 'on' || type === 'off' || type === 'enable' || type === 'disable') && !opcion) {
     return mostrarLista()
   }
 
+  // Si el valor no fue definido o el comando es desconocido
   if (valor === null) {
     if (!(type in opcionesValidas)) {
       return mostrarLista()
@@ -65,9 +76,14 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
       })
       .join('\n')
 
-    return conn.reply(m.chat, `⚙️ _La función *${type}* está actualmente: ${estado ? '✓ ACTIVADA' : '✗ DESACTIVADA'}_\n\nUsa:\n\`${usedPrefix}${type}\` on – para activar\n\`${usedPrefix}${type}\` off – para desactivar\n\n📋 *Otros estados:*\n${listaExtra}`, m)
+    return conn.reply(
+      m.chat,
+      `⚙️ _La función *${type}* está actualmente: ${estado ? '✓ ACTIVADA' : '✗ DESACTIVADA'}_\n\nUsa:\n\`${usedPrefix}${type}\` on – para activar\n\`${usedPrefix}${type}\` off – para desactivar\n\n📋 *Otros estados:*\n${listaExtra}`,
+      m
+    )
   }
 
+  // Aplicar cambios según el tipo (chat o bot)
   const scope = opcionesValidas[type]
   if (scope === 'chat') {
     if (m.isGroup && !(isAdmin || isOwner)) return global.dfail('admin', m, conn)
@@ -77,11 +93,13 @@ const handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin })
     bot[type] = valor
   }
 
-  conn.reply(m.chat, `✅ La función *${type}* fue *${valor ? 'activada' : 'desactivada'}* correctamente ${scope === 'bot' ? 'para todo el bot' : 'en este chat'}.`, m)
+  conn.reply(
+    m.chat,
+    `✅ La función *${type}* fue *${valor ? 'activada' : 'desactivada'}* correctamente ${scope === 'bot' ? 'para todo el bot' : 'en este chat'}.`,
+    m
+  )
 }
 
-handler.help = ['on <opción>', 'off <opción>', '<opción> (ver estado)', '<opción> on/off']
-handler.tags = ['nable']
 handler.command = [
   'on', 'off', 'enable', 'disable',
   'welcome', 'bienvenida',
@@ -90,6 +108,8 @@ handler.command = [
   'detect', 'antilink',
   'antifake', 'antibot',
   'antibot2', 'autosticker',
-  'autoband', 'antiprivado', 'jadibotmd', 'boton']
+  'autoband', 'antiprivado', 'jadibotmd',
+  'boton', 'audio', 'audios'
+]
 
 export default handler
