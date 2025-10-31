@@ -5,6 +5,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
     return conn.reply(m.chat, `✳️ Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
+  // 🔹 Reacción inicial: proceso iniciado
   m.react('🕒')
 
   try {
@@ -12,7 +13,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const contentType = res.headers.get('content-type') || ''
 
     // ==============================
-    // 🔹 DETECCIÓN DIRECTA (Imagen / Audio / Video / PDF)
+    // 🔹 ARCHIVO DIRECTO (imagen/audio/video/pdf)
     // ==============================
     if (/image|audio|video|application\/pdf/i.test(contentType)) {
       const ext =
@@ -21,23 +22,29 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
         : contentType.includes('video') ? '.mp4'
         : '.bin'
 
-      m.react('✅')
-      // Enviar directamente sin esperar a que se descargue todo
-      return conn.sendMessage(m.chat, {
+      // ⚙️ Reacción: listo para enviar
+      await m.react('⚙️')
+
+      // Enviar al instante sin descargar
+      await conn.sendMessage(m.chat, {
         document: { url: text },
         fileName: 'media' + ext,
         mimetype: contentType,
         caption: text
       }, { quoted: m })
+
+      // ✅ Reacción: enviado
+      await m.react('✅')
+      return
     }
 
     // ==============================
-    // 📄 SI NO ES ARCHIVO DIRECTO → LEER HTML
+    // 📄 LEER HTML SI NO ES DIRECTO
     // ==============================
     const html = await res.text()
 
     // ==============================
-    // 🔞 DETECCIÓN DE SITIOS PARA ADULTOS O STREAMING
+    // 🔞 DETECTAR SITIOS ADULTOS / STREAMING
     // ==============================
     const adultSites = [
       'xvideos', 'xnxx', 'pornhub', 'redtube', 'spankbang',
@@ -48,23 +55,21 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const isAdult = adultSites.some(site => text.includes(site))
 
     // ==============================
-    // 🔍 EXTRAER ENLACES POSIBLES
+    // 🔍 EXTRAER POSIBLES ENLACES
     // ==============================
     const regexAll = /(https?:\/\/[^\s"'<>]+?\.(jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|mp4|webm|mov|avi|mkv|pdf)(\?[^\s"'<>]*)?)/gi
     const foundLinks = [...html.matchAll(regexAll)].map(v => v[0])
 
-    // Extraer de etiquetas HTML
     const tagSrcRegex = /<(img|video|audio|source)[^>]+src=["']([^"']+)["']/gi
     const srcMatches = [...html.matchAll(tagSrcRegex)].map(v => v[2])
 
-    // Extraer de iframes
     const iframeRegex = /<iframe[^>]+src=["']([^"']+)["']/gi
     const iframeMatches = [...html.matchAll(iframeRegex)].map(v => v[1])
 
     const allCandidates = [...foundLinks, ...srcMatches, ...iframeMatches].filter(Boolean)
 
     // ==============================
-    // 🧩 BUSCAR EL PRIMER VIDEO VÁLIDO
+    // 🧩 ENCONTRAR PRIMER VIDEO VÁLIDO
     // ==============================
     let fileUrl
     for (let url of allCandidates) {
@@ -77,11 +82,12 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
 
     // ==============================
-    // 📦 ENVÍO INSTANTÁNEO COMO DOCUMENTO
+    // 📦 ENVIAR COMO DOCUMENTO AL INSTANTE
     // ==============================
     if (fileUrl) {
-      m.react('✅')
-      return conn.sendMessage(m.chat, {
+      await m.react('⚙️') // Reacción antes de enviar
+
+      await conn.sendMessage(m.chat, {
         document: { url: fileUrl },
         fileName: 'video.mp4',
         mimetype: 'video/mp4',
@@ -89,10 +95,13 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
           ? '🔞 Video detectado y enviado como documento.'
           : fileUrl
       }, { quoted: m })
+
+      await m.react('✅') // Reacción final: enviado
+      return
     }
 
     // ==============================
-    // 📜 SI NO ENCUENTRA NADA
+    // 📜 SIN RESULTADOS
     // ==============================
     return m.reply('⚠️ No se encontró ningún recurso multimedia válido en la página.')
 
