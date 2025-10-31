@@ -12,7 +12,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const contentType = res.headers.get('content-type') || ''
 
     // ==============================
-    // 🔹 ARCHIVO DIRECTO
+    // 🔹 ARCHIVO DIRECTO (imagen/audio/video/pdf)
     // ==============================
     if (/image|audio|video|application\/pdf/i.test(contentType)) {
       const ext =
@@ -33,14 +33,16 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
 
     // ==============================
-    // 🔹 DOMINIOS ESPECÍFICOS
+    // 🔹 DETECCIÓN DE DOMINIOS ESPECÍFICOS
     // ==============================
     const ytRegex = /(?:youtube\.com|youtu\.be)/i
-    const videoSites = ['instagram', 'facebook', 'tiktok', 'x.com', 'twitter', 'pinterest', 'terabox']
-    const docSites = ['mediafire', 'github']
+    const videoSites = [
+      'instagram', 'facebook', 'tiktok', 'x.com', 'twitter',
+      'mediafire', 'github', 'pinterest', 'terabox'
+    ]
 
     // ==============================
-    // 📄 LEER HTML
+    // 📄 LEER HTML SI NO ES DIRECTO
     // ==============================
     const html = await res.text()
 
@@ -77,36 +79,25 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     if (fileUrl) {
       await m.react('⚙️')
 
+      // Detectar tipo de envío
       if (ytRegex.test(text)) {
         // YouTube → audio
         await conn.sendMessage(m.chat, {
-          audio: { url: fileUrl },
-          mimetype: 'audio/mpeg',
+          document: { url: fileUrl },
           fileName: 'audio.mp3',
-          ptt: false,
+          mimetype: 'audio/mpeg',
           caption: '🎵 Audio extraído de YouTube'
         }, { quoted: m })
-
       } else if (videoSites.some(site => text.includes(site))) {
         // Video normal
         await conn.sendMessage(m.chat, {
-          video: { url: fileUrl },
-          mimetype: 'video/mp4',
+          document: { url: fileUrl },
           fileName: 'video.mp4',
+          mimetype: 'video/mp4',
           caption: '🎬 Video descargado'
         }, { quoted: m })
-
-      } else if (docSites.some(site => text.includes(site))) {
-        // Mediafire o GitHub → enviar como está
-        await conn.sendMessage(m.chat, {
-          document: { url: fileUrl },
-          fileName: 'archivo' + fileUrl.split('.').pop(),
-          mimetype: 'application/octet-stream',
-          caption: '📁 Archivo descargado'
-        }, { quoted: m })
-
       } else {
-        // Otros → documento genérico
+        // Otros → enviar como documento genérico
         await conn.sendMessage(m.chat, {
           document: { url: fileUrl },
           fileName: 'media.mp4',
