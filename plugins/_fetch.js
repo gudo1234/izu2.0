@@ -3,7 +3,7 @@ import { URL } from 'url'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
-    return conn.reply(m.chat, `${e} Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
+    return conn.reply(m.chat, `✳️ Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
   m.react('🕒')
 
@@ -12,7 +12,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const contentType = res.headers.get('content-type') || ''
 
     // ==============================
-    // 🖼️ DETECCIÓN DIRECTA (Imagen / Audio / Video / Documento)
+    // 🔹 DETECCIÓN DIRECTA (Imagen / Audio / Video / PDF)
     // ==============================
     if (/image|audio|video|application\/pdf/i.test(contentType)) {
       const ext =
@@ -23,15 +23,33 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
 
       const buffer = await res.buffer()
       m.react('✅')
-      return conn.sendFile(m.chat, buffer, 'file' + ext, text, m, null, false, { mimetype: contentType })
+      return conn.sendMessage(m.chat, {
+        document: buffer,
+        mimetype: contentType,
+        fileName: 'media' + ext,
+        caption: text
+      }, { quoted: m })
     }
 
     // ==============================
-    // 📄 SI NO ES UN ARCHIVO DIRECTO, LEER EL HTML
+    // 📄 SI NO ES ARCHIVO DIRECTO → LEER HTML
     // ==============================
     const html = await res.text()
 
-    // Buscar posibles recursos multimedia
+    // ==============================
+    // 🔞 DETECCIÓN DE SITIOS PARA ADULTOS O STREAMING
+    // ==============================
+    const adultSites = [
+      'xvideos', 'xnxx', 'pornhub', 'redtube', 'spankbang',
+      'youjizz', 'youporn', 'tube8', 'tnaflix', 'eporner',
+      'jav', 'rule34', 'hclips', 'beeg', 'googleusercontent',
+      'share.google'
+    ]
+    const isAdult = adultSites.some(site => text.includes(site))
+
+    // ==============================
+    // 🔍 EXTRAER ENLACES POSIBLES
+    // ==============================
     const regexAll = /(https?:\/\/[^\s"'<>]+?\.(jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|mp4|webm|mov|avi|mkv|pdf)(\?[^\s"'<>]*)?)/gi
     const foundLinks = [...html.matchAll(regexAll)].map(v => v[0])
 
@@ -46,40 +64,41 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const allCandidates = [...foundLinks, ...srcMatches, ...iframeMatches].filter(Boolean)
 
     // ==============================
-    // 🔎 ELEGIR EL PRIMER RECURSO VÁLIDO
+    // 🧩 BUSCAR EL PRIMER VIDEO VÁLIDO
     // ==============================
     let fileUrl
     for (let url of allCandidates) {
       if (!url) continue
       let fullUrl = url.startsWith('http') ? url : new URL(url, text).href
-      if (/\.(jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|mp4|webm|mov|avi|mkv|pdf)/i.test(fullUrl)) {
+      if (/\.(mp4|webm|mov|avi|mkv)(\?|$)/i.test(fullUrl)) {
         fileUrl = fullUrl
         break
       }
     }
 
     // ==============================
-    // 📦 DESCARGA Y ENVÍO
+    // 📦 DESCARGA Y ENVÍO COMO DOCUMENTO
     // ==============================
     if (fileUrl) {
       const fileRes = await fetch(fileUrl)
-      const type = fileRes.headers.get('content-type') || 'application/octet-stream'
+      const type = fileRes.headers.get('content-type') || 'video/mp4'
       const buffer = await fileRes.buffer()
-
       m.react('✅')
-      const ext =
-        type.includes('image') ? '.jpg'
-        : type.includes('audio') ? '.mp3'
-        : type.includes('video') ? '.mp4'
-        : '.bin'
 
-      return conn.sendFile(m.chat, buffer, 'media' + ext, fileUrl, m, null, false, { mimetype: type })
+      return conn.sendMessage(m.chat, {
+        document: buffer,
+        fileName: 'video.mp4',
+        mimetype: 'video/mp4',
+        caption: isAdult
+          ? '🔞 Video detectado y enviado como documento.'
+          : fileUrl
+      }, { quoted: m })
     }
 
     // ==============================
-    // 📃 SI NO ENCUENTRA NADA MULTIMEDIA
+    // 📜 SI NO ENCUENTRA NADA
     // ==============================
-    return m.reply(html.slice(0, 1500) + '...')
+    return m.reply('⚠️ No se encontró ningún recurso multimedia válido en la página.')
 
   } catch (e) {
     console.error(e)
