@@ -85,7 +85,8 @@ global.msm = '⚠︎'
       'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me17.jpg',
       'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me18.jpg',
       'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me19.jpg',
-      'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me20.jpg'
+      'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me20.jpg',
+      'https://raw.githubusercontent.com/CheirZ/Repo-img/main/zeus-jpeg/me21.jpg'
     ]
     global.icono = getRandom(iconosArray)
     const thumbnailBuffer = await (await fetch(global.icono)).buffer()
