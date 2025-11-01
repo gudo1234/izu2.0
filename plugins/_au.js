@@ -9,14 +9,13 @@ const handler = async (m, { conn, text, command }) => {
     const ytMatch = query.match(ytRegex)
     const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
-    // Buscar video en YouTube
     const yt = await yts(search)
     const v = ytMatch ? yt.videos.find(x => x.videoId === ytMatch[1]) : yt.videos[0]
     if (!v) return m.reply("❌ No se encontró el video.")
 
     const { title, author, views, ago, url, timestamp } = v
 
-    // Enviar info al instante
+    // 1️⃣ Enviar info al instante
     const caption = `🎬 *Título:* ${title}
 👤 *Canal:* ${author?.name || 'Desconocido'}
 ⌛ *Duración:* ${timestamp || '0:00'}
@@ -26,19 +25,19 @@ const handler = async (m, { conn, text, command }) => {
 
     await conn.sendMessage(m.chat, { text: caption }, { quoted: m })
 
-    // Construir URL directa de Ultraplus según comando
+    // 2️⃣ Construir URL directa de Ultraplus según tipo
     const mediaUrl = command === 'audio'
       ? `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`
       : `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`
 
-    // Enviar media al instante
+    // 3️⃣ Enviar media instantánea sin fileName ni thumbnail
     const sendObj = command === 'audio'
       ? { audio: { url: mediaUrl }, mimetype: "audio/mpeg", ptt: false }
       : { video: { url: mediaUrl }, mimetype: "video/mp4" }
 
     await conn.sendMessage(m.chat, sendObj, { quoted: m })
 
-    // Reacción ✨
+    // 4️⃣ Reacción instantánea
     await m.react("✨")
 
   } catch (err) {
