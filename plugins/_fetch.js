@@ -3,94 +3,98 @@ import { URL } from 'url'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
-    return conn.reply(m.chat, `
-✳️ Uso del comando *${usedPrefix + command}*:
+    return conn.reply(m.chat, `✳️ Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
-📌 Ejemplos:
-${usedPrefix + command} https://www.youtube.com/watch?v=dQw4w9WgXcQ
-${usedPrefix + command} https://twitter.com/user/status/123456789
-${usedPrefix + command} https://www.xnxx.com/video-xxxx
-${usedPrefix + command} https://www.pinterest.com/pin/xxxx
-
-🔹 Qué hace:
-1️⃣ Archivos directos (.jpg, .png, .mp4, .mp3, .pdf, etc.) → se envían tal cual.
-2️⃣ YouTube → intenta enviar audio (mp3) si hay URL directa.
-3️⃣ X/Twitter y Pinterest → video normal o documento según archivo.
-4️⃣ Sitios de videos para adultos → siempre video normal (mp4), se ignoran imágenes.
-5️⃣ Otros enlaces → documento genérico.
-🕒 Reacciones: 🕒 Inicio → ⚙️ Preparando → ✅ Enviado
-`, m)
-
-  m.react('🕒') // Inicio
+  m.react('🕒')
 
   try {
-    const adultSites = ['xnxx','xvideos','pornhub','redtube','youporn','tnaflix','spankbang','porntube']
-    const videoSites = ['x.com','twitter','pinterest']
-
-    // Regex para detectar archivos
-    const directFileRegex = /\.(mp3|mp4|webm|mkv|avi|mov|jpg|jpeg|png|gif|pdf)(\?|$)/i
+    const res = await fetch(text)
+    const contentType = res.headers.get('content-type') || ''
 
     // ==============================
-    // Archivos directos
+    // 🔹 DETECCIÓN DIRECTA (Imagen / Audio / Video / PDF)
     // ==============================
-    if (directFileRegex.test(text)) {
-      let ext = text.split('.').pop().split('?')[0].toLowerCase()
+    if (/image|audio|video|application\/pdf/i.test(contentType)) {
+      const ext =
+        contentType.includes('image') ? '.jpg'
+        : contentType.includes('audio') ? '.mp3'
+        : contentType.includes('video') ? '.mp4'
+        : '.bin'
 
-      // Si es sitio adulto, forzar solo video
-      if (adultSites.some(site => text.includes(site)) && !/(mp4|webm|mov|avi|mkv)/i.test(ext)) {
-        return m.reply('⚠️ Este enlace de sitio adulto no es un video directo. Usa un enlace que apunte al archivo de video (.mp4, .webm, .mov, etc.)')
-      }
-
-      let mimetype = 'video/mp4'
-      if (ext === 'mp3') mimetype = 'audio/mpeg'
-      else if (['jpg','jpeg','png','gif'].includes(ext)) mimetype = 'image/jpeg'
-      else if (ext === 'pdf') mimetype = 'application/pdf'
-
-      await m.react('⚙️')
-      await conn.sendMessage(m.chat, {
+      m.react('✅')
+      // Enviar directamente sin esperar a que se descargue todo
+      return conn.sendMessage(m.chat, {
         document: { url: text },
-        fileName: 'media.' + ext,
-        mimetype,
+        fileName: 'media' + ext,
+        mimetype: contentType,
         caption: text
       }, { quoted: m })
-      await m.react('✅')
-      return
     }
 
     // ==============================
-    // Descargar página y buscar archivos
+    // 📄 SI NO ES ARCHIVO DIRECTO → LEER HTML
     // ==============================
-    const res = await fetch(text)
     const html = await res.text()
 
-    // Regex para todos los archivos
-    const fileRegex = /(https?:\/\/[^\s"'<>]+?\.(mp4|webm|mov|avi|mkv|mp3|m4a|ogg|wav|pdf)(\?[^\s"'<>]*)?)/gi
-    let foundLinks = [...html.matchAll(fileRegex)].map(v => v[0])
+    // ==============================
+    // 🔞 DETECCIÓN DE SITIOS PARA ADULTOS O STREAMING
+    // ==============================
+    const adultSites = [
+      'xvideos', 'xnxx', 'pornhub', 'redtube', 'spankbang',
+      'youjizz', 'youporn', 'tube8', 'tnaflix', 'eporner',
+      'jav', 'rule34', 'hclips', 'beeg', 'googleusercontent',
+      'share.google'
+    ]
+    const isAdult = adultSites.some(site => text.includes(site))
 
-    // Para sitios adultos, eliminar links que no sean videos
-    if (adultSites.some(site => text.includes(site))) {
-      foundLinks = foundLinks.filter(url => /\.(mp4|webm|mov|avi|mkv)/i.test(url))
+    // ==============================
+    // 🔍 EXTRAER ENLACES POSIBLES
+    // ==============================
+    const regexAll = /(https?:\/\/[^\s"'<>]+?\.(jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|mp4|webm|mov|avi|mkv|pdf)(\?[^\s"'<>]*)?)/gi
+    const foundLinks = [...html.matchAll(regexAll)].map(v => v[0])
+
+    // Extraer de etiquetas HTML
+    const tagSrcRegex = /<(img|video|audio|source)[^>]+src=["']([^"']+)["']/gi
+    const srcMatches = [...html.matchAll(tagSrcRegex)].map(v => v[2])
+
+    // Extraer de iframes
+    const iframeRegex = /<iframe[^>]+src=["']([^"']+)["']/gi
+    const iframeMatches = [...html.matchAll(iframeRegex)].map(v => v[1])
+
+    const allCandidates = [...foundLinks, ...srcMatches, ...iframeMatches].filter(Boolean)
+
+    // ==============================
+    // 🧩 BUSCAR EL PRIMER VIDEO VÁLIDO
+    // ==============================
+    let fileUrl
+    for (let url of allCandidates) {
+      if (!url) continue
+      let fullUrl = url.startsWith('http') ? url : new URL(url, text).href
+      if (/\.(mp4|webm|mov|avi|mkv)(\?|$)/i.test(fullUrl)) {
+        fileUrl = fullUrl
+        break
+      }
     }
 
-    if (!foundLinks.length) {
-      return m.reply('⚠️ No se encontró ningún recurso multimedia válido en la página.')
+    // ==============================
+    // 📦 ENVÍO INSTANTÁNEO COMO DOCUMENTO
+    // ==============================
+    if (fileUrl) {
+      m.react('✅')
+      return conn.sendMessage(m.chat, {
+        document: { url: fileUrl },
+        fileName: 'video.mp4',
+        mimetype: 'video/mp4',
+        caption: isAdult
+          ? textbot
+          : fileUrl
+      }, { quoted: m })
     }
 
-    const fileUrl = foundLinks[0]
-    const ext = fileUrl.split('.').pop().split('?')[0].toLowerCase()
-
-    let mimetype = 'video/mp4'
-    if (ext === 'mp3') mimetype = 'audio/mpeg'
-    else if (ext === 'pdf') mimetype = 'application/pdf'
-
-    await m.react('⚙️')
-    await conn.sendMessage(m.chat, {
-      document: { url: fileUrl },
-      fileName: 'media.' + ext,
-      mimetype,
-      caption: fileUrl
-    }, { quoted: m })
-    await m.react('✅')
+    // ==============================
+    // 📜 SI NO ENCUENTRA NADA
+    // ==============================
+    return m.reply('⚠️ No se encontró ningún recurso multimedia válido en la página.')
 
   } catch (e) {
     console.error(e)
