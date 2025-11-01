@@ -2,7 +2,7 @@ import Starlights from '@StarlightsTeam/Scraper'
 import fetch from 'node-fetch'
 import { generateWAMessage, generateWAMessageFromContent, prepareWAMessageMedia } from '@whiskeysockets/baileys'
 
-/* === 🔹 Función para enviar álbum de imágenes o videos === */
+/* 🔹 Función para enviar álbum de videos */
 conn.sendAlbumMessage = async function (jid, medias, options = {}) {
   const caption = options.text || options.caption || ""
 
@@ -24,12 +24,11 @@ conn.sendAlbumMessage = async function (jid, medias, options = {}) {
 
   await conn.relayMessage(album.key.remoteJid, album.message, { messageId: album.key.id })
 
-  for (const [index, media] of medias.entries()) {
+  // Envío instantáneo de todos los medios
+  await Promise.all(medias.map(async (media, index) => {
     const { type, data } = media
-
-    let mediaMessage
     try {
-      mediaMessage = await generateWAMessage(album.key.remoteJid, {
+      const mediaMessage = await generateWAMessage(album.key.remoteJid, {
         [type]: data,
         ...(index === 0 ? { caption } : {})
       }, { upload: conn.waUploadToServer })
@@ -45,14 +44,14 @@ conn.sendAlbumMessage = async function (jid, medias, options = {}) {
         messageId: mediaMessage.key.id
       })
     } catch (err) {
-      console.log(`❌ Error al agregar medio al álbum:`, err)
+      console.log(`❌ Error enviando medio del álbum:`, err)
     }
-  }
+  }))
 
   return album
 }
 
-/* === 🔹 Comando TikTok con álbum de hasta 8 videos === */
+/* 🔹 Comando TikTok (solo envía si hay 8 videos exactos) */
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   const input = text || args[0]
   const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok\.com\/[^\s]+/gi.test(url)
@@ -64,61 +63,52 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
 
   await m.react('🕓')
 
+  // 🔹 Si es URL directa
   if (isTikTokUrl(input)) {
     try {
       const data = await Starlights.tiktokdl(input)
       if (!data?.dl_url) throw '❌ No se pudo obtener el enlace de descarga.'
-
-      const { title, author, duration, views, likes, comment, share, published, downloads, dl_url } = data
-      const txt = `*乂  T I K T O K  -  D O W N L O A D*\n\n` +
-        `✩ *Título:* ${title}\n✩ *Autor:* ${author}\n✩ *Duración:* ${duration}s\n✩ *Vistas:* ${views}\n✩ *Likes:* ${likes}\n✩ *Comentarios:* ${comment}\n✩ *Compartidos:* ${share}\n✩ *Publicado:* ${published}\n✩ *Descargas:* ${downloads}`
-
-      await conn.sendFile(m.chat, dl_url, 'tiktok.mp4', txt, m)
+      const txt = `*乂  T I K T O K  -  D O W N L O A D*\n\n✩ *Título:* ${data.title}\n✩ *Autor:* ${data.author}\n✩ *Duración:* ${data.duration}s\n✩ *Vistas:* ${data.views}\n✩ *Likes:* ${data.likes}`
+      await conn.sendFile(m.chat, data.dl_url, 'tiktok.mp4', txt, m)
       await m.react('✅')
-    } catch (e) {
-      console.error('❌ Error en descarga por URL:', e)
+    } catch (err) {
+      console.error('❌ Error en descarga directa:', err)
       await m.react('✖️')
-      return conn.reply(m.chat, `${e} Ocurrió un error al descargar el video de TikTok.`, m)
     }
     return
   }
 
-  // 🔹 Modo búsqueda → enviar álbum de 8 resultados
+  // 🔹 Si es búsqueda por texto
   try {
     const results = await Starlights.tiktokSearch(input)
-    if (!results || results.length === 0) {
+    if (!results || results.length < 8) {
       await m.react('✖️')
-      return conn.reply(m.chat, `${e} No se encontraron resultados para tu búsqueda en TikTok.`, m)
+      return // No se envía nada si no hay al menos 8
     }
 
-    const maxResults = 8
-    const selected = results.slice(0, maxResults)
+    const selected = results.slice(0, 8)
     const albumMedias = []
 
-    for (const res of selected) {
+    // Descargas simultáneas
+    await Promise.all(selected.map(async (res, i) => {
       try {
-        const video = await Starlights.tiktokdl(res.url)
-        if (video?.dl_url) {
-          albumMedias.push({ type: 'video', data: { url: video.dl_url } })
-        }
-      } catch (err) {
-        console.log(`Error al obtener video:`, err)
-      }
-    }
+        const vid = await Starlights.tiktokdl(res.url)
+        if (vid?.dl_url) albumMedias.push({ type: 'video', data: { url: vid.dl_url } })
+      } catch { }
+    }))
 
-    if (albumMedias.length > 0) {
-      const caption = `*Se muestran resultados de TikTok (${albumMedias.length})*`
+    // Solo enviar si hay exactamente 8 válidos
+    if (albumMedias.length === 8) {
+      const caption = `🎶 *Se muestran 8 resultados de TikTok*`
       await conn.sendAlbumMessage(m.chat, albumMedias, { caption, quoted: m })
       await m.react('✅')
     } else {
       await m.react('✖️')
-      await conn.reply(m.chat, `${e} No se pudo descargar ningún video de los resultados.`, m)
+      // No envía texto ni error si son menos de 8
     }
-
   } catch (err) {
-    console.error('❌ Error en búsqueda:', err)
+    console.error('❌ Error general:', err)
     await m.react('✖️')
-    await conn.reply(m.chat, `${err} Ocurrió un error al buscar videos en TikTok.`, m)
   }
 }
 
