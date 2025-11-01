@@ -64,9 +64,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       `📄 *Nombre:* ${file.title}`,
       `📦 *Peso:* ${file.peso}`,
       `📅 *Fecha:* ${file.fecha}`,
-      `📑 *Tipo:* ${ext.toUpperCase()}`,
-      ``,
-      `${file.dl}`
+      `📑 *Tipo:* ${ext.toUpperCase()}`
     ].join('\n')
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
