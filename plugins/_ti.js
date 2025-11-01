@@ -107,7 +107,7 @@ let handler = async (m, { conn, text, args, usedPrefix, command }) => {
     }
 
     if (albumMedias.length > 0) {
-      const caption = `🎶 *Se muestran resultados de TikTok (${albumMedias.length})*`
+      const caption = `*Se muestran resultados de TikTok (${albumMedias.length})*`
       await conn.sendAlbumMessage(m.chat, albumMedias, { caption, quoted: m })
       await m.react('✅')
     } else {
