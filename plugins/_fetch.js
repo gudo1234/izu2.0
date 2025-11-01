@@ -103,12 +103,11 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
 
     return conn.sendMessage(m.chat, { text: `${html.slice(0, 4000)}` }, { quoted: m })
-
+m.react('✅')
   } catch (e) {
     console.error(e)
     m.reply(`Error: ${e.message}`)
   }
-  m.react('✅')
 }
 
 handler.command = ['fetch', 'get']
