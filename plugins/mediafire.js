@@ -60,11 +60,8 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const ext = extMatch ? extMatch[1].toLowerCase() : 'zip'
     const mime = mimeFromExt(ext) || file.tipo || 'application/octet-stream'
 
-    const caption = [
-      `📄 *Nombre:* ${file.title}`,
-      `📦 *Peso:* ${file.peso}`,
-      `📅 *Fecha:* ${file.fecha}`,
-      `📑 *Tipo:* ${ext.toUpperCase()}`
+    const caption = [`📦 *Peso:* ${file.peso}`,
+      `📅 *Fecha:* ${file.fecha}`
     ].join('\n')
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
