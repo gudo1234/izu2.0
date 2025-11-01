@@ -1,8 +1,8 @@
 import fetch from "node-fetch"
 import yts from "yt-search"
 
-const handler = async (m, { conn, text }) => {
-  if (!text) return m.reply("⚠️ Envía un enlace o texto de YouTube.\nEj: .audio https://youtu.be/bef8QLNHubw")
+const handler = async (m, { conn, text, command }) => {
+  if (!text) return m.reply(`⚠️ Envía un enlace o texto de YouTube.\nEj: .${command} https://youtu.be/bef8QLNHubw`)
 
   try {
     const query = text.trim()
@@ -27,16 +27,17 @@ const handler = async (m, { conn, text }) => {
     
     await conn.sendMessage(m.chat, { text: caption }, { quoted: m })
 
-    // Construir URL directa de Ultraplus para audio
-    const audioUrl = `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`
+    // Construir URL directa de Ultraplus según comando
+    const mediaUrl = command === 'audio'
+      ? `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`
+      : `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`
 
-    // Enviar audio al instante
-    await conn.sendMessage(m.chat, {
-      audio: { url: audioUrl },
-      mimetype: "audio/mpeg",
-      fileName: "audio.mp3",
-      ptt: false
-    }, { quoted: m })
+    // Enviar media al instante
+    const sendObj = command === 'audio'
+      ? { audio: { url: mediaUrl }, mimetype: "audio/mpeg", fileName: "audio.mp3", ptt: false }
+      : { video: { url: mediaUrl }, mimetype: "video/mp4", fileName: "video.mp4" }
+
+    await conn.sendMessage(m.chat, sendObj, { quoted: m })
 
     // Reacción ✨
     await m.react("✨")
@@ -44,10 +45,10 @@ const handler = async (m, { conn, text }) => {
   } catch (err) {
     console.error(err)
     await m.react("✖️")
-    m.reply("❌ No se pudo procesar el audio.")
+    m.reply("❌ No se pudo procesar el contenido.")
   }
 }
 
-handler.command = ['audio']
+handler.command = ['audio', 'video']
 handler.group = true
 export default handler
