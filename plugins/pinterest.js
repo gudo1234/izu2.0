@@ -3,15 +3,16 @@ import fetch from 'node-fetch';
 import { URL } from 'url';
 import baileys from '@whiskeysockets/baileys';
 
+// Función para enviar álbum de imágenes
 async function sendAlbumMessage(conn, jid, medias, options = {}) {
-  if (typeof jid !== "string") throw new TypeError(`jid must be string, received: ${jid}`);
+  if (typeof jid !== "string") throw new TypeError(`jid must be string`);
 
   for (const media of medias) {
     if (!media.type || (media.type !== "image" && media.type !== "video")) {
       throw new TypeError(`media.type must be "image" or "video", received: ${media.type}`);
     }
     if (!media.data || (!media.data.url && !Buffer.isBuffer(media.data))) {
-      throw new TypeError(`media.data must be object with url or buffer, received: ${media.data}`);
+      throw new TypeError(`media.data must be object with url or buffer`);
     }
   }
 
@@ -60,9 +61,9 @@ async function sendAlbumMessage(conn, jid, medias, options = {}) {
 }
 
 // 🔹 API de Pinterest Dorratz (solo imágenes)
-const pins = async (judul) => {
+const pins = async (query) => {
   try {
-    const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(judul)}`);
+    const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`);
     if (Array.isArray(res.data) && res.data.length > 0) {
       return res.data.map(i => ({
         image_large_url: i.image_large_url,
@@ -77,10 +78,10 @@ const pins = async (judul) => {
   }
 };
 
-let handler = async (m, { conn, text, command, usedPrefix }) => {
+let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!text) return conn.reply(m.chat, `${emojis} Ingresa texto o URL de Pinterest. Ejemplo: ${usedPrefix + command} gatitos`, m);
 
-  m.react('🕒');
+  await m.react('🕒');
 
   try {
     // Caso URL de Pinterest
@@ -110,7 +111,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
         return conn.reply(m.chat, `${emojis} URL no reconocida como Pinterest.`, m);
       }
     } 
-    // Caso texto → búsqueda de imágenes
+    // Caso texto → búsqueda de imágenes con Dorratz
     else {
       const results = await pins(text);
       if (!results || results.length === 0) return conn.reply(m.chat, `No se encontraron resultados para "${text}".`, m);
@@ -130,7 +131,7 @@ let handler = async (m, { conn, text, command, usedPrefix }) => {
       });
     }
 
-    m.react('✅');
+    await m.react('✅');
 
   } catch (error) {
     console.error(error);
