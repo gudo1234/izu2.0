@@ -11,6 +11,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const res = await fetch(text)
     const contentType = res.headers.get('content-type') || ''
 
+    // Si es un archivo directo
     if (/image|audio|video/i.test(contentType)) {
       const type = contentType.split('/')[0]
 
@@ -28,9 +29,8 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     ]
     const isAdult = adultSites.some(site => text.includes(site))
 
+    // Pinterest
     let pinterestMatch = text.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/(\d+)/)
-    let twitterMatch = text.match(/https?:\/\/(www\.)?twitter\.com\/[^\/]+\/status\/\d+/)
-
     if (pinterestMatch) {
       const pinId = pinterestMatch[2]
       try {
@@ -38,11 +38,11 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
         const pinRes = await fetch(pinApi)
         const pinJson = await pinRes.json()
         const pinData = pinJson.data[pinId]
-        if (pinData && pinData.videos && pinData.videos.video_list) {
+        if (pinData?.videos?.video_list) {
           const videoKeys = Object.keys(pinData.videos.video_list)
           const videoUrl = pinData.videos.video_list[videoKeys[0]].url
           await conn.sendMessage(m.chat, { video: { url: videoUrl }, caption: `${e} Pinterest Pin` }, { quoted: m })
-        } else if (pinData && pinData.images && pinData.images.orig && pinData.images.orig.url) {
+        } else if (pinData?.images?.orig?.url) {
           await conn.sendMessage(m.chat, { image: { url: pinData.images.orig.url }, caption: `${e} Pinterest Pin` }, { quoted: m })
         } else {
           await conn.sendMessage(m.chat, { text: `${e} Pinterest: ${text}` }, { quoted: m })
@@ -52,10 +52,27 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
       }
     }
 
+    // Twitter/X
+    let twitterMatch = text.match(/https?:\/\/(www\.)?twitter\.com\/[^\/]+\/status\/\d+/)
     if (twitterMatch) {
-      await conn.sendMessage(m.chat, { text: `🐦 Twitter/X: ${twitterMatch[0]}` }, { quoted: m })
+      try {
+        // Usamos Nitter como proxy para obtener contenido público
+        const nitterUrl = twitterMatch[0].replace('twitter.com', 'nitter.net')
+        const twRes = await fetch(nitterUrl)
+        const twHtml = await twRes.text()
+        const videoRegex = /<source src="([^"]+)" type="video\/mp4"/
+        const videoMatch = twHtml.match(videoRegex)
+        if (videoMatch) {
+          await conn.sendMessage(m.chat, { video: { url: videoMatch[1] }, caption: `${e} Twitter/X Video` }, { quoted: m })
+        } else {
+          await conn.sendMessage(m.chat, { text: `🐦 Twitter/X: ${twitterMatch[0]}` }, { quoted: m })
+        }
+      } catch {
+        await conn.sendMessage(m.chat, { text: `🐦 Twitter/X: ${twitterMatch[0]}` }, { quoted: m })
+      }
     }
 
+    // Detección general de archivos
     const regexAll = /(https?:\/\/[^\s"'<>]+?\.(jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|mp4|webm|mov|avi|mkv)(\?[^\s"'<>]*)?)/gi
     const foundLinks = [...html.matchAll(regexAll)].map(v => v[0])
 
