@@ -86,33 +86,28 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       },
     }, { quoted: m })
 
-    let data = null, usedBackup = 0
+    let data = null
 
-    const apis = isAudio
-      ? [
-          `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`,
-          `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
-        ]
-      : [
-          `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`,
-          `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
-        ]
+    // Solo Ultraplus
+    const apiUrl = isAudio
+      ? `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`
+      : `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`
 
-    for (let i = 0; i < apis.length && !data; i++) {
-      try {
-        const res = await fetch(apis[i])
-        const json = await res.json()
-        if (json?.download?.url)
-          data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
-        else if (json?.result?.dl)
-          data = { link: json.result.dl, title: json.result.title, size: json.result.size }
-        else if (json?.result?.download)
-          data = { link: json.result.download, title: json.result.title, size: json.result.size }
-        if (data) usedBackup = i
-      } catch (e) { continue }
+    try {
+      const res = await fetch(apiUrl)
+      const json = await res.json()
+      if (json?.download?.url)
+        data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
+      else if (json?.result?.dl)
+        data = { link: json.result.dl, title: json.result.title, size: json.result.size }
+      else if (json?.result?.download)
+        data = { link: json.result.download, title: json.result.title, size: json.result.size }
+    } catch (e) {
+      console.error(e)
+      return m.reply("❌ No se pudo obtener el enlace desde Ultraplus.")
     }
 
-    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga desde ninguna API.")
+    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace desde Ultraplus.")
 
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
@@ -136,9 +131,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       }, { quoted: m })
     }
 
-    // Reacción según API usada
-    const reaction = usedBackup === 0 ? "✅" : "✨"
-    await m.react(reaction)
+    // Reacción ✨ siempre que se descargue desde Ultraplus
+    await m.react("✨")
 
   } catch (err) {
     console.error(err)
