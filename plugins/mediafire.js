@@ -1,6 +1,4 @@
 import axios from 'axios'
-
-// 📦 Función para obtener el tipo MIME según extensión
 const mimeFromExt = ext => ({
   '7z': 'application/x-7z-compressed',
   'zip': 'application/zip',
@@ -31,32 +29,27 @@ const mimeFromExt = ext => ({
 }[ext])
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const emoji = '📦'
 
   if (!text) {
     return conn.sendMessage(m.chat, {
-      text: `${emoji} Ingresa un enlace de *MediaFire*.\n\n📘 Ejemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
+      text: `${e} Ingresa un enlace de *MediaFire*.\n\n📘 Ejemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
     }, { quoted: m })
   }
 
   const mediafireRegex = /https?:\/\/(www\.)?mediafire\.com\/file\/[a-zA-Z0-9]+/i
   if (!mediafireRegex.test(text)) {
     return conn.sendMessage(m.chat, {
-      text: `⚠️ El enlace proporcionado no parece ser de *MediaFire*.\nPor favor revisa el formato.`
+      text: `${e} El enlace proporcionado no parece ser de *MediaFire*.\nPor favor revisa el formato.`
     }, { quoted: m })
   }
 
   try {
     await m.react('🕒')
-
-    // 📡 API correcta (Stellar)
     const apiURL = `https://api.stellarwa.xyz/dl/mediafire?url=${encodeURIComponent(text)}&key=stellar-wsRJSBsk`
     const { data: res } = await axios.get(apiURL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       timeout: 20000
     })
-
-    // ✅ Validar respuesta real
     if (!res || !res.status || !res.data || !res.data.dl) {
       console.log('[⚠️ API SIN DATOS VÁLIDOS]', res)
       throw new Error('No se obtuvo información válida del archivo.')
@@ -68,24 +61,19 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const mime = mimeFromExt(ext) || file.tipo || 'application/octet-stream'
 
     const caption = [
-      `📁 *Archivo encontrado en MediaFire*`,
-      ``,
       `📄 *Nombre:* ${file.title}`,
       `📦 *Peso:* ${file.peso}`,
       `📅 *Fecha:* ${file.fecha}`,
       `📑 *Tipo:* ${ext.toUpperCase()}`,
       ``,
-      `🔗 *Descarga directa:*`,
       `${file.dl}`
     ].join('\n')
-
-    // 🚀 Enviar archivo directamente
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
       mimetype: mime,
       fileName: file.title,
       caption
-    }, { quoted: m })
+    }, { quoted: m})
 
     await m.react('✅')
 
@@ -93,7 +81,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     console.error('[❌ ERROR EN MEDIAFIRE]', err)
     await m.react('❌')
 
-    let msg = '⚠️ *Error al procesar el enlace de MediaFire.*'
+    let msg = `${e} *Error al procesar el enlace de MediaFire.*`
     if (err.response?.status) msg += `\n\n📡 *Estado HTTP:* ${err.response.status}`
     if (err.message) msg += `\n📄 *Detalle:* ${err.message}`
 
