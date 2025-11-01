@@ -42,12 +42,12 @@ global.msm = '⚠︎'
     global.s = getRandom([global.s1, global.s2, global.s3, global.s4, global.s5])
 
     let c = 'https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H'
-    let n = 'https://wa.me/50492280729?text=Hola+quiero+un+bot+para+mi+grupo,+cuáles+son+los+planes?+'
+    let nu = 'https://wa.me/50492280729?text=Hola+quiero+un+bot+para+mi+grupo,+cuáles+son+los+planes?+'
     let i = 'https://www.instagram.com/edar504__'
     let t = 'https://www.tiktok.com/@edar_xd'
     let p = 'https://www.paypal.me/edar504'
     let g = 'https://chat.whatsapp.com/Cy42GegnKSmCVA6zxWlxKU?mode=wwt'
-    global.redes = getRandom([c, n, i, t, p, g])
+    global.redes = getRandom([c, nu, i, t, p, g])
 
     global.canalIdM = ["120363285614743024@newsletter", "120363395205399025@newsletter"]
     global.canalNombreM = ["🤖⃧►iʑυвöτ◃2.0▹", "Zeus Bot🔆Channel-OFC"]
