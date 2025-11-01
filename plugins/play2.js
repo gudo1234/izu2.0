@@ -90,13 +90,11 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const apis = isAudio
       ? [
-          `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
-          `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=audio&key=Alba`,
+          `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`,
           `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
       : [
-          `https://ruby-core.vercel.app/api/download/youtube/mp4?url=${encodeURIComponent(url)}`,
-          `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`,
+          `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`,
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
 
@@ -119,8 +117,10 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
     const fileSize = data.size || 8000000
-    const pttMode = command === "playaudio"
-    
+
+    // Nunca enviar playaudio como nota de voz
+    const pttMode = isAudio && command !== "playaudio"
+
     if (sendDoc) {
       await conn.sendMessage(m.chat, {
         document: { url: data.link },
@@ -134,12 +134,12 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         [isAudio ? "audio" : "video"]: { url: data.link },
         mimetype,
         fileName,
-        ptt: isAudio && pttMode
+        ptt: pttMode
       }, { quoted: m })
     }
 
     // Reacción final según API usada
-    await m.react(usedBackup === 0 ? "✅" : usedBackup === 1 ? "⌛" : "🌀")
+    await m.react(usedBackup === 0 ? "✅" : "🌀")
 
   } catch (err) {
     console.error(err)
