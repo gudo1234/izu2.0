@@ -3,7 +3,7 @@ import { URL } from 'url'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
-    return conn.reply(m.chat, `${e} Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
+    return conn.reply(m.chat, `${e} Ingresa cualquier URL de la web que contenga HTML o enlaces de video, incluyendo sitios como Pinterest, X (Twitter) o páginas para adultos.\n\n${s} Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
   m.react('🕒')
 
@@ -11,9 +11,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const res = await fetch(text)
     const contentType = res.headers.get('content-type') || ''
 
-    // ==============================
-    // 🔹 DETECCIÓN DIRECTA (Imagen / Audio / Video / PDF)
-    // ==============================
     if (/image|audio|video/i.test(contentType)) {
       const type = contentType.split('/')[0]
 
@@ -24,9 +21,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
 
     const html = await res.text()
 
-    // ==============================
-    // 🔞 DETECCIÓN DE SITIOS PARA ADULTOS
-    // ==============================
     const adultSites = [
       'xvideos', 'xnxx', 'pornhub', 'redtube', 'spankbang',
       'youjizz', 'youporn', 'tube8', 'tnaflix', 'eporner',
@@ -34,32 +28,27 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     ]
     const isAdult = adultSites.some(site => text.includes(site))
 
-    // ==============================
-    // 🔍 DETECCIÓN DE PINS / TWITTER / X
-    // ==============================
     let pinterestMatch = text.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/(\d+)/)
     let twitterMatch = text.match(/https?:\/\/(www\.)?twitter\.com\/[^\/]+\/status\/\d+/)
 
     if (pinterestMatch) {
       const pinId = pinterestMatch[2]
-      // Intentar obtener JSON de la publicación
       try {
         const pinApi = `https://api.pinterest.com/v3/pidgets/pins/info/?pin_ids=${pinId}`
         const pinRes = await fetch(pinApi)
         const pinJson = await pinRes.json()
         const pinData = pinJson.data[pinId]
         if (pinData && pinData.videos && pinData.videos.video_list) {
-          // Elegir el video más grande disponible
           const videoKeys = Object.keys(pinData.videos.video_list)
           const videoUrl = pinData.videos.video_list[videoKeys[0]].url
-          return conn.sendMessage(m.chat, { video: { url: videoUrl }, caption: `📌 Pinterest Pin` }, { quoted: m })
+          return conn.sendMessage(m.chat, { video: { url: videoUrl }, caption: `${e} Pinterest Pin` }, { quoted: m })
         } else if (pinData && pinData.images && pinData.images.orig && pinData.images.orig.url) {
-          return conn.sendMessage(m.chat, { image: { url: pinData.images.orig.url }, caption: `📌 Pinterest Pin` }, { quoted: m })
+          return conn.sendMessage(m.chat, { image: { url: pinData.images.orig.url }, caption: `${e} Pinterest Pin` }, { quoted: m })
         } else {
-          return conn.sendMessage(m.chat, { text: `📌 Pinterest: ${text}` }, { quoted: m })
+          return conn.sendMessage(m.chat, { text: `${e} Pinterest: ${text}` }, { quoted: m })
         }
       } catch {
-        return conn.sendMessage(m.chat, { text: `📌 Pinterest: ${text}` }, { quoted: m })
+        return conn.sendMessage(m.chat, { text: `${e} Pinterest: ${text}` }, { quoted: m })
       }
     }
 
@@ -67,9 +56,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
       return conn.sendMessage(m.chat, { text: `🐦 Twitter/X: ${twitterMatch[0]}` }, { quoted: m })
     }
 
-    // ==============================
-    // 🔍 EXTRAER ENLACES POSIBLES
-    // ==============================
     const regexAll = /(https?:\/\/[^\s"'<>]+?\.(jpg|jpeg|png|gif|webp|svg|mp3|m4a|ogg|wav|mp4|webm|mov|avi|mkv)(\?[^\s"'<>]*)?)/gi
     const foundLinks = [...html.matchAll(regexAll)].map(v => v[0])
 
@@ -81,9 +67,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
 
     const allCandidates = [...foundLinks, ...srcMatches, ...iframeMatches].filter(Boolean)
 
-    // ==============================
-    // 🧩 BUSCAR EL PRIMER VIDEO / IMAGE / AUDIO
-    // ==============================
     let fileUrl
     let fileType = ''
     for (let url of allCandidates) {
@@ -105,9 +88,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
       }
     }
 
-    // ==============================
-    // 📦 ENVÍO SEGÚN TIPO Y ADULTOS
-    // ==============================
     if (fileUrl) {
       if (fileType === 'video' && isAdult) {
         return conn.sendMessage(m.chat, {
@@ -122,15 +102,13 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
       if (fileType === 'audio') return conn.sendMessage(m.chat, { audio: { url: fileUrl }, mimetype: 'audio/mpeg', caption: fileUrl }, { quoted: m })
     }
 
-    // ==============================
-    // 📜 SI NO HAY NADA → ENVIAR HTML O JSON COMO TEXTO
-    // ==============================
-    return conn.sendMessage(m.chat, { text: `📄 Contenido de la página:\n\n${html.slice(0, 4000)}` }, { quoted: m })
+    return conn.sendMessage(m.chat, { text: `${html.slice(0, 4000)}` }, { quoted: m })
 
   } catch (e) {
     console.error(e)
-    m.reply(`❌ Error: ${e.message}`)
+    m.reply(`Error: ${e.message}`)
   }
+  m.react('✅')
 }
 
 handler.command = ['fetch', 'get']
