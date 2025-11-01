@@ -3,7 +3,6 @@ import fetch from 'node-fetch';
 import { URL } from 'url';
 import baileys from '@whiskeysockets/baileys';
 
-// Función para enviar álbum de imágenes
 async function sendAlbumMessage(conn, jid, medias, options = {}) {
   if (typeof jid !== "string") throw new TypeError(`jid must be string`);
 
@@ -84,9 +83,10 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   await m.react('🕒');
 
   try {
-    // Caso URL de Pinterest
+    // Si es URL
     if (/^https?:\/\//.test(text)) {
-      const pinterestMatch = text.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/(\d+)/);
+      // Usamos la lógica original de .get para Pinterest
+      const pinterestMatch = text.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/(\d+)/i);
       if (pinterestMatch) {
         const pinId = pinterestMatch[2];
         try {
@@ -104,10 +104,12 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
           } else {
             await conn.sendMessage(m.chat, { text: `${e} Pinterest: ${text}` }, { quoted: m });
           }
-        } catch {
+        } catch (err) {
+          console.error(err);
           await conn.sendMessage(m.chat, { text: `${e} Pinterest: ${text}` }, { quoted: m });
         }
       } else {
+        // Si no coincide con Pinterest
         return conn.reply(m.chat, `${emojis} URL no reconocida como Pinterest.`, m);
       }
     } 
