@@ -1,4 +1,3 @@
-import fetch from "node-fetch"
 import yts from "yt-search"
 
 const handler = async (m, { conn, text, command }) => {
@@ -24,7 +23,7 @@ const handler = async (m, { conn, text, command }) => {
 👁️ *Vistas:* ${views?.toLocaleString() || 0}
 📅 *Publicado:* ${ago || 'Desconocido'}
 🔗 *Link:* ${url}`
-    
+
     await conn.sendMessage(m.chat, { text: caption }, { quoted: m })
 
     // Construir URL directa de Ultraplus según comando
@@ -34,8 +33,8 @@ const handler = async (m, { conn, text, command }) => {
 
     // Enviar media al instante
     const sendObj = command === 'audio'
-      ? { audio: { url: mediaUrl }, mimetype: "audio/mpeg", fileName: "audio.mp3", ptt: false }
-      : { video: { url: mediaUrl }, mimetype: "video/mp4", fileName: "video.mp4" }
+      ? { audio: { url: mediaUrl }, mimetype: "audio/mpeg", ptt: false }
+      : { video: { url: mediaUrl }, mimetype: "video/mp4" }
 
     await conn.sendMessage(m.chat, sendObj, { quoted: m })
 
