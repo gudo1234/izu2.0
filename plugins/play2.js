@@ -16,7 +16,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       : normalVideo.includes(command)
       ? 'video'
       : 'video en documento'
-    return m.reply(`⚠️ Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n📌 Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+    return m.reply(`${e} Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
   }
 
   await m.react("🕒")
@@ -56,14 +56,14 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ⏳ _Preparando ${type}..._${aviso}
 `.trim()
 
-    // Procesar thumbnail
+    // Descargar y procesar thumbnail
     const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
     const thumb = await sharp(Buffer.from(thumbBuffer))
       .resize(200, 200)
       .jpeg({ quality: 80 })
       .toBuffer()
 
-    // Enviar mensaje con tu estructura original
+    // Mensaje con contextInfo y thumbnail
     await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -89,7 +89,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     let data = null
     let usedApi = ''
 
-    // URLs de tus dos APIs
+    // Definir URLs según tipo
     const ultraplusUrl = isAudio
       ? `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`
       : `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`
@@ -100,42 +100,38 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     // Intentar Ultraplus primero
     try {
-      const res = await fetch(ultraplusUrl)
-      if (res.ok) {
-        const json = await res.json().catch(() => ({}))
-        const dl = json?.download?.url || json?.result?.dl || json?.result?.download || json?.url || json?.data?.url
-        if (dl) {
-          data = { link: dl, title }
-          usedApi = 'ultraplus'
-        }
+      data = {
+        link: ultraplusUrl,
+        title,
       }
-    } catch {}
+      usedApi = 'ultraplus'
+    } catch (e) {
+      data = null
+    }
 
-    // Si falla Ultraplus, intentar Sankovollerei
+    // Si falla Ultraplus, usar Sankovollerei
     if (!data) {
       try {
         const res = await fetch(sankovollereiUrl)
-        if (res.ok) {
-          const json = await res.json().catch(() => ({}))
-          const dl = json?.download?.url || json?.result?.dl || json?.result?.download || json?.url || json?.data?.url
-          if (dl) {
-            data = { link: dl, title }
-            usedApi = 'sankovollerei'
-          }
-        }
-      } catch {}
+        const json = await res.json()
+        if (json?.download?.url)
+          data = { link: json.download.url, title: json.metadata?.title || title }
+        else if (json?.result?.dl)
+          data = { link: json.result.dl, title: json.result.title || title }
+        else if (json?.result?.download)
+          data = { link: json.result.download, title: json.result.title || title }
+
+        usedApi = 'sankovollerei'
+      } catch (e) {
+        console.error(e)
+      }
     }
 
-    // Si ninguna API responde correctamente
-    if (!data?.link) {
-      await m.react("✖️")
-      return m.reply("⚠️ No se pudo obtener el enlace en este momento. Intenta nuevamente más tarde.")
-    }
+    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace desde ninguna API.")
 
     const fileName = `${data.title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
 
-    // Envío del archivo
     if (sendDoc) {
       await conn.sendMessage(m.chat, {
         document: { url: data.link },
@@ -148,15 +144,18 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         [isAudio ? "audio" : "video"]: { url: data.link },
         mimetype,
         fileName,
-        ptt: false,
+        ptt: false
       }, { quoted: m })
     }
 
-    await m.react("✅")
+    // Reacción según API usada
+    const reaction = usedApi === 'ultraplus' ? '✨' : '✅'
+    await m.react(reaction)
 
   } catch (err) {
+    console.error(err)
     await m.react("✖️")
-    console.error("Error interno:", err.message)
+    m.reply(`❌ Error: ${err.message || err}`)
   }
 }
 
