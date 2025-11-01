@@ -137,7 +137,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     }
 
     // Reacción según API usada
-    const reaction = usedBackup === 0 ? "✨" : "✅"
+    const reaction = usedBackup === 0 ? "✅" : "✨"
     await m.react(reaction)
 
   } catch (err) {
