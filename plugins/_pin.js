@@ -1,6 +1,7 @@
 import axios from 'axios';
 import fetch from 'node-fetch';
 import baileys from '@whiskeysockets/baileys';
+import { URL } from 'url';
 
 // Función para enviar álbum de imágenes
 async function sendAlbumMessage(conn, jid, medias, options = {}) {
@@ -53,7 +54,7 @@ async function sendAlbumMessage(conn, jid, medias, options = {}) {
   return album;
 }
 
-// 🔹 API de Pinterest Dorratz (solo imágenes para texto)
+// 🔹 API de Pinterest Dorratz (solo imágenes)
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`);
@@ -71,12 +72,28 @@ const pins = async (query) => {
   }
 };
 
-// 🔹 Función para extraer video de URL de Pinterest
-const pinterestVideoByUrl = async (url) => {
-  const match = url.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/(\d+)/i);
-  if (!match) return null;
+// 🔹 Función para extraer pinId de cualquier URL de Pinterest
+const getPinterestPinId = async (url) => {
+  try {
+    // Redirigir URLs cortas de pin.it
+    if (url.includes("pin.it")) {
+      const res = await fetch(url, { redirect: 'follow' });
+      url = res.url;
+    }
 
-  const pinId = match[2];
+    // Normal URL de Pinterest
+    const match = url.match(/pinterest\.[a-z]+\/pin\/(\d+)/i);
+    if (match) return match[1];
+
+    return null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+};
+
+// 🔹 Función para obtener video de Pinterest por pinId
+const getPinterestVideo = async (pinId) => {
   try {
     const pinApi = `https://api.pinterest.com/v3/pidgets/pins/info/?pin_ids=${pinId}`;
     const pinRes = await fetch(pinApi);
@@ -100,16 +117,17 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   await m.react('🕒');
 
   try {
-    // Si es URL → intenta descargar video
+    // Si es URL
     if (/^https?:\/\//.test(text)) {
-      const videoUrl = await pinterestVideoByUrl(text);
-      if (videoUrl) {
-        await conn.sendMessage(m.chat, { video: { url: videoUrl }, caption: `🪴 Pinterest Video` }, { quoted: m });
-      } else {
-        return conn.reply(m.chat, `🪴 URL no reconocida como Pinterest o no contiene video.`, m);
-      }
+      const pinId = await getPinterestPinId(text);
+      if (!pinId) return conn.reply(m.chat, `🪴 URL no reconocida como Pinterest.`, m);
+
+      const videoUrl = await getPinterestVideo(pinId);
+      if (!videoUrl) return conn.reply(m.chat, `🪴 Este pin no contiene video.`, m);
+
+      await conn.sendMessage(m.chat, { video: { url: videoUrl }, caption: `🪴 Pinterest Video` }, { quoted: m });
     } 
-    // Si es texto → búsqueda con Dorratz
+    // Si es texto → búsqueda de imágenes
     else {
       const results = await pins(text);
       if (!results || results.length === 0) return conn.reply(m.chat, `No se encontraron resultados para "${text}".`, m);
@@ -130,7 +148,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     }
 
     await m.react('✅');
-
   } catch (error) {
     console.error(error);
     await m.react('❌');
