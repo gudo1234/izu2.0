@@ -18,20 +18,11 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
       const type = contentType.split('/')[0]
 
       m.react('✅')
-      if (type === 'image') {
-        return conn.sendMessage(m.chat, { image: { url: text }, caption: text }, { quoted: m })
-      }
-      if (type === 'audio') {
-        return conn.sendMessage(m.chat, { audio: { url: text }, mimetype: contentType, caption: text }, { quoted: m })
-      }
-      if (type === 'video') {
-        return conn.sendMessage(m.chat, { video: { url: text }, mimetype: contentType, caption: text }, { quoted: m })
-      }
+      if (type === 'image') return conn.sendMessage(m.chat, { image: { url: text }, caption: text }, { quoted: m })
+      if (type === 'audio') return conn.sendMessage(m.chat, { audio: { url: text }, mimetype: contentType, caption: text }, { quoted: m })
+      if (type === 'video') return conn.sendMessage(m.chat, { video: { url: text }, mimetype: contentType, caption: text }, { quoted: m })
     }
 
-    // ==============================
-    // 📄 SI NO ES ARCHIVO DIRECTO → LEER HTML
-    // ==============================
     const html = await res.text()
 
     // ==============================
@@ -47,11 +38,30 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     // ==============================
     // 🔍 DETECCIÓN DE PINS / TWITTER / X
     // ==============================
-    let pinterestMatch = html.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/\d+/)
-    let twitterMatch = html.match(/https?:\/\/(www\.)?twitter\.com\/[^\/]+\/status\/\d+/)
+    let pinterestMatch = text.match(/https?:\/\/(www\.)?pinterest\.[a-z]+\/pin\/(\d+)/)
+    let twitterMatch = text.match(/https?:\/\/(www\.)?twitter\.com\/[^\/]+\/status\/\d+/)
 
     if (pinterestMatch) {
-      return conn.sendMessage(m.chat, { text: `📌 Pinterest: ${pinterestMatch[0]}` }, { quoted: m })
+      const pinId = pinterestMatch[2]
+      // Intentar obtener JSON de la publicación
+      try {
+        const pinApi = `https://api.pinterest.com/v3/pidgets/pins/info/?pin_ids=${pinId}`
+        const pinRes = await fetch(pinApi)
+        const pinJson = await pinRes.json()
+        const pinData = pinJson.data[pinId]
+        if (pinData && pinData.videos && pinData.videos.video_list) {
+          // Elegir el video más grande disponible
+          const videoKeys = Object.keys(pinData.videos.video_list)
+          const videoUrl = pinData.videos.video_list[videoKeys[0]].url
+          return conn.sendMessage(m.chat, { video: { url: videoUrl }, caption: `📌 Pinterest Pin` }, { quoted: m })
+        } else if (pinData && pinData.images && pinData.images.orig && pinData.images.orig.url) {
+          return conn.sendMessage(m.chat, { image: { url: pinData.images.orig.url }, caption: `📌 Pinterest Pin` }, { quoted: m })
+        } else {
+          return conn.sendMessage(m.chat, { text: `📌 Pinterest: ${text}` }, { quoted: m })
+        }
+      } catch {
+        return conn.sendMessage(m.chat, { text: `📌 Pinterest: ${text}` }, { quoted: m })
+      }
     }
 
     if (twitterMatch) {
@@ -73,7 +83,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     const allCandidates = [...foundLinks, ...srcMatches, ...iframeMatches].filter(Boolean)
 
     // ==============================
-    // 🧩 BUSCAR EL PRIMER VIDEO VÁLIDO
+    // 🧩 BUSCAR EL PRIMER VIDEO / IMAGE / AUDIO
     // ==============================
     let fileUrl
     let fileType = ''
@@ -102,7 +112,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     if (fileUrl) {
       m.react('✅')
       if (fileType === 'video' && isAdult) {
-        // Solo videos de adultos se envían como documento
         return conn.sendMessage(m.chat, {
           document: { url: fileUrl },
           fileName: 'video_adulto.mp4',
@@ -110,24 +119,16 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
           caption: '🔞 Video para adultos'
         }, { quoted: m })
       }
-      if (fileType === 'video') {
-        return conn.sendMessage(m.chat, { video: { url: fileUrl }, mimetype: 'video/mp4', caption: fileUrl }, { quoted: m })
-      }
-      if (fileType === 'image') {
-        return conn.sendMessage(m.chat, { image: { url: fileUrl }, caption: fileUrl }, { quoted: m })
-      }
-      if (fileType === 'audio') {
-        return conn.sendMessage(m.chat, { audio: { url: fileUrl }, mimetype: 'audio/mpeg', caption: fileUrl }, { quoted: m })
-      }
+      if (fileType === 'video') return conn.sendMessage(m.chat, { video: { url: fileUrl }, mimetype: 'video/mp4', caption: fileUrl }, { quoted: m })
+      if (fileType === 'image') return conn.sendMessage(m.chat, { image: { url: fileUrl }, caption: fileUrl }, { quoted: m })
+      if (fileType === 'audio') return conn.sendMessage(m.chat, { audio: { url: fileUrl }, mimetype: 'audio/mpeg', caption: fileUrl }, { quoted: m })
     }
 
     // ==============================
     // 📜 SI NO HAY NADA → ENVIAR HTML O JSON COMO TEXTO
     // ==============================
     m.react('📝')
-    return conn.sendMessage(m.chat, {
-      text: `📄 Contenido de la página:\n\n${html.slice(0, 4000)}` // limitar a 4000 caracteres
-    }, { quoted: m })
+    return conn.sendMessage(m.chat, { text: `📄 Contenido de la página:\n\n${html.slice(0, 4000)}` }, { quoted: m })
 
   } catch (e) {
     console.error(e)
