@@ -31,61 +31,70 @@ const mimeFromExt = ext => ({
 }[ext])
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  //const apiKey = 'stellar-LgIsemtM' // tu API Key Stellar
+  const emoji = '📦'
 
   if (!text) {
     return conn.sendMessage(m.chat, {
-      text: `${e} Ingresa un enlace de *MediaFire*.\n\nEjemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
+      text: `${e} Ingresa un enlace de *MediaFire*.\n\n📘 Ejemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
     }, { quoted: m })
   }
 
   const mediafireRegex = /https?:\/\/(www\.)?mediafire\.com\/file\/[a-zA-Z0-9]+/i
   if (!mediafireRegex.test(text)) {
     return conn.sendMessage(m.chat, {
-      text: `⚠️ El enlace proporcionado no parece ser de *MediaFire*.\nPor favor, revisa el formato.`
+      text: `${e} El enlace proporcionado no parece ser de *MediaFire*.\nPor favor revisa el formato.`
     }, { quoted: m })
   }
 
   try {
-    m.react('🕒')
+    await m.react('🕒')
 
-    const url = `https://api.stellarwa.xyz/mediafire?url=${encodeURIComponent(text)}&apikey=stellar-wsRJSBsk`
-    const { data: res } = await axios.get(url, {
+    // 📡 API alternativa de Mediafire
+    const apiURL = `https://api-nv.ultraplus.click/api/dl/mediafire?url=${encodeURIComponent(text)}`
+    const { data: res } = await axios.get(apiURL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       timeout: 20000
     })
 
+    // ✅ Verificar estructura real del JSON
     if (!res || !res.status || !res.data || !res.data.dl) {
-      console.log('[API STELLAR RESPUESTA]', res)
-      throw new Error('La API no devolvió información válida del archivo.')
+      console.log('[⚠️ API SIN RESPUESTA VÁLIDA]', res)
+      throw new Error('No se obtuvo información válida del archivo.')
     }
 
     const file = res.data
     const extMatch = file.title.match(/\.(\w+)$/i)
     const ext = extMatch ? extMatch[1].toLowerCase() : 'zip'
-    const mime = mimeFromExt(ext) || `application/${ext}`
+    const mime = mimeFromExt(ext) || file.tipo || 'application/octet-stream'
 
-    const caption = `📦 *Archivo encontrado*\n\n` +
-                    `*📄 Nombre:* ${file.title}\n` +
-                    `*📁 Peso:* ${file.peso}\n` +
-                    `*📅 Fecha:* ${file.fecha}\n` +
-                    `*📑 Tipo:* ${ext.toUpperCase()}`
+    const caption = [
+      `📁 *Archivo encontrado en MediaFire*`,
+      ``,
+      `📄 *Nombre:* ${file.title}`,
+      `📦 *Peso:* ${file.peso}`,
+      `📅 *Fecha:* ${file.fecha}`,
+      `📑 *Tipo:* ${ext.toUpperCase()}`,
+      ``,
+      `🔗 *Descarga directa:*`,
+      `${file.dl}`
+    ].join('\n')
 
+    // 🚀 Enviar el archivo directamente (sin documento si es muy grande)
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
-      fileName: file.title,
       mimetype: mime,
+      fileName: file.title,
       caption
     }, { quoted: m })
 
-    m.react('✅')
+    await m.react('✅')
 
   } catch (err) {
     console.error('[❌ ERROR EN MEDIAFIRE]', err)
-    m.react('❌')
+    await m.react('❌')
 
     let msg = '⚠️ *Error al procesar el enlace de MediaFire.*'
-    if (err.response) msg += `\n\n📡 *Estado HTTP:* ${err.response.status}`
+    if (err.response?.status) msg += `\n\n📡 *Estado HTTP:* ${err.response.status}`
     if (err.message) msg += `\n📄 *Detalle:* ${err.message}`
 
     return conn.sendMessage(m.chat, { text: msg }, { quoted: m })
