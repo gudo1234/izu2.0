@@ -3,7 +3,7 @@ import { URL } from 'url'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   if (!/^https?:\/\//.test(text))
-    return conn.reply(m.chat, `✳️ Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
+    return conn.reply(m.chat, `${e} Ejemplo:\n*${usedPrefix + command}* https://qu-leo.pro/1052-2/`, m)
 
   m.react('🕒')
 
@@ -17,7 +17,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     if (/image|audio|video/i.test(contentType)) {
       const type = contentType.split('/')[0]
 
-      m.react('✅')
       if (type === 'image') return conn.sendMessage(m.chat, { image: { url: text }, caption: text }, { quoted: m })
       if (type === 'audio') return conn.sendMessage(m.chat, { audio: { url: text }, mimetype: contentType, caption: text }, { quoted: m })
       if (type === 'video') return conn.sendMessage(m.chat, { video: { url: text }, mimetype: contentType, caption: text }, { quoted: m })
@@ -110,13 +109,12 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     // 📦 ENVÍO SEGÚN TIPO Y ADULTOS
     // ==============================
     if (fileUrl) {
-      m.react('✅')
       if (fileType === 'video' && isAdult) {
         return conn.sendMessage(m.chat, {
           document: { url: fileUrl },
           fileName: 'video_adulto.mp4',
           mimetype: 'video/mp4',
-          caption: '🔞 Video para adultos'
+          caption: textbot
         }, { quoted: m })
       }
       if (fileType === 'video') return conn.sendMessage(m.chat, { video: { url: fileUrl }, mimetype: 'video/mp4', caption: fileUrl }, { quoted: m })
@@ -127,7 +125,6 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     // ==============================
     // 📜 SI NO HAY NADA → ENVIAR HTML O JSON COMO TEXTO
     // ==============================
-    m.react('📝')
     return conn.sendMessage(m.chat, { text: `📄 Contenido de la página:\n\n${html.slice(0, 4000)}` }, { quoted: m })
 
   } catch (e) {
