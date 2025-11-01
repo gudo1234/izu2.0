@@ -16,7 +16,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       : normalVideo.includes(command)
       ? 'video'
       : 'video en documento'
-    return m.reply(`${e} Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+    return m.reply(`⚠️ Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
   }
 
   await m.react("🕒")
@@ -118,9 +118,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
     const fileSize = data.size || 8000000
 
-    // Nunca enviar playaudio como nota de voz
-    const pttMode = isAudio && command !== "playaudio"
-
+    // Enviar siempre como audio normal, nunca PTT
     if (sendDoc) {
       await conn.sendMessage(m.chat, {
         document: { url: data.link },
@@ -134,7 +132,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         [isAudio ? "audio" : "video"]: { url: data.link },
         mimetype,
         fileName,
-        ptt: pttMode
+        ptt: false
       }, { quoted: m })
     }
 
