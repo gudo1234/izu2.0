@@ -35,7 +35,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (!text) {
     return conn.sendMessage(m.chat, {
-      text: `⚠️ Necesito un enlace de *MediaFire*.\n\nEjemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
+      text: `${e} Ingresa un enlace de *MediaFire*.\n\nEjemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
     }, { quoted: m })
   }
 
@@ -49,7 +49,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   try {
     m.react('🕒')
 
-    const url = `https://api.stellarwa.xyz/dow/mediafire?url=${encodeURIComponent(text)}&apikey=${apiKey}`
+    const url = `https://api.stellarwa.xyz/mediafire?url=${encodeURIComponent(text)}&apikey=stellar-wsRJSBsk`
     const { data: res } = await axios.get(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       timeout: 20000
