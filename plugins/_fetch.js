@@ -2,7 +2,6 @@ import fetch from 'node-fetch'
 import { URL } from 'url'
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
-  // Tutorial si no es URL
   if (!/^https?:\/\//.test(text))
     return conn.reply(m.chat, `
 ✳️ Uso del comando *${usedPrefix + command}*:
@@ -15,9 +14,9 @@ ${usedPrefix + command} https://www.pinterest.com/pin/xxxx
 
 🔹 Qué hace:
 1️⃣ Archivos directos (.jpg, .png, .mp4, .mp3, .pdf, etc.) → se envían tal cual.
-2️⃣ YouTube → intenta enviar el audio (mp3) si hay URL directa.
+2️⃣ YouTube → intenta enviar audio (mp3) si hay URL directa.
 3️⃣ X/Twitter y Pinterest → video normal o documento según archivo.
-4️⃣ Sitios de videos para adultos → siempre video normal (mp4).
+4️⃣ Sitios de videos para adultos → siempre video normal (mp4), se ignoran imágenes.
 5️⃣ Otros enlaces → documento genérico.
 🕒 Reacciones: 🕒 Inicio → ⚙️ Preparando → ✅ Enviado
 `, m)
@@ -25,26 +24,27 @@ ${usedPrefix + command} https://www.pinterest.com/pin/xxxx
   m.react('🕒') // Inicio
 
   try {
-    // Detectar sitios de video para adultos
     const adultSites = ['xnxx','xvideos','pornhub','redtube','youporn','tnaflix','spankbang','porntube']
-
-    // Detectar sitios normales de video
     const videoSites = ['x.com','twitter','pinterest']
 
-    // ==============================
-    // Intentar descargar directamente si es archivo
-    // ==============================
+    // Regex para detectar archivos
     const directFileRegex = /\.(mp3|mp4|webm|mkv|avi|mov|jpg|jpeg|png|gif|pdf)(\?|$)/i
 
+    // ==============================
+    // Archivos directos
+    // ==============================
     if (directFileRegex.test(text)) {
-      const ext = text.split('.').pop().split('?')[0].toLowerCase()
+      let ext = text.split('.').pop().split('?')[0].toLowerCase()
+
+      // Si es sitio adulto, forzar solo video
+      if (adultSites.some(site => text.includes(site)) && !/(mp4|webm|mov|avi|mkv)/i.test(ext)) {
+        return m.reply('⚠️ Este enlace de sitio adulto no es un video directo. Usa un enlace que apunte al archivo de video (.mp4, .webm, .mov, etc.)')
+      }
+
       let mimetype = 'video/mp4'
       if (ext === 'mp3') mimetype = 'audio/mpeg'
       else if (['jpg','jpeg','png','gif'].includes(ext)) mimetype = 'image/jpeg'
       else if (ext === 'pdf') mimetype = 'application/pdf'
-
-      // Para sitios adultos, forzar video/mp4
-      if (adultSites.some(site => text.includes(site))) mimetype = 'video/mp4'
 
       await m.react('⚙️')
       await conn.sendMessage(m.chat, {
@@ -63,9 +63,14 @@ ${usedPrefix + command} https://www.pinterest.com/pin/xxxx
     const res = await fetch(text)
     const html = await res.text()
 
-    // Buscar enlaces directos a archivos
-    const fileRegex = /(https?:\/\/[^\s"'<>]+?\.(mp4|webm|mov|avi|mkv|mp3|m4a|ogg|wav|jpg|jpeg|png|gif|pdf)(\?[^\s"'<>]*)?)/gi
-    const foundLinks = [...html.matchAll(fileRegex)].map(v => v[0])
+    // Regex para todos los archivos
+    const fileRegex = /(https?:\/\/[^\s"'<>]+?\.(mp4|webm|mov|avi|mkv|mp3|m4a|ogg|wav|pdf)(\?[^\s"'<>]*)?)/gi
+    let foundLinks = [...html.matchAll(fileRegex)].map(v => v[0])
+
+    // Para sitios adultos, eliminar links que no sean videos
+    if (adultSites.some(site => text.includes(site))) {
+      foundLinks = foundLinks.filter(url => /\.(mp4|webm|mov|avi|mkv)/i.test(url))
+    }
 
     if (!foundLinks.length) {
       return m.reply('⚠️ No se encontró ningún recurso multimedia válido en la página.')
@@ -74,14 +79,9 @@ ${usedPrefix + command} https://www.pinterest.com/pin/xxxx
     const fileUrl = foundLinks[0]
     const ext = fileUrl.split('.').pop().split('?')[0].toLowerCase()
 
-    // Determinar mimetype
     let mimetype = 'video/mp4'
     if (ext === 'mp3') mimetype = 'audio/mpeg'
-    else if (['jpg','jpeg','png','gif'].includes(ext)) mimetype = 'image/jpeg'
     else if (ext === 'pdf') mimetype = 'application/pdf'
-
-    // Si el sitio es adulto, forzar video/mp4
-    if (adultSites.some(site => fileUrl.includes(site))) mimetype = 'video/mp4'
 
     await m.react('⚙️')
     await conn.sendMessage(m.chat, {
