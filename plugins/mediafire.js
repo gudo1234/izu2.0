@@ -35,30 +35,30 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (!text) {
     return conn.sendMessage(m.chat, {
-      text: `${e} Ingresa un enlace de *MediaFire*.\n\n📘 Ejemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
+      text: `${emoji} Ingresa un enlace de *MediaFire*.\n\n📘 Ejemplo:\n> *${usedPrefix + command} https://www.mediafire.com/file/xxxx*`
     }, { quoted: m })
   }
 
   const mediafireRegex = /https?:\/\/(www\.)?mediafire\.com\/file\/[a-zA-Z0-9]+/i
   if (!mediafireRegex.test(text)) {
     return conn.sendMessage(m.chat, {
-      text: `${e} El enlace proporcionado no parece ser de *MediaFire*.\nPor favor revisa el formato.`
+      text: `⚠️ El enlace proporcionado no parece ser de *MediaFire*.\nPor favor revisa el formato.`
     }, { quoted: m })
   }
 
   try {
     await m.react('🕒')
 
-    // 📡 API alternativa de Mediafire
-    const apiURL = `https://api-nv.ultraplus.click/api/dl/mediafire?url=${encodeURIComponent(text)}`
+    // 📡 API correcta (Stellar)
+    const apiURL = `https://api.stellarwa.xyz/dl/mediafire?url=${encodeURIComponent(text)}&key=stellar-wsRJSBsk`
     const { data: res } = await axios.get(apiURL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       timeout: 20000
     })
 
-    // ✅ Verificar estructura real del JSON
+    // ✅ Validar respuesta real
     if (!res || !res.status || !res.data || !res.data.dl) {
-      console.log('[⚠️ API SIN RESPUESTA VÁLIDA]', res)
+      console.log('[⚠️ API SIN DATOS VÁLIDOS]', res)
       throw new Error('No se obtuvo información válida del archivo.')
     }
 
@@ -79,7 +79,7 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       `${file.dl}`
     ].join('\n')
 
-    // 🚀 Enviar el archivo directamente (sin documento si es muy grande)
+    // 🚀 Enviar archivo directamente
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
       mimetype: mime,
