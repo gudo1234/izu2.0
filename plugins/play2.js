@@ -33,14 +33,17 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
+
     const toSeconds = t => t.split(":").reduce((a, n) => a * 60 + +n, 0)
     const mins = toSeconds(duration) / 60
 
     const sendDoc = mins > 20 || docAudio.includes(command) || docVideo.includes(command)
     const isAudio = [...docAudio, ...normalAudio].includes(command)
     const type = isAudio ? (sendDoc ? "audio (doc)" : "audio") : (sendDoc ? "video (doc)" : "video")
+
     const aviso = !docAudio.includes(command) && !docVideo.includes(command) && mins > 20
       ? `\n> ‣ Se enviará como documento por superar 20 minutos.` : ""
+
     const caption = `╭──── • ────╮
 > ✰ *Título:* ${title}
 > ♢ *Canal:* ${author?.name}
@@ -50,9 +53,18 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 > ♬ *Link:* ${url}
 ╰──── • ────╯
 
-⏳ _Preparando ${type}..._${aviso}`.trim()
+⏳ _Preparando ${type}..._${aviso}
+`.trim()
 
-    conn.sendMessage(m.chat, {
+    // Descargar y procesar thumbnail
+    const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
+    const thumb = await sharp(Buffer.from(thumbBuffer))
+      .resize(200, 200)
+      .jpeg({ quality: 80 })
+      .toBuffer()
+
+    // Mensaje con contextInfo y thumbnail
+    await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
       contextInfo: {
@@ -65,19 +77,17 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
+          thumbnail: thumb,
           thumbnailUrl: redes,
-          thumbnail,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: false,
+          renderLargerThumbnail: true,
         },
       },
     }, { quoted: m })
 
-    const thumbPromise = (async () => {
-      const buffer = await (await fetch(thumbnail)).arrayBuffer()
-      return await sharp(Buffer.from(buffer)).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
-    })()
+    let data = null, usedBackup = 0
+
     const apis = isAudio
       ? [
           `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${encodeURIComponent(url)}`,
@@ -89,30 +99,19 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           `https://api-nv.ultraplus.click/api/youtube/v2?url=${encodeURIComponent(url)}&format=video&key=Alba`,
           `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
         ]
-    let data = null
-    for (const api of apis) {
-      try {
-        const res = await fetch(api)
-        const json = await res.json()
-        const link =
-          json?.download?.url ||
-          json?.result?.dl ||
-          json?.result?.download ||
-          json?.result?.url ||
-          json?.data?.url ||
-          null
 
-        if (link) {
-          data = {
-            link,
-            title: json?.metadata?.title || json?.result?.title || title,
-            size: json?.metadata?.filesize || json?.result?.size || 8000000
-          }
-          break
-        }
-      } catch {
-        continue
-      }
+    for (let i = 0; i < apis.length && !data; i++) {
+      try {
+        const res = await fetch(apis[i])
+        const json = await res.json()
+        if (json?.download?.url)
+          data = { link: json.download.url, title: json.metadata?.title, size: json.metadata?.filesize }
+        else if (json?.result?.dl)
+          data = { link: json.result.dl, title: json.result.title, size: json.result.size }
+        else if (json?.result?.download)
+          data = { link: json.result.download, title: json.result.title, size: json.result.size }
+        if (data) usedBackup = i
+      } catch (e) { continue }
     }
 
     if (!data?.link) return m.reply("❌ No se pudo obtener el enlace de descarga desde ninguna API.")
@@ -120,25 +119,27 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
     const fileName = `${data.title || title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
     const fileSize = data.size || 8000000
-    const thumb = await thumbPromise.catch(() => null)
+    const pttMode = command === "playaudio"
+    
+    if (sendDoc) {
+      await conn.sendMessage(m.chat, {
+        document: { url: data.link },
+        mimetype,
+        fileName,
+        fileLength: fileSize,
+        jpegThumbnail: thumb,
+      }, { quoted: m })
+    } else {
+      await conn.sendMessage(m.chat, {
+        [isAudio ? "audio" : "video"]: { url: data.link },
+        mimetype,
+        fileName,
+        ptt: isAudio && pttMode
+      }, { quoted: m })
+    }
 
-    const fileMsg = sendDoc
-      ? {
-          document: { url: data.link },
-          mimetype,
-          fileName,
-          fileLength: fileSize,
-          jpegThumbnail: thumb,
-        }
-      : {
-          [isAudio ? "audio" : "video"]: { url: data.link },
-          mimetype,
-          fileName,
-          jpegThumbnail: thumb,
-        }
-
-    await conn.sendMessage(m.chat, fileMsg, { quoted: m })
-    await m.react("✅")
+    // Reacción final según API usada
+    await m.react(usedBackup === 0 ? "✅" : usedBackup === 1 ? "⌛" : "🌀")
 
   } catch (err) {
     console.error(err)
