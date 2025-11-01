@@ -65,7 +65,8 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
         externalAdReply: {
           title: '🎧 YOUTUBE EXTRACTOR',
           body: textbot,
-          thumbnailUrl: thumbnail,
+          thumbnailUrl: redes,
+          thumbnail,
           sourceUrl: redes,
           mediaType: 1,
           renderLargerThumbnail: false,
