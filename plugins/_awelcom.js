@@ -24,10 +24,10 @@ let handler = async (m, { conn, __dirname }) => {
   const audioUrl = audios[Math.floor(Math.random() * audios.length)]
 
   // --- Variables principales ---
-  let wm = '🦄드림 가이 Xeon'
+ /* let wm = '🦄드림 가이 Xeon'
   let textbot = 'Bot oficial desarrollado por Xeon'
   let redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
-  let icono = 'https://qu.ax/zAMtB.jpg'
+  let icono = 'https://qu.ax/zAMtB.jpg'*/
 
   // --- Nombre del grupo ---
   let groupName = 'yoyo'
@@ -38,7 +38,7 @@ let handler = async (m, { conn, __dirname }) => {
 
   try {
     // --- Imagen miniatura ---
-    let pr = await (await fetch(`https://files.catbox.moe/njyrrp.jpg`)).buffer()
+    let pr = await (await fetch(`icono`)).buffer()
     const imgPath = join(__dirname, pr)
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
