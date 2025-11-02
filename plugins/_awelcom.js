@@ -18,11 +18,9 @@ let handler = async (m, { conn, __dirname }) => {
 let name
 try {
   name = await conn.getName(user)
-  if (!name || name.includes('lid')) {
-    name = 'Miembro'
-  }
+  if (!name) name = 'Usuario'
 } catch (e) {
-  name = 'Miembro'
+  name = 'Usuario'
 }
   let groupName = ''
   let tantos = 0
