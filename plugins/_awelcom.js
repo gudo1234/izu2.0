@@ -1,4 +1,4 @@
-import { WAMessageStubType } from '@whiskeysockets/baileys'
+pimport { WAMessageStubType } from '@whiskeysockets/baileys'
 import fetch from 'node-fetch'
 import Jimp from 'jimp'
 
@@ -23,7 +23,7 @@ export async function before(m, { conn, participants, groupMetadata }) {
 
   const wm = '🦄드림 가이 Xeon'
   const textbot = 'Bot oficial desarrollado por Xeon'
-  const thumbResized = await (await Jimp.read(icono)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
+  const thumbResized = await (await Jimp.read('https://files.catbox.moe/njyrrp.jpg')).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
 
   const contextInfo = {
     forwardingScore: 100,
