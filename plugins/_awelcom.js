@@ -11,8 +11,17 @@ let handler = async (m, { conn, __dirname }) => {
 
   const isWelcome = m.messageStubType === 27
   const isBye = m.messageStubType === 28
-  const user = m.messageStubParameters?.[0] || ''
-  const name = await conn.getName(user)
+  
+  /*const user = m.messageStubParameters?.[0] || ''
+  const name = await conn.getName(user)*/
+    const user = m.messageStubParameters?.[0] || ''
+let name
+try {
+  name = await conn.getName(user)
+  if (!name) name = '+' + user.split('@')[0]
+} catch (e) {
+  name = '+' + user.split('@')[0]
+}
   let groupName = ''
   let tantos = 0
 
