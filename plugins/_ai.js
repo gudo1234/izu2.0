@@ -2,28 +2,16 @@ import fs from 'fs'
 import { join } from 'path'
 import Jimp from 'jimp'
 import fetch from 'node-fetch'
-import { execSync } from 'child_process'
-import path from 'path'
 
-const audios = [
-  'https://qu.ax/LShpW.mp3',
-  'https://qu.ax/LShpW.mp3'
-]
-
-const emojis = ['🎉', '🤖', '💫', '🔥', '🛸', '💎', '⭐', '🌟', '🚀', '🦄']
-
-let handler = async (m, { conn, __dirname, text }) => {
-  m.react('🕒')
+let handler = async (m, { conn, __dirname }) => {
+  m.react('🕒') // Reacción al iniciar
 
   const user = m.sender
-  const emoji = emojis[Math.floor(Math.random() * emojis.length)]
-  const audioUrl = audios[Math.floor(Math.random() * audios.length)]
-
-  let wm = '🦄드림 가이 Xeon'
-  let textbot = 'Bot oficial desarrollado por Xeon'
-  let redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
-  let icono = 'https://qu.ax/zAMtB.jpg'
-  let groupName = m.isGroup ? (await conn.groupMetadata(m.chat)).subject : 'Chat Privado'
+  const wm = '드림 가이 Xeon'
+  const textbot = 'Bot oficial desarrollado por Xeon'
+  const redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
+  const icono = 'https://qu.ax/zAMtB.jpg'
+  const groupName = m.isGroup ? (await conn.groupMetadata(m.chat)).subject : 'Chat Privado'
 
   try {
     const imgPath = join(__dirname, icono)
@@ -32,7 +20,7 @@ let handler = async (m, { conn, __dirname, text }) => {
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
       : null
 
-    const menuText = `✨ Hola @${user.split('@')[0]} ${emoji}\n🦠Selecciona una opción del menú interactivo.`
+    const menuText = `Hola @${user.split('@')[0]}, selecciona una opción del menú.`
 
     const contextInfo = {
       mentionedJid: [user],
@@ -56,7 +44,7 @@ let handler = async (m, { conn, __dirname, text }) => {
           fileLength: { low: -727379969, high: 232, unsigned: true },
           pageCount: 0,
           mediaKey: Buffer.from('3163ba7c8db6dd363c4f48bda2735cc0d0413e57567f0a758f514f282889173c', 'hex'),
-          fileName: '🦄2take1-Interative',
+          fileName: '2take1-Interactive',
           fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
           directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
           mediaKeyTimestamp: { low: 1756370084, high: 0, unsigned: false },
@@ -66,7 +54,7 @@ let handler = async (m, { conn, __dirname, text }) => {
         hasMediaAttachment: true
       },
       body: { text: menuText },
-      footer: { text: '🦄 ¡By Take-Two Interative:!' },
+      footer: { text: '¡By Take-Two Interactive!' },
       nativeFlowMessage: {
         buttons: [
           { name: 'single_select', buttonParamsJson: '{"has_multiple_buttons":true}' },
@@ -77,8 +65,8 @@ let handler = async (m, { conn, __dirname, text }) => {
               "title":"Más Opciones",
               "sections":[
                 {
-                  "title":"⌏Seleccione una opción requerida⌎",
-                  "highlight_label":"🦄드림 가이 Xeon",
+                  "title":"Seleccione una opción",
+                  "highlight_label":"드림 가이 Xeon",
                   "rows":[
                     {"title":"Owner/Creador","description":"","id":"Edar"},
                     {"title":"Información del Bot","description":"","id":".info"},
@@ -91,68 +79,14 @@ let handler = async (m, { conn, __dirname, text }) => {
               "has_multiple_buttons":true
             }`
           },
-          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"🦄드림 가이 Xeon :v"}' },
-          {
-            name: 'cta_url',
-            buttonParamsJson: `{"display_text":"Canal de WhatsApp","url":"${redes}","merchant_url":"${redes}"}`
-          },
-          {
-            name: 'galaxy_message',
-            buttonParamsJson: `{
-              "mode":"published",
-              "flow_message_version":"3",
-              "flow_token":"1:1307913409923914:293680f87029f5a13d1ec5e35e718af3",
-              "flow_id":"1307913409923914",
-              "flow_cta":"ᴀᴄᴄᴇᴅᴇ ᴀ ʙᴏᴛ ᴀɪ",
-              "flow_action":"navigate",
-              "flow_action_payload":{
-                "screen":"QUESTION_ONE",
-                "params":{"user_id":"123456789","referral":"campaign_xyz"}
-              },
-              "flow_metadata":{
-                "flow_json_version":"201",
-                "data_api_protocol":"v2",
-                "flow_name":"Lead Qualification [en]",
-                "data_api_version":"v2",
-                "categories":["Lead Generation","Sales"]
-              }
-            }`
-          },
-          {
-            name: 'quick_reply',
-            buttonParamsJson: JSON.stringify({
-              display_text: '🦄 𝘾𝙧𝙖𝙨𝙝',
-              id: '.pito'
-            })
-          },
-          {
-            name: 'cta_url',
-            buttonParamsJson: JSON.stringify({
-              display_text: '🌐 𝐃𝐞𝐬𝐚𝐫𝐫𝐨𝐥𝐥𝐚𝐝𝐨𝐫',
-              url: 'https://wa.me/50236473217?text=Hola%20quiero%20un%20servicio%20de%20acceso%20premium%20precio%2010%20usd',
-              merchant_url: 'https://wa.me/50236473217?text=Hola%20quiero%20un%20servicio%20de%20acceso%20premium%20precio%2010%20usd'
-            })
-          }
+          { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"드림 가이 Xeon :v"}' },
+          { name: 'cta_url', buttonParamsJson: `{"display_text":"Canal de WhatsApp","url":"${redes}","merchant_url":"${redes}"}` }
         ],
         messageParamsJson: `{
-          "limited_time_offer":{
-            "text":"${m.pushName}",
-            "url":"https://github.com/edar",
-            "copy_code":"${groupName}",
-            "expiration_time":1754613436864329
-          },
           "bottom_sheet":{
             "in_thread_buttons_limit":2,
-            "divider_indices":[1,2,3,4,5,999],
             "list_title":"Select Menu",
-            "button_title":"▻ 𝐌𝐞𝐧𝐮 𝐈𝐧𝐭𝐞𝐫𝐚𝐭𝐢𝐯𝐨 ✨"
-          },
-          "tap_target_configuration":{
-            "title":"▸ X ◂",
-            "description":"Let’s go",
-            "canonical_url":"https://github.com/edar",
-            "domain":"https://xrljosedvapi.vercel.app",
-            "button_index":0
+            "button_title":"▻ Menú Interactivo"
           }
         }`
       },
@@ -165,7 +99,7 @@ let handler = async (m, { conn, __dirname, text }) => {
       {}
     )
 
-    m.react('✅')
+    m.react('✅') // Reacción al finalizar
 
   } catch (e) {
     console.error('Error al generar mensaje interactivo:', e)
