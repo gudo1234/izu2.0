@@ -3,6 +3,8 @@ import { join } from 'path'
 import Jimp from 'jimp'
 import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
+import { execSync } from 'child_process'
+import path from 'path'
 
 let handler = async (m, { conn, __dirname }) => {
   if (!m.messageStubType || ![27, 28].includes(m.messageStubType)) return
@@ -20,11 +22,13 @@ let handler = async (m, { conn, __dirname }) => {
     tantos = metadata.participants.length
   }
 
-  let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
+  // Imagen de perfil
+  let pp = await conn.profilePictureUrl(user, 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
   let uptime = process.uptime() * 1000
   let run = clockString(uptime)
 
+  // --- Datos del primer código integrados ---
   const audiosWelcome = [
     './media/a.mp3',
     './media/bien.mp3',
@@ -51,9 +55,17 @@ let handler = async (m, { conn, __dirname }) => {
   ]
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
 
+  const imagen7 = './media/despedida.webp'
+  const imagen8 = './media/bienvenida.webp'
+
   const stikerBienvenida = await sticker(imagen8, false, global.packname, global.author)
   const stikerDespedida = await sticker(imagen7, false, global.packname, global.author)
 
+  const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
+  const or = ['audio', 'sticker', 'texto', 'gifPlayback', 'interactivo']
+  const media = or[Math.floor(Math.random() * or.length)]
+
+  // Info canal
   const newsletterInfo = {
     forwardedNewsletterMessageInfo: {
       newsletterJid: channelRD.id,
@@ -63,16 +75,38 @@ let handler = async (m, { conn, __dirname }) => {
   }
 
   const accion = isWelcome ? '🎉 WELCOME' : '👋🏻 ADIOS'
-  const caption = `${accion} @${user.split('@')[0]}`
+  const caption = `${accion} *@${user.split('@')[0]}*`
   const mentionJid = [user]
-  const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
-  const opciones = ['stiker', 'audio', 'texto', 'gifPlayback', 'interactivo']
-  const media = opciones[Math.floor(Math.random() * opciones.length)]
+
+  // Contexto unificado
+  const contextInfo = {
+    ...newsletterInfo,
+    mentionedJid: mentionJid,
+    forwardingScore: 10,
+    isForwarded: true,
+    externalAdReply: {
+      title: `${accion} ${name}`,
+      body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'} `,
+      sourceUrl: redes,
+      thumbnailUrl: redes,
+      thumbnail: im,
+      showAdAttribution: false
+    }
+  }
 
   try {
     switch (media) {
-      // 🟣 STICKER ALEATORIO
-      case 'stiker':
+      case 'audio':
+        await conn.sendMessage(m.chat, {
+          audio: { url: isWelcome ? audioPick(audiosWelcome) : audioPick(audiosBye) },
+          mimetype: 'audio/mpeg',
+          ptt: false,
+          fileName: 'noti.mp3',
+          contextInfo
+        })
+        break
+
+      case 'sticker':
         await conn.sendFile(
           m.chat,
           isWelcome ? stikerBienvenida : stikerDespedida,
@@ -80,103 +114,27 @@ let handler = async (m, { conn, __dirname }) => {
           '',
           null,
           true,
-          {
-            contextInfo: {
-              mentionedJid: mentionJid,
-              forwardingScore: 200,
-              isForwarded: false,
-              externalAdReply: {
-                showAdAttribution: false,
-                title: `${accion} ${name}`,
-                body: isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-                mediaType: 1,
-                sourceUrl: redes,
-                thumbnailUrl: redes,
-                thumbnail: im
-              }
-            }
-          }
+          { contextInfo }
         )
         break
 
-      // 🟢 AUDIO ALEATORIO
-      case 'audio':
-        await conn.sendMessage(
-          m.chat,
-          {
-            audio: { url: isWelcome ? audioPick(audiosWelcome) : audioPick(audiosBye) },
-            mimetype: 'audio/mpeg',
-            fileName: 'noti.mp3',
-            ptt: false,
-            contextInfo: {
-              ...newsletterInfo,
-              mentionedJid: mentionJid,
-              forwardingScore: false,
-              isForwarded: true,
-              externalAdReply: {
-                title: `${accion} ${name}`,
-                body: isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-                previewType: 'PHOTO',
-                thumbnailUrl: redes,
-                thumbnail: im,
-                sourceUrl: redes,
-                showAdAttribution: false
-              }
-            }
-          }
-        )
-        break
-
-      // 🔵 TEXTO ALEATORIO
       case 'texto':
-        await conn.sendMessage(
-          m.chat,
-          {
-            text: caption,
-            contextInfo: {
-              ...newsletterInfo,
-              mentionedJid: mentionJid,
-              forwardingScore: 10,
-              isForwarded: true,
-              externalAdReply: {
-                title: `${accion} ${name}`,
-                body: isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-                sourceUrl: redes,
-                thumbnailUrl: redes,
-                thumbnail: im
-              }
-            }
-          }
-        )
+        await conn.sendMessage(m.chat, {
+          text: caption,
+          contextInfo
+        })
         break
 
-      // 🟠 GIF ALEATORIO
       case 'gifPlayback':
-        await conn.sendMessage(
-          m.chat,
-          {
-            video: { url: isWelcome ? gifsBienvenida[Math.floor(Math.random() * gifsBienvenida.length)] : gifDespedida },
-            gifPlayback: true,
-            caption,
-            contextInfo: {
-              ...newsletterInfo,
-              mentionedJid: mentionJid,
-              isForwarded: true,
-              forwardingScore: 10,
-              externalAdReply: {
-                title: `${accion} ${name}`,
-                body: isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-',
-                sourceUrl: redes,
-                thumbnailUrl: redes,
-                thumbnail: im
-              }
-            }
-          }
-        )
+        await conn.sendMessage(m.chat, {
+          video: { url: isWelcome ? gifsBienvenida[Math.floor(Math.random() * gifsBienvenida.length)] : gifDespedida },
+          gifPlayback: true,
+          caption,
+          contextInfo
+        })
         break
 
-      // 🧩 MENSAJE INTERACTIVO ORIGINAL
-      case 'interactivo': {
+      case 'interactivo':
         const imgPath = join(__dirname, icono)
         const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
         const thumbResized = thumbLocal
@@ -187,19 +145,6 @@ let handler = async (m, { conn, __dirname }) => {
           ? `✨ Bienvenido/a, @${user.split('@')[0]}`
           : `👋 Adiós, @${user.split('@')[0]}`
 
-        const contextInfo = {
-          mentionedJid: [user],
-          externalAdReply: {
-            title: wm,
-            body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: im,
-            sourceUrl: redes,
-            mediaType: 1,
-            renderLargerThumbnail: false
-          }
-        }
-
         const nativeFlowPayload = {
           header: {
             documentMessage: {
@@ -209,7 +154,7 @@ let handler = async (m, { conn, __dirname }) => {
               fileLength: { low: -727379969, high: 232, unsigned: true },
               pageCount: 0,
               mediaKey: Buffer.from('3163ba7c8db6dd363c4f48bda2735cc0d0413e57567f0a758f514f282889173c', 'hex'),
-              fileName: `${isWelcome ? '👥 Nuevo miembro' : '👋 Usuario salió'} Somos ${tantos} en el grupo`,
+              fileName: `${name} Somos ${tantos} en el grupo`,
               fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
               directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
               mediaKeyTimestamp: { low: 1756370084, high: 0, unsigned: false },
@@ -226,54 +171,50 @@ let handler = async (m, { conn, __dirname }) => {
               { name: 'call_permission_request', buttonParamsJson: '{"has_multiple_buttons":true}' },
               {
                 name: 'single_select',
-                buttonParamsJson: {
-                  "title": "Más Opciones",
-                  "sections": [
+                buttonParamsJson: `{
+                  "title":"Más Opciones",
+                  "sections":[
                     {
-                      "title": "⌏Seleccione una opción requerida⌎",
-                      "highlight_label": "Solo para negocios",
-                      "rows": [
-                        { "title": "Owner/Creador", "description": "", "id": "Edar" },
-                        { "title": "Información del Bot", "description": "", "id": ".info" },
-                        { "title": "Reglas/Términos", "description": "", "id": ".reglas" },
-                        { "title": "vcard/yo", "description": "", "id": ".vcar" },
-                        { "title": "Ping", "description": "Velocidad del bot", "id": ".ping" }
+                      "title":"⌏Seleccione una opción requerida⌎",
+                      "highlight_label":"Solo para negocios",
+                      "rows":[
+                        {"title":"Owner/Creador","description":"","id":"Edar"},
+                        {"title":"Información del Bot","description":"","id":".info"},
+                        {"title":"Reglas/Términos","description":"","id":".reglas"},
+                        {"title":"vcard/yo","description":"","id":".vcar"},
+                        {"title":"Ping","description":"Velocidad del bot","id":".ping"}
                       ]
                     }
                   ],
-                  "has_multiple_buttons": true
-                }
+                  "has_multiple_buttons":true
+                }`
               },
               { name: 'cta_copy', buttonParamsJson: '{"display_text":"Copiar Código","id":"123456789","copy_code":"🙇🏿‍♂️ Negro de mierd :v"}' },
               {
                 name: 'cta_url',
-                buttonParamsJson: {
-                  "display_text": "sᴇɢᴜɪʀ ᴄᴀɴᴀʟ/ᴡᴀ",
-                  "url": `${channel}`,
-                  "merchant_url": `${channel}`
-                }
+                buttonParamsJson: `{"display_text":"sᴇɢᴜɪʀ ᴄᴀɴᴀʟ/ᴡᴀ","url":"${channel}","merchant_url":"${channel}"}`
               },
               {
                 name: 'galaxy_message',
-                buttonParamsJson: {
-                  "mode": "published",
-                  "flow_message_version": "3",
-                  "flow_token": "1:1307913409923914:293680f87029f5a13d1ec5e35e718af3",
-                  "flow_id": "1307913409923914",
-                  "flow_cta": "👨🏻‍💻 ᴀᴄᴄᴇᴅᴇ ᴀ ʙᴏᴛ ᴀɪ",
-                  "flow_action": "navigate",
-                  "flow_action_payload": {
-                    "screen": "QUESTION_ONE",
-                    "params": { "user_id": "123456789", "referral": "campaign_xyz" }
+                buttonParamsJson: `{
+                  "mode":"published",
+                  "flow_message_version":"3",
+                  "flow_token":"1:1307913409923914:293680f87029f5a13d1ec5e35e718af3",
+                  "flow_id":"1307913409923914",
+                  "flow_cta":"👨🏻‍💻 ᴀᴄᴄᴇᴅᴇ ᴀ ʙᴏᴛ ᴀɪ",
+                  "flow_action":"navigate",
+                  "flow_action_payload":{
+                    "screen":"QUESTION_ONE",
+                    "params":{"user_id":"123456789","referral":"campaign_xyz"}
                   },
-                  "flow_metadata": {
-                    "flow_json_version": "201",
-                    "data_api_protocol": "v2",
-                    "flow_name": "Lead Qualification [en]",
-                    "data_api_version": "v2",
-                    "categories": ["Lead Generation", "Sales"]
+                  "flow_metadata":{
+                    "flow_json_version":"201",
+                    "data_api_protocol":"v2",
+                    "flow_name":"Lead Qualification [en]",
+                    "data_api_version":"v2",
+                    "categories":["Lead Generation","Sales"]
                   }
-                }
+                }`
               },
               {
                 name: 'quick_reply',
@@ -291,27 +232,26 @@ let handler = async (m, { conn, __dirname }) => {
                 })
               }
             ],
-            messageParamsJson: {
-              "limited_time_offer": {
-                "text": `| runtime ${run}`,
-                "url": "https://github.com/edar",
-                "copy_code": `${groupName}`,
-                "expiration_time": 1754613436864329
+            messageParamsJson: `{
+              "limited_time_offer":{
+                "text":"| runtime ${run}",
+                "url":"https://github.com/edar",
+                "copy_code":"${groupName}",
+                "expiration_time":1754613436864329},
+              "bottom_sheet":{
+                "in_thread_buttons_limit":2,
+                "divider_indices":[1,2,3,4,5,999],
+                "list_title":"Select Menu",
+                "button_title":"▻ ᴠᴇʀ ᴍᴇɴᴜ ✨"
               },
-              "bottom_sheet": {
-                "in_thread_buttons_limit": 2,
-                "divider_indices": [1, 2, 3, 4, 5, 999],
-                "list_title": "Select Menu",
-                "button_title": "▻ ᴠᴇʀ ᴍᴇɴᴜ ✨"
-              },
-              "tap_target_configuration": {
-                "title": "▸ X ◂",
-                "description": "Let’s go",
-                "canonical_url": "https://github.com/edar",
-                "domain": "https://xrljosedvapi.vercel.app",
-                "button_index": 0
+              "tap_target_configuration":{
+                "title":"▸ X ◂",
+                "description":"Let’s go",
+                "canonical_url":"https://github.com/edar",
+                "domain":"https://xrljosedvapi.vercel.app",
+                "button_index":0
               }
-            }
+            }`
           },
           contextInfo
         }
@@ -322,7 +262,6 @@ let handler = async (m, { conn, __dirname }) => {
           {}
         )
         break
-      }
     }
   } catch (e) {
     console.error('Error al generar mensaje interactivo:', e)
