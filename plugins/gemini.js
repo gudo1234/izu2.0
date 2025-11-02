@@ -26,7 +26,7 @@ let handler = async (m, { conn, text }) => {
   }
 };
 
-handler.command = ['gemini', 'bot'];
+handler.command = ['gemini'];
 handler.group = true;
 
 export default handler;
