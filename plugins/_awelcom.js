@@ -13,6 +13,12 @@ let handler = async (m, { conn, __dirname }) => {
   const isBye = m.messageStubType === 28
   const user = m.messageStubParameters?.[0] || ''
   const name = await conn.getName(user)
+
+  let who = m.messageStubParameters[0] + '@s.whatsapp.net'
+  let use = global.db.data.users[who]
+  let name = (use && use.name) || await conn.getName(who)
+  let tag = name || 'usuario'
+  
   let groupName = ''
   let tantos = 0
 
@@ -68,8 +74,8 @@ const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
     ? `✨ Bienvenido/a, @${user.split('@')[0]}`
     : `👋 Adiós, @${user.split('@')[0]}`
    const ac = isWelcome
-    ? `✨ Bienvenido/a, ${m.pushName}`
-    : `👋🏻 Adiós, ${m.pushName}`
+    ? `✨ Bienvenido/a, ${tag}`
+    : `👋🏻 Adiós, ${tag}`
   
   const newsletterInfo = {
       forwardedNewsletterMessageInfo: {
