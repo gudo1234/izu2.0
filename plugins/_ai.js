@@ -24,7 +24,7 @@ let handler = async (m, { conn, __dirname }) => {
 
   try {
     // --- Imagen miniatura ---
-    const imgPath = join(__dirname, '../thumbnail.jpg')
+    const imgPath = join(__dirname, icono)
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
