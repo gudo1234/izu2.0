@@ -17,19 +17,26 @@ let handler = async (m, { conn, __dirname }) => {
     const metadata = await conn.groupMetadata(m.chat)
     groupName = metadata.subject
   }
-  //⬇️
+
+  //⬇️ FOTO DE PERFIL
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
   //⬆️
+
+  // 🕒 Cálculo del uptime del bot
+  let uptime = process.uptime() * 1000
+  let tiempoActivo = clockString(uptime)
+
   try {
     const imgPath = join(__dirname, icono)
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
       : null
+
     const actividad = isWelcome
       ? `✨ Bienvenido/a, @${user.split('@')[0]}`
-      : `👋 Adiós, @${user.split('@')[0]}`;
+      : `👋 Adiós, @${user.split('@')[0]}`
 
     const contextInfo = {
       mentionedJid: [user],
@@ -115,7 +122,6 @@ let handler = async (m, { conn, __dirname }) => {
               }
             }`
           },
-
           {
             name: 'quick_reply',
             buttonParamsJson: JSON.stringify({
@@ -131,11 +137,10 @@ let handler = async (m, { conn, __dirname }) => {
               merchant_url: 'https://wa.me/50492280729?text=Hola+quiero+un+bot+para+mi+grupo,+cuáles+son+los+planes?+'
             })
           }
-
         ],
         messageParamsJson: `{
           "limited_time_offer":{
-            "text":"run ${aqui iria la función de uptime}",
+            "text":"run ${tiempoActivo}",
             "url":"https://github.com/edar",
             "copy_code":"${groupName}",
             "expiration_time":1754613436864329
@@ -168,6 +173,14 @@ let handler = async (m, { conn, __dirname }) => {
     console.error('Error al generar mensaje interactivo:', e)
     await conn.reply(m.chat, `Error al generar mensaje:\n${e.message}`, m)
   }
+}
+
+// 🧭 Función para convertir uptime a formato legible
+function clockString(ms) {
+  let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
+  let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
+  let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
+  return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
 }
 
 handler.before = handler
