@@ -22,8 +22,8 @@ let handler = async (m, { conn, __dirname }) => {
     : 'Chat privado'
 
   try {
-    // --- Imagen miniatura ---
-    const imgPath = join(__dirname, 'https://files.catbox.moe/njyrrp.jpg')
+    // --- Preparar miniatura ---
+    const imgPath = join(__dirname, '../thumbnail.jpg')
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
@@ -31,93 +31,65 @@ let handler = async (m, { conn, __dirname }) => {
 
     const menuText = `✨ Hola, @${user.split('@')[0]} ${emoji}\n🦄 ¡Bienvenido al menú interactivo de *${groupName}*!`
 
-    const contextInfo = {
-      mentionedJid: [user],
-      externalAdReply: {
-        title: wm,
-        body: textbot,
-        thumbnail: await (await fetch(icono)).buffer(),
-        sourceUrl: redes,
-        mediaType: 1,
-        renderLargerThumbnail: false
-      }
-    }
-
-    // --- Estructura documentMessage (real visible en WA) ---
-    const documentMessage = {
-      url: 'https://mmg.whatsapp.net/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
-      mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      fileSha256: Buffer.from('fa09afbc207a724252bae1b764ecc7b13060440ba47a3bf59e77f01924924bfe', 'hex'),
-      fileLength: '99999',
-      pageCount: 1,
-      mediaKey: Buffer.from('3163ba7c8db6dd363c4f48bda2735cc0d0413e57567f0a758f514f282889173c', 'hex'),
-      fileName: '🦄 2take1-Interactive',
-      fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
-      directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
-      mediaKeyTimestamp: '1756370084',
-      jpegThumbnail: thumbResized || null,
-      contextInfo
-    }
-
-    // --- Mensaje interactivo principal ---
-    const interactiveMessage = {
-      header: { documentMessage },
-      body: { text: menuText },
-      footer: { text: '🦄 ¡By Take-Two Interative!' },
-      nativeFlowMessage: {
-        buttons: [
-          {
-            name: 'single_select',
-            buttonParamsJson: `{
-              "title":"Más Opciones",
-              "sections":[
-                {
-                  "title":"⌏Seleccione una opción requerida⌎",
-                  "highlight_label":"🦄드림 가이 Xeon",
-                  "rows":[
-                    {"title":"Owner/Creador","description":"","id":"Edar"},
-                    {"title":"Información del Bot","description":"","id":".info"},
-                    {"title":"Reglas/Términos","description":"","id":".reglas"},
-                    {"title":"vcard/yo","description":"","id":".vcar"},
-                    {"title":"Ping","description":"Velocidad del bot","id":".ping"}
-                  ]
-                }
-              ]
-            }`
-          },
-          {
-            name: 'cta_url',
-            buttonParamsJson: JSON.stringify({
-              display_text: '🌐 Canal de WhatsApp',
-              url: redes,
-              merchant_url: redes
-            })
-          },
-          {
-            name: 'cta_copy',
-            buttonParamsJson: JSON.stringify({
-              display_text: 'Copiar Código',
-              id: '12345',
-              copy_code: '🦄 Xeon-Interactive'
-            })
-          }
-        ],
-        messageParamsJson: '{}'
-      },
-      contextInfo
-    }
-
-    // --- Envío visible (con document y botones reales) ---
-    await conn.relayMessage(
+    // --- 1) Enviar DOCUMENT (siempre visible como documento con icono) ---
+    // Aquí creamos un pequeño documento en memoria (puedes usar tu archivo real si lo tienes)
+    // Si quieres que sea un xlsx/pdf real, reemplaza el buffer por fs.readFileSync(rutaArchivo)
+    const docBuffer = Buffer.from('Interactive Document by Xeon') // archivo simple de prueba
+    await conn.sendMessage(
       m.chat,
       {
-        viewOnceMessage: {
-          message: {
-            interactiveMessage
+        document: docBuffer,
+        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        fileName: '🦄2take1-Interactive.xlsx',
+        fileLength: docBuffer.length,
+        pageCount: 1,
+        jpegThumbnail: thumbResized || undefined, // miniatura que aparece en el documento
+        contextInfo: {
+          externalAdReply: {
+            title: wm,
+            body: textbot,
+            thumbnail: thumbResized || undefined,
+            sourceUrl: redes
+          },
+          mentionedJid: [user]
+        }
+      },
+      { quoted: m }
+    )
+
+    // --- 2) Enviar MENSAJE INTERACTIVO (botones / lista) ---
+    // Usamos hydratedButtons (Baileys) para asegurar compatibilidad visual en la app
+    const buttons = [
+      { urlButton: { displayText: '🌐 Canal de WhatsApp', url: redes } },
+      { quickReplyButton: { displayText: '🦄 𝘾𝙧𝙖𝙨𝙝', id: '.pito' } },
+      { quickReplyButton: { displayText: '📋 Copiar Código', id: 'copy_code' } }
+    ]
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        text: menuText,
+        footer: '🦄 ¡By Take-Two Interative!',
+        templateButtons: [
+          // fallback para clientes que muestran template buttons
+          { urlButton: { displayText: '🌐 Canal de WhatsApp', url: redes } },
+          { quickReplyButton: { displayText: 'Más Opciones', id: '.menu' } }
+        ],
+        // adicional: hydratedButtons (mejor renderizado en varios clientes)
+        hydratedButtons: buttons,
+        contextInfo: {
+          mentionedJid: [user],
+          externalAdReply: {
+            title: wm,
+            body: textbot,
+            thumbnail: thumbResized || undefined,
+            sourceUrl: redes,
+            mediaType: 1,
+            renderLargerThumbnail: false
           }
         }
       },
-      {}
+      { quoted: m }
     )
 
   } catch (e) {
