@@ -16,8 +16,8 @@ let handler = async (m, { conn, __dirname }) => {
 
   let who = m.messageStubParameters[0] + '@s.whatsapp.net'
   let use = global.db.data.users[who]
-  let name = (use && use.name) || await conn.getName(who)
-  let tag = name || ''
+  let nam = (use && use.name) || await conn.getName(who)
+  let tag = nam || ''
   
   let groupName = ''
   let tantos = 0
