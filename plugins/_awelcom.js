@@ -17,9 +17,12 @@ let handler = async (m, { conn, __dirname }) => {
     const metadata = await conn.groupMetadata(m.chat)
     groupName = metadata.subject
   }
+  //⬇️
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
-
+  let _uptime = process.uptime() * 1000
+  let uptime = clockString(_uptime)
+  //⬆️
   try {
     const imgPath = join(__dirname, icono)
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
@@ -134,7 +137,7 @@ let handler = async (m, { conn, __dirname }) => {
         ],
         messageParamsJson: `{
           "limited_time_offer":{
-            "text":"${m.pushName}",
+            "text":"run ${uptime}",
             "url":"https://github.com/edar",
             "copy_code":"${groupName}",
             "expiration_time":1754613436864329
