@@ -1,25 +1,38 @@
 import fs from 'fs'
-import path from 'path'
-import fetch from 'node-fetch'
+import { join } from 'path'
 import Jimp from 'jimp'
+import fetch from 'node-fetch'
+import { execSync } from 'child_process'
+import path from 'path'
 
-let handler = async (m, { conn }) => {
+const audios = [
+  'https://qu.ax/LShpW.mp3',
+  'https://qu.ax/LShpW.mp3'
+]
+
+const emojis = ['🎉', '🤖', '💫', '🔥', '🛸', '💎', '⭐', '🌟', '🚀', '🦄']
+
+let handler = async (m, { conn, __dirname, text }) => {
+  m.react('🕒')
+
+  const user = m.sender
+  const emoji = emojis[Math.floor(Math.random() * emojis.length)]
+  const audioUrl = audios[Math.floor(Math.random() * audios.length)]
+
+  let wm = '🦄드림 가이 Xeon'
+  let textbot = 'Bot oficial desarrollado por Xeon'
+  let redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
+  let icono = 'https://qu.ax/zAMtB.jpg'
+  let groupName = m.isGroup ? (await conn.groupMetadata(m.chat)).subject : 'Chat Privado'
+
   try {
-    const wm = '🦄드림 가이 Xeon'
-    const textbot = 'Bot oficial desarrollado por Xeon'
-    const redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
-    const icono = 'https://qu.ax/zAMtB.jpg'
-    const user = m.sender
-    const groupName = m.isGroup ? (await conn.groupMetadata(m.chat)).subject : 'Privado'
-    const menuText = `👋 Hola @${m.pushName}\nEste es un ejemplo del menú interactivo con documentMessage integrado.`
-
-    const thumbPath = path.join(process.cwd(), 'thumbnail.jpg')
-    const thumbLocal = fs.existsSync(thumbPath)
-      ? fs.readFileSync(thumbPath)
-      : null
+    const imgPath = join(__dirname, '../thumbnail.jpg')
+    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
       : null
+
+    const menuText = `✨ Hola @${user.split('@')[0]} ${emoji}\n🦠Selecciona una opción del menú interactivo.`
 
     const contextInfo = {
       mentionedJid: [user],
@@ -152,9 +165,11 @@ let handler = async (m, { conn }) => {
       {}
     )
 
+    m.react('✅')
+
   } catch (e) {
-    console.error(e)
-    await conn.reply(m.chat, `❌ Error:\n${e.message}`, m)
+    console.error('Error al generar mensaje interactivo:', e)
+    await conn.reply(m.chat, `❌ Error al generar mensaje:\n${e.message}`, m)
   }
 }
 
