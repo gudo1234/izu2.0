@@ -20,8 +20,6 @@ let handler = async (m, { conn, __dirname }) => {
   //⬇️
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
-  let _uptime = process.uptime() * 1000
-  let uptime = clockString(_uptime)
   //⬆️
   try {
     const imgPath = join(__dirname, icono)
@@ -137,7 +135,7 @@ let handler = async (m, { conn, __dirname }) => {
         ],
         messageParamsJson: `{
           "limited_time_offer":{
-            "text":"run ${uptime}",
+            "text":"run ${aqui iria la función de uptime}",
             "url":"https://github.com/edar",
             "copy_code":"${groupName}",
             "expiration_time":1754613436864329
