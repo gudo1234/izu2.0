@@ -47,9 +47,6 @@ export async function before(m, { conn, participants, groupMetadata, __dirname }
   ]
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
 
-  let redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
-  let icono = 'https://qu.ax/zAMtB.jpg'
-
   let pp = await conn.profilePictureUrl(m.messageStubParameters[0], 'image').catch(_ => icono)
   let im = await (await fetch(pp)).buffer()
 
