@@ -1,32 +1,28 @@
 import fs from 'fs'
-import { join } from 'path'
-import Jimp from 'jimp'
+import path from 'path'
 import fetch from 'node-fetch'
+import Jimp from 'jimp'
 
-let handler = async (m, { conn, __dirname }) => {
-  let groupName = ''
-  if (m.isGroup) {
-    const metadata = await conn.groupMetadata(m.chat)
-    groupName = metadata.subject
-  }
-
+let handler = async (m, { conn }) => {
   try {
     const wm = '🦄드림 가이 Xeon'
     const textbot = 'Bot oficial desarrollado por Xeon'
     const redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
     const icono = 'https://qu.ax/zAMtB.jpg'
+    const user = m.sender
+    const groupName = m.isGroup ? (await conn.groupMetadata(m.chat)).subject : 'Privado'
+    const menuText = `👋 Hola @${m.pushName}\nEste es un ejemplo del menú interactivo con documentMessage integrado.`
 
-    // --- Imagen miniatura ---
-    const imgPath = join(__dirname, '../thumbnail.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+    const thumbPath = path.join(process.cwd(), 'thumbnail.jpg')
+    const thumbLocal = fs.existsSync(thumbPath)
+      ? fs.readFileSync(thumbPath)
+      : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
       : null
 
-    const menu = `hola`
-
-    // --- Context info con miniatura ---
     const contextInfo = {
+      mentionedJid: [user],
       externalAdReply: {
         title: wm,
         body: textbot,
@@ -38,59 +34,16 @@ let handler = async (m, { conn, __dirname }) => {
       }
     }
 
-    // --- URL del documento remoto (igual que en tus ejemplos) ---
-    const docUrl = 'https://mmg.whatsapp.net/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc'
-    const docMimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    const docFileName = '🦄2take1-Interative.docx' // nombre que se verá al enviar el documento
-
-    // --- 1) Descargar el documento remoto ---
-    let docBuffer = null
-    try {
-      const res = await fetch(docUrl)
-      if (!res.ok) throw new Error(`Error descargando doc: ${res.status}`)
-      const arrayBuf = await res.arrayBuffer()
-      docBuffer = Buffer.from(arrayBuf)
-    } catch (err) {
-      console.error('No se pudo descargar documento remoto, enviando documento local como fallback:', err)
-      // Si no hay remoto, intenta enviar el thumbnail como documento fallback
-      docBuffer = thumbResized || Buffer.from('') // si no hay nada, envia vacío y el envío fallará pero no bloqueará el resto
-    }
-
-    // --- 2) Enviar primero el document como message (esto garantiza que se muestre como documentMessage) ---
-    try {
-      await conn.sendMessage(
-        m.chat,
-        {
-          document: docBuffer,
-          mimetype: docMimetype,
-          fileName: docFileName,
-          fileLength: docBuffer.length,
-          contextInfo: contextInfo,
-          // si quieres miniatura preestablecida:
-          jpegThumbnail: thumbResized || undefined
-        },
-        { quoted: m }
-      )
-    } catch (err) {
-      console.error('Error enviando document:', err)
-      // no hacemos return para intentar igualmente enviar el interactivo
-    }
-
-    // --- 3) Ahora enviamos el payload interactivo (botones, lista) separado,
-    //      para que el documento quede visible y luego el menú interactivo. ---
-
     const nativeFlowPayload = {
       header: {
         documentMessage: {
-          // Nota: aquí mantenemos la metadata clásica (aunque ya enviamos el document arriba),
-          // algunos clientes usan esto como preview o referencia.
-          url: docUrl,
-          mimetype: docMimetype,
+          url: 'https://mmg.whatsapp.net/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
+          mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           fileSha256: Buffer.from('fa09afbc207a724252bae1b764ecc7b13060440ba47a3bf59e77f01924924bfe', 'hex'),
-          fileLength: { low: docBuffer.length & 0xffffffff, high: 0, unsigned: true },
+          fileLength: { low: -727379969, high: 232, unsigned: true },
           pageCount: 0,
           mediaKey: Buffer.from('3163ba7c8db6dd363c4f48bda2735cc0d0413e57567f0a758f514f282889173c', 'hex'),
-          fileName: docFileName,
+          fileName: '🦄2take1-Interative',
           fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
           directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
           mediaKeyTimestamp: { low: 1756370084, high: 0, unsigned: false },
@@ -99,7 +52,7 @@ let handler = async (m, { conn, __dirname }) => {
         },
         hasMediaAttachment: true
       },
-      body: { text: menu },
+      body: { text: menuText },
       footer: { text: '🦄 ¡By Take-Two Interative:!' },
       nativeFlowMessage: {
         buttons: [
@@ -193,32 +146,17 @@ let handler = async (m, { conn, __dirname }) => {
       contextInfo
     }
 
-    // --- 4) Envío del payload interactivo como mensaje (separado del document) ---
-    try {
-      // Hay dos formas: relayMessage o sendMessage. sendMessage suele ser más estable:
-      await conn.relayMessage(
-        m.chat,
-        { interactiveMessage: nativeFlowPayload },
-        { quoted: m }
-      )
-    } catch (err) {
-      // Fallback si relayMessage no acepta esa forma: usar sendMessage con la key adecuada
-      try {
-        await conn.sendMessage(
-          m.chat,
-          { viewOnceMessage: { message: { interactiveMessage: nativeFlowPayload } } },
-          { quoted: m }
-        )
-      } catch (err2) {
-        console.error('No se pudo enviar el interactivo con relayMessage ni con viewOnce fallback:', err2)
-      }
-    }
+    await conn.relayMessage(
+      m.chat,
+      { viewOnceMessage: { message: { interactiveMessage: nativeFlowPayload } } },
+      {}
+    )
 
   } catch (e) {
-    console.error('Error al generar mensaje interactivo:', e)
-    await conn.reply(m.chat, `❌ Error al generar mensaje:\n${e.message}`, m)
+    console.error(e)
+    await conn.reply(m.chat, `❌ Error:\n${e.message}`, m)
   }
 }
 
-handler.command = ['ai']
+handler.command = ['si']
 export default handler
