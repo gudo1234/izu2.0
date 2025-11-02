@@ -13,9 +13,12 @@ let handler = async (m, { conn, __dirname }) => {
   const user = m.messageStubParameters?.[0] || ''
   const name = await conn.getName(user)
   let groupName = ''
+  let tantos = 0 // 👈 número de participantes
+
   if (m.isGroup) {
     const metadata = await conn.groupMetadata(m.chat)
     groupName = metadata.subject
+    tantos = metadata.participants.length // 👈 obtenemos cantidad de miembros
   }
 
   //⬇️ FOTO DE PERFIL
@@ -60,7 +63,10 @@ let handler = async (m, { conn, __dirname }) => {
           fileLength: { low: -727379969, high: 232, unsigned: true },
           pageCount: 0,
           mediaKey: Buffer.from('3163ba7c8db6dd363c4f48bda2735cc0d0413e57567f0a758f514f282889173c', 'hex'),
-          fileName: `Ahora somo ${tantos} participantes`,
+
+          // ⬇️ Aquí se muestra el total de participantes
+          fileName: `Ahora somos ${tantos} participantes`,
+
           fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
           directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
           mediaKeyTimestamp: { low: 1756370084, high: 0, unsigned: false },
