@@ -68,7 +68,7 @@ let handler = async (m, { conn, __dirname }) => {
         hasMediaAttachment: true
       },
       body: { text: actividad },
-      footer: { text: isWelcome ? 'welcome' : '🚪 Usuario ha salido del grupo' },
+      footer: { text: isWelcome ? 'welcome' : 'Usuario ha salido del grupo' },
       nativeFlowMessage: {
         buttons: [
           { name: 'single_select', buttonParamsJson: '{"has_multiple_buttons":true}' },
@@ -80,7 +80,7 @@ let handler = async (m, { conn, __dirname }) => {
               "sections":[
                 {
                   "title":"⌏Seleccione una opción requerida⌎",
-                  "highlight_label":"uwuuu🫠🫠",
+                  "highlight_label":"Solo para negocios",
                   "rows":[
                     {"title":"Owner/Creador","description":"","id":"Edar"},
                     {"title":"Información del Bot","description":"","id":".info"},
