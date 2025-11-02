@@ -1,4 +1,4 @@
-Pone este import fs from 'fs'
+import fs from 'fs'
 
 let handler = async (m, { conn }) => {
   try {
