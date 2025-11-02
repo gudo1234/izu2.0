@@ -18,9 +18,11 @@ let handler = async (m, { conn, __dirname }) => {
 let name
 try {
   name = await conn.getName(user)
-  if (!name) name = '+' + user.split('@')[0]
+  if (!name || name.includes('lid')) {
+    name = 'Miembro'
+  }
 } catch (e) {
-  name = '+' + user.split('@')[0]
+  name = 'Miembro'
 }
   let groupName = ''
   let tantos = 0
