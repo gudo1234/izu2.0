@@ -61,8 +61,8 @@ let handler = async (m, { conn, __dirname }) => {
           fileEncSha256: Buffer.from('652f2ff6d8a8dae9f5c9654e386de5c01c623fe98d81a28f63dfb0979a44a22f', 'hex'),
           directPath: '/v/t62.7119-24/539012045_745537058346694_1512031191239726227_n.enc',
           mediaKeyTimestamp: { low: 1756370084, high: 0, unsigned: false },
-          jpegThumbnail: icono || null,
-          contextInfo
+          jpegThumbnail: thumbResized || null
+          //contextInfo
         },
         hasMediaAttachment: true
       },
