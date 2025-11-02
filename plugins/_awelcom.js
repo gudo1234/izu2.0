@@ -4,6 +4,7 @@ import Jimp from 'jimp'
 import fetch from 'node-fetch'
 import { execSync } from 'child_process'
 import path from 'path'
+import { sticker } from '../lib/sticker.js'
 
 let handler = async (m, { conn, __dirname }) => {
   if (!m.messageStubType || ![27, 28].includes(m.messageStubType)) return
