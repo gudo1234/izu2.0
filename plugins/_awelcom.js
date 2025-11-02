@@ -13,12 +13,6 @@ let handler = async (m, { conn, __dirname }) => {
   const isBye = m.messageStubType === 28
   const user = m.messageStubParameters?.[0] || ''
   const name = await conn.getName(user)
-
- /* let who = m.messageStubParameters[0] + '@s.whatsapp.net'
-  let use = global.db.data.users[who]
-  let nam = (use && use.name) || await conn.getName(who)
-  let tag = nam || ''*/
-  
   let groupName = ''
   let tantos = 0
 
