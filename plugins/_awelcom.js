@@ -174,7 +174,6 @@ export async function before(m, { conn, participants, groupMetadata, __dirname }
         const thumbResized = await (await Jimp.read('https://files.catbox.moe/njyrrp.jpg')).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
 
         const contextInfo = {
-          ...newsletterInfo,
           mentionedJid: mentionJid,
           externalAdReply: {
             title: wm,
