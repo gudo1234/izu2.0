@@ -12,10 +12,10 @@ let handler = async (m, { conn, __dirname }) => {
   const emoji = emojis[Math.floor(Math.random() * emojis.length)]
 
   // --- Variables principales ---
-  let wm = '🦄드림 가이 Xeon'
-  let textbot = 'Bot oficial desarrollado por Xeon'
-  let redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
-  let icono = 'https://qu.ax/zAMtB.jpg'
+  //let wm = '🦄드림 가이 Xeon'
+ // let textbot = 'Bot oficial desarrollado por Xeon'
+// let redes = 'https://whatsapp.com/channel/0029VbAdXB147XeAcgOsJQ2j'
+  //let icono = 'https://qu.ax/zAMtB.jpg'
 
   // --- Nombre del grupo o chat ---
   let groupName = m.isGroup
