@@ -38,7 +38,7 @@ let handler = async (m, { conn, __dirname }) => {
 
   try {
     // --- Imagen miniatura ---
-    let pr = await (await fetch(`icono`)).buffer()
+    //let pr = await (await fetch(`icono`)).buffer()
     const imgPath = join(__dirname, icono)
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
