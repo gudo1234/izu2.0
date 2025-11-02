@@ -1,0 +1,10 @@
+let handler = async (m, { conn, isAdmin, isROwner }) => {
+    if (!(isAdmin || isROwner)) return dfail('admin', m, conn)
+    global.db.data.chats[m.chat].isBanned = true
+    await conn.reply(m.chat, `${e} Chat Baneado con exito.`, m, rcanal)
+    await m.react('✅')
+}
+
+handler.command = ['banearbot', 'banchat']
+handler.group = true 
+export default handler
