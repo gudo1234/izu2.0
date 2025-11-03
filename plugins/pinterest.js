@@ -78,7 +78,6 @@ const pins = async (query) => {
 }
 
 let handler = async (m, { text, conn, command, usedPrefix }) => {
-  const e = '📌'
   if (!text) return conn.reply(m.chat, `${e} Ingresa texto o URL de Pinterest.\n\nEjemplo:\n${usedPrefix + command} gatitos\n${usedPrefix + command} https://pin.it/1OqQom3ma`, m)
 
   await m.react('🕒')
@@ -101,23 +100,15 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
         const video = result.video
         const tags = result.tags?.join(', ') || 'Sin etiquetas'
 
-        let caption = `
-🎬 *PINTEREST VIDEO DOWNLOADER*
-────────────────────
-👤 *Usuario:* ${user.fullName || user.username}
-🔗 *Perfil:* @${user.username}
-💾 *Guardados:* ${result.stats?.saves || 0}
-🕓 *Duración:* ${video.duration}
-📅 *Fecha:* ${info.date}
-🖋️ *Descripción:* ${info.altText || 'Sin descripción'}
-🏷️ *Etiquetas:* ${tags}
+        let txt = `👤 _*Usuario:*_ ${user.fullName || user.username}
+🔗 _*Perfil:*_ @${user.username}
+💾 _*Guardados:*_ ${result.stats?.saves || 0}
+🕓 _*Duración:*_ ${video.duration}
+📅 _*Fecha:*_ ${info.date}
+🖋️ _*Descripción:*_ ${info.altText || 'Sin descripción'}
+🏷️ _*Etiquetas:*_ ${tags}
 `.trim()
-
-        await conn.sendMessage(m.chat, {
-          video: { url: video.formats.mp4 },
-          mimetype: 'video/mp4',
-          caption
-        }, { quoted: m })
+        await conn.sendFile(m.chat, video.formats.mp4, "Thumbnail.jpg", txt, m, null, rcanal)
 
         await m.react('✅')
         return
