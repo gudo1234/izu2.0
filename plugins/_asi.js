@@ -460,7 +460,7 @@ if (m.isGroup) {
     groupName = metadata.subject
 }
  const contextInfo = {
-    mentionedJid: [user],
+    mentions: user,
     externalAdReply: {
       title: wm,
       body: textbot,
@@ -591,7 +591,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       contextInfo: {
-        mentionedJid: [user],
+        mentions: user,
         externalAdReply: {
           title: `| Runtime ${run}`,
           body: textbot,
@@ -610,7 +610,7 @@ if (m.isGroup) {
       video: { url: [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
       caption: puta,
-      mentionedJid: [user],
+      mentions: user,
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
@@ -634,7 +634,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       footer: textbot,
-      mentionedJid: [user],
+      mentions: user,
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
