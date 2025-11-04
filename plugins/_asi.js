@@ -29,7 +29,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
   }
 
   try {
-    conn.reply(message.chat, `${e} _*Espere un momento...*_`,m)
+    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal)
 
     let results = [];
     let { data } = await axios.get("https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=" + text);
