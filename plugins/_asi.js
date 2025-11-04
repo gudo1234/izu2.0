@@ -97,9 +97,19 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let run = clockString(uptime)
   
   //mención
-  //const user = m.messageStubParameters?.[0] || ''
-const user = m.sender
-//const mention = `@${user.split('@')[0]}`
+  const who = (params[0] || m.participant) + '@s.whatsapp.net'
+let userName
+try {
+  userName = (global.db.data.users[who]?.name) || (await conn.getName(who)) || who.split('@')[0]
+} catch {
+  userName = who.split('@')[0]
+}
+
+/*await conn.sendMessage(m.chat, {
+  text: `👋 Hola @${userName}, ¿todo bien?`,
+  mentions: [who]
+}, { quoted: m })*/
+  
   const thumbnail = await (await fetch(icono)).buffer()
 
   const comandosPorCategoria = (categoria, emoji) => {
@@ -126,7 +136,7 @@ const user = m.sender
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
 │ 🚩 *Nombre:* ${m.pushName}
-│ 🚦 *Tag:* @${user.split('@')[0]}
+│ 🚦 *Tag:* @${userName}
 │ 🌎 *País:* ${mundo}
 │ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
 └────────────`
@@ -460,7 +470,7 @@ if (m.isGroup) {
     groupName = metadata.subject
 }
  const contextInfo = {
-    mentions: user,
+    mentions: [who],
     externalAdReply: {
       title: wm,
       body: textbot,
@@ -591,7 +601,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       contextInfo: {
-        mentions: user,
+        mentions: [who],
         externalAdReply: {
           title: `| Runtime ${run}`,
           body: textbot,
@@ -610,7 +620,7 @@ if (m.isGroup) {
       video: { url: [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
       caption: puta,
-      mentions: user,
+      mentions: [who],
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
@@ -634,7 +644,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       footer: textbot,
-      mentions: user,
+      mentions: [who],
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
