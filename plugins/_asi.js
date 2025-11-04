@@ -9,7 +9,7 @@ const {
 
 let handler = async (message, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* de tiktok...\n\n🔎 *_Ejemplo de búsqueda:* ${usedPrefix + command} Lady Gaga`, message, rcanal);
+    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* de tiktok...\n\n🔎 *_Ejemplo de búsqueda:_* ${usedPrefix + command} Lady Gaga`, message, rcanal);
   }
 
   async function createVideoMessage(url) {
