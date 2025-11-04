@@ -13,10 +13,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
   //documentImg
   const imgPath = join(__dirname, '../src/catalogo.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal
-      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
-      : null
+const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+const thumbResized = thumbLocal
+  ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
+  : null
   
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
