@@ -89,7 +89,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const user = m.messageStubParameters?.[0] || ''
 
   const thumbnail = await (await fetch(icono)).buffer()
-
+//documentImg
+  const imgPath = join(__dirname, '../src/catalogo.jpg')
+    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+    const thumbResized = thumbLocal
+      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
+      : null
+  
   const comandosPorCategoria = (categoria, emoji) => {
     return Object.entries(global.plugins)
       .filter(([file, plugin]) => {
@@ -460,12 +466,6 @@ if (m.isGroup) {
   }
 
     // --- Estructura del mensaje interactivo ---
-    //documentImg
-  const imgPath = join(__dirname, '../src/catalogo.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal
-      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
-      : null
     const nativeFlowPayload = {
       header: {
         documentMessage: {
