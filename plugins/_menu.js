@@ -27,7 +27,7 @@ const thumbResized = thumbLocal
       ? String.fromCodePoint(...[...pais.toUpperCase()].map(c => 127397 + c.charCodeAt()))
       : '🏳️'
 
-    // Zonas horarias precisass
+    // Zonas horarias precisas
     const zonas = {
       MX: 'America/Mexico_City',
       CO: 'America/Bogota',
