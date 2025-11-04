@@ -1,23 +1,24 @@
 import axios from 'axios';
+import Starlights from '@StarlightsTeam/Scraper';
 const {
   proto,
   generateWAMessageFromContent,
-  prepareWAMessageMedia,
   generateWAMessageContent,
-  getDevice
 } = (await import("@whiskeysockets/baileys")).default;
 
 let handler = async (message, { conn, text, usedPrefix, command }) => {
-  if (!text) {
-    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* de tiktok...\n\n🔎 *_Ejemplo de búsqueda:_* ${usedPrefix + command} Lady Gaga`, message, rcanal);
+  const input = text?.trim();
+
+  const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok.com\/[^\s]+/gi.test(url);
+
+  if (!input) {
+    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\n🔎 _Ejemplo de búsqueda:_\n> ${usedPrefix + command} Lady Gaga\n\n📹 _Ejemplo de descarga:_\n> ${usedPrefix + command} https://vm.tiktok.com/ZMShLNoJe/`, message, rcanal);
   }
 
+  message.react('🕓');
+
   async function createVideoMessage(url) {
-    const { videoMessage } = await generateWAMessageContent({
-      video: { url }
-    }, {
-      upload: conn.waUploadToServer
-    });
+    const { videoMessage } = await generateWAMessageContent({ video: { url } }, { upload: conn.waUploadToServer });
     return videoMessage;
   }
 
@@ -29,14 +30,37 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
   }
 
   try {
-    message.react('🕒')
-    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal)
+    if (isTikTokUrl(input)) {
+      // DESCARGA DIRECTA
+      const data = await Starlights.tiktokdl(input);
+      if (!data?.dl_url) throw new Error('❌ No se pudo obtener el enlace de descarga.');
+      const { title, author, duration, views, likes, comment, share, published, downloads, dl_url } = data;
+      const txt = `*乂  T I K T O K  -  D O W N L O A D*\n\n` +
+        `✩ *Título* : ${title}\n` +
+        `✩ *Autor* : ${author}\n` +
+        `✩ *Duración* : ${duration} segundos\n` +
+        `✩ *Vistas* : ${views}\n` +
+        `✩ *Likes* : ${likes}\n` +
+        `✩ *Comentarios* : ${comment}\n` +
+        `✩ *Compartidos* : ${share}\n` +
+        `✩ *Publicado* : ${published}`
+      await conn.sendFile(message.chat, dl_url, 'tiktok.mp4', txt, message, null, rcanal);
+    message.react('✅');
+    }
 
-    let results = [];
-    let { data } = await axios.get("https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=" + text);
+    // BÚSQUEDA POR TEXTO (carrusel)
+    message.react('🕒');
+    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal);
+
+    let { data } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(input)}`);
     let searchResults = data.data;
+    if (!searchResults || searchResults.length === 0) {
+      return conn.reply(message.chat, `${e} No se encontraron resultados para tu búsqueda.`, message);
+    }
+
     shuffleArray(searchResults);
     let topResults = searchResults.splice(0, 7);
+    let results = [];
 
     for (let result of topResults) {
       results.push({
@@ -45,7 +69,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
         header: proto.Message.InteractiveMessage.Header.fromObject({
           title: '' + result.title + '\n' + result.url,
           hasMediaAttachment: true,
-          videoMessage: await createVideoMessage(result.nowm)
+          videoMessage: await createVideoMessage(result.nowm) // video sin watermark
         }),
         nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons: [] })
       });
@@ -54,40 +78,25 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
     const messageContent = generateWAMessageFromContent(message.chat, {
       viewOnceMessage: {
         message: {
-          messageContextInfo: {
-            deviceListMetadata: {},
-            deviceListMetadataVersion: 2
-          },
+          messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
           interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-            body: proto.Message.InteractiveMessage.Body.create({
-              //text: "resultados de" + text
-            }),
-            footer: proto.Message.InteractiveMessage.Footer.create({
-              text: `${e} _Resultados de_ *${text}*`
-            }),
-            header: proto.Message.InteractiveMessage.Header.create({
-              hasMediaAttachment: false
-            }),
-            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-              cards: [...results]
-            })
+            body: proto.Message.InteractiveMessage.Body.create({}),
+            footer: proto.Message.InteractiveMessage.Footer.create({ text: `${e} *Resultados de* ${input}` }),
+            header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
+            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({ cards: [...results] })
           })
         }
       }
-    }, {
-      quoted: message
-    });
-message.react('✅')
-    await conn.relayMessage(message.chat, messageContent.message, {
-      messageId: messageContent.key.id
-    });
+    }, { quoted: message });
+message.react('✅');
+    await conn.relayMessage(message.chat, messageContent.message, { messageId: messageContent.key.id });
+
   } catch (error) {
     console.error(error);
     conn.reply(message.chat, `${e} *OCURRIÓ UN ERROR:* ${error.message}`, message);
   }
 };
 
-
-handler.command = ["tiktoksearch", "ttsearch", "tiktoks"];
-handler.group = true
+handler.command = ["tiktoksearch", "tiktoks", "ttsearch"];
+handler.group = true;
 export default handler;
