@@ -59,10 +59,10 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
           },
           interactiveMessage: proto.Message.InteractiveMessage.fromObject({
             body: proto.Message.InteractiveMessage.Body.create({
-              text: "resultados de" + text
+              //text: "resultados de" + text
             }),
             footer: proto.Message.InteractiveMessage.Footer.create({
-              text: textbot
+              text: `${e} Resultados de ${text}`
             }),
             header: proto.Message.InteractiveMessage.Header.create({
               hasMediaAttachment: false
