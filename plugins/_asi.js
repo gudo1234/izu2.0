@@ -4,9 +4,9 @@ import moment from 'moment-timezone'
 import 'moment/locale/es.js'
 import fetch from 'node-fetch'
 import fs from 'fs'
-import { join } from 'path'
+//import { join } from 'path'
 import Jimp from 'jimp'
-//import path from 'path'
+import path from 'path'
 import { execSync } from 'child_process'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
