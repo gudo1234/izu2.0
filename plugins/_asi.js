@@ -125,6 +125,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
 │ 🚩 *Nombre:* ${m.pushName}
+│ 🚦 *Tag:* @${user.split('@')[0]}
 │ 🌎 *País:* ${mundo}
 │ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
 └────────────`
@@ -589,6 +590,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       contextInfo: {
+        mentionedJid: [user],
         externalAdReply: {
           title: `| Runtime ${run}`,
           body: textbot,
@@ -607,6 +609,7 @@ if (m.isGroup) {
       video: { url: [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
       caption: puta,
+      mentionedJid: [user],
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
@@ -630,6 +633,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       footer: textbot,
+      mentionedJid: [user],
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
