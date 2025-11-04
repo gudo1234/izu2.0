@@ -10,13 +10,6 @@ import { execSync } from 'child_process'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
-  //documentImg
-  const imgPath = join(__dirname, '../src/catalogo.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal
-      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
-      : null
-  
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
     let pais = numero.getRegionCode()
@@ -466,6 +459,12 @@ if (m.isGroup) {
   }
 
     // --- Estructura del mensaje interactivo ---
+    //documentImg
+  const imgPath = join(__dirname, '../src/catalogo.jpg')
+    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+    const thumbResized = thumbLocal
+      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
+      : null
     const nativeFlowPayload = {
       header: {
         documentMessage: {
