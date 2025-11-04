@@ -12,7 +12,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
   const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok.com\/[^\s]+/gi.test(url);
 
   if (!input) {
-    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\n🔎 _Ejemplo de búsqueda:_\n> ${usedPrefix + command} Lady Gaga\n\n📹 _Ejemplo de descarga:_\n> ${usedPrefix + command} https://vm.tiktok.com/ZMShLNoJe/`, message);
+    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\n🔎 _Ejemplo de búsqueda:_\n> ${usedPrefix + command} Lady Gaga\n\n📹 _Ejemplo de descarga:_\n> ${usedPrefix + command} https://vm.tiktok.com/ZMShLNoJe/`, message, rcanal);
   }
 
   await message.react('🕓');
@@ -46,17 +46,17 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
           `✩ *Compartidos* : ${share}\n` +
           `✩ *Publicado* : ${published}\n` +
           `✩ *Descargas* : ${downloads}`;
-        await conn.sendFile(message.chat, dl_url, 'tiktok.mp4', txt, message, null);
+        await conn.sendFile(message.chat, dl_url, 'tiktok.mp4', txt, message, null, rcanal);
         return await message.react('✅');
       } catch (err) {
         console.error('❌ Error en descarga directa:', err);
         await message.react('✖️');
-        return conn.reply(message.chat, `${e} Ocurrió un error al descargar el video de TikTok.`, message);
+        return conn.reply(message.chat, `${e} Ocurrió un error al descargar el video de TikTok.`, message, rcanal);
       }
     }
 
     // BÚSQUEDA POR TEXTO Y CARRUSEL
-    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message);
+    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal);
 
     let { data } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(input)}`);
     let searchResults = data.data;
