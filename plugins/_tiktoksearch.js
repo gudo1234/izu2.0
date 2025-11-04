@@ -16,7 +16,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
   }
 
   message.react('🕓');
-
+conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal);
   async function createVideoMessage(url) {
     const { videoMessage } = await generateWAMessageContent({ video: { url } }, { upload: conn.waUploadToServer });
     return videoMessage;
@@ -49,9 +49,6 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
     }
 
     // BÚSQUEDA POR TEXTO (carrusel)
-    message.react('🕒');
-    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal);
-
     let { data } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(input)}`);
     let searchResults = data.data;
     if (!searchResults || searchResults.length === 0) {
