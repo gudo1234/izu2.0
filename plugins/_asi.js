@@ -12,7 +12,7 @@ import { execSync } from 'child_process'
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
   //documentImg
-  const imgPath = join(__dirname, '../src/catalogo.jpg')
+  const imgPath = join(__dirname, './src/catalogo.jpg')
     const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
     const thumbResized = thumbLocal
       ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
