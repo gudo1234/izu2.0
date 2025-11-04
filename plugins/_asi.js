@@ -1,22 +1,26 @@
 import fs from 'fs'
-import { join } from 'path'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import Jimp from 'jimp'
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
 import 'moment/locale/es.js'
 import fetch from 'node-fetch'
-import path from 'path'
 import { execSync } from 'child_process'
+
+// ✅ Corrección para ESM: definir __dirname correctamente
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
   //documentImg
-  const imgPath = join(__dirname, '../src/catalogo.jpg')
-const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-const thumbResized = thumbLocal
-  ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
-  : null
+  const imgPath = path.join(__dirname, '../src/catalogo.jpg')
+  const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+  const thumbResized = thumbLocal
+    ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
+    : null
   
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
