@@ -87,7 +87,6 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
 };
 
 
-//handler.command = ["tiktoksearch", "tts", "tiktoks"];
-handler.command = ['si']
+handler.command = ["tiktoksearch", "ttsearch", "tiktoks"];
 handler.group = true
 export default handler;
