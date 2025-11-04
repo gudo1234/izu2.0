@@ -97,8 +97,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let run = clockString(uptime)
   
   //mención
-  const user = m.messageStubParameters?.[0] || ''
-
+  //const user = m.messageStubParameters?.[0] || ''
+const user = m.sender
+//const mention = `@${user.split('@')[0]}`
   const thumbnail = await (await fetch(icono)).buffer()
 
   const comandosPorCategoria = (categoria, emoji) => {
