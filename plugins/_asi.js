@@ -7,7 +7,6 @@ const {
 } = (await import("@whiskeysockets/baileys")).default;
 
 let handler = async (message, { conn, text, usedPrefix, command }) => {
-  const e = "⚠️"; // Emoji de aviso
   const input = text?.trim();
 
   const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok.com\/[^\s]+/gi.test(url);
