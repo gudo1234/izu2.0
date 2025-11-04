@@ -42,7 +42,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
         body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
         footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: wm }),
         header: proto.Message.InteractiveMessage.Header.fromObject({
-          title: '' + result.title,
+          title: '' + result.title + '\n' + result.url,
           hasMediaAttachment: true,
           videoMessage: await createVideoMessage(result.nowm)
         }),
@@ -62,7 +62,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
               //text: "resultados de" + text
             }),
             footer: proto.Message.InteractiveMessage.Footer.create({
-              //text: `${e} Resultados de ${text}`
+              text: `${e} *Resultados de *${text}*`
             }),
             header: proto.Message.InteractiveMessage.Header.create({
               hasMediaAttachment: false
