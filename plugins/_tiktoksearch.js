@@ -29,6 +29,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
   }
 
   try {
+    message.react('🕒')
     conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal)
 
     let results = [];
@@ -76,7 +77,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
     }, {
       quoted: message
     });
-
+message.react('✅')
     await conn.relayMessage(message.chat, messageContent.message, {
       messageId: messageContent.key.id
     });
