@@ -10,11 +10,12 @@ import { execSync } from 'child_process'
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
-  const imgPath = __dirname + '/../thumbnail.jpg';
-const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null;
-const thumbResized = thumbLocal
-  ? await (await Jimp.read(thumbLocal)).resize(300, 150).getBufferAsync(Jimp.MIME_JPEG)
-  : null;
+  //documentImg
+  const imgPath = join(__dirname, '../src/catalogo.jpg')
+    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
+    const thumbResized = thumbLocal
+      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
+      : null
   
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
@@ -85,13 +86,6 @@ const thumbResized = thumbLocal
   let jpg3 = './media/gifff.mp4'
   let or = ['grupo', 'gif', 'anu', 'bot']
   let media = or[Math.floor(Math.random() * or.length)]
-  
-  //documentImg
-  const imgPath = join(__dirname, '../src/catalogo.jpg')
-    const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
-    const thumbResized = thumbLocal
-      ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
-      : null
   
   //runtime
   let uptime = process.uptime() * 1000
