@@ -1,11 +1,11 @@
+import fs from 'fs'
+import { join } from 'path'
+import Jimp from 'jimp'
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
 import 'moment/locale/es.js'
 import fetch from 'node-fetch'
-import fs from 'fs'
-//import { join } from 'path'
-import Jimp from 'jimp'
 import path from 'path'
 import { execSync } from 'child_process'
 
