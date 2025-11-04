@@ -40,7 +40,7 @@ let handler = async (message, { conn, text, usedPrefix, command }) => {
     for (let result of topResults) {
       results.push({
         body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: wm }),
+        footer: proto.Message.InteractiveMessage.Footer.fromObject/*({ text: wm })*/,
         header: proto.Message.InteractiveMessage.Header.fromObject({
           title: '' + result.title + '\n' + result.url,
           hasMediaAttachment: true,
