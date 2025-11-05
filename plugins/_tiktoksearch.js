@@ -1,108 +1,94 @@
-import axios from 'axios';
-import Starlights from '@StarlightsTeam/Scraper';
-const {
-  proto,
+import fetch from 'node-fetch'
+import {
   generateWAMessageFromContent,
-  generateWAMessageContent,
-} = (await import("@whiskeysockets/baileys")).default;
+  generateWAMessage,
+  delay
+} from '@whiskeysockets/baileys'
 
-let handler = async (message, { conn, text, usedPrefix, command }) => {
-  const input = text?.trim();
+async function sendAlbumMessage(conn, jid, medias, options = {}) {
+  if (typeof jid !== "string") throw new TypeError("jid must be string")
+  if (!Array.isArray(medias) || medias.length < 2) throw new RangeError("Minimum 2 media required")
 
-  const isTikTokUrl = url => /(?:https?:\/\/)?(?:www\.)?(?:vm|vt|t)?\.?tiktok.com\/[^\s]+/gi.test(url);
+  const caption = options.caption || ""
+  const wait = !isNaN(options.delay) ? options.delay : 500
 
-  if (!input) {
-    return conn.reply(message.chat, `${e} Ingresa el *nombre del video* o un *enlace* de TikTok.\n\n🔎 _Ejemplo de búsqueda:_\n> ${usedPrefix + command} Lady Gaga\n\n📹 _Ejemplo de descarga:_\n> ${usedPrefix + command} https://vm.tiktok.com/ZMShLNoJe/`, message, rcanal);
-  }
+  const album = generateWAMessageFromContent(
+    jid,
+    {
+      albumMessage: {
+        expectedImageCount: medias.filter(m => m.type === "image").length,
+        expectedVideoCount: medias.filter(m => m.type === "video").length,
+        ...(options.quoted ? {
+          contextInfo: {
+            remoteJid: options.quoted.key.remoteJid,
+            fromMe: options.quoted.key.fromMe,
+            stanzaId: options.quoted.key.id,
+            participant: options.quoted.key.participant || options.quoted.key.remoteJid,
+            quotedMessage: options.quoted.message,
+          },
+        } : {})
+      }
+    },
+    {}
+  )
 
-  await message.react('🕓');
+  await conn.relayMessage(album.key.remoteJid, album.message, { messageId: album.key.id })
 
-  async function createVideoMessage(url) {
-    const { videoMessage } = await generateWAMessageContent({ video: { url } }, { upload: conn.waUploadToServer });
-    return videoMessage;
-  }
-
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+  for (let i = 0; i < medias.length; i++) {
+    const { type, data } = medias[i]
+    try {
+      const msg = await generateWAMessage(
+        album.key.remoteJid,
+        { [type]: data, ...(i === 0 ? { caption } : {}) },
+        { upload: conn.waUploadToServer }
+      )
+      msg.message.messageContextInfo = { messageAssociation: { associationType: 1, parentMessageKey: album.key } }
+      await conn.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id })
+      await delay(wait)
+    } catch (err) {
+      console.warn(`[WARN VIDEO] No se pudo enviar el video ${i + 1}:`, err.message)
+      continue
     }
   }
 
+  return album
+}
+
+const handler = async (m, { conn, text, usedPrefix, command }) => {
+  if (!text) {
+    conn.reply(m.chat, `${e} Uso correcto: ${usedPrefix + command} <busqueda>`, m)
+    return
+  }
+
+  m.react('🕒')
+conn.reply(m.chat, `${e} Espere un momento...`, m, rcanal)
   try {
-    if (isTikTokUrl(input)) {
-      // DESCARGA DIRECTA SOLO, SIN CARRUSEL
-      try {
-        const data = await Starlights.tiktokdl(input);
-        if (!data?.dl_url) throw new Error('❌ No se pudo obtener el enlace de descarga.');
-        const { title, author, duration, views, likes, comment, share, published, downloads, dl_url } = data;
-        const txt = `*乂  T I K T O K  -  D O W N L O A D*\n\n` +
-          `✩ *Título* : ${title}\n` +
-          `✩ *Autor* : ${author}\n` +
-          `✩ *Duración* : ${duration} segundos\n` +
-          `✩ *Vistas* : ${views}\n` +
-          `✩ *Likes* : ${likes}\n` +
-          `✩ *Comentarios* : ${comment}\n` +
-          `✩ *Compartidos* : ${share}\n` +
-          `✩ *Publicado* : ${published}\n` +
-          `✩ *Descargas* : ${downloads}`;
-        await conn.sendFile(message.chat, dl_url, 'tiktok.mp4', txt, message, null, rcanal);
-        return await message.react('✅');
-      } catch (err) {
-        console.error('❌ Error en descarga directa:', err);
-        await message.react('✖️');
-        return conn.reply(message.chat, `${e} Ocurrió un error al descargar el video de TikTok.`, message, rcanal);
-      }
-    }
+    const response = await fetch(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(text)}`)
+    const json = await response.json()
 
-    // BÚSQUEDA POR TEXTO Y CARRUSEL
-    conn.reply(message.chat, `${e} _*Espere un momento...*_`, message, rcanal);
+    if (!json || !json.data || json.data.length === 0)
+      throw new Error('No se encontraron videos')
 
-    let { data } = await axios.get(`https://apis-starlights-team.koyeb.app/starlight/tiktoksearch?text=${encodeURIComponent(input)}`);
-    let searchResults = data.data;
-    if (!searchResults || searchResults.length === 0) {
-      return conn.reply(message.chat, `${e} No se encontraron resultados para tu búsqueda.`, message);
-    }
+    const videos = json.data.slice(0, 10)
+    const medias = videos.map(v => ({
+      type: 'video',
+      data: { url: v.nowm }
+    }))
 
-    shuffleArray(searchResults);
-    let topResults = searchResults.splice(0, 7);
-    let results = [];
+    await sendAlbumMessage(conn, m.chat, medias, {
+      caption: `${e} *_Resultados de TikTok para:_* ${text}`,
+      quoted: m
+    })
 
-    for (let result of topResults) {
-      results.push({
-        body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-        footer: proto.Message.InteractiveMessage.Footer.fromObject({ text: null }),
-        header: proto.Message.InteractiveMessage.Header.fromObject({
-          title: '' + result.title + '\n' + result.url,
-          hasMediaAttachment: true,
-          videoMessage: await createVideoMessage(result.nowm)
-        }),
-        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({ buttons: [] })
-      });
-    }
+    m.react('✅')
 
-    const messageContent = generateWAMessageFromContent(message.chat, {
-      viewOnceMessage: {
-        message: {
-          messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-          interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-            body: proto.Message.InteractiveMessage.Body.create({}),
-            footer: proto.Message.InteractiveMessage.Footer.create({ text: `${e} *Resultados de* ${input}` }),
-            header: proto.Message.InteractiveMessage.Header.create({ hasMediaAttachment: false }),
-            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({ cards: [...results] })
-          })
-        }
-      }
-    }, { quoted: message });
-
-    await conn.relayMessage(message.chat, messageContent.message, { messageId: messageContent.key.id });
-
-  } catch (error) {
-    console.error(error);
-    conn.reply(message.chat, `${e} *OCURRIÓ UN ERROR:* ${error.message}`, message);
+  } catch (e) {
+    console.error('[ERROR TIKTOK]', e)
+    m.reply(`${e} Ocurrió un error al obtener los videos.\n\n${e.message}`)
   }
-};
+}
 
-handler.command = ["tiktoksearch", "tiktoks", "ttsearch"];
-handler.group = true;
-export default handler;
+handler.command = ['tiktoks', 'ttsearch', 'tiktoksearch']
+handler.group = true
+
+export default handler
