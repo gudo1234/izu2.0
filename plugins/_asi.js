@@ -97,18 +97,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let run = clockString(uptime)
   
   //mención
-  const who = (params[0] || m.participant) + '@s.whatsapp.net'
-let userName
-try {
-  userName = (global.db.data.users[who]?.name) || (await conn.getName(who)) || who.split('@')[0]
-} catch {
-  userName = who.split('@')[0]
-}
-
-/*await conn.sendMessage(m.chat, {
-  text: `👋 Hola @${userName}, ¿todo bien?`,
-  mentions: [who]
-}, { quoted: m })*/
+  const who = m.mentionedJid[0]
+const userName = (global.db.data.users[who]?.name) || (await conn.getName(who)) || who.split('@')[0]
   
   const thumbnail = await (await fetch(icono)).buffer()
 
