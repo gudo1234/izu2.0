@@ -97,23 +97,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let run = clockString(uptime)
   
   //mención
- let who =
-  m.mentionedJid?.[0] || // si se mencionó a alguien
-  (args[0]?.replace(/[@+]/g, '') ? args[0].replace(/[@+]/g, '') + '@s.whatsapp.net' : null) || // si se pasó un número
-  m.participant // si no, usa el autor del mensaje
-
-// aseguramos que sea string
-if (typeof who !== 'string') who = m.participant
-
-let userName
-try {
-  userName =
-    global.db.data.users[who]?.name ||
-    (await conn.getName(who)) ||
-    (who.split('@')[0]) // si no tiene nombre, usa número
-} catch {
-  userName = who?.split('@')?.[0] || 'Usuario'
-}
+ const userName = m.sender ? `@${m.sender.split('@')[0]}` : '@usuario';
   const thumbnail = await (await fetch(icono)).buffer()
 
   const comandosPorCategoria = (categoria, emoji) => {
