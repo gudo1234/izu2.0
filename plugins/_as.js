@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { spawn } from "child_process";
 import yts from "yt-search";
+import ytDlp from "yt-dlp-exec"; // aquí importamos el ejecutable
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
@@ -17,66 +17,37 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     await conn.sendMessage(
       m.chat,
-      {
-        image: { url: video.image },
-        caption:
-          `🎧 *${video.title}*\n` +
-          `👤 Canal: *${video.author.name}*\n` +
-          `⏳ Duración: *${video.timestamp}*\n` +
-          `🔗 Link: ${url}\n\n` +
-          `⬇️ Descargando audio...`
-      },
+      { text: `⬇️ Descargando audio de *${video.title}*...` },
       { quoted: m }
     );
 
-    // Carpeta tmp
     const tmpDir = path.join(process.cwd(), "tmp");
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
-    const filename = `${Date.now()}.mp3`;
-    const filepath = path.join(tmpDir, filename);
+    const filepath = path.join(tmpDir, `${Date.now()}.mp3`);
 
-    // 🔹 Spawn yt-dlp
-    const yt = spawn("yt-dlp", ["-x", "--audio-format", "mp3", "-o", filepath, url], {
-      shell: true // importante en Windows
+    // Usamos yt-dlp-exec directamente
+    await ytDlp(url, {
+      extractAudio: true,
+      audioFormat: "mp3",
+      output: filepath
     });
 
-    yt.stderr.on("data", data => {
-      console.log("[yt-dlp stderr]", data.toString());
-    });
+    const buffer = fs.readFileSync(filepath);
+    await conn.sendMessage(
+      m.chat,
+      { audio: buffer, mimetype: "audio/mpeg", fileName: `${video.title}.mp3`, caption: `✅ Descarga lista\n🎧 ${video.title}` },
+      { quoted: m }
+    );
 
-    yt.on("error", err => {
-      console.error("[yt-dlp error]", err);
-      conn.sendMessage(m.chat, { text: "❌ No se pudo ejecutar yt-dlp. ¿Está instalado?" }, { quoted: m });
-    });
-
-    yt.on("close", async code => {
-      if (code !== 0) {
-        console.error("[yt-dlp] terminó con código", code);
-        return conn.sendMessage(m.chat, { text: "❌ Error descargando el audio." }, { quoted: m });
-      }
-
-      try {
-        const buffer = fs.readFileSync(filepath);
-        await conn.sendMessage(
-          m.chat,
-          { audio: buffer, mimetype: "audio/mpeg", fileName: `${video.title}.mp3`, caption: `✅ Descarga lista\n🎧 ${video.title}` },
-          { quoted: m }
-        );
-      } catch (err) {
-        console.error("[play] error enviando:", err);
-        await conn.sendMessage(m.chat, { text: "⚠️ Error al enviar el archivo." }, { quoted: m });
-      } finally {
-        try { fs.unlinkSync(filepath); } catch {}
-      }
-    });
+    fs.unlinkSync(filepath);
 
   } catch (e) {
     console.error("[play] excepción:", e);
-    await conn.sendMessage(m.chat, { text: "⚠️ Ocurrió un error ejecutando el comando." }, { quoted: m });
+    await conn.sendMessage(m.chat, { text: "⚠️ Ocurrió un error descargando el audio." }, { quoted: m });
   }
 };
 
-handler.command = ["pa"];
+handler.command = ["po"];
 
 export default handler;
