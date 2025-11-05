@@ -9,13 +9,11 @@ import 'moment/locale/es.js'
 import fetch from 'node-fetch'
 import { execSync } from 'child_process'
 
-// ✅ Corrección para ESM: definir __dirname correctamente
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   let mundo = 'Desconocido'
-  //documentImg
   const imgPath = path.join(__dirname, '../src/catalogo.jpg')
   const thumbLocal = fs.existsSync(imgPath) ? fs.readFileSync(imgPath) : null
   const thumbResized = thumbLocal
@@ -32,8 +30,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     let bandera = pais
       ? String.fromCodePoint(...[...pais.toUpperCase()].map(c => 127397 + c.charCodeAt()))
       : '🏳️'
-
-    // Zonas horarias precisass
     const zonas = {
       MX: 'America/Mexico_City',
       CO: 'America/Bogota',
@@ -91,8 +87,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let jpg3 = './media/gifff.mp4'
   let or = ['grupo', 'gif', 'anu', 'bot']
   let media = or[Math.floor(Math.random() * or.length)]
-  
-  //runtime
   let uptime = process.uptime() * 1000
   let run = clockString(uptime)
 let tag = '@' + m.sender.split('@')[0]
@@ -146,7 +140,7 @@ let txt2 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 │ ${e}${s}tagall *‹τ×τ›*
 │ ${e}${s}hideteg *‹τ×τ›*
 │ ${e}${s}tag *‹rєρℓy›*
-│ ${e}${s}icongc *‹rєρℓy›*
+│ ${e}${s}icongp *‹rєρℓy›*
 │ ${e}${s}grupo *‹αвrir/cєrrαr›*
 │ ${e}${s}promote *‹@υsєя›*
 │ ${e}${s}demote *‹@υsєя›*
@@ -448,7 +442,6 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 let textos = txt2
 let textos2 = txt3
 let puta = txt + '\n\n' + [textos, textos2].sort(() => Math.random() - 0.5)[0]
-//-------abajo----
 let groupName = ''
 if (m.isGroup) {
     const metadata = await conn.groupMetadata(m.chat)
@@ -467,8 +460,6 @@ if (m.isGroup) {
       renderLargerThumbnail: false
     }
   }
-
-    // --- Estructura del mensaje interactivo ---
     const nativeFlowPayload = {
       header: {
         documentMessage: {
@@ -579,7 +570,6 @@ if (m.isGroup) {
       },
       contextInfo
     }
-//-------arriba---- 
 
   m.react('🏖️')
 
@@ -671,6 +661,5 @@ function clockString(ms) {
 }
 
 handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú', 'm', 'me']
-//handler.command = ['si']
 handler.group = true
 export default handler
