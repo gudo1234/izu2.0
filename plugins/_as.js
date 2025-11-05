@@ -1,10 +1,8 @@
-import ytdl from 'ytdl-core';
+import play from 'play-dl';
 import yts from 'yt-search';
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
-  if (!text) {
-    return conn.reply(m.chat, `✳️ Usa el comando así:\n\n${usedPrefix + command} mi buen amor`, m);
-  }
+  if (!text) return conn.reply(m.chat, `✳️ Usa el comando así:\n\n${usedPrefix + command} mi canción`, m);
 
   try {
     const search = await yts(text);
@@ -23,16 +21,12 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
     await conn.reply(m.chat, info, m);
 
-    // Descargar el audio desde YouTube
-    const stream = ytdl(url, {
-      filter: 'audioonly',
-      quality: 'highestaudio'
-    });
+    // Obtener el stream de audio
+    const stream = await play.stream(url);
 
-    // Enviar el audio al chat
     await conn.sendMessage(
       m.chat,
-      { audio: { stream }, mimetype: 'audio/mpeg', fileName: `${title}.mp3` },
+      { audio: { stream: stream.stream, mimetype: 'audio/mpeg', fileName: `${title}.mp3` } },
       { quoted: m }
     );
 
@@ -42,6 +36,5 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.command = ['pa']
-
+handler.command = ['pa'];
 export default handler;
