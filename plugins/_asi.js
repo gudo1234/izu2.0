@@ -116,13 +116,12 @@ let tag = '@' + m.sender.split('@')[0]
   const comandosFun   = comandosPorCategoria('fun',   '*‹rєρℓy›*')
   const comandosNsfw  = comandosPorCategoria('nsfw',  '*‹@υsєя›*')
 
-  let txt = `${e} _¡Hola!_ *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
+  let txt = `${e} _¡Hola!_ ${tag}, *🥀¡Muy buenos días🌅, tardes🌇 o noches🌆!*\n\n> ⚡ \`izuBot:\` es un sistema automatizado diseñado para interactuar mediante comandos. Permite realizar acciones como descargar videos de distintas plataformas, hacer búsquedas en la \`web\`, y disfrutar de una variedad de juegos dentro del \`chat\`.
 
 ━━━━━━━━━━━━━
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
 │ 🚩 *Nombre:* ${m.pushName}
-│ 🚦 *tag:* ${tag}
 │ 🌎 *País:* ${mundo}
 │ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
 └────────────`
