@@ -9,7 +9,6 @@ const require = createRequire(__dirname)
 
 let handler = async (m, _2) => {
   let { conn, usedPrefix, noPrefix, args, groupMetadata } = _2
-//if (!isOwner) return;
   let _return
   let _syntax = ''
   let _text = (/^=/.test(usedPrefix) ? 'return ' : '') + noPrefix
@@ -39,7 +38,7 @@ let handler = async (m, _2) => {
   }
 }
 
-handler.customPrefix = /^=?> /
+handler.customPrefix = /^=?• /
 handler.command = /(?:)/i
 handler.owner = true
 
