@@ -1,16 +1,3 @@
-/*⚠ PROHIBIDO EDITAR ⚠
-Este codigo fue modificado, adaptado y mejorado por
-- ReyEndymion >> https://github.com/ReyEndymion
-El codigo de este archivo esta inspirado en el codigo original de:
-- Aiden_NotLogic >> https://github.com/ferhacks
-*El archivo original del MysticBot-MD fue liberado en mayo del 2024 aceptando su liberacion*
-El codigo de este archivo fue parchado en su momento por:
-- BrunoSobrino >> https://github.com/BrunoSobrino
-Contenido adaptado por:
-- GataNina-Li >> https://github.com/GataNina-Li
-- elrebelde21 >> https://github.com/elrebelde21
-*/
-
 const { useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, fetchLatestBaileysVersion} = (await import("@whiskeysockets/baileys"));
 import qrcode from "qrcode"
 import NodeCache from "node-cache"
@@ -44,14 +31,11 @@ let time = global.db.data.users[m.sender].Subs + 120000
 if (new Date - global.db.data.users[m.sender].Subs < 120000) return conn.reply(m.chat, `${emoji} Debes esperar ${msToTime(time - new Date())} para volver a vincular un *Sub-Bot.*`, m)
 const subBots = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])]
 const subBotsCount = subBots.length
-if (subBotsCount === 20) {
-return m.reply(`${emoji2} No se han encontrado espacios para *Sub-Bots* disponibles.`)
+if (subBotsCount === 01) {
+return m.reply(`${e} No se han encontrado espacios para *Sub-Bots* disponibles.`)
 }
-/*if (Object.values(global.conns).length === 30) {
-return m.reply(`${emoji2} No se han encontrado espacios para *Sub-Bots* disponibles.`)
-}*/
 let who = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
-let id = `${who.split`@`[0]}`  //conn.getName(who)
+let id = `${who.split`@`[0]}`
 let pathYukiJadiBot = path.join(`./${jadi}/`, id)
 if (!fs.existsSync(pathYukiJadiBot)){
 fs.mkdirSync(pathYukiJadiBot, { recursive: true })
