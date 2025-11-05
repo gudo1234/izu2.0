@@ -36,14 +36,23 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     const filename = `${Date.now()}.mp3`;
     const filepath = path.join(tmpDir, filename);
 
-    // Spawn yt-dlp
-    const yt = spawn("yt-dlp", ["-x", "--audio-format", "mp3", "-o", filepath, url]);
+    // 🔹 Spawn yt-dlp
+    const yt = spawn("yt-dlp", ["-x", "--audio-format", "mp3", "-o", filepath, url], {
+      shell: true // importante en Windows
+    });
 
-    yt.stderr.on("data", data => console.log("[yt-dlp]", data.toString()));
+    yt.stderr.on("data", data => {
+      console.log("[yt-dlp stderr]", data.toString());
+    });
+
+    yt.on("error", err => {
+      console.error("[yt-dlp error]", err);
+      conn.sendMessage(m.chat, { text: "❌ No se pudo ejecutar yt-dlp. ¿Está instalado?" }, { quoted: m });
+    });
 
     yt.on("close", async code => {
       if (code !== 0) {
-        console.error("[play] yt-dlp salió con código:", code);
+        console.error("[yt-dlp] terminó con código", code);
         return conn.sendMessage(m.chat, { text: "❌ Error descargando el audio." }, { quoted: m });
       }
 
@@ -68,5 +77,6 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 };
 
-handler.command = ["po"];
+handler.command = ["pa"];
+
 export default handler;
