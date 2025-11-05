@@ -95,7 +95,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   //runtime
   let uptime = process.uptime() * 1000
   let run = clockString(uptime)
-  
+
+  let tag = '@' + m.sender.split('@')[0]
   const thumbnail = await (await fetch(icono)).buffer()
 
   const comandosPorCategoria = (categoria, emoji) => {
@@ -122,7 +123,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 \`❒ᴄᴏɴᴛᴇxᴛ-ɪɴғᴏ☔\`
 ┌────────────
 │ 🚩 *Nombre:* ${m.pushName}
-│ 🚦 *Tag:* ${taguser}
+│ 🚦 *Tag:* ${tag}
 │ 🌎 *País:* ${mundo}
 │ 📱 *Sistema/Opr:* ${getDevice(m.key.id)}
 └────────────`
@@ -456,6 +457,7 @@ if (m.isGroup) {
     groupName = metadata.subject
 }
  const contextInfo = {
+   mentions: [m.sender],
     externalAdReply: {
       title: wm,
       body: textbot,
@@ -586,6 +588,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       contextInfo: {
+        mentions: [m.sender],
         externalAdReply: {
           title: `| Runtime ${run}`,
           body: textbot,
@@ -604,6 +607,7 @@ if (m.isGroup) {
       video: { url: [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
       caption: puta,
+      mentions: [m.sender],
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
@@ -627,6 +631,7 @@ if (m.isGroup) {
     await conn.sendMessage(m.chat, {
       text: puta,
       footer: textbot,
+      mentions: [m.sender],
       contextInfo: {
         isForwarded: true,
         forwardedNewsletterMessageInfo: {
