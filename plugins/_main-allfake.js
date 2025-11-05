@@ -117,7 +117,7 @@ global.msm = '⚠︎'
         }
       }
     }
-    
+  global.taguser = '@' + m.sender.split("@s.whatsapp.net")
 //🗿
   } catch (err) {
     console.error('before() error:', err)
