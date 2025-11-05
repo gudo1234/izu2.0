@@ -146,7 +146,7 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
   }
 }
 
-handler.command = ['pin', 'pinterest', 'pinimg', 'pinvid', 'pinterestdl', 'pinvideo']
+handler.command = ['pin', 'pinterest', 'pinimg', 'pinvid', 'pinterestdl', 'pinvideo', 'pindl']
 handler.group = true
 
 export default handler
