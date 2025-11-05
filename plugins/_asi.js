@@ -97,9 +97,16 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   let run = clockString(uptime)
   
   //mención
-  const who = m.mentionedJid[0]
-const userName = (global.db.data.users[who]?.name) || (await conn.getName(who)) || who.split('@')[0]
-  
+ const who = m.mentionedJid?.[0] 
+  || (args[0]?.includes('@') ? args[0].replace(/[@+]/g, '') + '@s.whatsapp.net' : null)
+  || m.participant
+
+let userName
+try {
+  userName = global.db.data.users[who]?.name || (await conn.getName(who)) || who.split('@')[0]
+} catch {
+  userName = who.split('@')[0]
+}
   const thumbnail = await (await fetch(icono)).buffer()
 
   const comandosPorCategoria = (categoria, emoji) => {
