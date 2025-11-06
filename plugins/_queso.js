@@ -8,6 +8,8 @@ let handler = async (m, { conn }) => {
     txt = 'zo🧀'
   } else if (/^(pe|p)$/i.test(m.text)) {
     txt = 'ne'
+  } else if (/^(pe|peru|perú|Pe|Perú|Peru)$/i.test(m.text)) {
+    txt = 'oe pe causa 🐦'
   }
 
   await conn.sendMessage(
@@ -21,6 +23,6 @@ let handler = async (m, { conn }) => {
   )
 }
 
-handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee|pe)$/i
+handler.customPrefix = /^(e|a|q|que|qe|ke|Qe|k|Ke|Kee|Quee|pe|peru|perú|Pe|Perú|Peru)$/i
 handler.command = new RegExp
 export default handler
