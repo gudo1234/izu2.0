@@ -6,8 +6,6 @@ let handler = async (m, { conn }) => {
     txt = 'rroz'
   } else if (/^(q|que|qe|ke|qe|k|ke|kee|quee)$/i.test(m.text)) {
     txt = 'zo🧀'
-  } else if (/^(pe|p)$/i.test(m.text)) {
-    txt = 'ne'
   } else if (/^(pe|peru|perú|Pe|Perú|Peru)$/i.test(m.text)) {
     txt = 'oe pe causa 🐦'
   }
