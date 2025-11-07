@@ -38,7 +38,7 @@ font: 'simple',
 align: 'left',
 gradient: ['green', 'white']
 })
-say('Made with love by Destroy', {
+say('Made with love by Edar', {
 font: 'console',
 align: 'center',
 colors: ['cyan', 'magenta', 'yellow']
