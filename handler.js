@@ -309,7 +309,7 @@ const bot = participants.find(
   u =>
     u.id === conn.user.jid ||
     u.jid === conn.user.jid ||
-    u.id === (conn.user.lid?.split(':')[0])
+    u.id === (conn.user.lid?.split(':')[0] + '@lid')
 ) || {}
 const isRAdmin = response.isRAdmin
 const isAdmin = response.isAdmin
