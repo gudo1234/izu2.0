@@ -252,7 +252,7 @@ if (opts["queque"] && m.text && !isPrems) {
 m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
-    
+// ----------------- Reemplazo mejorado -----------------
 async function getGroupInfo(m, conn) {
     let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
     let response = {};
@@ -266,7 +266,6 @@ async function getGroupInfo(m, conn) {
         response.isBotAdmin = !!response.admins?.find(a => a.id === conn.user.jid || a.id === (conn.user.lid?.split(':')[0] + '@lid'));
         response.metadata = metadata || {};
     }
-    // Manejo de IDs tipo @lid
     if (sender?.endsWith('@lid')) {
         const match = response.metadata?.participants?.find(p => p.id === sender && p.jid);
         if (match) sender = match.jid;
@@ -275,9 +274,9 @@ async function getGroupInfo(m, conn) {
     return response;
 }
 
-// Uso en tu handler, reemplazando la sección antigua
 const groupInfo = await getGroupInfo(m, this); 
 const { admins, isAdmin, isBotAdmin, metadata, sender } = groupInfo;
+// -------------------------------------------------------
 if (m.isBaileys) {
 return
 }
