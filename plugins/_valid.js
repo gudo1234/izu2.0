@@ -21,7 +21,7 @@ function levenshteinDistance(a, b) {
   return dp[a.length][b.length]
 }
 
-export async function before(m) {
+export async function before(m, { conn }) {
   if (!m.text || !global.prefix.test(m.text)) return
 
   const usedPrefix = global.prefix.exec(m.text)[0]
@@ -31,23 +31,27 @@ export async function before(m) {
   const user = global.db.data.users[m.sender]
   let sender = m.sender
 
+  // ⚡ Bypass del @lid (igual que en tu primer código)
+  if (sender?.endsWith('@lid')) {
+    const metadata = await conn.groupMetadata?.(m.chat).catch(() => null)
+    const match = metadata?.participants?.find(p => p.id === sender && p.jid)
+    if (match) sender = match.jid
+  }
+
   // Extrae número real
   const realNum = sender.split('@')[0].replace(/\D/g, '')
   const pn = PhoneNumber(`+${realNum}`)
-  const region = pn.getRegionCode() || 'Desconocido'
+  const region = pn.getRegionCode() || ''
 
-  // Nombre del país y bandera
-  let countryName = ''
+  // Solo la bandera usando la misma lógica del primer código
   let flag = ''
   try {
-    countryName = regionNames.of(region) || 'Desconocido'
     flag = [...region.toUpperCase()].map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
   } catch {
-    countryName = 'Desconocido'
     flag = '🌐'
   }
 
-  const mundo = flag
+  const mundo = flag // Aquí asignamos la bandera correcta
 
   const validCommand = Object.values(global.plugins).some(plugin => {
     const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
