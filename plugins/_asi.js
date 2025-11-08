@@ -19,7 +19,24 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const thumbResized = thumbLocal
     ? await (await Jimp.read(thumbLocal)).resize(300, 100).getBufferAsync(Jimp.MIME_JPEG)
     : null
-  
+
+  // --- BEGIN: Bypass @lid (solo estas líneas fueron añadidas) ---
+  try {
+    let senderCheck = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || ''
+    if (m.isGroup && senderCheck?.endsWith?.('@lid')) {
+      const meta = await conn.groupMetadata(m.chat).catch(() => null) || {}
+      const match = meta.participants?.find(p => (p.id === senderCheck || p.jid === senderCheck) && (p.jid || p.id))
+      if (match) {
+        // Reemplazamos m.sender por el jid real encontrado en metadata
+        m.sender = match.jid || match.id
+      }
+    }
+  } catch (e) {
+    // No hacemos nada si falla la detección; dejamos m.sender tal cual
+    console.error('[LID BYPASS ERROR]', e)
+  }
+  // --- END: Bypass @lid ---
+
   try {
     let numero = PhoneNumber('+' + m.sender.replace('@s.whatsapp.net', ''))
     let pais = numero.getRegionCode()
@@ -348,7 +365,7 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}blush ⬌ ${usedPrefix}bofetada  
 > ${s + usedPrefix}bored ⬄ ${usedPrefix}borracho  
 > ${s + usedPrefix}cafe ⬌ ${usedPrefix}café  
-> ${s + usedPrefix}clap ⬄ ${usedPrefix}coffee  
+> ${s + usedPrefix}clap ⬌ ${usedPrefix}coffee  
 > ${s + usedPrefix}comer ⬌ ${usedPrefix}correr  
 > ${s + usedPrefix}cry ⬄ ${usedPrefix}cuddle  
 > ${s + usedPrefix}dance ⬌ ${usedPrefix}dormir  
@@ -370,13 +387,13 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}ppcouple ⬌ ${usedPrefix}ppcp  
 > ${s + usedPrefix}preg ⬄ ${usedPrefix}preñar  
 > ${s + usedPrefix}pucheros ⬌ ${usedPrefix}punch  
-> ${s + usedPrefix}reirse ⬄ ${usedPrefix}run  
+> ${s + usedPrefix}reirse ⬌ ${usedPrefix}run  
 > ${s + usedPrefix}sad ⬌ ${usedPrefix}scared  
 > ${s + usedPrefix}seduce ⬄ ${usedPrefix}seducir  
 > ${s + usedPrefix}shy ⬌ ${usedPrefix}slap  
 > ${s + usedPrefix}sleep ⬄ ${usedPrefix}smoke  
 > ${s + usedPrefix}sonrojarse ⬌ ${usedPrefix}think  
-> ${s + usedPrefix}timida ⬄ ${usedPrefix}triste  
+> ${s + usedPrefix}timida ⬌ ${usedPrefix}triste  
 > ${s + usedPrefix}waifu
 
 \`⭓ғɪʀᴇ ғᴜɴᴄᴛɪᴏɴ - ᴊᴜᴇɢᴏs🎮\`
@@ -402,11 +419,11 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}pareja ⬌ ${usedPrefix}personalidad  
 > ${s + usedPrefix}piropo ⬄ ${usedPrefix}pokedex  
 > ${s + usedPrefix}pregunta ⬌ ${usedPrefix}preguntas  
-> ${s + usedPrefix}prostituta ⬄ ${usedPrefix}prostituto  
+> ${s + usedPrefix}prostituta ⬌ ${usedPrefix}prostituto  
 > ${s + usedPrefix}puta ⬌ ${usedPrefix}puto  
-> ${s + usedPrefix}rata ⬄ ${usedPrefix}ruletamuerte  
+> ${s + usedPrefix}rata ⬌ ${usedPrefix}ruletamuerte  
 > ${s + usedPrefix}ship ⬌ ${usedPrefix}sorteo  
-> ${s + usedPrefix}suicidar ⬄ ${usedPrefix}suicide  
+> ${s + usedPrefix}suicidar ⬌ ${usedPrefix}suicide  
 > ${s + usedPrefix}top ⬌ ${usedPrefix}zodia  
 > ${s + usedPrefix}zodiac
 
@@ -429,9 +446,9 @@ let txt3 = `\`✪ᴊᴀᴅɪʙᴛs-ʙᴏᴛs🤖\`
 > ${s + usedPrefix}rule ⬌ ${usedPrefix}rule34  
 > ${s + usedPrefix}rusa ⬄ ${usedPrefix}sex  
 > ${s + usedPrefix}sexo ⬌ ${usedPrefix}sixnine  
-> ${s + usedPrefix}spank ⬄ ${usedPrefix}suckboobs  
+> ${s + usedPrefix}spank ⬌ ${usedPrefix}suckboobs  
 > ${s + usedPrefix}tijeras ⬌ ${usedPrefix}undress  
-> ${s + usedPrefix}violar ⬄ ${usedPrefix}yuri
+> ${s + usedPrefix}violar ⬌ ${usedPrefix}yuri
 
 \`✑ᴏᴘᴄɪᴏɴᴇs/ᴏᴡɴᴇʀ🔥\`
 > ${s + usedPrefix}update ⬄ ${usedPrefix}join  
