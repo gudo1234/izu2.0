@@ -1,16 +1,41 @@
 import PhoneNumber from 'awesome-phonenumber'
 import fetch from 'node-fetch'
 
+const zonas = {
+  MX: 'America/Mexico_City',
+  CO: 'America/Bogota',
+  AR: 'America/Argentina/Buenos_Aires',
+  CL: 'America/Santiago',
+  VE: 'America/Caracas',
+  PE: 'America/Lima',
+  EC: 'America/Guayaquil',
+  BO: 'America/La_Paz',
+  PY: 'America/Asuncion',
+  UY: 'America/Montevideo',
+  DO: 'America/Santo_Domingo',
+  GT: 'America/Guatemala',
+  HN: 'America/Tegucigalpa',
+  NI: 'America/Managua',
+  CR: 'America/Costa_Rica',
+  SV: 'America/El_Salvador',
+  PA: 'America/Panama',
+  US: 'America/New_York',
+  ES: 'Europe/Madrid',
+  BR: 'America/Sao_Paulo',
+  CU: 'America/Havana',
+  PR: 'America/Puerto_Rico',
+  HT: 'America/Port-au-Prince',
+  CA: 'America/Toronto',
+}
+
 let handler = async (m, { conn }) => {
   let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || ''
-  let response = {}
 
   // Bypass del @lid
   if (sender?.endsWith('@lid')) {
     const match = (await conn.groupMetadata?.(m.chat).catch(() => null))?.participants?.find(p => p.id === sender && p.jid)
     if (match) sender = match.jid
   }
-  response.sender = sender
 
   // Extrae número real
   const realNum = sender.split('@')[0].replace(/\D/g, '')
@@ -28,16 +53,8 @@ let handler = async (m, { conn }) => {
     countryName = 'Desconocido'
   }
 
-  // Localización por IP (fallback)
-  let locationData = {}
-  try {
-    const res = await fetch('https://ipapi.co/json/')
-    locationData = await res.json()
-  } catch {
-    locationData = {}
-  }
-
-  const timezone = locationData.timezone || 'America/Tegucigalpa'
+  // Selección de zona horaria según el país
+  const timezone = zonas[region] || 'America/Tegucigalpa'
   const date = new Date().toLocaleDateString('es-HN', { timeZone: timezone })
   const time = new Date().toLocaleTimeString('es-HN', { timeZone: timezone })
 
