@@ -3,6 +3,8 @@ import PhoneNumber from "awesome-phonenumber"
 import moment from "moment-timezone"
 import path from "path"
 
+const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
+
 function levenshteinDistance(a, b) {
   const dp = Array.from({ length: a.length + 1 }, (_, i) => [i])
   for (let j = 1; j <= b.length; j++) dp[0][j] = j
@@ -29,13 +31,23 @@ export async function before(m) {
   const user = global.db.data.users[m.sender]
   let sender = m.sender
 
-  // Extrae número real y obtiene la bandera
+  // Extrae número real
   const realNum = sender.split('@')[0].replace(/\D/g, '')
   const pn = PhoneNumber(`+${realNum}`)
-  const region = pn.getRegionCode() || ''
-  const mundo = region
-    ? [...region.toUpperCase()].map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
-    : '🌐'
+  const region = pn.getRegionCode() || 'Desconocido'
+
+  // Nombre del país y bandera
+  let countryName = ''
+  let flag = ''
+  try {
+    countryName = regionNames.of(region) || 'Desconocido'
+    flag = [...region.toUpperCase()].map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
+  } catch {
+    countryName = 'Desconocido'
+    flag = '🌐'
+  }
+
+  const mundo = flag
 
   const validCommand = Object.values(global.plugins).some(plugin => {
     const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
