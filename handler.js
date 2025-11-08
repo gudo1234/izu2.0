@@ -252,41 +252,11 @@ if (opts["queque"] && m.text && !isPrems) {
 m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
-// ----------------- Reemplazo seguro -----------------
-async function getGroupInfo(m, conn) {
-    const response = {
-        admins: [],
-        isAdmin: false,
-        isBotAdmin: false,
-        metadata: {},
-        sender: m.sender
-    };
-
-    if (m.isGroup) {
-        // Intentar obtener metadata del grupo
-        const metadata = (await conn.groupMetadata?.(m.chat).catch(() => null)) || {};
-        response.metadata = metadata;
-
-        // Tomar participantes de forma segura
-        const participants = Array.isArray(metadata.participants) ? metadata.participants : [];
-
-        // Lista de admins
-        response.admins = participants.filter(p => p.admin).map(p => ({ id: p.jid, admin: p.admin }));
-
-        // Verificar si el remitente es admin
-        response.isAdmin = response.admins.some(a => a.id === m.sender);
-
-        // Verificar si el bot es admin
-        const botJid = conn.user?.jid || (conn.user?.lid?.split(':')[0] + '@lid');
-        response.isBotAdmin = response.admins.some(a => a.id === botJid);
-    }
-
-    return response;
-}
-
-// Uso en tu handler
-const groupInfo = await getGroupInfo(m, this);
-const { admins, isAdmin, isBotAdmin, metadata, sender } = groupInfo;
+const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {};
+const participants = Array.isArray(groupMetadata.participants) ? groupMetadata.participants : [];
+const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === m.sender) : {}) || {};
+const botJid = this.user?.jid || (this.user?.lid?.replace(/:.*/, '') + '@lid');
+const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === botJid) : {}) || {};
 if (m.isBaileys) {
 return
 }
