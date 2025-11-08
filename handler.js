@@ -253,17 +253,67 @@ m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
 
-const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
-const participants = (m.isGroup ? groupMetadata.participants : []) || []
-const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id && u.jid) === m.sender) : {}) || {}
-const numBott = (this.user.lid || '').replace(/:.*/, '') || false
-const detectnumbot = m.sender.includes('@lid') ? `${numBott}@lid` : this.user.jid
-const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == detectnumbot) : {}) || {}
-let bottt = conn?.user?.jid
-let bt = groupMetadata?.participants?.find(u => u.jid === bottt)
-const isRAdmin = user?.admin == 'superadmin' || false
-const isAdmin = isRAdmin || user?.admin == 'admin' || false
-const isBotAdmin = bt?.admin == 'admin'
+let sender = ''
+if (m.key.fromMe) {
+  sender = conn.user?.jid || conn.user?.id || conn.user?.lid?.split(':')[0] + '@lid' || ''
+} else if (m.participant) {
+  sender = m.participant
+} else if (m.key.participant) {
+  sender = m.key.participant
+} else if (m.key.remoteJid?.endsWith('@g.us')) {
+  sender = m.sender || m.key.participant || ''
+} else {
+  sender = m.key.remoteJid || m.sender || ''
+}
+
+// Fallback final para cualquier caso raro
+if (!sender && m.sender) sender = m.sender
+if (!sender && m.chat && !m.isGroup) sender = m.chat
+
+let response = {}
+
+if (m.isGroup) {
+  const metadata = await conn.groupMetadata(m.chat).catch(() => null) || {}
+  response.metadata = metadata
+
+  response.admins = metadata.participants?.filter(p => p.admin)?.map(p => ({
+    id: p.id || p.jid,
+    admin: p.admin
+  })) || []
+
+  const user = metadata.participants?.find(u => (u.id || u.jid) === sender) || {}
+  response.isRAdmin = user.admin === 'superadmin'
+  response.isAdmin = response.isRAdmin || user.admin === 'admin'
+  response.isBotAdmin = response.admins.some(a =>
+    a.id === conn.user.jid ||
+    a.id === conn.user?.id ||
+    a.id === (conn.user.lid?.split(':')[0] + '@lid')
+  )
+}
+
+// Detectar sender en caso de que venga con formato @lid
+if (sender?.endsWith('@lid')) {
+  const match = response.metadata?.participants?.find(
+    p => p.id === sender || p.jid === sender
+  )
+  if (match) sender = match.jid || match.id
+}
+
+response.sender = sender
+
+// Variables de conveniencia
+const groupMetadata = response.metadata || {}
+const participants = groupMetadata.participants || []
+const user = participants.find(u => (u.id || u.jid) === response.sender) || {}
+const bot = participants.find(
+  u =>
+    u.id === conn.user.jid ||
+    u.jid === conn.user.jid ||
+    u.id === (conn.user.lid?.split(':')[0])
+) || {}
+const isRAdmin = response.isRAdmin
+const isAdmin = response.isAdmin
+const isBotAdmin = response.isBotAdmin
 if (m.isBaileys) {
 return
 }
