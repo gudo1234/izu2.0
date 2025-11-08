@@ -308,8 +308,8 @@ match,
 conn: this,
 participants,
 groupMetadata,
-user,
-bot,
+userGroup,
+botGroup,
 isROwner,
 isOwner,
 isRAdmin,
@@ -318,8 +318,11 @@ isBotAdmin,
 isPrems,
 chatUpdate,
 __dirname: ___dirname,
-__filename
-}))
+__filename,
+user,
+chat,
+settings
+})) 
 continue
 }
 if (typeof plugin !== 'function')
