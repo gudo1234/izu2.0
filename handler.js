@@ -252,7 +252,7 @@ if (opts["queque"] && m.text && !isPrems) {
 m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
-let sender = m.key?.participant || m.key?.jid || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
+
 let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
 let response = {};
 
