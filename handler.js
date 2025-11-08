@@ -252,11 +252,37 @@ if (opts["queque"] && m.text && !isPrems) {
 m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
-const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {};
-const participants = Array.isArray(groupMetadata.participants) ? groupMetadata.participants : [];
-const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === m.sender) : {}) || {};
-const botJid = this.user?.jid || (this.user?.lid?.replace(/:.*/, '') + '@lid');
-const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === botJid) : {}) || {};
+// Por esta nueva forma segura:
+let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
+let response = {};
+if (m.isGroup) {
+    let metadata = await conn.groupMetadata(m.chat).catch(() => null);
+    response.admins = metadata?.participants?.reduce((acc, v) => {
+        if (v.admin) {
+            acc.push({
+                id: v.jid,
+                admin: v.admin
+            });
+        }
+        return acc;
+    }, []) || [];
+    response.isAdmin = response.admins?.some(a => a.id === sender) || false;
+    response.isBotAdmin = !!response.admins?.find(a => a.id === conn.user.jid || a.id === conn.user.lid?.split(':')[0] + '@lid');
+    response.metadata = metadata;
+}
+if (sender?.endsWith('@lid')) {
+    const match = response.metadata?.participants?.find(p => p.id === sender && p.jid);
+    if (match) sender = match.jid;
+}
+response.sender = sender;
+
+// Ahora puedes usar:
+const groupMetadata = response.metadata || {};
+const participants = groupMetadata.participants || [];
+const user = participants.find(u => u.jid === response.sender) || {};
+const bot = participants.find(u => u.jid === conn.user.jid || u.jid === (conn.user.lid?.split(':')[0] + '@lid')) || {};
+const isAdmin = response.isAdmin;
+const isBotAdmin = response.isBotAdmin;
 if (m.isBaileys) {
 return
 }
