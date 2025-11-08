@@ -266,15 +266,17 @@ if (m.key.fromMe) {
   sender = m.key.remoteJid || m.sender || ''
 }
 
+// Fallbacks de seguridad
 if (!sender && m.sender) sender = m.sender
 if (!sender && m.chat && !m.isGroup) sender = m.chat
 
-// Normalizamos el sender a formato estándar WhatsApp
+// Normalizar formato (ej: @lid → @s.whatsapp.net)
 sender = sender.replace(/:[0-9]+@lid$/i, '@s.whatsapp.net')
-sender = sender.replace(/[^0-9@]/g, '') // limpia caracteres raros si los hay
 
-let response = {}
+// Inicialización
+let response = { sender }
 
+// Si es grupo, obtenemos la metadata
 if (m.isGroup) {
   const metadata = await conn.groupMetadata(m.chat).catch(() => null) || {}
   response.metadata = metadata
@@ -294,15 +296,16 @@ if (m.isGroup) {
   )
 }
 
-// Corrige sender si viene como @lid dentro de grupos
+// Corrige sender si está en formato @lid dentro de grupos
 if (sender?.endsWith('@lid')) {
   const match = response.metadata?.participants?.find(
     p => p.id === sender || p.jid === sender
   )
   if (match) sender = match.jid || match.id
+  response.sender = sender
 }
 
-// Detectar si el sender es owner
+// 🔹 Detección del Owner (sin causar "already declared")
 const ownerNumbers = (global.owner || [])
   .map(o => (typeof o === 'string' ? o : o[0]))
   .map(num => num.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
@@ -310,9 +313,7 @@ const ownerNumbers = (global.owner || [])
 const senderNum = sender.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
 response.isOwner = ownerNumbers.includes(senderNum) || ownerNumbers.includes(sender)
 
-// Datos finales
-response.sender = sender
-
+// Variables finales de conveniencia
 const groupMetadata = response.metadata || {}
 const participants = groupMetadata.participants || []
 const user = participants.find(u => (u.id || u.jid) === response.sender) || {}
@@ -323,14 +324,14 @@ const bot = participants.find(
     u.id === (conn.user.lid?.split(':')[0] + '@lid')
 ) || {}
 
-const isOwner = response.isOwner
 const isRAdmin = response.isRAdmin
 const isAdmin = response.isAdmin
 const isBotAdmin = response.isBotAdmin
+const isOwnerFlag = response.isOwner // ✅ nombre distinto, no causa conflicto
 
-// Opcional: debug visual
+// Debug opcional
 console.log('Sender:', sender)
-console.log('Owner detected:', isOwner)
+console.log('Owner detectado:', isOwnerFlag)
 if (m.isBaileys) {
 return
 }
