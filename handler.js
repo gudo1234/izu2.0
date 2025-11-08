@@ -253,42 +253,40 @@ m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
 let sender = m.key?.participant || m.key?.jid || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
+let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
 let response = {};
 
 if (m.isGroup) {
     let metadata = await conn.groupMetadata(m.chat).catch(() => null) || {};
     response.metadata = metadata;
 
-    let participants = metadata.participants || [];
-
-    response.admins = participants.reduce((acc, v) => {
+    response.admins = metadata.participants?.reduce((acc, v) => {
         if (v.admin) {
-            acc.push({
-                id: v.jid,
-                admin: v.admin
-            });
+            acc.push({ id: v.jid, admin: v.admin });
         }
         return acc;
-    }, []);
+    }, []) || [];
 
-    let user = participants.find(u => u.jid === sender) || {};
-
-    const isRAdmin = user?.admin === 'superadmin';
-    const isAdmin = isRAdmin || user?.admin === 'admin';
-    const isBotAdmin = response.admins.some(a => a.id === conn.user.jid || a.id === (conn.user.lid?.split(':')[0] + '@lid'));
-
-    response.user = user;
-    response.isRAdmin = isRAdmin;
-    response.isAdmin = isAdmin;
-    response.isBotAdmin = isBotAdmin;
+    let user = metadata.participants?.find(u => u.jid === sender) || {};
+    response.isRAdmin = user.admin === 'superadmin';
+    response.isAdmin = response.isRAdmin || user.admin === 'admin';
+    response.isBotAdmin = response.admins.some(a => a.id === conn.user.jid || a.id === (conn.user.lid?.split(':')[0] + '@lid'));
 }
 
 if (sender?.endsWith('@lid')) {
-    const match = response.metadata?.participants?.find(p => p.jid === sender || p.id === sender);
+    const match = response.metadata?.participants?.find(p => p.id === sender || p.jid === sender);
     if (match) sender = match.jid;
 }
 
 response.sender = sender;
+
+const groupMetadata = response.metadata || {};
+const participants = groupMetadata.participants || [];
+const user = participants.find(u => u.jid === response.sender) || {};
+const bot = participants.find(u => u.jid === conn.user.jid || u.jid === (conn.user.lid?.split(':')[0] + '@lid')) || {};
+const isRAdmin = response.isRAdmin;
+const isAdmin = response.isAdmin;
+const isBotAdmin = response.isBotAdmin;
 if (m.isBaileys) {
 return
 }
