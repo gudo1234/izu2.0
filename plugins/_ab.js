@@ -77,7 +77,8 @@ let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fro
   let jpg = './media/gif.mp4'
   let jpg2 = './media/giff.mp4'
   let jpg3 = './media/gifff.mp4'
-  let or = ['grupo', 'gif', 'anu', 'bot']
+  //let or = ['grupo', 'gif', 'anu', 'bot']
+  let or = ['grupo', 'gif', 'anu']
   let media = or[Math.floor(Math.random() * or.length)]
   let uptime = process.uptime() * 1000
   let run = clockString(uptime)
@@ -638,13 +639,13 @@ if (m.isGroup) {
     }, { quoted: m })
   }
  
-if (media === 'bot') {
+/*if (media === 'bot') {
 await conn.relayMessage(
       m.chat,
       { viewOnceMessage: { message: { interactiveMessage: nativeFlowPayload } } },
       { quoted: m }
     )
-}
+}*/
 }
 
 function clockString(ms) {
@@ -654,7 +655,6 @@ function clockString(ms) {
   return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
 }
 
-//handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú', 'm', 'me']
-handler.command = ['lid']
+handler.command = ['menu', 'memu', 'help', 'comandos', 'memu', 'menú', 'memú', 'm', 'me']
 handler.group = true
 export default handler
