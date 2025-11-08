@@ -255,12 +255,25 @@ let _user = global.db.data && global.db.data.users && global.db.data.users[m.sen
 
 const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
 const participants = (m.isGroup ? groupMetadata.participants : []) || []
-const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === m.sender) : {}) || {}
-const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) == this.user.jid) : {}) || {}
 
-const isRAdmin = user?.admin == 'superadmin' || false
-const isAdmin = isRAdmin || user?.admin == 'admin' || false
-const isBotAdmin = bot?.admin == 'admin' || bot?.admin == 'superadmin'
+// Usuario que envía el mensaje
+const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === m.sender) : {}) || {}
+
+// Detección avanzada del número del bot (soporta cuentas con @lid)
+const numBott = (this.user.lid || '').replace(/:.*/, '') || ''
+const detectnumbot = this.user?.jid?.includes('@lid') ? `${numBott}@lid` : this.user.jid
+
+// Bot dentro del grupo
+const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.jid) === detectnumbot) : {}) || {}
+
+// Verificación redundante (por si el bot no se detecta con la lógica anterior)
+const bottt = conn?.user?.jid
+const bt = groupMetadata?.participants?.find(u => u.jid === bottt)
+
+// Roles
+const isRAdmin = user?.admin === 'superadmin' || false
+const isAdmin = isRAdmin || user?.admin === 'admin' || false
+const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin' || bt?.admin === 'admin' || bt?.admin === 'superadmin'
 if (m.isBaileys) {
 return
 }
