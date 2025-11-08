@@ -252,44 +252,32 @@ if (opts["queque"] && m.text && !isPrems) {
 m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
-
-async function getGroupData(conn, m) {
-  let response = {}
-  let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || ''
-
-  const numBott = (conn.user?.lid || '').replace(/:.*/, '') || false
-  const detectnumbot = sender.includes('@lid') ? `${numBott}@lid` : conn.user?.jid
-
-  const groupMetadata = (m.isGroup 
-    ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null)) 
-    : {}) || {}
-
-  const participants = (m.isGroup ? groupMetadata.participants : []) || []
-  const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id && u.jid) === sender) : {}) || {}
-  const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == detectnumbot) : {}) || {}
-  
-  const bottt = conn?.user?.jid
-  const bt = groupMetadata?.participants?.find(u => u.jid === bottt)
-
-  const isRAdmin = user?.admin == 'superadmin' || false
-  const isAdmin = isRAdmin || user?.admin == 'admin' || false
-  const isBotAdmin = bt?.admin == 'admin'
-
-  response = {
-    sender,
-    groupMetadata,
-    participants,
-    user,
-    bot,
-    bottt,
-    bt,
-    isRAdmin,
-    isAdmin,
-    isBotAdmin
-  }
-
-  return response
+    
+async function getGroupInfo(m, conn) {
+    let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || '';
+    let response = {};
+    if (m.isGroup) {
+        let metadata = await conn.groupMetadata(m.chat).catch(() => null);
+        response.admins = metadata?.participants?.reduce((acc, v) => {
+            if (v.admin) acc.push({ id: v.jid, admin: v.admin });
+            return acc;
+        }, []) || [];
+        response.isAdmin = response.admins?.some(a => a.id === sender) || false;
+        response.isBotAdmin = !!response.admins?.find(a => a.id === conn.user.jid || a.id === (conn.user.lid?.split(':')[0] + '@lid'));
+        response.metadata = metadata || {};
+    }
+    // Manejo de IDs tipo @lid
+    if (sender?.endsWith('@lid')) {
+        const match = response.metadata?.participants?.find(p => p.id === sender && p.jid);
+        if (match) sender = match.jid;
+    }
+    response.sender = sender;
+    return response;
 }
+
+// Uso en tu handler, reemplazando la sección antigua
+const groupInfo = await getGroupInfo(m, this); 
+const { admins, isAdmin, isBotAdmin, metadata, sender } = groupInfo;
 if (m.isBaileys) {
 return
 }
