@@ -58,18 +58,19 @@ let handler = async (m, { conn }) => {
   const date = new Date().toLocaleDateString('es-HN', { timeZone: timezone })
   const time = new Date().toLocaleTimeString('es-HN', { timeZone: timezone })
 
-  // Mensaje final
+  // Mensaje final con mención
   const info = `
 🌍 *Ubicación del usuario*
 ────────────────────
 👤 *Número real:* +${realNum}
+🏷️ *Mención:* @${realNum}
 🏳️ *País:* ${countryName} ${flag}
 🕒 *Hora local:* ${time}
 📅 *Fecha:* ${date}
 🧭 *Zona horaria:* ${timezone}
 `.trim()
 
-  await conn.reply(m.chat, info, m)
+  await conn.reply(m.chat, info, m, { mentions: [sender] })
 }
 
 handler.command = ['lid']
