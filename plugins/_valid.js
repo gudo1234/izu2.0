@@ -3,14 +3,6 @@ import PhoneNumber from "awesome-phonenumber"
 import moment from "moment-timezone"
 import path from "path"
 
-const regionNames = new Intl.DisplayNames(['es'], { type: 'region' })
-
-function banderaEmoji(countryCode) {
-  if (!countryCode || countryCode.length !== 2) return '🌐'
-  const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
-  return String.fromCodePoint(...codePoints)
-}
-
 function levenshteinDistance(a, b) {
   const dp = Array.from({ length: a.length + 1 }, (_, i) => [i])
   for (let j = 1; j <= b.length; j++) dp[0][j] = j
@@ -35,12 +27,15 @@ export async function before(m) {
   if (!command || command === "bot") return
 
   const user = global.db.data.users[m.sender]
-  const number = m.sender.replace('@s.whatsapp.net', '')
+  let sender = m.sender
 
-  // Obtiene información del número real y su país
-  const phoneInfo = PhoneNumber('+' + number)
-  const countryCode = phoneInfo.getRegionCode() || '🌐'
-  const mundo = banderaEmoji(countryCode)
+  // Extrae número real y obtiene la bandera
+  const realNum = sender.split('@')[0].replace(/\D/g, '')
+  const pn = PhoneNumber(`+${realNum}`)
+  const region = pn.getRegionCode() || ''
+  const mundo = region
+    ? [...region.toUpperCase()].map(c => String.fromCodePoint(127397 + c.charCodeAt())).join('')
+    : '🌐'
 
   const validCommand = Object.values(global.plugins).some(plugin => {
     const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
@@ -68,7 +63,7 @@ export async function before(m) {
     .sort((a, b) => b.sim - a.sim)
     .slice(0, 2)
 
-  let text = `⌗_*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
+  let text = `⌗ _*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
   if (similares.length) {
     text += `\n∝ *Sugerencias:*\n`
     text += similares.map(s => `> _${usedPrefix + s.cmd}_ (${s.sim}% de coincidencia)`).join('\n')
