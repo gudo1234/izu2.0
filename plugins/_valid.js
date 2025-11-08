@@ -10,6 +10,7 @@ function banderaEmoji(countryCode) {
   const codePoints = [...countryCode.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
   return String.fromCodePoint(...codePoints)
 }
+
 function levenshteinDistance(a, b) {
   const dp = Array.from({ length: a.length + 1 }, (_, i) => [i])
   for (let j = 1; j <= b.length; j++) dp[0][j] = j
@@ -35,9 +36,12 @@ export async function before(m) {
 
   const user = global.db.data.users[m.sender]
   const number = m.sender.replace('@s.whatsapp.net', '')
+
+  // Obtiene información del número real y su país
   const phoneInfo = PhoneNumber('+' + number)
-  const countryCode = phoneInfo.getRegionCode('international')
+  const countryCode = phoneInfo.getRegionCode() || '🌐'
   const mundo = banderaEmoji(countryCode)
+
   const validCommand = Object.values(global.plugins).some(plugin => {
     const cmds = Array.isArray(plugin.command) ? plugin.command : [plugin.command]
     return cmds.includes(command)
@@ -47,10 +51,12 @@ export async function before(m) {
     user.commands = (user.commands || 0) + 1
     return
   }
+
   const allCommands = Object.values(global.plugins)
     .flatMap(p => Array.isArray(p.command) ? p.command : [p.command])
     .filter(Boolean)
     .filter(cmd => typeof cmd === 'string')
+
   const similares = allCommands
     .map(cmd => {
       const dist = levenshteinDistance(command, cmd)
@@ -61,7 +67,8 @@ export async function before(m) {
     .filter(r => !isNaN(r.sim) && r.sim > 0)
     .sort((a, b) => b.sim - a.sim)
     .slice(0, 2)
-  let text = `⌗ _*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
+
+  let text = `⌗_*Comando no reconocido*_\n> ${mundo} Usa *${usedPrefix}menu* para ver los disponibles.\n`
   if (similares.length) {
     text += `\n∝ *Sugerencias:*\n`
     text += similares.map(s => `> _${usedPrefix + s.cmd}_ (${s.sim}% de coincidencia)`).join('\n')
