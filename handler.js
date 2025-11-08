@@ -253,63 +253,43 @@ m.exp += Math.ceil(Math.random() * 10)
 let usedPrefix
 let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
 
-let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || ''
-let response = {}
+async function getGroupData(conn, m) {
+  let response = {}
+  let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fromMe && conn.user?.jid) || m.chat || ''
 
-if (m.isGroup) {
-    const metadata = await conn.groupMetadata(m.chat).catch(() => ({}))
-    const participants = metadata?.participants || []
+  const numBott = (conn.user?.lid || '').replace(/:.*/, '') || false
+  const detectnumbot = sender.includes('@lid') ? `${numBott}@lid` : conn.user?.jid
 
-    // Obtener administradores del grupo
-    response.admins = participants.reduce((acc, v) => {
-        if (v.admin) {
-            acc.push({
-                id: v.jid,
-                admin: v.admin
-            })
-        }
-        return acc
-    }, []) || []
+  const groupMetadata = (m.isGroup 
+    ? ((conn.chats[m.chat] || {}).metadata || await conn.groupMetadata(m.chat).catch(_ => null)) 
+    : {}) || {}
 
-    // Detección del usuario y bot
-    const numBott = (conn.user?.lid || '').replace(/:.*/, '') || ''
-    const detectnumbot = conn.user?.jid?.includes('@lid') ? `${numBott}@lid` : conn.user?.jid
+  const participants = (m.isGroup ? groupMetadata.participants : []) || []
+  const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id && u.jid) === sender) : {}) || {}
+  const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == detectnumbot) : {}) || {}
+  
+  const bottt = conn?.user?.jid
+  const bt = groupMetadata?.participants?.find(u => u.jid === bottt)
 
-    const user = participants.find(u => conn.decodeJid(u.jid) === sender) || {}
-    const bot = participants.find(u => conn.decodeJid(u.jid) === detectnumbot) || {}
-    const bottt = conn?.user?.jid
-    const bt = participants.find(u => u.jid === bottt) || {}
+  const isRAdmin = user?.admin == 'superadmin' || false
+  const isAdmin = isRAdmin || user?.admin == 'admin' || false
+  const isBotAdmin = bt?.admin == 'admin'
 
-    // Roles
-    const isRAdmin = user?.admin === 'superadmin' || false
-    const isAdmin = isRAdmin || user?.admin === 'admin' || response.admins?.some(a => a.id === sender) || false
-    const isBotAdmin = bot?.admin === 'admin' || bot?.admin === 'superadmin' || bt?.admin === 'admin' || bt?.admin === 'superadmin' ||
-        !!response.admins?.find(a => a.id === conn.user?.jid || a.id === `${numBott}@lid`)
+  response = {
+    sender,
+    groupMetadata,
+    participants,
+    user,
+    bot,
+    bottt,
+    bt,
+    isRAdmin,
+    isAdmin,
+    isBotAdmin
+  }
 
-    // Resolver @lid → @s.whatsapp.net si aplica
-    if (sender?.endsWith('@lid')) {
-        const match = participants.find(p => p.id === sender && p.jid)
-        if (match) sender = match.jid
-    }
-
-    // Respuesta estructurada
-    response.metadata = metadata
-    response.sender = sender
-    response.user = user
-    response.bot = bot
-    response.isAdmin = isAdmin
-    response.isBotAdmin = isBotAdmin
-    response.isRAdmin = isRAdmin
-    response.participants = participants
-} else {
-    // En caso de que no sea grupo
-    response.sender = sender
-    response.isAdmin = false
-    response.isBotAdmin = false
-    response.isRAdmin = false
+  return response
 }
-
-return response
 if (m.isBaileys) {
 return
 }
