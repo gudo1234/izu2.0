@@ -91,7 +91,7 @@ auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({
 msgRetry,
 msgRetryCache, 
 browser: ['Windows', 'Firefox'],
-version: version,
+version: [2, 3000, 1027934701],
 generateHighQualityLinkPreview: true
 }
 let sock = makeWASocket(connectionOptions)
