@@ -73,7 +73,7 @@ const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
 
   // ➤ Definimos los posibles formatos
-  const formatos = ['stiker', 'audio', 'texto', 'gifPlayback', 'interactivo']
+  const formatos = ['stiker', 'audio', 'texto', 'gifPlayback']
   const formatoElegido = formatos[Math.floor(Math.random() * formatos.length)]
 
   // ➤ Mensaje base
@@ -320,11 +320,11 @@ await conn.sendMessage(
       contextInfo
     }
 
-        await conn.relayMessage(
+        /*await conn.relayMessage(
           m.chat,
           { viewOnceMessage: { message: { interactiveMessage: nativeFlowPayload } } },
           {}
-        )
+        )*/
         break
     }
   } catch (e) {
