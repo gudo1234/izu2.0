@@ -248,7 +248,7 @@ logger.post('/start-pairing', async (req, res) => {
    // console.error(error);
     return res.status(500).json({ message: 'Error al conectar el bot.' });
   }
-});
+}
 
 logger.listen(PORT, () => {
 })
