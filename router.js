@@ -163,7 +163,7 @@ await creloadHandler(true).catch(console.error)
   } else {
     sessions.set(phone, { detect: false, connectedNumber: "" })
   }
-  return s
+  return sock
 
 setInterval(async () => {
 if (!sock.user) {
