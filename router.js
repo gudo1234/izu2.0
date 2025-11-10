@@ -45,7 +45,7 @@ logger.get('/bots/summary', (req, res) => {
       Sub: subs.length,
     };
 
-    const totalBots = activeBots.Owner + activeBots.Mod + activeBots.Premium + activeBots.Sub;
+    const totalBots = activeBots.Owner + (activeBots.Mod || 0) + (activeBots.Premium || 0) + activeBots.Sub;
 
     const uptime = process.uptime();
     const seconds = Math.floor(uptime % 60);
@@ -105,10 +105,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 logger.use(express.json())
 logger.use('/src', express.static(path.join(__dirname, 'src')))
 logger.get('/', (req, res) => {
-return res.redirect('/dash')
+  return res.redirect('/dash')
 })
 logger.get('/dash', (req, res) => {
-res.sendFile(path.join(__dirname, 'src', 'bot.html'));
+  res.sendFile(path.join(__dirname, 'src', 'bot.html'));
 })
 
 const sockets = new Map()
@@ -190,7 +190,6 @@ async function requestPairingCode(rawPhone) {
   }
   await sleep(1500)
   const code = await s.requestPairingCode(phoneDigits)
-  // await new Promise(r => setTimeout(r, 15000))
   const pretty = String(code).match(/.{1,4}/g)?.join("-") || code
   console.log(`✿ WEB » Código de vinculación: ${pretty}`)
   return pretty
@@ -245,10 +244,10 @@ logger.post('/start-pairing', async (req, res) => {
       connected: false
     });
   } catch (error) {
-   // console.error(error);
     return res.status(500).json({ message: 'Error al conectar el bot.' });
   }
-}
+});
 
 logger.listen(PORT, () => {
-})
+  console.log(`✿ Servidor web iniciado en http://izu-bot.ultraplus.click`);
+});
