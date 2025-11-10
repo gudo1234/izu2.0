@@ -189,7 +189,7 @@ async function startSocketIfNeeded(phone) {
 
 async function creloadHandler(restartConn = false) {
   try {
-    const Handler = await import(`../handler.js?update=${Date.now()}`).catch(console.error);
+    const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error);
     if (Handler && Object.keys(Handler).length) {
       handler = Handler;
     }
