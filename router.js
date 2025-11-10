@@ -45,7 +45,7 @@ logger.get('/bots/summary', (req, res) => {
       Sub: subs.length,
     };
 
-    const totalBots = activeBots.Owner + (activeBots.Mod || 0) + (activeBots.Premium || 0) + activeBots.Sub;
+    const totalBots = activeBots.Owner + activeBots.Sub;
 
     const uptime = process.uptime();
     const seconds = Math.floor(uptime % 60);
@@ -251,3 +251,4 @@ logger.post('/start-pairing', async (req, res) => {
 logger.listen(PORT, () => {
   console.log(`✿ Servidor web iniciado en http://izu-bot.ultraplus.click`);
 });
+}
