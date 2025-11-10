@@ -8,9 +8,10 @@ import {
 } from "@whiskeysockets/baileys";
 
 import pino from "pino";
+import { yukiJadiBot } from './plugins/sockets-serbot.js'
 import chalk from "chalk";
 import fs from "fs";
-import path from "path";
+import path, { join } from "path";
 import express from 'express';
 import { fileURLToPath } from 'url'
 
@@ -146,6 +147,32 @@ async function startSocketIfNeeded(phone) {
       console.log(`✎ Conectado como ${session.connectedNumber}`)
     } else if (connection === "close") {
       console.log(`✎ Desconectado. Reiniciando...`)
+
+const rutaJadiBot = path.join(__dirname, 'JadiBots'); 
+
+const phone = session.connectedNumber
+const readRutaJadiBot = fs.readdirSync(rutaJadiBot);
+if (readRutaJadiBot.length > 0) {
+  const creds = 'creds.json';
+  for (const gjbts of readRutaJadiBot) {
+    if (gjbts !== phone) continue; 
+
+    const botPath = join(rutaJadiBot, gjbts);
+    if (fs.existsSync(botPath) && fs.statSync(botPath).isDirectory()) {
+      const readBotPath = fs.readdirSync(botPath);
+      if (readBotPath.includes(creds)) {
+        yukiJadiBot({
+          pathYukiJadiBot: botPath,
+          m: null,
+          conn,
+          args: '',
+          usedPrefix: '/',
+          command: 'serbot'
+        });
+      }
+    }
+  }
+}
       session.detect = false
     }
     sessions.set(phone, session)
