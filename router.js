@@ -114,8 +114,7 @@ logger.get('/dash', (req, res) => {
 const sockets = new Map()
 const sessions = new Map()
 
-// async function startSocketIfNeeded(phone) {
-export default async startSocketIfNeeded(phone) => {
+async function startSocketIfNeeded(phone) {
   if (sockets.has(phone)) return sockets.get(phone)
   const sessionPath = `${SESSIONS_DIR}/${phone}`
   if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true })
@@ -148,7 +147,9 @@ export default async startSocketIfNeeded(phone) => {
     } else if (connection === "close") {
       console.log(`✎ Desconectado. Reiniciando...`)
 
+(async () => {
 await creloadHandler(true).catch(console.error)
+})();
       session.detect = false
     }
     sessions.set(phone, session)
