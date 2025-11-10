@@ -129,7 +129,7 @@ async function startSocketIfNeeded(phone) {
     version,
     logger: pino({ level: "silent" }),
     printQRInTerminal: false,
-    browser: ["MacOS", "Chrome", "120.0.0.0"],
+    browser: ["MacOs", "Safari"],
     auth: {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, logger),
