@@ -5,14 +5,15 @@ import {
   fetchLatestBaileysVersion,
   jidDecode,
   DisconnectReason,
-} from "@whiskeysockets/baileys";
-import handler from './handler.js' 
+} from "@whiskeysockets/baileys"; 
 import pino from "pino";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
 import express from 'express';
 import { fileURLToPath } from 'url'
+let handler = await import('../handler.js')
+const Handler = await import(`../handler.js?update=${Date.now()}`).catch(console.error)
 
 export default async (conn, m) => {
 const __filename = fileURLToPath(import.meta.url)
