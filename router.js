@@ -143,7 +143,7 @@ async function startSocketIfNeeded(phone) {
     const session = sessions.get(phone) || {}
     if (connection === "open") {
       session.detect = true
-      session.connectedNumber = s.user?.id?.split("@")[0] || ""
+      session.connectedNumber = s.user?.id?.split(":")[0] || ""
       console.log(`✎ Conectado como ${session.connectedNumber}`)
     } else if (connection === "close") {
       console.log(`✎ Desconectado. Reiniciando...`)
