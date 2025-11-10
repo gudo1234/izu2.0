@@ -1,6 +1,6 @@
 import PhoneNumber from 'awesome-phonenumber'
 
-var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
+let handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   // === 🧩 FUNCIÓN PARA BURLAR EL LID ===
   let sender = ''
   if (m.key.fromMe) {
@@ -54,7 +54,7 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   const ownerBot = `${global.owner[0][0]}@s.whatsapp.net`
   const admins = groupInfo.participants?.filter(p => p.admin).map(p => p.id) || []
 
-  // Elegir un usuario aleatorio válido
+  // === 🧍‍♂️ Usuario aleatorio para ejemplo ===
   const candidates = groupInfo.participants.filter(p =>
     p.id !== conn.user.jid &&
     p.id !== ownerGroup &&
@@ -87,19 +87,37 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   // === 🔢 Si se pasa un prefijo numérico ===
   if (args[0] && !isNaN(args[0])) {
     const prefix = args[0]
+    const targets = []
 
-    let targets = groupInfo.participants.filter(p =>
-      p.id.startsWith(prefix) &&
-      p.id !== conn.user.jid &&
-      p.id !== ownerGroup &&
-      p.id !== ownerBot &&
-      !admins.includes(p.id)
-    ).map(p => p.id)
+    for (const p of groupInfo.participants) {
+      if (
+        p.id !== conn.user.jid &&
+        p.id !== ownerGroup &&
+        p.id !== ownerBot &&
+        !admins.includes(p.id)
+      ) {
+        // Extraer número real de forma segura (sin mostrarlo)
+        let num = ''
+        try {
+          const clean = p.id.split('@')[0].replace(/\D/g, '')
+          if (clean) {
+            const pn = new PhoneNumber('+' + clean)
+            num = pn.getNumber('e164') || ''
+          }
+        } catch {
+          num = ''
+        }
+
+        if (num.startsWith('+' + prefix)) {
+          targets.push(p.id)
+        }
+      }
+    }
 
     if (targets.length === 0)
       return conn.reply(m.chat, `${e} *No se encontró ningún miembro con el prefijo* ${prefix} *que pueda ser expulsado.*`, m)
 
-    conn.reply(m.chat, `*Expulsando a ${targets.length} usuario(s) con el prefijo ${prefix}*`, m)
+    conn.reply(m.chat, `*Expulsando a ${targets.length} usuario(s) con el prefijo ${prefix}...*`, m)
 
     for (let id of targets) {
       await conn.groupParticipantsUpdate(m.chat, [id], 'remove')
@@ -120,7 +138,6 @@ var handler = async (m, { conn, participants, args, usedPrefix, command }) => {
   )
 }
 
-//handler.command = ['ban', 'kick', 'echar', 'hechar', 'b', 'bam', 'kicknum']
 handler.command = ['io']
 handler.admin = true
 handler.group = true
