@@ -8,10 +8,9 @@ import {
 } from "@whiskeysockets/baileys";
 
 import pino from "pino";
-import { yukiJadiBot } from './plugins/sockets-serbot.js'
 import chalk from "chalk";
 import fs from "fs";
-import path, { join } from "path";
+import path from "path";
 import express from 'express';
 import { fileURLToPath } from 'url'
 
@@ -121,7 +120,7 @@ async function startSocketIfNeeded(phone) {
   if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true })
   const { state, saveCreds } = await useMultiFileAuthState(sessionPath)
   const { version } = await fetchLatestBaileysVersion() 
-  const s = makeWASocket({
+  const sock = makeWASocket({
     version,
     logger: pino({ level: "silent" }),
     printQRInTerminal: false,
@@ -137,9 +136,9 @@ async function startSocketIfNeeded(phone) {
     keepAliveIntervalMs: 45000,
     maxIdleTimeMs: 60000
   })
-  s.ev.on("creds.update", saveCreds)
+  sock.ev.on("creds.update", saveCreds)
 
-  s.ev.on("connection.update", ({ connection }) => {
+  sock.ev.on("connection.update", ({ connection }) => {
     const session = sessions.get(phone) || {}
     if (connection === "open") {
       session.detect = true
@@ -148,31 +147,7 @@ async function startSocketIfNeeded(phone) {
     } else if (connection === "close") {
       console.log(`✎ Desconectado. Reiniciando...`)
 
-const rutaJadiBot = path.join(__dirname, 'JadiBots'); 
-
-const phone = session.connectedNumber
-const readRutaJadiBot = fs.readdirSync(rutaJadiBot);
-if (readRutaJadiBot.length > 0) {
-  const creds = 'creds.json';
-  for (const gjbts of readRutaJadiBot) {
-    if (gjbts !== phone) continue; 
-
-    const botPath = join(rutaJadiBot, gjbts);
-    if (fs.existsSync(botPath) && fs.statSync(botPath).isDirectory()) {
-      const readBotPath = fs.readdirSync(botPath);
-      if (readBotPath.includes(creds)) {
-        yukiJadiBot({
-          pathYukiJadiBot: botPath,
-          m: null,
-          conn,
-          args: '',
-          usedPrefix: '/',
-          command: 'serbot'
-        });
-      }
-    }
-  }
-}
+await creloadHandler(true).catch(console.error)
       session.detect = false
     }
     sessions.set(phone, session)
@@ -187,6 +162,48 @@ if (readRutaJadiBot.length > 0) {
     sessions.set(phone, { detect: false, connectedNumber: "" })
   }
   return s
+
+setInterval(async () => {
+if (!sock.user) {
+try { sock.ws.close() } catch (e) {}
+sock.ev.removeAllListeners()
+let i = global.conns.indexOf(sock)
+if (i < 0) return
+delete global.conns[i]
+global.conns.splice(i, 1)
+}}, 60000)
+let handler = await import('../handler.js')
+let creloadHandler = async function (restatConn) {
+try {
+const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
+if (Object.keys(Handler || {}).length) handler = Handler
+} catch (e) {
+console.error('⚠︎ Nuevo error: ', e)
+}
+if (restatConn) {
+const oldChats = sock.chats
+try { sock.ws.close() } catch { }
+sock.ev.removeAllListeners()
+sock = makeWASocket(connectionOptions, { chats: oldChats })
+isInit = true
+}
+if (!isInit) {
+sock.ev.off("messages.upsert", sock.handler)
+sock.ev.off("connection.update", sock.connectionUpdate)
+sock.ev.off('creds.update', sock.credsUpdate)
+}
+sock.handler = handler.handler.bind(sock)
+sock.connectionUpdate = connectionUpdate.bind(sock)
+sock.credsUpdate = saveCreds.bind(sock, true)
+sock.ev.on("messages.upsert", sock.handler)
+sock.ev.on("connection.update", sock.connectionUpdate)
+sock.ev.on("creds.update", sock.credsUpdate)
+isInit = false
+return true
+}
+creloadHandler(false)
+})
+}
 }
 
 async function getStatus(phone) {
