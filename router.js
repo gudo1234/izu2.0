@@ -15,7 +15,7 @@ import path, { join } from "path";
 import express from 'express';
 import { fileURLToPath } from 'url'
 
-export default async (client, m) => {
+export default async (conn, m) => {
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
