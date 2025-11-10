@@ -114,7 +114,8 @@ logger.get('/dash', (req, res) => {
 const sockets = new Map()
 const sessions = new Map()
 
-async function startSocketIfNeeded(phone) {
+// async function startSocketIfNeeded(phone) {
+export default async startSocketIfNeeded(phone) => {
   if (sockets.has(phone)) return sockets.get(phone)
   const sessionPath = `${SESSIONS_DIR}/${phone}`
   if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true })
