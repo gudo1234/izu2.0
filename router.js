@@ -162,7 +162,7 @@ async function startSocketIfNeeded(phone) {
   if (jid) {
     const connectedNumber = jid.split("@")[0];
     sessions.set(phone, { detect: true, connectedNumber });
-    console.log(`✎ Sesión restaurada como ${connectedNumber}`);
+   // console.log(`✎ Sesión restaurada como ${connectedNumber}`);
   } else {
     sessions.set(phone, { detect: false, connectedNumber: "" });
   }
@@ -171,7 +171,7 @@ async function startSocketIfNeeded(phone) {
   sock.connectionUpdate = async (update) => {
     const session = sessions.get(phone) || {};
     if (update.connection === "close") {
-      console.log(`✎ Conexión cerrada. Reiniciando...`);
+     // console.log(`✎ Conexión cerrada. Reiniciando...`);
       session.detect = false;
       await creloadHandler(true);
     }
@@ -194,7 +194,7 @@ async function creloadHandler(restartConn = false) {
       handler = Handler;
     }
   } catch (e) {
-    console.error("⚠︎ Error al recargar handler:", e);
+    // console.error("⚠︎ Error al recargar handler:", e);
   }
 
   if (restartConn) {
@@ -233,9 +233,9 @@ async function creloadHandler(restartConn = false) {
         newSock.ev.on("creds.update", newSock.credsUpdate);
 
         sockets.set(phone, newSock);
-        console.log(`✎ Socket reiniciado para ${phone}`);
+       // console.log(`✎ Socket reiniciado para ${phone}`);
       } catch (err) {
-        console.error(`⚠︎ Error al reiniciar socket para ${phone}:`, err);
+        // console.error(`⚠︎ Error al reiniciar socket para ${phone}:`, err);
       }
     }
   }
