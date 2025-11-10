@@ -6,7 +6,7 @@ import {
   jidDecode,
   DisconnectReason,
 } from "@whiskeysockets/baileys";
-
+import handler from './handler.js' 
 import pino from "pino";
 import chalk from "chalk";
 import fs from "fs";
@@ -114,98 +114,131 @@ logger.get('/dash', (req, res) => {
 const sockets = new Map()
 const sessions = new Map()
 
+let isInit = false
+
 async function startSocketIfNeeded(phone) {
-  if (sockets.has(phone)) return sockets.get(phone)
-  const sessionPath = `${SESSIONS_DIR}/${phone}`
-  if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true })
-  const { state, saveCreds } = await useMultiFileAuthState(sessionPath)
-  const { version } = await fetchLatestBaileysVersion() 
-  const sock = makeWASocket({
+  if (sockets.has(phone)) return sockets.get(phone);
+
+  const sessionPath = path.join(SESSIONS_DIR, phone);
+  if (!fs.existsSync(sessionPath)) fs.mkdirSync(sessionPath, { recursive: true });
+
+  const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+  const { version } = await fetchLatestBaileysVersion();
+
+  let sock = makeWASocket({
     version,
     logger: pino({ level: "silent" }),
     printQRInTerminal: false,
-    browser: ['MacOS', 'Chrome', '120.0.0.0'],
+    browser: ["MacOS", "Chrome", "120.0.0.0"],
     auth: {
       creds: state.creds,
-      keys: makeCacheableSignalKeyStore(state.keys, logger)
+      keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
     markOnlineOnConnect: false,
     generateHighQualityLinkPreview: true,
     syncFullHistory: false,
     getMessage: async () => "",
     keepAliveIntervalMs: 45000,
-    maxIdleTimeMs: 60000
-  })
-  sock.ev.on("creds.update", saveCreds)
+    maxIdleTimeMs: 60000,
+  });
 
-  sock.ev.on("connection.update", ({ connection }) => {
-    const session = sessions.get(phone) || {}
+  sock.ev.on("creds.update", saveCreds);
+
+  sock.ev.on("connection.update", async ({ connection }) => {
+    const session = sessions.get(phone) || {};
     if (connection === "open") {
-      session.detect = true
-      session.connectedNumber = s.user?.id?.split(":")[0] || ""
-      console.log(`✎ Conectado como ${session.connectedNumber}`)
+      session.detect = true;
+      session.connectedNumber = sock.user?.id?.split("@")[0] || "";
+      console.log(`✎ Conectado como ${session.connectedNumber}`);
     } else if (connection === "close") {
-      console.log(`✎ Desconectado. Reiniciando...`)
-
-(async () => {
-await creloadHandler(true).catch(console.error)
-})();
-      session.detect = false
+      console.log(`✎ Desconectado. Reiniciando ceremonialmente...`);
+      session.detect = false;
+      await creloadHandler(true);
     }
-    sessions.set(phone, session)
-  })
-  sockets.set(phone, s)
-  const jid = s.user?.id
-  if (jid) {
-    const connectedNumber = jid.split('@')[0]
-    sessions.set(phone, { detect: true, connectedNumber })
-    console.log(`✎ Sesión restaurada como ${connectedNumber}`)
-  } else {
-    sessions.set(phone, { detect: false, connectedNumber: "" })
-  }
-  return sock
+    sessions.set(phone, session);
+  });
 
-setInterval(async () => {
-if (!sock.user) {
-try { sock.ws.close() } catch (e) {}
-sock.ev.removeAllListeners()
-let i = global.conns.indexOf(sock)
-if (i < 0) return
-delete global.conns[i]
-global.conns.splice(i, 1)
-}}, 60000)
-let handler = await import('../handler.js')
-let creloadHandler = async function (restatConn) {
-try {
-const Handler = await import(`./handler.js?update=${Date.now()}`).catch(console.error)
-if (Object.keys(Handler || {}).length) handler = Handler
-} catch (e) {
-console.error('⚠︎ Nuevo error: ', e)
+  const jid = sock.user?.id;
+  if (jid) {
+    const connectedNumber = jid.split("@")[0];
+    sessions.set(phone, { detect: true, connectedNumber });
+    console.log(`✎ Sesión restaurada como ${connectedNumber}`);
+  } else {
+    sessions.set(phone, { detect: false, connectedNumber: "" });
+  }
+
+  sock.handler = handler.handler.bind(sock);
+  sock.connectionUpdate = async (update) => {
+    const session = sessions.get(phone) || {};
+    if (update.connection === "close") {
+      console.log(`✎ Conexión cerrada. Reiniciando...`);
+      session.detect = false;
+      await creloadHandler(true);
+    }
+    sessions.set(phone, session);
+  };
+  sock.credsUpdate = saveCreds.bind(sock, true);
+
+  sock.ev.on("messages.upsert", sock.handler);
+  sock.ev.on("connection.update", sock.connectionUpdate);
+  sock.ev.on("creds.update", sock.credsUpdate);
+
+  sockets.set(phone, sock);
+  return sock;
 }
-if (restatConn) {
-const oldChats = sock.chats
-try { sock.ws.close() } catch { }
-sock.ev.removeAllListeners()
-sock = makeWASocket(connectionOptions, { chats: oldChats })
-isInit = true
-}
-if (!isInit) {
-sock.ev.off("messages.upsert", sock.handler)
-sock.ev.off("connection.update", sock.connectionUpdate)
-sock.ev.off('creds.update', sock.credsUpdate)
-}
-sock.handler = handler.handler.bind(sock)
-sock.connectionUpdate = connectionUpdate.bind(sock)
-sock.credsUpdate = saveCreds.bind(sock, true)
-sock.ev.on("messages.upsert", sock.handler)
-sock.ev.on("connection.update", sock.connectionUpdate)
-sock.ev.on("creds.update", sock.credsUpdate)
-isInit = false
-return true
-}
-creloadHandler(false)
-})
-}
+
+async function creloadHandler(restartConn = false) {
+  try {
+    const Handler = await import(`../handler.js?update=${Date.now()}`).catch(console.error);
+    if (Handler && Object.keys(Handler).length) {
+      handler = Handler;
+    }
+  } catch (e) {
+    console.error("⚠︎ Error al recargar handler:", e);
+  }
+
+  if (restartConn) {
+    for (const [phone, sock] of sockets.entries()) {
+      try {
+        const oldChats = sock.chats;
+        sock.ev.removeAllListeners();
+        sock.ws.close();
+        const { state, saveCreds } = await useMultiFileAuthState(path.join(SESSIONS_DIR, phone));
+        const { version } = await fetchLatestBaileysVersion();
+
+        const newSock = makeWASocket({
+          version,
+          logger: pino({ level: "silent" }),
+          printQRInTerminal: false,
+          browser: ["MacOS", "Chrome", "120.0.0.0"],
+          auth: {
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, logger),
+          },
+          markOnlineOnConnect: false,
+          generateHighQualityLinkPreview: true,
+          syncFullHistory: false,
+          getMessage: async () => "",
+          keepAliveIntervalMs: 45000,
+          maxIdleTimeMs: 60000,
+        });
+
+        newSock.chats = oldChats;
+        newSock.handler = handler.handler.bind(newSock);
+        newSock.connectionUpdate = sock.connectionUpdate;
+        newSock.credsUpdate = saveCreds.bind(newSock, true);
+
+        newSock.ev.on("messages.upsert", newSock.handler);
+        newSock.ev.on("connection.update", newSock.connectionUpdate);
+        newSock.ev.on("creds.update", newSock.credsUpdate);
+
+        sockets.set(phone, newSock);
+        console.log(`✎ Socket reiniciado para ${phone}`);
+      } catch (err) {
+        console.error(`⚠︎ Error al reiniciar socket para ${phone}:`, err);
+      }
+    }
+  }
 }
 
 async function getStatus(phone) {
