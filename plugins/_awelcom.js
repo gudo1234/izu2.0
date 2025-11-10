@@ -7,6 +7,8 @@ import path from 'path'
 import { sticker } from '../lib/sticker.js'
 
 let handler = async (m, { conn, __dirname }) => {
+  let chat = db.data.chats[m.chat];
+if (!chat.welcome || !m.isGroup) return !0;
   if (!m.messageStubType || ![27, 28].includes(m.messageStubType)) return
 
   const isWelcome = m.messageStubType === 27
