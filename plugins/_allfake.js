@@ -46,7 +46,7 @@ global.msm = '⚠︎'
     let i = 'https://www.instagram.com/edar504__'
     let t = 'https://www.tiktok.com/@edar_xd'
     let p = 'https://www.paypal.me/edar504'
-    let g = 'https://chat.whatsapp.com/Cy42GegnKSmCVA6zxWlxKU?mode=wwt'
+    let g = 'https://chat.whatsapp.com/EGWREmKYGUAADNAan5vxZo?mode=wwt'
     global.redes = getRandom([c, nu, i, t, p, g])
 
     global.canalIdM = ["120363285614743024@newsletter", "120363395205399025@newsletter"]
