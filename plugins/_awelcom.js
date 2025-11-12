@@ -70,7 +70,8 @@ const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
   const gifsBienvenida = [
     './media/gif.mp4',
     './media/giff.mp4',
-    './media/gifff.mp4'
+    './media/gifff.mp4',
+    'https://cdn.russellxz.click/4ca23a70.mp4'
   ]
   const gifDespedida = 'https://qu.ax/xOtQJ.mp4'
 
