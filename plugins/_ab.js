@@ -7,7 +7,7 @@ const parseReactionInput = (input) => {
     return { link, count, emoji }
 }
 
-const handler = async (m, { conn, text, command, usedPrefix }) => {
+const handler = async (m, { conn, text }) => {
     if (!text) return m.reply(`🧠 Uso correcto:\n.re <link>|<cantidad>|<emoji>\nEjemplo:\n.re https://whatsapp.com/channel/ID/ID|10|🤣`)
 
     try {
@@ -15,14 +15,22 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
         if (!parsed) return m.reply("❌ Formato inválido. Ejemplo:\n.re https://whatsapp.com/channel/ID/ID|10|🤣")
 
         const { link, count, emoji } = parsed
-        const channelId = link.split('/')[4]
-        const messageId = link.split('/')[5]
+
+        // Limpiar posibles "/" al final del link
+        const cleanLink = link.replace(/\/+$/, '')
+        const linkParts = cleanLink.split('/')
+        const channelId = linkParts[4]
+        const messageId = linkParts[5]
+
         if (!channelId || !messageId) return m.reply("❌ Enlace inválido - faltan IDs")
 
         const channelMeta = await conn.newsletterMetadata("invite", channelId)
+        if (!channelMeta) return m.reply("❌ No se pudo obtener la metadata del canal")
 
+        // Reaccionar con pequeño delay para evitar bloqueos
         for (let i = 0; i < count; i++) {
             await conn.newsletterReactMessage(channelMeta.id, messageId, emoji)
+            await new Promise(resolve => setTimeout(resolve, 200)) // 200ms de pausa
         }
 
         await m.reply(`Reacción enviada a: ${channelMeta.name} la cantidad de ${count}`)
