@@ -4,7 +4,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         return m.reply(`Ejemplo de uso:\n${usedPrefix + command} https://whatsapp.com/channel/canal/id-de-mensaje texto de reacción`);
     }
 
-    // Regex corregido: los paréntesis no se cierran fuera del grupo
+    // Regex corregido: captura canal y mensaje
     const channelLinkRegex = /^https:\/\/whatsapp\.com\/channel\/([A-Za-z0-9_-]{22,})\/([A-Za-z0-9_-]+)$/;
     const match = args[0].match(channelLinkRegex);
 
@@ -17,18 +17,15 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     const styleMap = {
         a: '⛧', b: '🅑', c: '🅒', d: '🅓', e: '🅔', f: '🅕', g: '🅖',
         h: '🅗', i: '🅘', j: '🅙', k: '🅚', l: '🅛', m: '🅜', n: '🅝',
-        o: '🅞', p: '🇵', q: '🅠', r: '🅡', s: '🅢', t: '🅣', u: '🅤',
+        o: '🅞', p: '🇵‌', q: '🅠', r: '🅡', s: '🅢', t: '🅣', u: '🅤',
         v: '🅥', w: '🅦', x: '🅧', y: '🅨', z: '🅩',
         0: '⓿', 1: '➊', 2: '➋', 3: '➌', 4: '➍',
         5: '➎', 6: '➏', 7: '➐', 8: '➑', 9: '➒',
         ' ': '―'
     };
 
-    // Soporte para múltiples reacciones separadas por coma
-    const reactionTexts = args.slice(1).join(' ').split(',').map(r => r.trim());
-    const emojiReactions = reactionTexts.map(text =>
-        text.toLowerCase().split('').map(c => styleMap[c] || c).join('')
-    );
+    const reactionText = args.slice(1).join(' ').toLowerCase();
+    const emojiReaction = reactionText.split('').map(c => styleMap[c] || c).join('');
 
     try {
         const channelInfo = await conn.newsletterMetadata("invite", channelId);
@@ -37,24 +34,20 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
             return m.reply(`No se pudo obtener información del canal. Verifica que el enlace sea correcto.`);
         }
 
-        // Enviar todas las reacciones
-        for (const emojiReaction of emojiReactions) {
-            await conn.newsletterReactMessage(channelInfo.id, messageId, emojiReaction);
-        }
+        await conn.newsletterReactMessage(channelInfo.id, messageId, emojiReaction);
 
-        return m.reply(`✅ Reacción(es) *${emojiReactions.join(', ')}* enviada(s) correctamente al mensaje en el canal *${channelInfo.name}*`);
+        return m.reply(`✅ Reacción *${emojiReaction}* enviada correctamente al mensaje en el canal *${channelInfo.name}*`);
+
     } catch (error) {
         if (error.message.includes('not found')) {
             return m.reply(`El canal o mensaje no fue encontrado. Verifica que tengas acceso al canal y que el mensaje exista.`);
         }
-
         if (error.message.includes('react')) {
             return m.reply(`Error al enviar la reacción. ¿Tienes permiso para reaccionar en este canal?`);
         }
-
         return m.reply(`Ocurrió un error inesperado. Por favor intenta nuevamente.`);
     }
 };
 
-handler.command = ['channelreac', 'chreact', 'rch']
+handler.command = ['channelreac', 'chreact', 'rch'];
 export default handler;
