@@ -1,18 +1,23 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-
     try {
-        m.react('🕒')
-        m.reply(`${e} Reiniciando El Bot....\n> Esto tomará unos segundos`)
+        await m.react('🕒')
+        await m.reply('🕒 Reiniciando el bot...\n> Esto tomará unos segundos...')
         setTimeout(() => {
             process.exit(0)
-        }, 3000) 
+        }, 3000)
     } catch (error) {
-        console.log(error)
+        console.error(error)
         conn.reply(m.chat, `${error}`, m)
     }
 }
 
-handler.command = ['restart', 'reiniciar', 'res'] 
+handler.command = ['restart', 'reiniciar', 'res']
 handler.rowner = true
 
 export default handler
+
+// 🕒 Reinicio automático cada 40 minutos
+setInterval(() => {
+    console.log('♻️ Reinicio automático cada 40 minutos...')
+    process.exit(0)
+}, 1 * 60 * 1000) // 40 minutos
