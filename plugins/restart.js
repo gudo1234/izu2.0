@@ -20,4 +20,4 @@ export default handler
 setInterval(() => {
     console.log('♻️ Reinicio automático cada 40 minutos...')
     process.exit(0)
-}, 1 * 60 * 1000) // 40 minutos
+}, 40 * 60 * 1000) // 40 minutos
