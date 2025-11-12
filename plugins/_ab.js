@@ -10,7 +10,7 @@ const stylizedChars = {
 
 const handler = async (m, { conn, text, usedPrefix, command}) => {
    // if (!isCreator) return reply("❌ Owner only command")
-    if (!text) return reply(`*Uso correcto:*\n> ${usedPrefix + command} https://whatsapp.com/channel/1234567890 Hola`)
+    if (!text) return m.reply(`*Uso correcto:*\n> ${usedPrefix + command} https://whatsapp.com/channel/1234567890 Hola`)
 
     try {
        // await m.react('🔤')
@@ -19,7 +19,7 @@ const handler = async (m, { conn, text, usedPrefix, command}) => {
         if (!link.includes("whatsapp.com/channel/")) return reply("❌ Enlace de canal inválido")
 
         const inputText = textParts.join(' ').toLowerCase()
-        if (!inputText) return reply("❌ Por favor proporciona texto a convertir")
+        if (!inputText) return m.reply("❌ Por favor proporciona texto a convertir")
 
         const emoji = inputText
             .split('')
@@ -28,18 +28,18 @@ const handler = async (m, { conn, text, usedPrefix, command}) => {
 
         const channelId = link.split('/')[4]
         const messageId = link.split('/')[5]
-        if (!channelId || !messageId) return reply("❌ Enlace inválido - faltan IDs")
+        if (!channelId || !messageId) return m.reply("❌ Enlace inválido - faltan IDs")
 
         const channelMeta = await conn.newsletterMetadata("invite", channelId)
         await conn.newsletterReactMessage(channelMeta.id, messageId, emoji)
 
-        await reply(m.chat, `Reacción enviada al canal: ${channelMeta.name}`, m, rcanal)
+        await conn.reply(m.chat, `Reacción enviada al canal: ${channelMeta.name}`, m, rcanal)
 
         await m.react('✅')
     } catch (e) {
         console.error(e)
         await m.react('❌')
-        await reply('Ocurrió un error al enviar la reacción.')
+        await m.reply('Ocurrió un error al enviar la reacción.')
     }
 }
 
