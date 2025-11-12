@@ -77,6 +77,7 @@ let sender = m.key?.jid || m.key?.participant || m.key?.remoteJid || (m.key?.fro
   let jpg = './media/gif.mp4'
   let jpg2 = './media/giff.mp4'
   let jpg3 = './media/gifff.mp4'
+  let jpg4 = 'https://cdn.russellxz.click/4ca23a70.mp4'
   //let or = ['grupo', 'gif', 'anu', 'bot']
   let or = ['grupo', 'gif', 'anu']
   let media = or[Math.floor(Math.random() * or.length)]
@@ -589,7 +590,7 @@ if (m.isGroup) {
 
   if (media === 'gif') {
     await conn.sendMessage(m.chat, {
-      video: { url: [jpg, jpg2, jpg3].sort(() => Math.random() - 0.5)[0] },
+      video: { url: [jpg, jpg2, jpg3, jpg4].sort(() => Math.random() - 0.5)[0] },
       gifPlayback: true,
       caption: puta,
       mentions: [sender],
