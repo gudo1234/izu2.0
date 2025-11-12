@@ -1,5 +1,4 @@
 const parseReactionInput = (input) => {
-    // input esperado: link|cantidad|emoji
     const parts = input.split('|')
     if (parts.length !== 3) return null
     const [link, countStr, emoji] = parts
@@ -9,7 +8,6 @@ const parseReactionInput = (input) => {
 }
 
 const handler = async (m, { conn, text, command, usedPrefix }) => {
-   // if (!isCreator) return reply("❌ Owner only command")
     if (!text) return m.reply(`🧠 Uso correcto:\n.re <link>|<cantidad>|<emoji>\nEjemplo:\n.re https://whatsapp.com/channel/ID/ID|10|🤣`)
 
     try {
