@@ -1,7 +1,7 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
     try {
         await m.react('🕒')
-        await m.reply('🕒 Reiniciando el bot...\n> Esto tomará unos segundos...')
+        await m.reply(`${e} Reiniciando el bot...\n> Esto tomará unos segundos...`)
         setTimeout(() => {
             process.exit(0)
         }, 3000)
@@ -20,4 +20,4 @@ export default handler
 setInterval(() => {
     console.log('♻️ Reinicio automático cada 40 minutos...')
     process.exit(0)
-}, 40 * 60 * 1000) // 40 minutos
+}, 30 * 60 * 1000) // 40 minutos
