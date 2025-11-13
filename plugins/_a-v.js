@@ -24,8 +24,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   const quality = '144'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
 
-  await m.reply(`⏳ *Descargando ${command === 'audio' ? 'audio 🎵' : 'video 🎬'}...*\n\n📺 *Título:* ${video.title}\n⏱️ *Duración:* ${video.timestamp}\n👀 *Vistas:* ${video.views.toLocaleString()}`)
-
+  //await m.reply(`⏳ *Descargando ${command === 'audio' ? 'audio 🎵' : 'video 🎬'}...*\n\n📺 *Título:* ${video.title}\n⏱️ *Duración:* ${video.timestamp}\n👀 *Vistas:* ${video.views.toLocaleString()}`)
+m.react('⬆️')
   try {
     const res = await fetch(apiURL)
     if (!res.ok) throw new Error(`Error API: ${res.status}`)
@@ -36,7 +36,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     if (!urlMatch) return m.reply(`${e} No se pudo extraer el enlace de descarga.`)
 
     const downloadUrl = urlMatch[0]
-
+m.react('⬇️')
     await conn.sendMessage(
       m.chat,
       {
@@ -48,8 +48,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
           externalAdReply: {
             title: video.title,
             body: textbot,
-            //thumbnailUrl: redes,
-            thumbnailUrl: video.thumbnail,
+            thumbnailUrl: redes,
+            thumbnail: await (await fetch(video.thumbnail)).buffer(),
             sourceUrl: redes,
             mediaType: 1,
             renderLargerThumbnail: false
