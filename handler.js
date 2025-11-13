@@ -549,11 +549,30 @@ user.exp += m.exp
 user.coin -= m.coin * 1
 }
 
-let stat
+/*let stat
 if (m.plugin) {
 let now = +new Date
 if (m.plugin in stats) {
-stat = stats[m.plugin]
+stat = stats[m.plugin]*/
+let stat
+global.db.data.stats = global.db.data.stats || {}
+let user, stats = global.db.data.stats
+let now = +new Date
+
+if (m.plugin) {
+  if (m.plugin in stats) {
+    stat = stats[m.plugin]
+  } else {
+    stat = stats[m.plugin] = {}
+  }
+  if (!('total' in stat)) stat.total = 0
+  if (!('success' in stat)) stat.success = 0
+  if (!('last' in stat)) stat.last = 0
+  stat.total++
+  stat.last = now
+  if (m.error == null) stat.success++
+}
+        
 if (!isNumber(stat.total))
 stat.total = 1
 if (!isNumber(stat.success))
