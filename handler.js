@@ -571,7 +571,7 @@ if (m.plugin) {
   stat.total++
   stat.last = now
   if (m.error == null) stat.success++
-}
+
         
 if (!isNumber(stat.total))
 stat.total = 1
