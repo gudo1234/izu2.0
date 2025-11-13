@@ -48,8 +48,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
           externalAdReply: {
             title: video.title,
             body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: video.thumbnail,
+            //thumbnailUrl: redes,
+            thumbnailUrl: video.thumbnail,
             sourceUrl: redes,
             mediaType: 1,
             renderLargerThumbnail: false
