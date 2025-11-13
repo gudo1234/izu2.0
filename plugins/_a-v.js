@@ -6,7 +6,7 @@ const API_KEY = 'c44a9812537c7331c11c792314397e3179ab5774c606c8208be0dd7bd952d86
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args.length)
-    return m.reply(`🧩 Uso correcto:\n\n• *${usedPrefix + command}* nombre o link de YouTube`)
+    return m.reply(`${e} Uso correcto:\n\n• *${usedPrefix + command}* nombre o link de YouTube`)
 
   const text = args.join(' ')
   let video
@@ -33,7 +33,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     // Extraer la URL del texto devuelto
     const urlMatch = textData.match(/https?:\/\/[^\s"']+/)
-    if (!urlMatch) return m.reply('⚠️ No se pudo extraer el enlace de descarga.')
+    if (!urlMatch) return m.reply(`${e} No se pudo extraer el enlace de descarga.`)
 
     const downloadUrl = urlMatch[0]
 
@@ -47,11 +47,12 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         contextInfo: {
           externalAdReply: {
             title: video.title,
-            body: 'Descargado desde YouTube',
-            thumbnailUrl: video.thumbnail,
-            sourceUrl: video.url,
+            body: textbot,
+            thumbnailUrl: redes,
+            thumbnail: video.thumbnail,
+            sourceUrl: redes,
             mediaType: 1,
-            renderLargerThumbnail: true
+            renderLargerThumbnail: false
           }
         }
       },
@@ -59,12 +60,10 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     )
   } catch (err) {
     console.error(err)
-    m.reply('❌ Error al procesar la descarga. Verifica que la API esté activa.')
+    m.reply(`${e} Error al procesar la descarga. Verifica que la API esté activa.`)
   }
 }
 
-handler.help = ['audio', 'video']
-handler.tags = ['descargas']
 handler.command = ['audio', 'video']
-
+handler.group = true
 export default handler
