@@ -10,7 +10,7 @@ import moment from 'moment-timezone'
 global.botNumber = '' //Ejemplo: 50492280729
 
 global.owner = [
-   ['50492280729', '͟͞🔖⸸͜𝆞༝⟅ẹ𝆬υ⟆༝͜𝆞⸸.er/k', true],
+   ['50492280729', '🍁̶͢͞▻⟅ẹ𝆊ϋ⟆٭⳺֟፝͜⳻٭.er/k', true],
    ['5212431268546'], ['50495351584'], ['58399391748107'], ['94880558792752']];
 
 global.mods = ['50492280729']
@@ -30,10 +30,10 @@ global.apiKey = 'stellar-8CQatPnA'
 global.packname = '🤖⃧►iʑυвöτ◃2.0▹'
 global.botname = '🤖⃧►iʑυвöτ◃2.0▹'
 global.wm = '🤖⃧►iʑυвöτ◃2.0▹'
-global.author = '͟͞🔖⸸͜𝆞༝⟅ẹ𝆬υ⟆༝͜𝆞⸸.er/k'
-global.dev = '͟͞🔖⸸͜𝆞༝⟅ẹ𝆬υ⟆༝͜𝆞⸸.er/k'
+global.author = '🍁̶͢͞▻⟅ẹ𝆊ϋ⟆٭⳺֟፝͜⳻٭.er/k'
+global.dev = '🍁̶͢͞▻⟅ẹ𝆊ϋ⟆٭⳺֟፝͜⳻٭.er/k'
 global.textbot = 'Powered System WA-Bot © 2025'
-global.etiqueta = '͟͞🔖⸸͜𝆞༝⟅ẹ𝆬υ⟆༝͜𝆞⸸.er/k'
+global.etiqueta = '🍁̶͢͞▻⟅ẹ𝆊ϋ⟆٭⳺֟፝͜⳻٭.er/k'
 
 global.imagen7 = fs.readFileSync('./media/ad.png')
 global.imagen8 = fs.readFileSync('./media/byenavidad.jpg')
