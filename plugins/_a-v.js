@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
+import sharp from 'sharp' // 👈 IMPORTANTE para convertir a JPEG
 
 const BASE_API = 'https://foreign-marna-sithaunarathnapromax-9a005c2e.koyeb.app/api/ytapi'
 const API_KEY = 'c44a9812537c7331c11c792314397e3179ab5774c606c8208be0dd7bd952d869'
@@ -34,10 +35,20 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     const downloadUrl = urlMatch[0]
     m.react('⬇️')
 
-    const thumb = await (await fetch(video.thumbnail)).buffer()
+    // ----------------------------
+    // 🔥 CONVERSIÓN A JPEG (EVITA MINIATURA NEGRA)
+    // ----------------------------
+    let rawThumb = await (await fetch(video.thumbnail)).buffer()
 
+    let jpegThumb = await sharp(rawThumb)
+      .resize(400, 250, { fit: 'cover' })
+      .jpeg()
+      .toBuffer()
+
+    // ----------------------------
+    // AUDIO NORMAL
+    // ----------------------------
     if (command === 'audio') {
-      // --- ENVÍO NORMAL DE AUDIO ---
       return await conn.sendMessage(
         m.chat,
         {
@@ -47,7 +58,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
           contextInfo: {
             externalAdReply: {
               title: video.title,
-              thumbnail: thumb,
+              thumbnail: jpegThumb,
               mediaType: 1
             }
           }
@@ -56,19 +67,22 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
       )
     }
 
-    // --- AQUÍ LA MAGIA DEL FORMATO TIPO TARJETA COMO LA CAPTURA ---
+    // ----------------------------
+    // 🔥 VIDEO EN FORMATO DOCUMENTO
+    // 🔥 CON MINIATURA VISIBLE (NO NEGRA)
+    // ----------------------------
     await conn.sendMessage(
       m.chat,
       {
         document: { url: downloadUrl },
         mimetype: 'video/mp4',
         fileName: `${video.title}.mp4`,
-        //caption: `🎬 *${video.title}*`,
-        jpegThumbnail: thumb,  // ESTA LINEA CREA LA TARJETA COMO EN WHATSAPP
+        caption: `🎬 *${video.title}*`,
+        jpegThumbnail: jpegThumb,   // 🔥 miniatura correcta
         contextInfo: {
           externalAdReply: {
             title: video.title,
-            thumbnail: thumb,
+            thumbnail: jpegThumb,
             mediaType: 1,
             renderLargerThumbnail: false
           }
