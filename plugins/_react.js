@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     if (!args || !args.length) {
-        return m.reply(`${e} Uso: ${usedPrefix + command} <link_post> <emoji1,emoji2,emoji3,emoji4>\n\nEjemplo:\n${usedPrefix + command} https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H/218 😨,🤣,👾,😳`)
+        return m.reply(`${e} Uso: ${usedPrefix + command} <link_post> <emoji1,emoji2,emoji3,emoji4>\n\nEjemplo:\n${usedPrefix + command} https://whatsapp.com/channel/0029Vb6D6ogBVJl60Yr8YL31/473 😨,🤣,👾,😳`)
     }
 
     await m.react('⏳')
@@ -49,7 +49,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
         if (response.ok && result.message) {
             await m.react('✅')
-            await m.reply(`${e} Reacciones enviadas con éxito`)
+            await m.reply(`✅ Reacciones enviadas con éxito`)
         } else {
             await m.react('❌')
             await m.reply(`${e} Error al enviar las reacciones`)
@@ -62,4 +62,5 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 }
 
 handler.command = ['rea', 'react', 'reaccionar', 'channelreact']
+
 export default handler
