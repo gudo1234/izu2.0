@@ -1,11 +1,12 @@
 import fetch from 'node-fetch'
 import yts from 'yt-search'
-import sharp from 'sharp' // 👈 IMPORTANTE para convertir a JPEG
+import sharp from 'sharp'
 
 const BASE_API = 'https://foreign-marna-sithaunarathnapromax-9a005c2e.koyeb.app/api/ytapi'
 const API_KEY = 'c44a9812537c7331c11c792314397e3179ab5774c606c8208be0dd7bd952d869'
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
+
   if (!args.length)
     return m.reply(`${e} Uso correcto:\n\n• *${usedPrefix + command}* nombre o link de YouTube`)
 
@@ -23,66 +24,40 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   const fo = command === 'audio' ? 2 : 1
   const quality = '360'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
-  m.react('⬆️')
 
+  m.react('⬆️')
   try {
     const res = await fetch(apiURL)
     if (!res.ok) throw new Error(`Error API: ${res.status}`)
+
     const textData = await res.text()
     const urlMatch = textData.match(/https?:\/\/[^\s"']+/)
     if (!urlMatch) return m.reply(`${e} No se pudo extraer el enlace de descarga.`)
 
     const downloadUrl = urlMatch[0]
     m.react('⬇️')
-
-    // ----------------------------
-    // 🔥 CONVERSIÓN A JPEG (EVITA MINIATURA NEGRA)
-    // ----------------------------
-    let rawThumb = await (await fetch(video.thumbnail)).buffer()
-
-    let jpegThumb = await sharp(rawThumb)
+    const rawThumb = await (await fetch(video.thumbnail)).buffer()
+    const jpegThumb = await sharp(rawThumb)
       .resize(400, 250, { fit: 'cover' })
       .jpeg()
       .toBuffer()
-
-    // ----------------------------
-    // AUDIO NORMAL
-    // ----------------------------
-    if (command === 'audio') {
-      return await conn.sendMessage(
-        m.chat,
-        {
-          audio: { url: downloadUrl },
-          mimetype: 'audio/mpeg',
-          fileName: `${video.title}.mp3`,
-          contextInfo: {
-            externalAdReply: {
-              title: video.title,
-              thumbnail: jpegThumb,
-              mediaType: 1
-            }
-          }
-        },
-        { quoted: m }
-      )
-    }
-
-    // ----------------------------
-    // 🔥 VIDEO EN FORMATO DOCUMENTO
-    // 🔥 CON MINIATURA VISIBLE (NO NEGRA)
-    // ----------------------------
+    const isAudio = command === 'audio'
     await conn.sendMessage(
       m.chat,
       {
-        document: { url: downloadUrl },
-        mimetype: 'video/mp4',
-        fileName: `${video.title}.mp4`,
-        caption: `🎬 *${video.title}*`,
-        jpegThumbnail: jpegThumb,   // 🔥 miniatura correcta
+        [isAudio ? 'audio' : 'document']: { url: downloadUrl },
+
+        mimetype: isAudio ? 'audio/mpeg' : 'video/mp4',
+        fileName: `${video.title}.${isAudio ? 'mp3' : 'mp4'}`,
+        //caption: !isAudio ? `🎬 *${video.title}*` : undefined,
+        jpegThumbnail: jpegThumb,
         contextInfo: {
           externalAdReply: {
             title: video.title,
-            thumbnail: jpegThumb,
+            body: textbot,
+            thumbnailUrl: redes,
+            thumbnail: await (await fetch(icono)).buffer(),
+            sourceUrl: redes,
             mediaType: 1,
             renderLargerThumbnail: false
           }
