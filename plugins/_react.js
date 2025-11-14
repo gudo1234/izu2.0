@@ -49,7 +49,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
         if (response.ok && result.message) {
             await m.react('✅')
-            await m.reply(`${e} ✅ Reacciones enviadas con éxito`)
+            await m.reply(`${e} Reacciones enviadas con éxito`)
         } else {
             await m.react('❌')
             await m.reply(`${e} Error al enviar las reacciones`)
