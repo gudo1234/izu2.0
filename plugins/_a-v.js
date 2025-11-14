@@ -11,7 +11,6 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   const text = args.join(' ')
   let video
 
-  // Buscar o usar el link directamente
   if (text.includes('youtube.com') || text.includes('youtu.be')) {
     video = { url: text }
   } else {
@@ -20,18 +19,14 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     video = search.videos[0]
   }
 
-  const fo = command === 'audio' ? 2 : 1 // 1=video, 2=audio
+  const fo = command === 'audio' ? 2 : 1
   const quality = '360'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
-
-  //await m.reply(`⏳ *Descargando ${command === 'audio' ? 'audio 🎵' : 'video 🎬'}...*\n\n📺 *Título:* ${video.title}\n⏱️ *Duración:* ${video.timestamp}\n👀 *Vistas:* ${video.views.toLocaleString()}`)
 m.react('⬆️')
   try {
     const res = await fetch(apiURL)
     if (!res.ok) throw new Error(`Error API: ${res.status}`)
     const textData = await res.text()
-
-    // Extraer la URL del texto devuelto
     const urlMatch = textData.match(/https?:\/\/[^\s"']+/)
     if (!urlMatch) return m.reply(`${e} No se pudo extraer el enlace de descarga.`)
 
@@ -43,7 +38,7 @@ m.react('⬇️')
         [command]: { url: downloadUrl },
         mimetype: command === 'audio' ? 'audio/mpeg' : 'video/mp4',
         fileName: `${video.title}.${command === 'audio' ? 'mp3' : 'mp4'}`,
-        caption: command === 'video' ? `🎬 *${video.title}*\n📺 YouTube` : undefined,
+        caption: command === 'video' ? `🎬 *${video.title}*` : undefined,
         contextInfo: {
           externalAdReply: {
             title: video.title,
