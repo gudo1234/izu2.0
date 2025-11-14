@@ -1,11 +1,5 @@
-import fetch from 'node-fetch'
-import yts from 'yt-search'
-import sharp from 'sharp'
-
-const BASE_API = 'https://foreign-marna-sithaunarathnapromax-9a005c2e.koyeb.app/api/ytapi'
-const API_KEY = 'c44a9812537c7331c11c792314397e3179ab5774c606c8208be0dd7bd952d869'
-
 const handler = async (m, { conn, args, usedPrefix, command }) => {
+  const cleanCommand = command.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
   if (!args.length)
     return m.reply(`${e} Uso correcto:\n\n• *${usedPrefix + command}* nombre o link de YouTube`)
@@ -21,7 +15,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     video = search.videos[0]
   }
 
-  const fo = command === 'audio' ? 2 : 1
+  const fo = cleanCommand === 'audio' ? 2 : 1
   const quality = '360'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
 
@@ -36,12 +30,15 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const downloadUrl = urlMatch[0]
     m.react('⬇️')
+
     const rawThumb = await (await fetch(video.thumbnail)).buffer()
     const jpegThumb = await sharp(rawThumb)
       .resize(400, 250, { fit: 'cover' })
       .jpeg()
       .toBuffer()
-    const isAudio = command === 'audio'
+
+    const isAudio = cleanCommand === 'audio'
+
     await conn.sendMessage(
       m.chat,
       {
@@ -52,7 +49,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         jpegThumbnail: jpegThumb,
         contextInfo: {
           externalAdReply: {
-            title: isAudio ? video.title: wm,
+            title: isAudio ? video.title : wm,
             body: textbot,
             thumbnailUrl: redes,
             thumbnail: isAudio ? jpegThumb : await (await fetch(icono)).buffer(),
@@ -71,6 +68,6 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 }
 
-handler.command = ['audio', 'video']
+handler.command = ['video', 'vídeo', 'audio']
 handler.group = true
 export default handler
