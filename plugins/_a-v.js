@@ -49,14 +49,13 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
         mimetype: isAudio ? 'audio/mpeg' : 'video/mp4',
         fileName: `${video.title}.${isAudio ? 'mp3' : 'mp4'}`,
-        //caption: !isAudio ? `🎬 *${video.title}*` : undefined,
         jpegThumbnail: jpegThumb,
         contextInfo: {
           externalAdReply: {
             title: video.title,
             body: textbot,
             thumbnailUrl: redes,
-            thumbnail: await (await fetch(icono)).buffer(),
+            thumbnail: isAudio ? jpegThumb : await (await fetch(icono)).buffer(),
             sourceUrl: redes,
             mediaType: 1,
             renderLargerThumbnail: false
