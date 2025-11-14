@@ -21,7 +21,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 
   const fo = command === 'audio' ? 2 : 1 // 1=video, 2=audio
-  const quality = '144'
+  const quality = '360'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
 
   //await m.reply(`⏳ *Descargando ${command === 'audio' ? 'audio 🎵' : 'video 🎬'}...*\n\n📺 *Título:* ${video.title}\n⏱️ *Duración:* ${video.timestamp}\n👀 *Vistas:* ${video.views.toLocaleString()}`)
