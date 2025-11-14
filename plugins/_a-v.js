@@ -22,7 +22,7 @@ video = search.videos[0]
 }
 
 const fo = command === 'audio' ? 2 : 1
-const quality = '360'
+const quality = '720'
 const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
 
 m.react('⬆️')
