@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     if (!args || !args.length) {
-        return m.reply(`${e} Uso: ${usedPrefix + command} <link_post> <emoji1,emoji2,emoji3,emoji4>\n\nEjemplo:\n${usedPrefix + command} https://whatsapp.com/channel/0029Vb6D6ogBVJl60Yr8YL31/473 😨,🤣,👾,😳`)
+        return m.reply(`${e} Uso: ${usedPrefix + command} <link_post> <emoji1,emoji2,emoji3,emoji4>\n\nEjemplo:\n${usedPrefix + command} https://whatsapp.com/channel/0029VaXHNMZL7UVTeseuqw3H/218 😨,🤣,👾,😳`)
     }
 
     await m.react('⏳')
