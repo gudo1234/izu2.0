@@ -22,7 +22,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   const fo = command === 'audio' ? 2 : 1
   const quality = '360'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
-m.react('⬆️')
+  m.react('⬆️')
+
   try {
     const res = await fetch(apiURL)
     if (!res.ok) throw new Error(`Error API: ${res.status}`)
@@ -31,21 +32,43 @@ m.react('⬆️')
     if (!urlMatch) return m.reply(`${e} No se pudo extraer el enlace de descarga.`)
 
     const downloadUrl = urlMatch[0]
-m.react('⬇️')
+    m.react('⬇️')
+
+    const thumb = await (await fetch(video.thumbnail)).buffer()
+
+    if (command === 'audio') {
+      // --- ENVÍO NORMAL DE AUDIO ---
+      return await conn.sendMessage(
+        m.chat,
+        {
+          audio: { url: downloadUrl },
+          mimetype: 'audio/mpeg',
+          fileName: `${video.title}.mp3`,
+          contextInfo: {
+            externalAdReply: {
+              title: video.title,
+              thumbnail: thumb,
+              mediaType: 1
+            }
+          }
+        },
+        { quoted: m }
+      )
+    }
+
+    // --- AQUÍ LA MAGIA DEL FORMATO TIPO TARJETA COMO LA CAPTURA ---
     await conn.sendMessage(
       m.chat,
       {
-        [command]: { url: downloadUrl },
-        mimetype: command === 'audio' ? 'audio/mpeg' : 'video/mp4',
-        fileName: `${video.title}.${command === 'audio' ? 'mp3' : 'mp4'}`,
-        caption: command === 'video' ? `🎬 *${video.title}*` : undefined,
+        document: { url: downloadUrl },
+        mimetype: 'video/mp4',
+        fileName: `${video.title}.mp4`,
+        //caption: `🎬 *${video.title}*`,
+        jpegThumbnail: thumb,  // ESTA LINEA CREA LA TARJETA COMO EN WHATSAPP
         contextInfo: {
           externalAdReply: {
             title: video.title,
-            body: textbot,
-            thumbnailUrl: redes,
-            thumbnail: await (await fetch(video.thumbnail)).buffer(),
-            sourceUrl: redes,
+            thumbnail: thumb,
             mediaType: 1,
             renderLargerThumbnail: false
           }
@@ -53,6 +76,7 @@ m.react('⬇️')
       },
       { quoted: m }
     )
+
   } catch (err) {
     console.error(err)
     m.reply(`${e} Error al procesar la descarga. Verifica que la API esté activa.`)
