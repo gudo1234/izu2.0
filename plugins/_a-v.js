@@ -52,7 +52,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
         jpegThumbnail: jpegThumb,
         contextInfo: {
           externalAdReply: {
-            title: wm,
+            title: isAudio ? video.title: wm,
             body: textbot,
             thumbnailUrl: redes,
             thumbnail: isAudio ? jpegThumb : await (await fetch(icono)).buffer(),
