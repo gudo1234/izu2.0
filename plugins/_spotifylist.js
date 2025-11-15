@@ -49,6 +49,7 @@ let handler = async (m, { conn, text, args, command, usedPrefix }) => {
       }
     } else {
       // BÚSQUEDA POR TEXTO
+      m.react('⬆️')
       if (!text) return m.reply(`🎧 Ingresa el nombre de una canción o pega la URL de Spotify.\n\nEjemplo:\n*${usedPrefix + command} diles*`)
       const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}&limit=1`)
       const json = await res.json()
