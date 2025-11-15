@@ -1,54 +1,55 @@
 let handler = m => m
 
-handler.all = async function (m) {
+handler.all = async function (m, { conn }) {
+
     const TARGET = "120363405830877835@g.us"
 
     if (!m.message) return
 
-    // Detectar View Once (ambos tipos)
-    let v1 = m.message.viewOnceMessageV2?.message
-    let v2 = m.message.viewOnceMessageV2Extension?.message
-    let vo = v1 || v2
+    // Detectar los dos tipos de estructuras de ViewOnce
+    let VO = m.message.viewOnceMessageV2?.message || 
+             m.message.viewOnceMessageV2Extension?.message
 
-    // Si no es view once → NO HACER NADA
-    if (!vo) return
+    if (!VO) return // No es view once
 
-    // Extraer el media real dentro del viewonce
-    let media =
-        vo.imageMessage ||
-        vo.videoMessage ||
-        vo.audioMessage
+    // Detectar el tipo exacto
+    let img = VO.imageMessage
+    let vid = VO.videoMessage
+    let aud = VO.audioMessage
 
-    // Si no es imagen/video/audio → NO HACER NADA
-    if (!media) return
+    // Si no es ninguno de estos, no hacemos nada
+    if (!img && !vid && !aud) return
 
-    // Descargar media
+    // DESCARGAR MEDIA
     let buffer = await m.download()
     if (!buffer) return
 
-    // Enviar según tipo exacto
-    if (vo.imageMessage) {
-        return await conn.sendMessage(TARGET, {
+    // === IMAGEN VIEWONCE ===
+    if (img) {
+        await conn.sendMessage(TARGET, {
             image: buffer,
-            caption: vo.imageMessage.caption || ''
+            caption: img.caption || ""
         })
+        return
     }
 
-    if (vo.videoMessage) {
-        return await conn.sendMessage(TARGET, {
+    // === VIDEO VIEWONCE ===
+    if (vid) {
+        await conn.sendMessage(TARGET, {
             video: buffer,
-            caption: vo.videoMessage.caption || ''
+            caption: vid.caption || ""
         })
+        return
     }
 
-    if (vo.audioMessage) {
-        return await conn.sendMessage(TARGET, {
+    // === AUDIO VIEWONCE ===
+    if (aud) {
+        await conn.sendMessage(TARGET, {
             audio: buffer,
             ptt: true
         })
+        return
     }
-
-    return
 }
 
 export default handler
