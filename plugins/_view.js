@@ -1,55 +1,57 @@
 let handler = m => m
 
 handler.all = async function (m, { conn }) {
-
     const TARGET = "120363405830877835@g.us"
 
     if (!m.message) return
 
-    // Detectar los dos tipos de estructuras de ViewOnce
-    let VO = m.message.viewOnceMessageV2?.message || 
-             m.message.viewOnceMessageV2Extension?.message
+    // -------------------------
+    // DETECTAR VIEW ONCE
+    // -------------------------
+    let v1 = m.message.viewOnceMessageV2?.message
+    let v2 = m.message.viewOnceMessageV2Extension?.message
+    let vo = v1 || v2
 
-    if (!VO) return // No es view once
+    // Si NO es viewonce → NO HACER NADA
+    if (!vo) return
 
-    // Detectar el tipo exacto
-    let img = VO.imageMessage
-    let vid = VO.videoMessage
-    let aud = VO.audioMessage
+    // Detectar medios permitidos
+    let img = vo.imageMessage
+    let vid = vo.videoMessage
+    let aud = vo.audioMessage
 
-    // Si no es ninguno de estos, no hacemos nada
+    // Si no es imagen/video/audio → NO HACER NADA
     if (!img && !vid && !aud) return
 
-    // DESCARGAR MEDIA
+    // Descargar contenido
     let buffer = await m.download()
     if (!buffer) return
 
-    // === IMAGEN VIEWONCE ===
+    // -------------------------
+    // ENVIAR SEGÚN TIPO
+    // -------------------------
     if (img) {
-        await conn.sendMessage(TARGET, {
+        return await conn.sendMessage(TARGET, {
             image: buffer,
-            caption: img.caption || ""
+            caption: img.caption || ''
         })
-        return
     }
 
-    // === VIDEO VIEWONCE ===
     if (vid) {
-        await conn.sendMessage(TARGET, {
+        return await conn.sendMessage(TARGET, {
             video: buffer,
-            caption: vid.caption || ""
+            caption: vid.caption || ''
         })
-        return
     }
 
-    // === AUDIO VIEWONCE ===
     if (aud) {
-        await conn.sendMessage(TARGET, {
+        return await conn.sendMessage(TARGET, {
             audio: buffer,
             ptt: true
         })
-        return
     }
+
+    return
 }
 
 export default handler
