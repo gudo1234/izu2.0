@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { join } from 'path'
-import Jimp from 'jimp'
+import * as Jimp from 'jimp';
 import fetch from 'node-fetch'
 import { execSync } from 'child_process'
 import path from 'path'
