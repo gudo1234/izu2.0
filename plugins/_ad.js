@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js'
+//import { sticker } from '../lib/sticker.js'
 
 let yaIniciado = false
 
