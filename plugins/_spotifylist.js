@@ -70,6 +70,7 @@ let handler = async (m, { conn, text, args, command, usedPrefix }) => {
     thumb = await getValidThumbnail(trackData.image)
 
     // --- ENVÍO EN UN SOLO sendMessage ---
+   m.react('⬇️')
     await conn.sendMessage(
       m.chat,
       {
