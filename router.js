@@ -30,7 +30,7 @@ export default async (client, m) => {
   const __dirname = path.dirname(__filename);
 
   const logger = express();
-  const PORT = process.env.PORT || 40063;
+  const PORT = process.env.PORT || 25524;
   const SESSIONS_DIR = path.resolve(__dirname, 'Sessions/Subs');
   const basePath = path.join(__dirname, './Sessions');
 
@@ -283,9 +283,6 @@ export default async (client, m) => {
   });
 
 logger.listen(PORT, () => {
-})
-
-logger.listen(25559, () => {
 })
 
 }
