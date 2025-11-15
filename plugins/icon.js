@@ -1,4 +1,4 @@
-import jimp from "jimp"
+import * as Jimp from 'jimp';
 import { S_WHATSAPP_NET } from '@whiskeysockets/baileys'
 
 let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isROwner }) => {
