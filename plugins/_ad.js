@@ -1,6 +1,6 @@
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js' // tu función sticker
+import { sticker } from '../lib/sticker.js'
 
 let yaIniciado = false
 
@@ -47,31 +47,32 @@ const sendRandomSticker = async (conn, jid) => {
   }
 }
 
-let handler = async (m, { conn }) => {
-  if (!m.isGroup) return
+// 🔹 Función principal que inicia el ciclo automático
+export const startAutoStickers = async (conn) => {
+  if (yaIniciado) return
+  yaIniciado = true
 
-  if (!yaIniciado) {
-    yaIniciado = true
+  const INTERVAL = 1 * 60 * 1000 // 30 minutos
+  const PAUSE = 2 * 60 * 1000     // 2 minutos entre grupos
+  const myJID = '50495351584@s.whatsapp.net' // tu número
 
-    setInterval(async () => {
-      try {
-        // Obtener todos los grupos
-        const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us'))
+  const sendStickersCycle = async () => {
+    try {
+      // Primero enviar a tu PV
+      await sendRandomSticker(conn, myJID)
 
-        for (let i = 0; i < chats.length; i++) {
-          await sendRandomSticker(conn, chats[i])
-          if (i < chats.length - 1) {
-            // Pausa de 2 minutos entre cada grupo
-            await new Promise(res => setTimeout(res, 2 * 60 * 1000))
-          }
-        }
-
-      } catch (e) {
-        console.log('Error al enviar stickers automáticos:', e)
+      // Luego enviar a todos los grupos
+      const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us'))
+      for (let i = 0; i < chats.length; i++) {
+        await sendRandomSticker(conn, chats[i])
+        if (i < chats.length - 1) await new Promise(r => setTimeout(r, PAUSE))
       }
-    }, 30 * 60 * 1000) // cada 30 minutos
+    } catch (e) {
+      console.log('Error en ciclo de stickers:', e)
+    }
   }
-}
 
-handler.before = handler
-export default handler
+  // Ejecutar inmediatamente y luego cada 30 minutos
+  sendStickersCycle()
+  setInterval(sendStickersCycle, INTERVAL)
+}
