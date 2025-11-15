@@ -82,7 +82,7 @@ import yts from 'yt-search'
 import sharp from 'sharp'
 
 const BASE_API = 'https://foreign-marna-sithaunarathnapromax-9a005c2e.koyeb.app/api/ytapi'
-const API_KEY = 'c44a9812537c7331c11c7923143974c606c8208be0dd7bd952d869'
+const API_KEY = 'c44a9812537c7331c11c792314397e3179ab5774c606c8208be0dd7bd952d869'
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
 
@@ -92,7 +92,9 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   const text = args.join(' ')
   let video
 
-    m.react('⬆️')
+  // Reacción instantánea al iniciar
+m.react('⬆️')
+
   if (text.includes('youtube.com') || text.includes('youtu.be')) {
     video = { url: text }
   } else {
@@ -106,7 +108,11 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   const quality = '360'
   const apiURL = `${BASE_API}?url=${video.url}&fo=${fo}&qu=${quality}&apiKey=${API_KEY}`
 
+  // Reacción antes de enviar
+  //m.react('⬆️')
+
   try {
+    // 🔑 Aquí mantenemos EXACTAMENTE la forma de tu API
     const res = await fetch(apiURL)
     if (!res.ok) throw new Error(`Error API: ${res.status}`)
 
@@ -116,7 +122,6 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const downloadUrl = urlMatch[0]
 
-    // Reacción antes de enviar
     m.react('⬇️')
 
     // Thumbnail
@@ -126,6 +131,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
       .jpeg()
       .toBuffer()
 
+    // ✅ Manteniendo tu sendMessage exactamente igual
     await conn.sendMessage(
       m.chat,
       {
@@ -147,6 +153,8 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
       },
       { quoted: m }
     )
+
+    //m.react('✅')
 
   } catch (err) {
     console.error(err)
