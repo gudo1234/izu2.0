@@ -163,7 +163,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
     if (!data?.link) {
       await m.react("✖️")
-      return m.reply("❌ No se pudo obtener enlace desde ninguna API (todas fallaron).")
+      return m.reply(`${e} No se pudo obtener enlace desde ninguna API (todas fallaron).`)
     }
 
     // -------------------------------
@@ -182,8 +182,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 
   } catch {
     // ERROR INVISIBLE — nunca muestra stacktrace
-    await m.react("⚠️")
-    return m.reply("❌ No se pudo procesar la descarga, intenta de nuevo.")
+    return m.reply(`${e} No se pudo procesar la descarga, intenta de nuevo.`)
   }
 }
 
