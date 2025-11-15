@@ -81,10 +81,10 @@ const audioPick = arr => arr[Math.floor(Math.random() * arr.length)]
 
   // ➤ Mensaje base
   const actividad = isWelcome
-    ? `✨ Bienvenido/a, @${user.split('@')[0]}`
-    : `👋 Adiós, @${user.split('@')[0]}`
+    ? `${e} Bienvenid@, @${user.split('@')[0]}`
+    : `👋🏻 Adiós, @${user.split('@')[0]}`
    const ac = isWelcome
-    ? `✨ Bienvenido/a, ${name}`
+    ? `${e} Bienvenid@, ${name}`
     : `👋🏻 Adiós, ${name}`
   
   const newsletterInfo = {
@@ -176,7 +176,7 @@ await conn.sendMessage(
               forwardingScore: 10,
               isForwarded: true,
               externalAdReply: {
-                title: `| runtime ${run}`,
+                title: `| Runtime ${run}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
@@ -200,7 +200,7 @@ await conn.sendMessage(
               isForwarded: true,
               forwardingScore: 10,
               externalAdReply: {
-                title: `| runtime ${run}`,
+                title: `| Runtime ${run}`,
                 body: `${isWelcome ? 'IzuBot te da la bienvenida' : 'Esperemos que no vuelva -_-'}`,
                 sourceUrl: redes,
                 thumbnailUrl: redes,
@@ -301,7 +301,7 @@ await conn.sendMessage(
         ],
         messageParamsJson: `{
           "limited_time_offer":{
-            "text":"| runtime ${run}",
+            "text":"| Runtime ${run}",
             "url":"https://github.com/edar",
             "copy_code":"${groupName}",
             "expiration_time":1754613436864329},
