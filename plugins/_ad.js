@@ -1,7 +1,7 @@
 import makeWASocket from '@whiskeysockets/baileys'
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { sticker } from './lib/sticker.js' // tu función sticker
+import { sticker } from '../lib/sticker.js' // tu función sticker
 
 // 🔹 Temas de Pinterest
 const themes = [
