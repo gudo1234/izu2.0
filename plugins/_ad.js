@@ -1,9 +1,10 @@
-import makeWASocket from '@whiskeysockets/baileys'
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { sticker } from './lib/sticker.js' // aquí tu función sticker
+import { sticker } from '../lib/sticker.js' // tu función sticker
 
-// 🔹 Temas de Pinterest
+let yaIniciado = false
+
+// Temas de Pinterest
 const themes = [
   'gatitos',
   'fondos de pantalla',
@@ -14,7 +15,7 @@ const themes = [
   'emojis de meme'
 ]
 
-// 🔹 Función para buscar imágenes en Pinterest
+// Función para obtener imágenes de Pinterest
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`)
@@ -22,13 +23,13 @@ const pins = async (query) => {
       return res.data.map(i => i.image_large_url || i.image_medium_url || i.image_small_url).filter(Boolean)
     }
     return []
-  } catch (err) {
-    console.error('Error API Dorratz:', err)
+  } catch (e) {
+    console.log('Error API Dorratz:', e)
     return []
   }
 }
 
-// 🔹 Función para enviar sticker a un chat
+// Función para enviar sticker a un chat
 const sendRandomSticker = async (conn, jid) => {
   try {
     const theme = themes[Math.floor(Math.random() * themes.length)]
@@ -41,25 +42,36 @@ const sendRandomSticker = async (conn, jid) => {
 
     await conn.sendMessage(jid, { sticker: webpBuffer })
     console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
-  } catch (err) {
-    console.error(`Error enviando sticker a ${jid}:`, err)
+  } catch (e) {
+    console.log(`Error enviando sticker a ${jid}:`, e)
   }
 }
 
-// 🔹 Función principal
-const startBot = async () => {
-  const conn = makeWASocket() // Inicializa Baileys
+let handler = async (m, { conn }) => {
+  if (!m.isGroup) return
 
-  const TEST_NUMBER = '50495351584@s.whatsapp.net' // tu número en JID
-  const INTERVAL = 60 * 1000 // 1 minuto para prueba
+  if (!yaIniciado) {
+    yaIniciado = true
 
-  // Función que envía sticker al test number
-  const sendToTestNumber = async () => {
-    await sendRandomSticker(conn, TEST_NUMBER)
+    setInterval(async () => {
+      try {
+        // Obtener todos los grupos
+        const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us'))
+
+        for (let i = 0; i < chats.length; i++) {
+          await sendRandomSticker(conn, chats[i])
+          if (i < chats.length - 1) {
+            // Pausa de 2 minutos entre cada grupo
+            await new Promise(res => setTimeout(res, 2 * 60 * 1000))
+          }
+        }
+
+      } catch (e) {
+        console.log('Error al enviar stickers automáticos:', e)
+      }
+    }, 30 * 60 * 1000) // cada 30 minutos
   }
-
-  sendToTestNumber() // enviar inmediatamente
-  setInterval(sendToTestNumber, INTERVAL) // luego cada minuto
 }
 
-startBot()
+handler.before = handler
+export default handler
