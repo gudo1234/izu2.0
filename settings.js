@@ -22,8 +22,8 @@ global.baileys = 'V 6.7.16'
 global.vs = '2.2.0'
 global.nameqr = '🤖⃧►iʑυвöτ◃2.0▹'
 global.namebot = '🤖⃧►iʑυвöτ◃2.0▹'
-global.sessions = 'Sessions/Owner'
-global.jadi = 'Sessions/Subs' 
+global.sessions = 'Sessions'
+global.jadi = 'JadiBots' 
 global.yukiJadibts = true
 global.apiKey = 'stellar-8CQatPnA'
 
