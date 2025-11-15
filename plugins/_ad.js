@@ -31,36 +31,25 @@ async function enviarSticker(conn, jid, url) {
   }
 }
 
-let yaIniciado = false
-
-async function enviarStickerPrueba(conn) {
-  if (yaIniciado) return
-  yaIniciado = true
-
-  setInterval(async () => {
-    try {
-      const miNumero = '50495351584@s.whatsapp.net'
-
-      // Elegir categoría aleatoria
-      const categoria = categorias[Math.floor(Math.random() * categorias.length)]
-      const imgs = await pins(categoria)
-      if (!imgs || imgs.length === 0) return
-
-      // Elegir imagen aleatoria
-      const imgRandom = imgs[Math.floor(Math.random() * imgs.length)]
-
-      // Enviar sticker a tu PV
-      await enviarSticker(conn, miNumero, imgRandom)
-
-    } catch (err) {
-      console.error('Error enviando sticker de prueba:', err)
-    }
-  }, 1 * 60 * 1000) // Cada 30 minutos
-}
-
 let handler = async (m, { conn }) => {
-  await enviarStickerPrueba(conn)
+  try {
+    const miNumero = '50495351584@s.whatsapp.net'
+
+    // Elegir categoría aleatoria
+    const categoria = categorias[Math.floor(Math.random() * categorias.length)]
+    const imgs = await pins(categoria)
+    if (!imgs || imgs.length === 0) return console.log('No se encontraron imágenes')
+
+    // Elegir imagen aleatoria
+    const imgRandom = imgs[Math.floor(Math.random() * imgs.length)]
+
+    // Enviar sticker **inmediatamente**
+    await enviarSticker(conn, miNumero, imgRandom)
+
+  } catch (err) {
+    console.error('Error enviando sticker de prueba:', err)
+  }
 }
 
-handler.before = handler
+handler.command = ['teststicker']
 export default handler
