@@ -67,9 +67,6 @@ import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js'
 
 let yaIniciado = false
-const wm = 'MiBot'
-
-// Temas actualizados
 const themes = [
   'gatitos',
   'memes Perú',
