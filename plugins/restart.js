@@ -17,7 +17,7 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys';
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('./Sessions');
+    const { state, saveCreds } = await useMultiFileAuthState('./session');
     const conn = makeWASocket({
         printQRInTerminal: true,
         auth: state,
