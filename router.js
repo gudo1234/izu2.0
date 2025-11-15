@@ -12,7 +12,7 @@ import pino from "pino";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
-import { startSubBot } from './lib/subs.js';
+// import { startSubBot } from './lib/subs.js';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import NodeCache from 'node-cache';
