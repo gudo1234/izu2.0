@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import Jimp from 'jimp'
+import * as Jimp from 'jimp';
 import { getDevice } from "@whiskeysockets/baileys"
 import PhoneNumber from 'awesome-phonenumber'
 import moment from 'moment-timezone'
