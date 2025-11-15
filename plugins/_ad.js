@@ -1,9 +1,10 @@
-import makeWASocket from '@whiskeysockets/baileys'
 import axios from 'axios'
 import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js' // tu función sticker
 
-// 🔹 Temas de Pinterest
+let yaIniciado = false
+
+// Temas de Pinterest
 const themes = [
   'gatitos',
   'fondos de pantalla',
@@ -14,7 +15,7 @@ const themes = [
   'emojis de meme'
 ]
 
-// 🔹 Función para obtener imágenes de Pinterest
+// Función para obtener imágenes de Pinterest
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`)
@@ -23,12 +24,12 @@ const pins = async (query) => {
     }
     return []
   } catch (err) {
-    console.error('Error API Dorratz:', err)
+    console.log('Error API Dorratz:', err)
     return []
   }
 }
 
-// 🔹 Función para enviar un sticker random a un chat
+// Función para enviar un sticker random a tu número
 const sendRandomSticker = async (conn, jid) => {
   try {
     const theme = themes[Math.floor(Math.random() * themes.length)]
@@ -42,23 +43,26 @@ const sendRandomSticker = async (conn, jid) => {
     await conn.sendMessage(jid, { sticker: webpBuffer })
     console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
   } catch (err) {
-    console.error(`Error enviando sticker a ${jid}:`, err)
+    console.log('Error enviando sticker:', err)
   }
 }
 
-// 🔹 Función principal
-const startBot = async () => {
-  const conn = makeWASocket() // inicializa Baileys
-  const MY_JID = '50495351584@s.whatsapp.net' // tu número privado
-  const INTERVAL = 1 * 60 * 1000 // 30 minutos
+let handler = async (m, { conn }) => {
+  // Esto solo sirve para inicializar una vez
+  if (!yaIniciado) {
+    yaIniciado = true
 
-  // Función que envía sticker cada 30 minutos
-  const sendStickerCycle = async () => {
+    const MY_JID = '50495351584@s.whatsapp.net' // tu número privado
+    const INTERVAL = 1 * 60 * 1000 // 30 minutos
+
+    setInterval(async () => {
+      await sendRandomSticker(conn, MY_JID)
+    }, INTERVAL)
+
+    // Enviar inmediatamente al iniciar
     await sendRandomSticker(conn, MY_JID)
   }
-
-  sendStickerCycle() // enviar inmediatamente
-  setInterval(sendStickerCycle, INTERVAL) // luego cada 30 minutos
 }
 
-startBot()
+handler.before = handler
+export default handler
