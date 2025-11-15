@@ -1,7 +1,7 @@
 import fs, { promises as fsp } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
-import as Jimp from 'jimp'
+import * as Jimp from 'jimp';
 import fetch from 'node-fetch'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
