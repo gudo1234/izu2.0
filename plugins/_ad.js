@@ -1,15 +1,12 @@
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js' // tu función de stickers
+import { sticker } from '../lib/sticker.js' // tu función de sticker
 
-// 🔹 API de Pinterest Dorratz (solo imágenes)
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`)
     if (Array.isArray(res.data) && res.data.length > 0) {
-      return res.data.map(i => ({
-        url: i.image_large_url || i.image_medium_url || i.image_small_url
-      })).filter(i => i.url)
+      return res.data.map(i => i.image_large_url || i.image_medium_url || i.image_small_url).filter(Boolean)
     }
     return []
   } catch (error) {
@@ -21,7 +18,11 @@ const pins = async (query) => {
 let handler = async (m, { text, conn, command, usedPrefix }) => {
   const e = '❌'
 
-  if (!text) return conn.reply(m.chat, `${e} Ingresa texto o URL de Pinterest.\n\nEjemplo:\n${usedPrefix + command} gatitos`, m)
+  if (!text) return conn.reply(
+    m.chat,
+    `${e} Ingresa texto para buscar stickers de Pinterest.\n\nEjemplo: ${usedPrefix + command} gatos`,
+    m
+  )
 
   await m.react('🕒')
 
@@ -30,23 +31,26 @@ let handler = async (m, { text, conn, command, usedPrefix }) => {
     if (!results || results.length === 0) return conn.reply(m.chat, `No se encontraron resultados para "${text}".`, m)
 
     // Elegir una imagen random
-    const randomImg = results[Math.floor(Math.random() * results.length)]
-    const imgBuffer = await (await fetch(randomImg.url)).buffer()
+    const randomUrl = results[Math.floor(Math.random() * results.length)]
+    const imgBuffer = await fetch(randomUrl).then(r => r.buffer())
 
     // Generar sticker
-    const stkr = await sticker(imgBuffer, { packname: 'Pinterest', author: text })
+    const webpBuffer = await sticker(imgBuffer, false, text)
 
     // Enviar sticker
-    await conn.sendMessage(m.chat, { sticker: stkr }, { quoted: m })
+    await conn.sendMessage(
+      m.chat,
+      { sticker: webpBuffer },
+      { quoted: m }
+    )
 
     await m.react('✅')
-  } catch (error) {
-    console.error('Error Pinterest Sticker:', error)
+  } catch (err) {
+    console.error('Error al enviar sticker de Pinterest:', err)
     await m.react('❌')
-    m.reply(`❌ Error: ${error.message}`)
+    m.reply(`❌ Error: ${err.message}`)
   }
 }
 
 handler.command = ['pinstiker']
-
 export default handler
