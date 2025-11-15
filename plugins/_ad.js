@@ -3,18 +3,16 @@ import fetch from 'node-fetch'
 import { sticker } from '../lib/sticker.js' // tu función sticker
 
 let yaIniciado = false
-
 const themes = [
   'gatitos',
   'fondos de pantalla',
   'anonymous',
   'carros exóticos',
+  'gato meme',
   'memes',
   'emojis de meme',
-  'emojis funables de peru',
   'perro meme'
 ]
-
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`)
@@ -23,11 +21,9 @@ const pins = async (query) => {
     }
     return []
   } catch (err) {
-    console.log('Error API Dorratz:', err)
     return []
   }
 }
-
 const sendRandomSticker = async (conn, jid) => {
   try {
     const theme = themes[Math.floor(Math.random() * themes.length)]
@@ -36,7 +32,7 @@ const sendRandomSticker = async (conn, jid) => {
 
     const randomUrl = results[Math.floor(Math.random() * results.length)]
     const imgBuffer = await fetch(randomUrl).then(r => r.buffer())
-    const webpBuffer = await sticker(imgBuffer, false, wm, '😉')
+    const webpBuffer = await sticker(imgBuffer, false, wm)
 
     await conn.sendMessage(jid, { sticker: webpBuffer })
   } catch (err) {
@@ -47,8 +43,8 @@ let handler = async (m, { conn }) => {
   if (!yaIniciado) {
     yaIniciado = true
 
-    const INTERVAL = 30 * 60 * 1000
-    const PAUSE = 2 * 60 * 1000
+    const INTERVAL = 40 * 60 * 1000
+    const PAUSE = 1 * 60 * 1000
 
     const sendToGroups = async () => {
       try {
@@ -63,7 +59,6 @@ let handler = async (m, { conn }) => {
       } catch (err) {
       }
     }
-
     sendToGroups()
     setInterval(sendToGroups, INTERVAL)
   }
