@@ -16,7 +16,7 @@ function normalizeTikTokUrl(text) {
 
 const handler = async (m, { conn, text, usedPrefix, command }) => {
   if (!text) {
-    return conn.reply(m.chat, `✎ Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola\n*${usedPrefix + command}* https://vt.tiktok.com/ZShhtdsRh/`, m);
+    return conn.reply(m.chat, `${e} Usa el comando correctamente:\n\n📌 Ejemplo:\n*${usedPrefix + command}* La Vaca Lola\n*${usedPrefix + command}* https://vt.tiktok.com/ZShhtdsRh/`, m);
   }
 
   await m.react('🕒');
@@ -25,7 +25,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
     let result, dl_url;
     const isUrl = /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com\/@[\w.-]+\/video\/\d+|tiktok\.com\/t\/[\w.-]+|vm\.tiktok\.com\/[\w.-]+|vt\.tiktok\.com\/[\w.-]+)/i.test(text);
 
-    // PRIMER INTENTO: API
     if (isUrl) {
       const apiUrl = `https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`;
       const res = await fetch(apiUrl);
@@ -52,8 +51,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
         dl_url = result.dl_url;
       }
     }
-
-    // SEGUNDO INTENTO: SCRAPER
     if (!result) {
       const url = normalizeTikTokUrl(text);
       const scrape = url ? await Starlights.tiktokdl(url) : await Starlights.tiktokvid(text);
@@ -66,13 +63,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       };
       dl_url = result.dl_url;
     }
-
-    // TEXTO FORMATEADO
-    let txt = `╭───── • ─────╮
-  𖤐 \`TIKTOK EXTRACTOR\` 𖤐
-╰───── • ─────╯
-
-✦ *Título* : ${result.title}
+    let txt = `✦ *Título* : ${result.title}
 ✦ *Autor* : ${result.author}
 ✦ *Duración* : ${result.duration} segundos
 ✦ *Vistas* : ${result.views || '-'}
@@ -80,15 +71,9 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 ✦ *Comentarios* : ${result.comment || '-'}
 ✦ *Compartidos* : ${result.share || '-'}
 ✦ *Publicado* : ${result.published || '-'}
-✦ *Descargas* : ${result.downloads || '-'}
-
-╭───── • ─────╮
-> *${textbot}*
-╰───── • ─────╯`;
+✦ *Descargas* : ${result.downloads || '-'}`;
 
     await m.react('✅');
-
-    // ENVÍO DE ARCHIVO SEGÚN TIPO
     if (result.type === 'image' && result.images?.length > 0) {
       for (let i = 0; i < result.images.length; i++) {
         await conn.sendFile(m.chat, result.images[i], `foto_${i + 1}.jpg`, `*Foto ${i + 1} del TikTok*`, m, null, rcanal);
@@ -100,7 +85,6 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   } catch (err) {
     console.error('[ERROR TOTAL]', err);
-    //conn.reply(m.chat, '✗ No se pudo descargar el TikTok. Verifica el enlace o intenta con otra búsqueda.', m);
   }
 };
 
