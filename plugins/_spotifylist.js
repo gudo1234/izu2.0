@@ -81,8 +81,9 @@ let handler = async (m, { conn, text, args, command, usedPrefix }) => {
             title: trackData.title,
             body: trackData.artist,
             thumbnail: thumb,
+            thumbnailUrl: redes,
             mediaType: 2,
-            sourceUrl: trackData.url
+            sourceUrl: redes
           }
         }
       },
