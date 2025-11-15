@@ -1,4 +1,5 @@
 import axios from 'axios'
+
 const mimeFromExt = ext => ({
   '7z': 'application/x-7z-compressed',
   'zip': 'application/zip',
@@ -45,12 +46,14 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   try {
     await m.react('🕒')
+
     const apiURL = `https://api.stellarwa.xyz/dl/mediafire?url=${encodeURIComponent(text)}&key=stellar-wsRJSBsk`
     const { data: res } = await axios.get(apiURL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
       timeout: 20000
     })
-    if (!res || !res.status || !res.data || !res.data.dl) {
+
+    if (!res?.status || !res.data?.dl) {
       console.log('[⚠️ API SIN DATOS VÁLIDOS]', res)
       throw new Error('No se obtuvo información válida del archivo.')
     }
@@ -58,20 +61,21 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const file = res.data
     const extMatch = file.title.match(/\.(\w+)$/i)
     const ext = extMatch ? extMatch[1].toLowerCase() : 'zip'
-    const mime = mimeFromExt(ext) || file.tipo || 'application/octet-stream'
+    const mime = mimeFromExt(ext) || file.mimeType || 'application/octet-stream'
 
-    const caption = [`📦 *Peso:* ${file.peso}`,
-      `📅 *Fecha:* ${file.fecha}`
-    ].join('\n')
+    const caption = [
+      file.peso ? `📦 *Peso:* ${file.peso}` : '',
+      file.fecha ? `📅 *Fecha:* ${file.fecha}` : ''
+    ].filter(Boolean).join('\n')
+
     await conn.sendMessage(m.chat, {
       document: { url: file.dl },
       mimetype: mime,
       fileName: file.title,
       caption
-    }, { quoted: m})
+    }, { quoted: m })
 
     await m.react('✅')
-
   } catch (err) {
     console.error('[❌ ERROR EN MEDIAFIRE]', err)
     await m.react('❌')
