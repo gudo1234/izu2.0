@@ -11,14 +11,16 @@ let handler = async (m, { conn }) => {
 
     setInterval(async () => {
       try {
-        await conn.sendMessage(
-          '50495351584@s.whatsapp.net',
-          { sticker: await sticker(await (await fetch(icono)).buffer(), wm, m.pushName) }
-        )
+        const miNumero = '50495351584@s.whatsapp.net'
+        const stickerBuffer = await (await fetch(icono)).buffer()
+        const stikerFinal = await sticker(stickerBuffer, { packname: 'hola', author: '' })
+
+        await conn.sendMessage(miNumero, { sticker: stikerFinal })
+
       } catch (e) {
-        console.log('Error en sticker automático:', e)
+        console.log('Error al enviar sticker automático:', e)
       }
-    }, 1 * 60 * 1000) // 30 min
+    }, 1 * 60 * 1000) // 30 minutos
   }
 }
 
