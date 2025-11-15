@@ -22,7 +22,7 @@ import makeWASocket, {
 import fs from 'fs';
 function fixCreds() {
     try {
-        const credsPath = './Sessions/Owner/creds.json'
+        const credsPath = './Sessions/creds.json'
         if (!fs.existsSync(credsPath)) return;
 
         const raw = fs.readFileSync(credsPath, 'utf8');
