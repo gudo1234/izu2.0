@@ -12,9 +12,10 @@ import pino from "pino";
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
-import express from "express";
-import { fileURLToPath } from "url";
-import NodeCache from "node-cache";
+import { startSubBot } from './lib/subs.js';
+import express from 'express';
+import { fileURLToPath } from 'url';
+import NodeCache from 'node-cache';
 
 if (!global.conns) global.conns = [];
 const msgRetryCounterCache = new NodeCache({ stdTTL: 0, checkperiod: 0 });
@@ -100,7 +101,6 @@ export default async (client, m) => {
   logger.get('/', (req, res) => {
     return res.redirect('/dash');
   });
-
   logger.get('/dash', (req, res) => {
     res.sendFile(path.join(__dirname, 'src', 'bot.html'));
   });
@@ -166,7 +166,7 @@ export default async (client, m) => {
           if (intentos < 5) {
             console.log(chalk.gray(`[ ✿  ]  SUB-BOT ${botId} Conexión cerrada (código ${reason}) intento ${intentos}/5 → Reintentando...`));
             setTimeout(() => {
-             // startSubBot(null, null, 'Auto reinicio', false, phone, null);
+              startSubBot(null, null, 'Auto reinicio', false, phone, null);
             }, 3000);
           } else {
             console.log(chalk.gray(`[ ✿  ]  SUB-BOT ${botId} Falló tras 5 intentos. Eliminando sesión.`));
@@ -182,29 +182,16 @@ export default async (client, m) => {
 
         if ([DisconnectReason.connectionClosed, DisconnectReason.connectionLost, DisconnectReason.timedOut, DisconnectReason.connectionReplaced].includes(reason)) {
           setTimeout(() => {
-           // startSubBot(null, null, 'Auto reinicio', false, phone, null);
+            startSubBot(null, null, 'Auto reinicio', false, phone, null);
           }, 3000);
           return;
         }
 
         setTimeout(() => {
-        //  startSubBot(null, null, 'Auto reinicio', false, phone, null);
+          startSubBot(null, null, 'Auto reinicio', false, phone, null);
         }, 3000);
       }
     });
-
-    s.ev.on('messages.upsert', async (msg) => {
-      if (!msg.messages || msg.type !== 'notify') return; 
-      const message = msg.messages[0];
-      if (message.key.fromMe) return; 
-
-      const text = message.message.conversation; 
-      if (text === '!ping') {
-        await s.sendMessage(message.key.remoteJid, { text: 'Pong!' });
-      }
-
-    });
-
     return s;
   }
 
@@ -251,7 +238,7 @@ export default async (client, m) => {
         ok: true,
         connected: true,
         number: numbot,
-        message: `✎ Conectado como ${numbot}`,
+        message: `✎ Conectado como ${numbot}`
       };
     }
     const code = await requestPairingCode(phone);
@@ -259,7 +246,7 @@ export default async (client, m) => {
       ok: true,
       connected: false,
       code,
-      message: `${code}`,
+      message: `${code}`
     };
   }
 
@@ -271,7 +258,7 @@ export default async (client, m) => {
 
     if (fs.existsSync(subBotSessionPath)) {
       return res.json({
-        message: 'Este subbot ya está con una sesión activa. Si no está conectado, por favor espera 5 minutos antes de volver a intentar.',
+        message: 'Este subbot ya está con una sesión activa. Si no está conectado, por favor espera 5 minutos antes de volver a intentar.'
       });
     }
 
@@ -281,20 +268,20 @@ export default async (client, m) => {
         return res.json({
           message: `✎ Bot conectado como ${pairingResult.number}. Cargando edición...`,
           connected: true,
-          number: pairingResult.number,
+          number: pairingResult.number
         });
       }
       return res.json({
         message: `${pairingResult.code}`,
         code: `${pairingResult.code}`,
-        connected: false,
+        connected: false
       });
     } catch (error) {
       return res.status(500).json({ message: 'Error al conectar el bot.' });
     }
   });
 
-  logger.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-};
+logger.listen(PORT, () => {
+})
+
+}
