@@ -12,7 +12,8 @@ const themes = [
   'carros exóticos',
   'memes',
   'emojis de meme',
-  'emojis funables de peru'
+  'emojis funables de peru',
+  'perro meme'
 ]
 
 // Función para obtener imágenes de Pinterest
