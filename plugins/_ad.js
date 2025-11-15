@@ -1,8 +1,9 @@
+import makeWASocket from '@whiskeysockets/baileys'
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js'
+import { sticker } from './lib/sticker.js' // aquí tu función sticker
 
-// 🔹 Temas para los stickers
+// 🔹 Temas de Pinterest
 const themes = [
   'gatitos',
   'fondos de pantalla',
@@ -21,8 +22,8 @@ const pins = async (query) => {
       return res.data.map(i => i.image_large_url || i.image_medium_url || i.image_small_url).filter(Boolean)
     }
     return []
-  } catch (error) {
-    console.error('Error API Dorratz:', error)
+  } catch (err) {
+    console.error('Error API Dorratz:', err)
     return []
   }
 }
@@ -41,20 +42,24 @@ const sendRandomSticker = async (conn, jid) => {
     await conn.sendMessage(jid, { sticker: webpBuffer })
     console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
   } catch (err) {
-    console.error(`Error al enviar sticker a ${jid}:`, err)
+    console.error(`Error enviando sticker a ${jid}:`, err)
   }
 }
 
-// 🔹 Función de prueba solo para tu número
-export const startTestSticker = (conn) => {
-  const TEST_NUMBER = '50495351584@s.whatsapp.net' // tu número en formato JID
-  const INTERVAL = 60 * 1000 // 1 minuto para prueba rápida
+// 🔹 Función principal
+const startBot = async () => {
+  const conn = makeWASocket() // Inicializa Baileys
 
+  const TEST_NUMBER = '50495351584@s.whatsapp.net' // tu número en JID
+  const INTERVAL = 60 * 1000 // 1 minuto para prueba
+
+  // Función que envía sticker al test number
   const sendToTestNumber = async () => {
     await sendRandomSticker(conn, TEST_NUMBER)
   }
 
-  // Ejecutar inmediatamente y luego cada minuto
-  sendToTestNumber()
-  setInterval(sendToTestNumber, INTERVAL)
+  sendToTestNumber() // enviar inmediatamente
+  setInterval(sendToTestNumber, INTERVAL) // luego cada minuto
 }
+
+startBot()
