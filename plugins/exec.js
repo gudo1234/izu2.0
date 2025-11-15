@@ -38,7 +38,7 @@ let handler = async (m, _2) => {
   }
 }
 
-handler.customPrefix = /^=?+ /
+handler.customPrefix = /^=?< /
 handler.command = /(?:)/i
 handler.owner = true
 
