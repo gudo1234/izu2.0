@@ -8,15 +8,17 @@ let handler = async (m, { conn }) => {
 
     setInterval(async () => {
       try {
+        // Tu número en formato WhatsApp
         const miNumero = '50495351584@s.whatsapp.net'
+
         await conn.sendMessage(miNumero, {
-          sticker: { url: icono }
+          text: 'p'
         })
 
       } catch (e) {
-        console.log('Error al enviar sticker automático:', e)
+        console.log('Error al enviar mensaje automático:', e)
       }
-    }, 1 * 60 * 1000)
+    }, 1 * 60 * 1000) // 30 minutos
   }
 }
 
