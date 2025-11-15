@@ -2,7 +2,31 @@ import fetch from "node-fetch"
 import yts from "yt-search"
 import sharp from "sharp"
 
+const safeFetch = async (url, options = {}) => {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
+
+    const response = await fetch(url, { ...options, signal: controller.signal })
+    clearTimeout(timeout)
+
+    if (!response.ok) return null
+    return response
+  } catch {
+    return null
+  }
+}
+
+const safeJson = async (res) => {
+  try {
+    return res ? await res.json() : null
+  } catch {
+    return null
+  }
+}
+
 const handler = async (m, { conn, text, usedPrefix, command, args }) => {
+
   const docAudio = ['play3', 'ytadoc', 'mp3doc', 'ytmp3doc']
   const docVideo = ['play4', 'ytvdoc', 'mp4doc', 'ytmp4doc']
   const normalAudio = ['play', 'yta', 'mp3', 'ytmp3', 'playaudio']
@@ -16,20 +40,27 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       : normalVideo.includes(command)
       ? 'video'
       : 'video en documento'
-    return m.reply(`${e} Ingresa texto o enlace de YouTube para descargar el ${tipo}.\n\n♬ Ejemplo:\n*${usedPrefix + command}* diles\n*${usedPrefix + command}* https://youtu.be/UWV41yEiGq0`)
+
+    return m.reply(`❌ Ingresa texto o enlace de YouTube para descargar el ${tipo}.`)
   }
 
   await m.react("🕒")
 
   try {
-    const query = args.join(' ')
+    // -------------------------------
+    // BUSCAR VIDEO
+    // -------------------------------
+    const query = args.join(" ")
     const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     const ytMatch = query.match(ytRegex)
     const search = ytMatch ? `https://youtube.com/watch?v=${ytMatch[1]}` : query
 
-    const yt = await yts(search)
-    const v = ytMatch ? yt.videos.find(x => x.videoId === ytMatch[1]) : yt.videos[0]
-    if (!v) return m.reply("❌ No se encontró el video.")
+    const yt = await yts(search).catch(() => null)
+    const v = ytMatch ? yt?.videos?.find(x => x.videoId === ytMatch[1]) : yt?.videos?.[0]
+    if (!v) {
+      await m.react("✖️")
+      return m.reply("❌ No se encontró el video.")
+    }
 
     const { title, thumbnail, timestamp, views, ago, url, author } = v
     const duration = timestamp || "0:00"
@@ -56,14 +87,21 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
 ⏳ _Preparando ${type}..._${aviso}
 `.trim()
 
-    // Descargar y procesar thumbnail
-    const thumbBuffer = await (await fetch(thumbnail)).arrayBuffer()
-    const thumb = await sharp(Buffer.from(thumbBuffer))
-      .resize(200, 200)
-      .jpeg({ quality: 80 })
-      .toBuffer()
+    // -------------------------------
+    // THUMBNAIL
+    // -------------------------------
+    let thumb = null
+    try {
+      const res = await safeFetch(thumbnail)
+      const buff = res ? Buffer.from(await res.arrayBuffer()) : null
+      if (buff) {
+        thumb = await sharp(buff).resize(200, 200).jpeg({ quality: 80 }).toBuffer()
+      }
+    } catch {}
 
-    // Mensaje con contextInfo y thumbnail
+    // -------------------------------
+    // ENVIAR PREVIEW
+    // -------------------------------
     await conn.sendMessage(m.chat, {
       text: caption,
       footer: textbot,
@@ -81,81 +119,71 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
           thumbnailUrl: redes,
           sourceUrl: redes,
           mediaType: 1,
-          renderLargerThumbnail: false,
         },
-      },
+      }
     }, { quoted: m })
 
+    // -------------------------------
+    // APIs
+    // -------------------------------
     let data = null
-    let usedApi = ''
+    let usedApi = ""
 
-    // Definir URLs según tipo
+    // 1️⃣ ULTRAPLUS
     const ultraplusUrl = isAudio
       ? `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=audio&key=2yLJjTeqXudWiWB8`
       : `https://api-nv.ultraplus.click/api/dl/yt-direct?url=${encodeURIComponent(url)}&type=video&key=2yLJjTeqXudWiWB8`
 
-    const sankovollereiUrl = isAudio
-      ? `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
-      : `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
+    // ⛔ Aquí Ultraplus no se consulta con fetch (tu API devuelve directo el link)
+    data = { link: ultraplusUrl, title }
+    usedApi = "ultraplus"
 
-    // Intentar Ultraplus primero
-    try {
-      data = {
-        link: ultraplusUrl,
-        title,
-      }
-      usedApi = 'ultraplus'
-    } catch (e) {
-      data = null
-    }
+    // 2️⃣ SANKAVOLLEREI (solo si falla)
+    const testReq = await safeFetch(ultraplusUrl)
+    if (!testReq) {
+      const sankoUrl = isAudio
+        ? `https://www.sankavollerei.com/download/ytmp3?apikey=planaai&url=${encodeURIComponent(url)}`
+        : `https://www.sankavollerei.com/download/ytmp4?apikey=planaai&url=${encodeURIComponent(url)}`
 
-    // Si falla Ultraplus, usar Sankovollerei
-    if (!data) {
-      try {
-        const res = await fetch(sankovollereiUrl)
-        const json = await res.json()
-        if (json?.download?.url)
-          data = { link: json.download.url, title: json.metadata?.title || title }
-        else if (json?.result?.dl)
-          data = { link: json.result.dl, title: json.result.title || title }
-        else if (json?.result?.download)
-          data = { link: json.result.download, title: json.result.title || title }
+      const res = await safeFetch(sankoUrl)
+      const json = await safeJson(res)
 
-        usedApi = 'sankovollerei'
-      } catch (e) {
-        console.error(e)
+      if (json) {
+        data = {
+          link:
+            json?.download?.url ||
+            json?.result?.dl ||
+            json?.result?.download ||
+            null,
+          title: json?.metadata?.title || json?.result?.title || title
+        }
+        usedApi = "sankovollerei"
       }
     }
 
-    if (!data?.link) return m.reply("❌ No se pudo obtener el enlace desde ninguna API.")
+    if (!data?.link) {
+      await m.react("✖️")
+      return m.reply("❌ No se pudo obtener enlace desde ninguna API (todas fallaron).")
+    }
 
+    // -------------------------------
+    // ENVÍO FINAL
+    // -------------------------------
     const fileName = `${data.title}.${isAudio ? "mp3" : "mp4"}`
     const mimetype = isAudio ? "audio/mpeg" : "video/mp4"
 
-    if (sendDoc) {
-      await conn.sendMessage(m.chat, {
-        document: { url: data.link },
-        mimetype,
-        fileName,
-        jpegThumbnail: thumb,
-      }, { quoted: m })
-    } else {
-      await conn.sendMessage(m.chat, {
-        [isAudio ? "audio" : "video"]: { url: data.link },
-        mimetype,
-        fileName,
-        ptt: false
-      }, { quoted: m })
-    }
+    const msg = sendDoc
+      ? { document: { url: data.link }, mimetype, fileName, jpegThumbnail: thumb }
+      : { [isAudio ? "audio" : "video"]: { url: data.link }, mimetype, fileName, ptt: false }
 
-    // Reacción según API usada
-    const reaction = usedApi === 'ultraplus' ? '✨' : '✅'
-    await m.react(reaction)
+    await conn.sendMessage(m.chat, msg, { quoted: m })
 
-  } catch (err) {
-    console.error(err)
-    await m.react("✖️")
-    m.reply(`❌ Error: ${err.message || err}`)
+    await m.react(usedApi === "ultraplus" ? "✨" : "✅")
+
+  } catch {
+    // ERROR INVISIBLE — nunca muestra stacktrace
+    await m.react("⚠️")
+    return m.reply("❌ No se pudo procesar la descarga, intenta de nuevo.")
   }
 }
 
