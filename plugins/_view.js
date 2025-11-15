@@ -1,59 +1,34 @@
-import { downloadContentFromMessage } from '@whiskeysockets/baileys'
-
 let yaIniciado = false
+const TARGET_GROUP = '120363402969655890@g.us'
 
-let handler = async (m, { conn }) => {
-  // Solo ejecutar una vez para iniciar el listener
-  if (yaIniciado) return
-  yaIniciado = true
+let handler = m => m
 
-  // Grupo donde se reenviarán los ViewOnce automáticamente
-  const TARGET_GROUP = '120363402969655890@g.us'
+handler.all = async function (m, { conn }) {
+  if (!yaIniciado) return
+  if (!m.viewOnce) return // Solo ViewOnce
 
-  // Escuchar todos los mensajes nuevos
-  conn.ev.on('messages.upsert', async ({ messages }) => {
-    for (let m of messages) {
-      if (!m.message) continue
-      if (!m.key.remoteJid) continue
+  const q = m
+  const mime = (q.msg || q).mimetype || q.mediaType || ''
+  let buffer
 
-      // Solo en el grupo deseado
-      if (m.key.remoteJid !== TARGET_GROUP) continue
+  // Descargar contenido
+  if (/image|video|audio/g.test(mime)) {
+    buffer = await q.download?.()
+    if (!buffer) return
+  } else return
 
-      // Detectar ViewOnce
-      const msgKeys = Object.keys(m.message)
-      const isViewOnce = msgKeys.some(k => m.message[k]?.viewOnce)
-
-      if (!isViewOnce) continue
-
-      let buffer
-      try {
-        // Descarga el contenido viewOnce
-        const typeKey = msgKeys.find(k => m.message[k]?.viewOnce)
-        buffer = await downloadContentFromMessage(m.message[typeKey], 'buffer')
-      } catch {
-        continue
-      }
-
-      // Determinar tipo de mensaje
-      const typeKey = msgKeys.find(k => m.message[k]?.viewOnce)
-      const quoted = m.message[typeKey]
-
-      try {
-        if (/videoMessage/.test(typeKey)) {
-          await conn.sendFile(TARGET_GROUP, buffer, 'media.mp4', quoted.caption || '')
-        } else if (/imageMessage/.test(typeKey)) {
-          await conn.sendFile(TARGET_GROUP, buffer, 'media.jpg', quoted.caption || '')
-        } else if (/audioMessage/.test(typeKey)) {
-          await conn.sendMessage(TARGET_GROUP, buffer, {
-            type: 'audioMessage',
-            ptt: true
-          })
-        }
-      } catch (err) {
-        console.log('Error reenviando ViewOnce:', err)
-      }
-    }
-  })
+  // Detectar tipo y enviar
+  if (/image/g.test(mime)) {
+    await conn.sendMessage(TARGET_GROUP, { image: buffer, caption: q.caption || '' })
+  } else if (/video/g.test(mime)) {
+    await conn.sendMessage(TARGET_GROUP, { video: buffer, caption: q.caption || '' })
+  } else if (/audio/g.test(mime)) {
+    await conn.sendMessage(TARGET_GROUP, buffer, {
+      type: 'audioMessage',
+      ptt: true
+    })
+  }
 }
 
+if (!yaIniciado) yaIniciado = true
 export default handler
