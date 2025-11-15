@@ -11,7 +11,8 @@ const themes = [
   'gato meme',
   'memes',
   'emojis de meme',
-  'perro meme'
+  'perro meme',
+  'bob el constructor meme'
 ]
 
 const pins = async (query) => {
