@@ -41,8 +41,12 @@ let handler = async (m, { conn }) => {
     const INTERVAL = 40 * 60 * 1000
     const PAUSE = 1 * 60 * 1000
 
+    const PRIORITY_GROUP = '120363402969655890@g.us'
     const sendToGroups = async () => {
-      const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us'))
+      await sendRandomSticker(conn, PRIORITY_GROUP)
+      await new Promise(r => setTimeout(r, PAUSE))
+
+      const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us') && id !== PRIORITY_GROUP)
       for (let i = 0; i < chats.length; i++) {
         await sendRandomSticker(conn, chats[i])
         if (i < chats.length - 1) await new Promise(r => setTimeout(r, PAUSE))
