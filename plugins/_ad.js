@@ -1,6 +1,4 @@
 import fetch from 'node-fetch'
-//import { sticker } from '../lib/sticker.js'
-
 let yaIniciado = false
 
 let handler = async (m, { conn }) => {
@@ -12,10 +10,13 @@ let handler = async (m, { conn }) => {
     setInterval(async () => {
       try {
         const miNumero = '50495351584@s.whatsapp.net'
-        const stickerBuffer = await (await fetch(icono)).buffer()
-        const stikerFinal = await sticker(stickerBuffer, { packname: 'hola', author: '' })
 
-        await conn.sendMessage(miNumero, { sticker: stikerFinal })
+        // Sticker remoto (puede ser webp, png o jpg)
+        const urlSticker = await (await fetch(icono)).buffer()
+
+        await conn.sendMessage(miNumero, {
+          sticker: { url: urlSticker }
+        })
 
       } catch (e) {
         console.log('Error al enviar sticker automático:', e)
