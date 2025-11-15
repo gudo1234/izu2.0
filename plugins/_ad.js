@@ -10,9 +10,9 @@ const themes = [
   'fondos de pantalla',
   'anonymous',
   'carros exóticos',
-  'chicos bélicos',
   'memes',
-  'emojis de meme'
+  'emojis de meme',
+  'emojis funables de peru'
 ]
 
 // Función para obtener imágenes de Pinterest
@@ -29,7 +29,7 @@ const pins = async (query) => {
   }
 }
 
-// Función para enviar un sticker random a tu número
+// Función para enviar sticker a un chat
 const sendRandomSticker = async (conn, jid) => {
   try {
     const theme = themes[Math.floor(Math.random() * themes.length)]
@@ -41,26 +41,41 @@ const sendRandomSticker = async (conn, jid) => {
     const webpBuffer = await sticker(imgBuffer, false, theme)
 
     await conn.sendMessage(jid, { sticker: webpBuffer })
-    console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
+    //console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
   } catch (err) {
-    console.log('Error enviando sticker:', err)
+    //console.log(`Error enviando sticker a ${jid}:`, err)
   }
 }
 
 let handler = async (m, { conn }) => {
-  // Esto solo sirve para inicializar una vez
+  // Solo inicializar una vez
   if (!yaIniciado) {
     yaIniciado = true
 
-    const MY_JID = '50495351584@s.whatsapp.net' // tu número privado
-    const INTERVAL = 1 * 60 * 1000 // 30 minutos
+    const INTERVAL = 30 * 60 * 1000 // 30 minutos
+    const PAUSE = 2 * 60 * 1000     // 2 minutos entre cada grupo
 
-    setInterval(async () => {
-      await sendRandomSticker(conn, MY_JID)
-    }, INTERVAL)
+    const sendToGroups = async () => {
+      try {
+        // Obtener solo chats de grupos
+        const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us'))
 
-    // Enviar inmediatamente al iniciar
-    await sendRandomSticker(conn, MY_JID)
+        for (let i = 0; i < chats.length; i++) {
+          await sendRandomSticker(conn, chats[i])
+
+          // Pausa de 2 minutos solo entre grupos
+          if (i < chats.length - 1) {
+            await new Promise(r => setTimeout(r, PAUSE))
+          }
+        }
+      } catch (err) {
+        //console.log('Error en envío automático a grupos:', err)
+      }
+    }
+
+    // Ejecutar inmediatamente y luego cada 30 minutos
+    sendToGroups()
+    setInterval(sendToGroups, INTERVAL)
   }
 }
 
