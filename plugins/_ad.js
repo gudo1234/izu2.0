@@ -5,7 +5,7 @@ import { sticker } from '../lib/sticker.js'
 let yaIniciado = false
 const themes = [
   'gatitos',
-  'fondos de pantalla',
+  'memes Perú',
   'anonymous',
   'carros exóticos',
   'gato meme',
