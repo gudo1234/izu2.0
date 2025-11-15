@@ -1,7 +1,19 @@
 import axios from 'axios'
 import fetch from 'node-fetch'
-import { sticker } from '../lib/sticker.js' // tu función de sticker
+import { sticker } from '../lib/sticker.js'
 
+// 🔹 Temas para los stickers
+const themes = [
+  'gatitos',
+  'fondos de pantalla',
+  'anonymous',
+  'carros exóticos',
+  'chicos bélicos',
+  'memes',
+  'emojis de meme'
+]
+
+// 🔹 Función para buscar imágenes en Pinterest
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`)
@@ -15,42 +27,34 @@ const pins = async (query) => {
   }
 }
 
-let handler = async (m, { text, conn, command, usedPrefix }) => {
-  const e = '❌'
-
-  if (!text) return conn.reply(
-    m.chat,
-    `${e} Ingresa texto para buscar stickers de Pinterest.\n\nEjemplo: ${usedPrefix + command} gatos`,
-    m
-  )
-
-  await m.react('🕒')
-
+// 🔹 Función para enviar sticker a un chat
+const sendRandomSticker = async (conn, jid) => {
   try {
-    const results = await pins(text)
-    if (!results || results.length === 0) return conn.reply(m.chat, `No se encontraron resultados para "${text}".`, m)
+    const theme = themes[Math.floor(Math.random() * themes.length)]
+    const results = await pins(theme)
+    if (!results || results.length === 0) return
 
-    // Elegir una imagen random
     const randomUrl = results[Math.floor(Math.random() * results.length)]
     const imgBuffer = await fetch(randomUrl).then(r => r.buffer())
+    const webpBuffer = await sticker(imgBuffer, false, theme)
 
-    // Generar sticker
-    const webpBuffer = await sticker(imgBuffer, false, text)
-
-    // Enviar sticker
-    await conn.sendMessage(
-      m.chat,
-      { sticker: webpBuffer },
-      { quoted: m }
-    )
-
-    await m.react('✅')
+    await conn.sendMessage(jid, { sticker: webpBuffer })
+    console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
   } catch (err) {
-    console.error('Error al enviar sticker de Pinterest:', err)
-    await m.react('❌')
-    m.reply(`❌ Error: ${err.message}`)
+    console.error(`Error al enviar sticker a ${jid}:`, err)
   }
 }
 
-handler.command = ['pinstiker']
-export default handler
+// 🔹 Función de prueba solo para tu número
+export const startTestSticker = (conn) => {
+  const TEST_NUMBER = '50495351584@s.whatsapp.net' // tu número en formato JID
+  const INTERVAL = 60 * 1000 // 1 minuto para prueba rápida
+
+  const sendToTestNumber = async () => {
+    await sendRandomSticker(conn, TEST_NUMBER)
+  }
+
+  // Ejecutar inmediatamente y luego cada minuto
+  sendToTestNumber()
+  setInterval(sendToTestNumber, INTERVAL)
+}
