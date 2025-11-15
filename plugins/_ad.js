@@ -4,7 +4,6 @@ import { sticker } from '../lib/sticker.js' // tu función sticker
 
 let yaIniciado = false
 
-// Temas de Pinterest
 const themes = [
   'gatitos',
   'fondos de pantalla',
@@ -16,7 +15,6 @@ const themes = [
   'perro meme'
 ]
 
-// Función para obtener imágenes de Pinterest
 const pins = async (query) => {
   try {
     const res = await axios.get(`https://api.dorratz.com/v2/pinterest?q=${encodeURIComponent(query)}`)
@@ -30,7 +28,6 @@ const pins = async (query) => {
   }
 }
 
-// Función para enviar sticker a un chat
 const sendRandomSticker = async (conn, jid) => {
   try {
     const theme = themes[Math.floor(Math.random() * themes.length)]
@@ -39,42 +36,34 @@ const sendRandomSticker = async (conn, jid) => {
 
     const randomUrl = results[Math.floor(Math.random() * results.length)]
     const imgBuffer = await fetch(randomUrl).then(r => r.buffer())
-    const webpBuffer = await sticker(imgBuffer, false, theme)
+    const webpBuffer = await sticker(imgBuffer, false, wm, '😉')
 
     await conn.sendMessage(jid, { sticker: webpBuffer })
-    //console.log(`Sticker enviado a ${jid} con tema "${theme}"`)
   } catch (err) {
-    //console.log(`Error enviando sticker a ${jid}:`, err)
   }
 }
 
 let handler = async (m, { conn }) => {
-  // Solo inicializar una vez
   if (!yaIniciado) {
     yaIniciado = true
 
-    const INTERVAL = 30 * 60 * 1000 // 30 minutos
-    const PAUSE = 2 * 60 * 1000     // 2 minutos entre cada grupo
+    const INTERVAL = 30 * 60 * 1000
+    const PAUSE = 2 * 60 * 1000
 
     const sendToGroups = async () => {
       try {
-        // Obtener solo chats de grupos
         const chats = Object.keys(conn.chats).filter(id => id.endsWith('@g.us'))
 
         for (let i = 0; i < chats.length; i++) {
           await sendRandomSticker(conn, chats[i])
-
-          // Pausa de 2 minutos solo entre grupos
           if (i < chats.length - 1) {
             await new Promise(r => setTimeout(r, PAUSE))
           }
         }
       } catch (err) {
-        //console.log('Error en envío automático a grupos:', err)
       }
     }
 
-    // Ejecutar inmediatamente y luego cada 30 minutos
     sendToGroups()
     setInterval(sendToGroups, INTERVAL)
   }
