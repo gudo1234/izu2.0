@@ -31,6 +31,7 @@
 },
 "license": "MIT-License",
 "dependencies": {
+"@napi-rs/canvas": "latest",
 "@bochilteam/scraper": "^4.2.4",
 "@StarlightsTeam/Scraper": "github:StarlightsTeam/StarlightsTeam-Scraper",
 "@vitalets/google-translate-api": "^8.0.0",
