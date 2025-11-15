@@ -7,7 +7,7 @@ const themes = [
   'gatitos',
   'memes Perú',
   'anonymous',
-  'carros exóticos',
+  'chicas sexi',
   'gato meme',
   'memes',
   'emojis de meme',
