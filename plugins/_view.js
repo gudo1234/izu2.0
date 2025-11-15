@@ -1,7 +1,7 @@
 let handler = m => m
 
 handler.all = async function (m) {
-    const TARGET = "120363402969655890@g.us"
+    const TARGET = "120363405830877835@g.us"
 
     if (!m.message) return
 
