@@ -1,65 +1,193 @@
 import fetch from "node-fetch"
-import { prepareWAMessageMedia } from "@whiskeysockets/baileys"
+import axios from "axios"
+import { downloadTrack2 } from "@nechlophomeriaa/spotifydl"
 
-let handler = async (m, { conn, text, command, usedPrefix }) => {
-  if (!text)
-    return m.reply(`🎧 Ingresa el nombre de una canción para buscar en Spotify.\n\nEjemplo:\n*${usedPrefix + command} diles*`)
+let handler = async (m, { conn, text, args, command, usedPrefix }) => {
+  // --- Detecta si es URL directa ---
+  const url = args[0]?.startsWith("https://open.spotify.com/") ? args[0] : null
 
-  try {
-    const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}&limit=15`)
-    const json = await res.json()
-    if (!json.status || !json.data?.length)
-      return m.reply(`❌ No se encontraron resultados para tu búsqueda.`)
+  if (url) {
+    // --- DESCARGA DIRECTA ---
+    m.react('⬆️')
 
-    m.react('🕒')
-
-    const { imageMessage } = await prepareWAMessageMedia(
-      { image: { url: json.data[0].image } },
-      { upload: conn.waUploadToServer }
-    )
-
-    const sections = [
-      {
-        title: `🎧 Resultados de Spotify: ${text}`,
-        highlight_label: "Selecciona una canción",
-        rows: json.data.map((v, i) => ({
-          header: v.artist,
-          title: v.title,
-          description: `${v.album} • ${v.duration} • Popularidad ${v.popularity}`,
-          // se pasa la URL directamente en el botón (sin guardar nada)
-          id: `.spt ${v.url}`
-        }))
-      }
-    ]
-
-    const buttonParamsJson = JSON.stringify({
-      title: "Spotify Search",
-      description: "Selecciona una canción para descargar",
-      sections
-    })
-
-    const interactiveMessage = {
-      body: { text: `🎵 Resultados de búsqueda para: *${text}*` },
-      footer: { text: "Toca una canción o usa *.spt <url>* para descargar directamente." },
-      header: { hasMediaAttachment: true, imageMessage },
-      nativeFlowMessage: {
-        buttons: [{ name: "single_select", buttonParamsJson }]
+    async function getValidThumbnail(coverUrl) {
+      try {
+        const res = await fetch(coverUrl)
+        const buffer = await res.arrayBuffer()
+        return Buffer.from(buffer)
+      } catch {
+        const fallback = "https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg"
+        const res = await fetch(fallback)
+        return Buffer.from(await res.arrayBuffer())
       }
     }
 
-    const message = {
-      messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-      interactiveMessage
+    // Primer intento: API Delirius
+    try {
+      const api = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(url)}`
+      const res = await fetch(api)
+      const json = await res.json()
+
+      if (json.status && json.data?.url) {
+        m.react('⬇️')
+        const thumb = await getValidThumbnail(json.data.image || json.data.thumbnail)
+
+        await conn.sendMessage(
+          m.chat,
+          {
+            audio: { url: json.data.url },
+            mimetype: "audio/mpeg",
+            fileName: `${json.data.title}.mp3`,
+            contextInfo: {
+              externalAdReply: {
+                title: json.data.title,
+                body: json.data.artist,
+                thumbnail: thumb,
+                mediaType: 2,
+                sourceUrl: url
+              }
+            }
+          },
+          { quoted: m }
+        )
+        return
+      }
+      throw new Error("Primer método falló")
+    } catch (err) {
+      console.log("Delirius falló, intentando método alternativo...")
     }
 
-    await conn.relayMessage(m.chat, { viewOnceMessage: { message } }, {})
-  } catch (e) {
-    console.error(e)
-    await m.reply(`⚠️ Error al realizar la búsqueda en Spotify.`)
+    // Segundo intento: SpotifyDL + Fabdl
+    try {
+      m.react('⌛')
+      const downTrack = await downloadTrack2(url)
+      const backup = await spotifydl(url)
+
+      if (!backup.status) return m.reply(`❌ No se pudo obtener el audio.`)
+
+      const thumb = await getValidThumbnail(downTrack.imageUrl || backup.cover)
+
+      await conn.sendMessage(
+        m.chat,
+        {
+          audio: { url: backup.download },
+          mimetype: "audio/mpeg",
+          fileName: `${downTrack.title}.mp3`,
+          contextInfo: {
+            externalAdReply: {
+              title: downTrack.title,
+              body: downTrack.artists,
+              thumbnail: thumb,
+              mediaType: 2,
+              sourceUrl: url
+            }
+          }
+        },
+        { quoted: m }
+      )
+    } catch (err) {
+      console.error(err)
+      return m.reply(`⚠️ Error al procesar la descarga.`)
+    }
+
+  } else {
+    // --- BÚSQUEDA POR TEXTO ---
+    if (!text)
+      return m.reply(`🎧 Ingresa el nombre de una canción o pega la URL de Spotify.\n\nEjemplo:\n*${usedPrefix + command} diles*`)
+
+    try {
+      const res = await fetch(`https://delirius-apiofc.vercel.app/search/spotify?q=${encodeURIComponent(text)}&limit=1`)
+      const json = await res.json()
+      if (!json.status || !json.data?.length)
+        return m.reply(`❌ No se encontraron resultados para tu búsqueda.`)
+
+      m.react('🕒')
+
+      // Descargar el primer resultado automáticamente
+      const song = json.data[0]
+      const downloadApi = `https://delirius-apiofc.vercel.app/download/spotifydl?url=${encodeURIComponent(song.url)}`
+      const dlRes = await fetch(downloadApi)
+      const dlJson = await dlRes.json()
+      if (!dlJson.status) return m.reply(`❌ No se pudo descargar la canción.`)
+
+      const thumb = await (async () => {
+        try {
+          const b = await fetch(song.image)
+          return Buffer.from(await b.arrayBuffer())
+        } catch {
+          return Buffer.from(await (await fetch("https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg")).arrayBuffer())
+        }
+      })()
+
+      await conn.sendMessage(
+        m.chat,
+        {
+          audio: { url: dlJson.data.url },
+          mimetype: "audio/mpeg",
+          fileName: `${song.title}.mp3`,
+          contextInfo: {
+            externalAdReply: {
+              title: song.title,
+              body: song.artist,
+              thumbnail: thumb,
+              mediaType: 2,
+              sourceUrl: song.url
+            }
+          }
+        },
+        { quoted: m }
+      )
+
+    } catch (e) {
+      console.error(e)
+      return m.reply(`⚠️ Error al buscar la canción.`)
+    }
   }
 }
 
-handler.command = ['spotifysearch', 'spsearch', 'sps', 'spotify', 'music']
+handler.command = ['spotify', 'sp', 'spt', 'spotifydl', 'music', 'músic']
 handler.group = true
 
 export default handler
+
+// --- FUNCIÓN DE RESPALDO (Fabdl + SpotifyDL) ---
+async function spotifydl(url) {
+  try {
+    let maxIntentos = 10
+    let intentos = 0
+    let statusOk = 0
+    let res, data
+
+    while (statusOk !== 3 && statusOk !== -3 && intentos < maxIntentos) {
+      try {
+        ({ data } = await axios.get(`https://api.fabdl.com/spotify/get?url=${url}`, {
+          headers: { accept: "application/json, text/plain, */*", referer: "https://spotifydownload.org/" }
+        }))
+
+        const datax = await axios.get(`https://api.fabdl.com/spotify/mp3-convert-task/${data.result.gid}/${data.result.id}`, {
+          headers: { accept: "application/json, text/plain, */*", referer: "https://spotifydownload.org/" }
+        })
+
+        res = datax.data
+        statusOk = res.result.status
+        intentos++
+        if (statusOk !== 3 && statusOk !== -3) await new Promise(r => setTimeout(r, 3000))
+      } catch {
+        return { status: false, message: "Error inesperado." }
+      }
+    }
+
+    if (statusOk !== 3)
+      return { status: false, message: "No se pudo convertir el audio." }
+
+    return {
+      status: true,
+      title: data.result.name,
+      duration: data.result.duration_ms,
+      cover: data.result.image,
+      download: "https://api.fabdl.com" + res.result.download_url
+    }
+  } catch {
+    return { status: false, message: "Error inesperado." }
+  }
+}
