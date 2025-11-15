@@ -41,7 +41,7 @@ const handler = async (m, { conn, text, usedPrefix, command, args }) => {
       ? 'video'
       : 'video en documento'
 
-    return m.reply(`❌ Ingresa texto o enlace de YouTube para descargar el ${tipo}.`)
+    return m.reply(`${e} Ingresa _texto_ o _enlace_ de YouTube para descargar el *${tipo}.*`)
   }
 
   await m.react("🕒")
