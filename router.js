@@ -97,12 +97,12 @@ export default async (client, m) => {
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   logger.use(express.json());
-  logger.use('/lib', express.static(path.join(__dirname, 'src')));
+
   logger.get('/', (req, res) => {
     return res.redirect('/dash');
   });
   logger.get('/dash', (req, res) => {
-    res.sendFile(path.join(__dirname, 'lib', 'bot.html'));
+    res.sendFile(path.join(__dirname, 'src', 'bot.html'));
   });
 
   const sockets = new Map();
