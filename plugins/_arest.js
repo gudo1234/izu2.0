@@ -1,21 +1,15 @@
 import makeWASocket from "@whiskeysockets/baileys"
 import fetch from "node-fetch"
-import punycode from "punycode/"  // Node lanza warnings aquí
 
-global.conn = null
-
-// ⚠️ Función que fuerza a Node a volver a generar los warnings REALES
+// ⚠️ Función que fuerza a Node a volver a generar warnings reales
 function recargarModulosParaWarnings() {
     try {
-        // limpiar cache
-        delete require.cache[require.resolve('punycode')]
-        delete require.cache[require.resolve('node-fetch')]
-        
-        // volver a cargar → Node emitirá sus warnings de nuevo
-        require('punycode')
-        require('node-fetch')
+        delete require.cache[require.resolve("node-fetch")]
+        require("node-fetch")   // esto sí genera warnings REALES
     } catch {}
 }
+
+global.conn = null
 
 // 🚀 Función principal de conexión
 async function startSock() {
@@ -26,37 +20,37 @@ async function startSock() {
 
     global.conn = conn
 
-    // Eventos
     conn.ev.on('connection.update', async (update) => {
-        const { connection, lastDisconnect } = update
+        const { connection } = update
         
         if (connection === 'open') {
-            // ⚡ Forzar Node warnings REALES (los de la captura)
+
+            // ⚡ Mostrar warnings REALES de Node
             recargarModulosParaWarnings()
 
-            // Mensaje verde bonito
+            // Mensaje de conexión
             console.log(`\x1b[32m[*] Conectado a: ${conn.user?.name || 'Bot'}\x1b[0m`)
         }
 
         if (connection === 'close') {
             try {
-                await startSock() // reconexión automática
+                await startSock() // Reconexión automática
             } catch {}
         }
     })
 
     conn.ev.on('messages.upsert', async (m) => {
-        // tu manejador normal
+        // Tu manejador normal aquí
     })
 }
 
 startSock()
 
-// ♻️ Reconexion automática cada 5 minutos (sin logs)
+// ♻️ Reconexion automática cada 5 minutos
 setInterval(() => {
     try {
         if (global.conn?.ws) {
             global.conn.ws.close()
         }
     } catch {}
-}, 2 * 60 * 1000)
+}, 5 * 60 * 1000)
