@@ -34,26 +34,24 @@ let handler = async (m, { conn, text, participants, command }) => {
     const buffer = await q.download().catch(() => null)
 
     if (buffer) {
-      // Detectar tipo de contenido y enviarlo con el texto
+      // Enviar contenido primero, sin caption para no perderlo
       if (/image/.test(type)) {
-        await conn.sendMessage(res, { image: buffer, caption: msg || '', mentions: groupUsers })
+        await conn.sendMessage(res, { image: buffer, mentions: groupUsers })
       } else if (/video/.test(type)) {
-        await conn.sendMessage(res, { video: buffer, caption: msg || '', gifPlayback: false, mentions: groupUsers })
+        await conn.sendMessage(res, { video: buffer, gifPlayback: false, mentions: groupUsers })
       } else if (/gif/.test(type) || (type === 'video/mp4' && q.message?.videoMessage?.gifPlayback)) {
-        // GIF: enviarlo como GIF
-        await conn.sendMessage(res, { video: buffer, caption: msg || '', gifPlayback: true, mentions: groupUsers })
+        await conn.sendMessage(res, { video: buffer, gifPlayback: true, mentions: groupUsers })
       } else if (/sticker/.test(type)) {
         await conn.sendMessage(res, { sticker: buffer, mentions: groupUsers })
-        if (msg) await conn.sendMessage(res, { text: msg, mentions: groupUsers })
       } else {
-        await conn.sendMessage(res, { document: buffer, caption: msg || '', mentions: groupUsers })
+        await conn.sendMessage(res, { document: buffer, mentions: groupUsers })
       }
       enviado = true
     }
   }
 
-  // Si solo hay texto
-  if (msg && !enviado) {
+  // Siempre enviar el texto después, si existe
+  if (msg) {
     await conn.sendMessage(res, { text: msg, mentions: groupUsers })
     enviado = true
   }
