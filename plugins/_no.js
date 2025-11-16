@@ -9,15 +9,16 @@ let handler = async (m, { conn, text, participants, command }) => {
     `» O escribe *.${command} <link del grupo> <tu texto>* para enviar un texto mencionando a todos`
   )
 
-  // Extraer el enlace y el mensaje
-  const parts = text.trim().split(/\s+/) // divide por espacios
-  const link = parts.shift() // primer elemento = link
-  const msg = parts.join(' ') || '' // resto = mensaje
+  // Extraer enlace y mensaje completo (manteniendo emojis y caracteres especiales)
+  const match = text.trim().match(/(https?:\/\/chat\.whatsapp\.com\/[0-9A-Za-z]+(?:\?.*)?)([\s\S]*)/)
+  if (!match) return m.reply('Enlace de grupo no válido.')
 
-  // Obtener el código del grupo (detecta todos los links válidos de WhatsApp)
+  const link = match[1]
+  const msg = (match[2] || '').trim() // mensaje completo con cualquier carácter
+
+  // Obtener el código del grupo
   const codeMatch = link.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)(\?.*)?/)
   if (!codeMatch) return m.reply('Enlace de grupo no válido.')
-
   const groupId = codeMatch[1]
 
   // Intentar unirse al grupo (si ya estás, solo continúa)
@@ -56,7 +57,7 @@ let handler = async (m, { conn, text, participants, command }) => {
   }
 
   // Si solo hay texto
-  if (msg.trim() && !enviado) {
+  if (msg && !enviado) {
     await conn.sendMessage(res, { text: msg, mentions: groupUsers })
     enviado = true
   }
