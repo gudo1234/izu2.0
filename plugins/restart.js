@@ -1,18 +1,30 @@
 let handler = async (m, { conn, usedPrefix, command }) => {
-
     try {
-        m.react('🕒')
-        m.reply(`${e} Reiniciando El Bot....\n> Esto tomará unos segundos`)
+        await m.react('🕒')
+        await m.reply(`🕒 Reiniciando la conexión...\n> Esto tomará unos segundos...`)
+
+        // Reinicio silencioso de BAILEYS
         setTimeout(() => {
-            process.exit(0)
-        }, 3000) 
+            try {
+                conn.ws.close() // Fuerza la reconexión sin reiniciar Node
+            } catch {}
+        }, 2000)
+
     } catch (error) {
-        console.log(error)
         conn.reply(m.chat, `${error}`, m)
     }
 }
 
-handler.command = ['restart', 'reiniciar', 'res'] 
+handler.command = ['restart', 'reiniciar', 'res']
 handler.rowner = true
 
 export default handler
+
+// ♻️ Reconexion automática cada 5 minutos (SIN log, SIN console)
+setInterval(() => {
+    try {
+        if (global.conn?.ws) {
+            global.conn.ws.close() // Reconexión silenciosa
+        }
+    } catch {}
+}, 5 * 60 * 1000) // 5 minutos
