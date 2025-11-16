@@ -1,33 +1,52 @@
 let handler = async (m, { conn, text, participants, command }) => {
   const users = participants
     .map(u => u.id)
-    .filter(v => v !== conn.user.jid) // Excluye al bot
+    .filter(v => v !== conn.user.jid)
 
-  let [link, msg] = text ? text.split('|') : []
+  // Dividir solo en el PRIMER "|", permitiendo emojis, caracteres raros, = _ etc.
+  let link = null
+  let msg = null
 
-  if (!link) return m.reply(
-    `*Uso correcto:*\n` +
-    `» Responde a un mensaje con *.${command}* para etiquetar a todos\n` +
-    `» O escribe *.${command} <link del grupo>|<tu texto>* para enviar un texto mencionando a todos`
-  )
+  if (text) {
+    const index = text.indexOf('|')
+    if (index !== -1) {
+      link = text.slice(0, index).trim()
+      msg = text.slice(index + 1).trim()
+    } else {
+      link = text.trim()
+    }
+  }
 
-  // Obtener el código del grupo
-  let code = link.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)/)
+  if (!link)
+    return m.reply(
+      `*Uso correcto:*\n` +
+      `» Responde a un mensaje con *.${command}* para etiquetar a todos\n` +
+      `» O escribe *.${command} <link del grupo>|<tu texto>*`
+    )
+
+  // Aceptar enlaces con cualquier carácter permitido
+  // Soporta links como:
+  // https://chat.whatsapp.com/IWaeL319lvwG2KllObjKHD?mode=ems_copy_c
+  let code = link.match(/chat\.whatsapp\.com\/([A-Za-z0-9=_-]+)/)
+
   if (!code) return m.reply('Enlace de grupo no válido.')
+
   let groupId = code[1]
 
-  // Intentar unirse al grupo (si ya estás, solo continúa)
+  // Intentar unirse
   let res = await conn.groupAcceptInvite(groupId).catch(() => groupId)
   if (!res) return m.reply('No pude unirme al grupo (enlace vencido o privado).')
 
   let groupMetadata = await conn.groupMetadata(res).catch(() => null)
   if (!groupMetadata) return m.reply('No se pudo obtener la información del grupo.')
+
   let groupUsers = groupMetadata.participants.map(u => u.id)
 
-  // Variable para saber si se envió algo
   let enviado = false
 
-  // Si hay mensaje citado
+  // -----------------------------
+  // SI HAY UN MENSAJE CITADO
+  // -----------------------------
   if (m.quoted) {
     const q = m.quoted
     const type = (q.mimetype || q.mediaType || q.mtype || '').toLowerCase()
@@ -51,18 +70,18 @@ let handler = async (m, { conn, text, participants, command }) => {
     }
   }
 
-  // Si solo hay texto
-  if (msg?.trim() && !enviado) {
+  // -----------------------------
+  // SI SOLO HAY TEXTO
+  // -----------------------------
+  if (!enviado && msg?.trim()) {
     await conn.sendMessage(res, { text: msg, mentions: groupUsers })
     enviado = true
   }
 
-  // Reaccionar solo una vez si se envió algo
   if (enviado) await m.react('✅')
-  else return m.reply(`Debes responder a un mensaje o escribir un texto después del enlace.`)
+  else return m.reply(`Debes responder a un mensaje o escribir texto después del enlace.`)
 }
 
 handler.command = ['no']
 handler.owner = true
-//handler.group = true
 export default handler
