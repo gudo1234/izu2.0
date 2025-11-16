@@ -1,5 +1,7 @@
 let handler = async (m, { conn, text, participants, command }) => {
-  const users = participants.map(u => u.id).filter(v => v !== conn.user.jid)
+  const users = participants
+    .map(u => u.id)
+    .filter(v => v !== conn.user.jid) // Excluye al bot
 
   if (!text) return m.reply(
     `*Uso correcto:*\n` +
@@ -7,24 +9,26 @@ let handler = async (m, { conn, text, participants, command }) => {
     `» O escribe *.${command} <link del grupo> <tu texto>* para enviar un texto mencionando a todos`
   )
 
-  // Extraer enlace y mensaje completo
-  const match = text.trim().match(/(https?:\/\/chat\.whatsapp\.com\/[0-9A-Za-z]+(?:\?.*)?)([\s\S]*)/)
-  if (!match) return m.reply('Enlace de grupo no válido.')
+  // Separar el link del mensaje: el primer "palabra" es el link, el resto es el texto
+  let [link, ...msgParts] = text.trim().split(/\s+/)
+  let msg = msgParts.join(' ')
 
-  const link = match[1]
-  const msg = (match[2] || '').trim()
+  if (!link) return m.reply('Debes poner un enlace de grupo válido.')
 
-  const codeMatch = link.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)(\?.*)?/)
-  if (!codeMatch) return m.reply('Enlace de grupo no válido.')
-  const groupId = codeMatch[1]
+  // Obtener el código del grupo
+  let code = link.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)/)
+  if (!code) return m.reply('Enlace de grupo no válido.')
+  let groupId = code[1]
 
-  const res = await conn.groupAcceptInvite(groupId).catch(() => groupId)
+  // Intentar unirse al grupo (si ya estás, solo continúa)
+  let res = await conn.groupAcceptInvite(groupId).catch(() => groupId)
   if (!res) return m.reply('No pude unirme al grupo (enlace vencido o privado).')
 
-  const groupMetadata = await conn.groupMetadata(res).catch(() => null)
+  let groupMetadata = await conn.groupMetadata(res).catch(() => null)
   if (!groupMetadata) return m.reply('No se pudo obtener la información del grupo.')
-  const groupUsers = groupMetadata.participants.map(u => u.id)
+  let groupUsers = groupMetadata.participants.map(u => u.id)
 
+  // Variable para saber si se envió algo
   let enviado = false
 
   // Si hay mensaje citado
@@ -34,32 +38,35 @@ let handler = async (m, { conn, text, participants, command }) => {
     const buffer = await q.download().catch(() => null)
 
     if (buffer) {
-      // Enviar contenido primero, sin caption para no perderlo
       if (/image/.test(type)) {
-        await conn.sendMessage(res, { image: buffer, mentions: groupUsers })
+        await conn.sendMessage(res, { image: buffer, caption: msg || '', mentions: groupUsers })
+        enviado = true
       } else if (/video/.test(type)) {
-        await conn.sendMessage(res, { video: buffer, gifPlayback: false, mentions: groupUsers })
-      } else if (/gif/.test(type) || (type === 'video/mp4' && q.message?.videoMessage?.gifPlayback)) {
-        await conn.sendMessage(res, { video: buffer, gifPlayback: true, mentions: groupUsers })
+        await conn.sendMessage(res, { video: buffer, caption: msg || '', mentions: groupUsers })
+        enviado = true
       } else if (/sticker/.test(type)) {
         await conn.sendMessage(res, { sticker: buffer, mentions: groupUsers })
+        if (msg) await conn.sendMessage(res, { text: msg, mentions: groupUsers })
+        enviado = true
       } else {
-        await conn.sendMessage(res, { document: buffer, mentions: groupUsers })
+        await conn.sendMessage(res, { document: buffer, caption: msg || '', mentions: groupUsers })
+        enviado = true
       }
-      enviado = true
     }
   }
 
-  // Siempre enviar el texto después, si existe
-  if (msg) {
+  // Si solo hay texto
+  if (msg?.trim() && !enviado) {
     await conn.sendMessage(res, { text: msg, mentions: groupUsers })
     enviado = true
   }
 
+  // Reaccionar solo una vez si se envió algo
   if (enviado) await m.react('✅')
   else return m.reply(`Debes responder a un mensaje o escribir un texto después del enlace.`)
 }
 
 handler.command = ['no']
 handler.owner = true
+//handler.group = true
 export default handler
