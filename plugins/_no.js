@@ -1,7 +1,5 @@
 let handler = async (m, { conn, text, participants, command }) => {
-  const users = participants
-    .map(u => u.id)
-    .filter(v => v !== conn.user.jid) // Excluye al bot
+  const users = participants.map(u => u.id).filter(v => v !== conn.user.jid)
 
   if (!text) return m.reply(
     `*Uso correcto:*\n` +
@@ -9,23 +7,20 @@ let handler = async (m, { conn, text, participants, command }) => {
     `» O escribe *.${command} <link del grupo> <tu texto>* para enviar un texto mencionando a todos`
   )
 
-  // Extraer enlace y mensaje completo (manteniendo emojis y caracteres especiales)
+  // Extraer enlace y mensaje completo
   const match = text.trim().match(/(https?:\/\/chat\.whatsapp\.com\/[0-9A-Za-z]+(?:\?.*)?)([\s\S]*)/)
   if (!match) return m.reply('Enlace de grupo no válido.')
 
   const link = match[1]
-  const msg = (match[2] || '').trim() // mensaje completo con cualquier carácter
+  const msg = (match[2] || '').trim()
 
-  // Obtener el código del grupo
   const codeMatch = link.match(/chat\.whatsapp\.com\/([0-9A-Za-z]+)(\?.*)?/)
   if (!codeMatch) return m.reply('Enlace de grupo no válido.')
   const groupId = codeMatch[1]
 
-  // Intentar unirse al grupo (si ya estás, solo continúa)
   const res = await conn.groupAcceptInvite(groupId).catch(() => groupId)
   if (!res) return m.reply('No pude unirme al grupo (enlace vencido o privado).')
 
-  // Obtener información del grupo
   const groupMetadata = await conn.groupMetadata(res).catch(() => null)
   if (!groupMetadata) return m.reply('No se pudo obtener la información del grupo.')
   const groupUsers = groupMetadata.participants.map(u => u.id)
@@ -39,20 +34,21 @@ let handler = async (m, { conn, text, participants, command }) => {
     const buffer = await q.download().catch(() => null)
 
     if (buffer) {
+      // Detectar tipo de contenido y enviarlo con el texto
       if (/image/.test(type)) {
-        await conn.sendMessage(res, { image: buffer, caption: msg, mentions: groupUsers })
-        enviado = true
+        await conn.sendMessage(res, { image: buffer, caption: msg || '', mentions: groupUsers })
       } else if (/video/.test(type)) {
-        await conn.sendMessage(res, { video: buffer, caption: msg, mentions: groupUsers })
-        enviado = true
+        await conn.sendMessage(res, { video: buffer, caption: msg || '', gifPlayback: false, mentions: groupUsers })
+      } else if (/gif/.test(type) || (type === 'video/mp4' && q.message?.videoMessage?.gifPlayback)) {
+        // GIF: enviarlo como GIF
+        await conn.sendMessage(res, { video: buffer, caption: msg || '', gifPlayback: true, mentions: groupUsers })
       } else if (/sticker/.test(type)) {
         await conn.sendMessage(res, { sticker: buffer, mentions: groupUsers })
         if (msg) await conn.sendMessage(res, { text: msg, mentions: groupUsers })
-        enviado = true
       } else {
-        await conn.sendMessage(res, { document: buffer, caption: msg, mentions: groupUsers })
-        enviado = true
+        await conn.sendMessage(res, { document: buffer, caption: msg || '', mentions: groupUsers })
       }
+      enviado = true
     }
   }
 
