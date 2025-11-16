@@ -20,7 +20,6 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys';
 
 import fs from 'fs';
-
 function fixCreds() {
     try {
         const credsPath = './Sessions/creds.json'
@@ -38,10 +37,6 @@ let restartTimeout;
 let heartbeat;
 let conn;
 
-// 🔥 NUEVO: Registro de actividad por grupo
-let groupActivity = {}; 
-let groupMonitor;
-
 async function startBot() {
     fixCreds();
 
@@ -56,7 +51,6 @@ async function startBot() {
     });
 
     conn.ev.on('creds.update', saveCreds);
-
     conn.ev.on('connection.update', (update) => {
         const { connection, lastDisconnect } = update || {};
 
@@ -75,19 +69,7 @@ async function startBot() {
         }
     });
 
-    // 📌 Detecta actividad por grupo
-    conn.ev.on('messages.upsert', ({ messages }) => {
-        try {
-            let m = messages[0]
-            let chat = m.key.remoteJid
-
-            if (chat && chat.endsWith('@g.us')) {
-                groupActivity[chat] = Date.now()
-            }
-
-        } catch {}
-    });
-
+    conn.ev.on('messages.upsert', () => {});
     conn.ev.on('messages.update', () => {});
     conn.ev.on('messages.delete', () => {});
     conn.ws.on('error', () => {});
@@ -95,33 +77,7 @@ async function startBot() {
 
     global.conn = conn;
     heartbeatSystem();
-    startGroupMonitor(); // 🆕 inicia el monitor de grupos
 }
-
-// 🔥 NUEVO: Monitor que detecta grupos congelados
-function startGroupMonitor() {
-    clearInterval(groupMonitor);
-
-    groupMonitor = setInterval(() => {
-        const now = Date.now();
-        const freezeLimit = 1000 * 60 * 2; // 2 minutos sin actividad = congelado
-
-        for (let group in groupActivity) {
-            if (now - groupActivity[group] > freezeLimit) {
-                console.log(`🟥 Grupo congelado detectado (${group}). Reiniciando conexión...`);
-                process.exit(0);
-            }
-        }
-
-        // Si no hay registro de actividad en absoluto → posible freeze
-        if (Object.keys(groupActivity).length === 0) {
-            console.log("🟥 No hay actividad en ningún grupo, reiniciando conexión…");
-            process.exit(0);
-        }
-
-    }, 20000); // cada 20 segundos
-}
-
 function heartbeatSystem() {
     clearInterval(heartbeat);
 
@@ -135,12 +91,11 @@ function heartbeatSystem() {
             process.exit(0);
         }
     }, 15000);
-
+  
     clearTimeout(restartTimeout);
     restartTimeout = setTimeout(() => {
         console.log("🟧 Reinicio automático por tiempo extendido sin actividad.");
         process.exit(0);
     }, 1000 * 60 * 8);
 }
-
 startBot();
